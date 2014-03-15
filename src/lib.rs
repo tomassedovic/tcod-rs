@@ -1,7 +1,8 @@
 #[feature(globs)];
 
 use std::cast;
-use std::libc::{c_int, c_float};
+use std::libc::{c_char, c_int, c_float, uint8_t};
+use std::intrinsics::transmute;
 use std::path;
 
 //pub use self::ffi::Color;
@@ -16,7 +17,31 @@ use std::path;
 
 pub mod ffi;
 
+#[allow(non_camel_case_types)]
 type c_bool = std::libc::uint8_t;
+
+pub struct Console {
+    priv con: ffi::TCOD_console_t,
+}
+
+impl Console {
+    pub fn new(width: int, height: int) -> Console {
+        assert!(width > 0 && height > 0);
+        unsafe {
+            Console{
+                con: ffi::TCOD_console_new(width as c_int, height as c_int)
+            }
+        }
+    }
+}
+
+impl Drop for Console {
+    fn drop(&mut self) {
+        unsafe {
+            ffi::TCOD_console_delete(self.con);
+        }
+    }
+}
 
 pub struct Map {
     priv tcod_map: ffi::TCOD_map_t,
@@ -296,9 +321,6 @@ pub enum BackgroundFlag {
 }
 
 
-pub static ROOT_CONSOLE: console_t = 0 as console_t;
-
-
 pub fn sys_set_fps(fps: int) {
     assert!(fps > 0);
     unsafe {
@@ -327,20 +349,20 @@ pub fn console_init_root(width: int, height: int, title: &str, fullscreen: bool)
         title.with_c_str(
             |c_title| ffi::TCOD_console_init_root(width as c_int, height as c_int,
                                                   c_title, fullscreen as c_bool,
-                                                  ffi::RENDERER_SDL));
+                                                  ffi::TCOD_RENDERER_SDL));
     }
 }
 
 pub fn console_set_fade(fade: u8, fading_color: Color) {
     unsafe {
-        ffi::TCOD_console_set_fade(fade, fading_color);
+        ffi::TCOD_console_set_fade(fade, transmute(fading_color));
     }
 }
 
 pub fn console_set_custom_font(font_path: path::Path) {
     unsafe {
-        let flags = (ffi::FONT_TYPE_GREYSCALE as c_int |
-                     ffi::FONT_LAYOUT_TCOD as c_int);
+        let flags = (ffi::TCOD_FONT_TYPE_GREYSCALE as c_int |
+                     ffi::TCOD_FONT_LAYOUT_TCOD as c_int);
         font_path.with_c_str( |path| {
             ffi::TCOD_console_set_custom_font(path, flags, 32, 8);
         });
@@ -361,19 +383,20 @@ pub enum KeyStatus {
 
 pub fn console_wait_for_keypress(flush: bool) -> Key {
     unsafe {
-        ffi::TCOD_console_wait_for_keypress(flush as c_bool)
+        transmute(ffi::TCOD_console_wait_for_keypress(flush as c_bool))
     }
 }
 
 pub fn console_check_for_keypress(status: KeyStatus) -> Key {
     unsafe {
-        ffi::TCOD_console_check_for_keypress(status as c_int)
+        transmute(ffi::TCOD_console_check_for_keypress(status as c_int))
     }
 }
 
+/*
 pub fn console_set_char_background(con: console_t, x: int, y: int,
                                    color: Color,
-                                   background_flag: ffi::BackgroundFlag) {
+                                   background_flag: BackgroundFlag) {
     assert!(x >= 0 && y >= 0);
     unsafe {
         ffi::TCOD_console_set_char_background(con, x as c_int, y as c_int,
@@ -421,13 +444,6 @@ pub fn console_print_ex(con: console_t, x: int, y: int,
             |c_text|
                 ffi::TCOD_console_print_ex(con, x as c_int, y as c_int,
                                            background_flag, alignment, c_text));
-    }
-}
-
-pub fn console_new(width: int, height: int) -> console_t {
-    assert!(width > 0 && height > 0);
-    unsafe {
-        ffi::TCOD_console_new(width as c_int, height as c_int)
     }
 }
 
@@ -479,9 +495,4 @@ pub fn console_blit(source_console: console_t,
                                background_alpha as c_float);
     }
 }
-
-pub fn console_delete(con: console_t) {
-    unsafe {
-        ffi::TCOD_console_delete(con);
-    }
-}
+*/
