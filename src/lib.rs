@@ -179,19 +179,18 @@ impl Drop for Path {
 
 
 #[repr(C)]
-pub enum renderer_t {
-    RENDERER_GLSL,
-    RENDERER_OPENGL,
-    RENDERER_SDL,
-    NB_RENDERERS,
+pub enum Renderer {
+    GLSL = ffi::TCOD_RENDERER_GLSL,
+    OpenGL = ffi::TCOD_RENDERER_OPENGL,
+    SDL = ffi::TCOD_RENDERER_SDL,
 }
 
 #[repr(C)]
-pub enum font_flags_t {
-    FONT_LAYOUT_ASCII_INCOL=1,
-    FONT_LAYOUT_ASCII_INROW=2,
-    FONT_TYPE_GREYSCALE=4,
-    FONT_LAYOUT_TCOD=8,
+pub enum FontFlags {
+    LayoutAsciiIncol = ffi::TCOD_FONT_LAYOUT_ASCII_INCOL,
+    LayoutAsciiInrow = ffi::TCOD_FONT_LAYOUT_ASCII_INROW,
+    TypeGreyscale = ffi::TCOD_FONT_TYPE_GREYSCALE,
+    LayoutTcod = ffi::TCOD_FONT_LAYOUT_TCOD,
 }
 
 pub mod key_code {
@@ -302,22 +301,26 @@ pub enum TextAlignment {
     Center,
 }
 
-#[repr(C)]
-pub enum BackgroundFlag {
-    BKGND_NONE,
-    BKGND_SET,
-    BKGND_MULTIPLY,
-    BKGND_LIGHTEN,
-    BKGND_DARKEN,
-    BKGND_SCREEN,
-    BKGND_COLOR_DODGE,
-    BKGND_COLOR_BURN,
-    BKGND_ADD,
-    BKGND_ADDA,
-    BKGND_BURN,
-    BKGND_OVERLAY,
-    BKGND_ALPH,
-    BKGND_DEFAULT
+pub mod background_flag {
+    use super::ffi;
+
+    #[repr(C)]
+    pub enum BackgroundFlag {
+        None = ffi::TCOD_BKGND_NONE,
+        Set = ffi::TCOD_BKGND_SET,
+        Multiply = ffi::TCOD_BKGND_MULTIPLY,
+        Lighten = ffi::TCOD_BKGND_LIGHTEN,
+        Darken = ffi::TCOD_BKGND_DARKEN,
+        Screen = ffi::TCOD_BKGND_SCREEN,
+        ColorDodge = ffi::TCOD_BKGND_COLOR_DODGE,
+        ColorBurn = ffi::TCOD_BKGND_COLOR_BURN,
+        Add = ffi::TCOD_BKGND_ADD,
+        AddA = ffi::TCOD_BKGND_ADDA,
+        Burn = ffi::TCOD_BKGND_BURN,
+        Overlay = ffi::TCOD_BKGND_OVERLAY,
+        Alph = ffi::TCOD_BKGND_ALPH,
+        Default = ffi::TCOD_BKGND_DEFAULT
+    }
 }
 
 
@@ -361,8 +364,7 @@ pub fn console_set_fade(fade: u8, fading_color: Color) {
 
 pub fn console_set_custom_font(font_path: path::Path) {
     unsafe {
-        let flags = (ffi::TCOD_FONT_TYPE_GREYSCALE as c_int |
-                     ffi::TCOD_FONT_LAYOUT_TCOD as c_int);
+        let flags = LayoutTcod as c_int | TypeGreyscale as c_int;
         font_path.with_c_str( |path| {
             ffi::TCOD_console_set_custom_font(path, flags, 32, 8);
         });
