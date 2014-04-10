@@ -1,9 +1,14 @@
-#[feature(globs)];
+#![crate_id = "tcod#0.1.0"]
+#![crate_type = "lib"]
+#![feature(globs)]
+
+extern crate libc;
 
 use std::cast;
-use std::libc::{c_char, c_int, c_float, uint8_t};
 use std::intrinsics::transmute;
 use std::path;
+
+use libc::{c_char, c_int, c_float, uint8_t};
 
 //pub use self::ffi::Color;
 //pub use self::ffi::console_t;
@@ -18,10 +23,10 @@ use std::path;
 pub mod ffi;
 
 #[allow(non_camel_case_types)]
-type c_bool = std::libc::uint8_t;
+type c_bool = uint8_t;
 
 pub struct Console {
-    priv con: ffi::TCOD_console_t,
+    con: ffi::TCOD_console_t,
 }
 
 impl Console {
@@ -44,11 +49,11 @@ impl Drop for Console {
 }
 
 pub struct Map {
-    priv tcod_map: ffi::TCOD_map_t,
+    tcod_map: ffi::TCOD_map_t,
 }
 
 pub struct Path {
-    priv tcod_path: ffi::TCOD_path_t,
+    tcod_path: ffi::TCOD_path_t,
 }
 
 impl Map {
