@@ -153,6 +153,22 @@ impl Console {
         }
     }
 
+    pub fn wait_for_keypress(&self, flush: bool) -> Key {
+        assert!(self.con == 0 as ffi::TCOD_console_t,
+                "wait_for_keypress can be called on the root console only.");
+        unsafe {
+            transmute(ffi::TCOD_console_wait_for_keypress(flush as c_bool))
+        }
+    }
+
+    pub fn check_for_keypress(&self, status: KeyStatus) -> Key {
+        assert!(self.con == 0 as ffi::TCOD_console_t,
+                "check_for_keypress can be called on the root console only.");
+        unsafe {
+            transmute(ffi::TCOD_console_check_for_keypress(status as c_int))
+        }
+    }
+
     pub fn window_closed(&mut self) -> bool {
         assert!(self.con == 0 as ffi::TCOD_console_t,
                 "Window checks can be done on the root console only.");
@@ -486,18 +502,6 @@ pub enum KeyStatus {
     KeyPressed = 1,
     KeyReleased = 2,
     KeyPressedOrReleased = 1 | 2,
-}
-
-pub fn console_wait_for_keypress(flush: bool) -> Key {
-    unsafe {
-        transmute(ffi::TCOD_console_wait_for_keypress(flush as c_bool))
-    }
-}
-
-pub fn console_check_for_keypress(status: KeyStatus) -> Key {
-    unsafe {
-        transmute(ffi::TCOD_console_check_for_keypress(status as c_int))
-    }
 }
 
 pub fn console_blit(source_console: &Console,
