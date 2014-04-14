@@ -10,16 +10,6 @@ use std::path;
 
 use libc::{c_char, c_int, c_float, uint8_t};
 
-//pub use self::ffi::Color;
-//pub use self::ffi::console_t;
-//pub use self::ffi::BKGND_NONE;
-//pub use self::ffi::key_code;
-//pub use self::ffi::Key;
-//pub use self::ffi::*;
-//pub use self::ffi::Right;
-
-//use self::ffi::{c_int, c_float, c_bool};
-
 pub mod ffi;
 
 #[allow(non_camel_case_types)]
@@ -36,6 +26,146 @@ impl Console {
             Console{
                 con: ffi::TCOD_console_new(width as c_int, height as c_int)
             }
+        }
+    }
+
+    pub fn init_root(width: int, height: int, title: &str, fullscreen: bool) -> Console {
+        assert!(width > 0 && height > 0);
+        unsafe {
+            title.with_c_str(
+                |c_title| ffi::TCOD_console_init_root(width as c_int, height as c_int,
+                                                      c_title, fullscreen as c_bool,
+                                                      ffi::TCOD_RENDERER_SDL));
+        }
+        Console{con: 0 as ffi::TCOD_console_t}
+    }
+
+    pub fn set_key_color(&mut self, color: Color) {
+        unsafe {
+            ffi::TCOD_console_set_key_color(self.con, transmute(color));
+        }
+    }
+
+    pub fn width(&self) -> int {
+        unsafe {
+            ffi::TCOD_console_get_width(self.con) as int
+        }
+    }
+
+    pub fn height(&self) -> int {
+        unsafe {
+            ffi::TCOD_console_get_height(self.con) as int
+        }
+    }
+
+    pub fn set_default_background(&mut self, color: Color) {
+        unsafe {
+            ffi::TCOD_console_set_default_background(self.con, transmute(color));
+        }
+    }
+
+    pub fn set_default_foreground(&mut self, color: Color) {
+        unsafe {
+            ffi::TCOD_console_set_default_foreground(self.con, transmute(color));
+        }
+    }
+
+    pub fn console_set_key_color(&mut self, color: Color) {
+        unsafe {
+            ffi::TCOD_console_set_key_color(self.con, transmute(color));
+        }
+    }
+
+    pub fn set_char_background(&mut self, x: int, y: int,
+                               color: Color,
+                               background_flag: background_flag::BackgroundFlag) {
+        assert!(x >= 0 && y >= 0);
+        unsafe {
+            ffi::TCOD_console_set_char_background(self.con,
+                                                  x as c_int, y as c_int,
+                                                  transmute(color),
+                                                  background_flag as u32)
+        }
+    }
+
+    pub fn put_char(&mut self,
+                    x: int, y: int, glyph: char,
+                    background_flag: background_flag::BackgroundFlag) {
+        assert!(x >= 0 && y >= 0);
+        unsafe {
+            ffi::TCOD_console_put_char(self.con,
+                                       x as c_int, y as c_int, glyph as c_int,
+                                       background_flag as u32);
+        }
+    }
+
+    pub fn put_char_ex(&mut self,
+                       x: int, y: int, glyph: char,
+                       foreground: Color, background: Color) {
+        assert!(x >= 0 && y >= 0);
+        unsafe {
+            ffi::TCOD_console_put_char_ex(self.con,
+                                          x as c_int, y as c_int, glyph as c_int,
+                                          transmute(foreground),
+                                          transmute(background));
+        }
+    }
+
+    pub fn clear(&mut self) {
+        unsafe {
+            ffi::TCOD_console_clear(self.con);
+        }
+    }
+
+    pub fn print_ex(&mut self,
+                    x: int, y: int,
+                    background_flag: background_flag::BackgroundFlag,
+                    alignment: TextAlignment,
+                    text: &str) {
+        assert!(x >= 0 && y >= 0);
+        unsafe {
+            text.with_c_str(
+                |c_text|
+                ffi::TCOD_console_print_ex(self.con,
+                                           x as c_int, y as c_int,
+                                           background_flag as u32,
+                                           alignment as u32,
+                                           c_text));
+        }
+    }
+
+    pub fn set_fade(&mut self, fade: u8, fading_color: Color) {
+        assert!(self.con == 0 as ffi::TCOD_console_t,
+                "Fade can be set on the root console only.");
+        unsafe {
+            ffi::TCOD_console_set_fade(fade, transmute(fading_color));
+        }
+    }
+
+    pub fn set_custom_font(&mut self, font_path: path::Path) {
+        assert!(self.con == 0 as ffi::TCOD_console_t,
+                "Custom font can be set on the root console only.");
+        unsafe {
+            let flags = LayoutTcod as c_int | TypeGreyscale as c_int;
+            font_path.with_c_str( |path| {
+                ffi::TCOD_console_set_custom_font(path, flags, 32, 8);
+            });
+        }
+    }
+
+    pub fn window_closed(&mut self) -> bool {
+        assert!(self.con == 0 as ffi::TCOD_console_t,
+                "Window checks can be done on the root console only.");
+        unsafe {
+            ffi::TCOD_console_is_window_closed() != 0
+        }
+    }
+
+    pub fn flush(&mut self) {
+        assert!(self.con == 0 as ffi::TCOD_console_t,
+                "Only the root console can be flushed.");
+        unsafe {
+            ffi::TCOD_console_flush();
         }
     }
 }
@@ -351,36 +481,6 @@ pub fn sys_get_last_frame_length() -> f32 {
     }
 }
 
-pub fn console_init_root(width: int, height: int, title: &str, fullscreen: bool) {
-    assert!(width > 0 && height > 0);
-    unsafe {
-        title.with_c_str(
-            |c_title| ffi::TCOD_console_init_root(width as c_int, height as c_int,
-                                                  c_title, fullscreen as c_bool,
-                                                  ffi::TCOD_RENDERER_SDL));
-    }
-}
-
-pub fn console_set_fade(fade: u8, fading_color: Color) {
-    unsafe {
-        ffi::TCOD_console_set_fade(fade, transmute(fading_color));
-    }
-}
-
-pub fn console_set_custom_font(font_path: path::Path) {
-    unsafe {
-        let flags = LayoutTcod as c_int | TypeGreyscale as c_int;
-        font_path.with_c_str( |path| {
-            ffi::TCOD_console_set_custom_font(path, flags, 32, 8);
-        });
-    }
-}
-
-pub fn console_is_window_closed() -> bool {
-    unsafe {
-        ffi::TCOD_console_is_window_closed() != 0
-    }
-}
 
 pub enum KeyStatus {
     KeyPressed = 1,
@@ -400,106 +500,21 @@ pub fn console_check_for_keypress(status: KeyStatus) -> Key {
     }
 }
 
-/*
-pub fn console_set_char_background(con: console_t, x: int, y: int,
-                                   color: Color,
-                                   background_flag: BackgroundFlag) {
-    assert!(x >= 0 && y >= 0);
-    unsafe {
-        ffi::TCOD_console_set_char_background(con, x as c_int, y as c_int,
-                                              color, background_flag)
-    }
-}
-
-pub fn console_put_char(con: console_t, x: int, y: int, glyph: char,
-                        background_flag: ffi::BackgroundFlag) {
-    assert!(x >= 0 && y >= 0);
-    unsafe {
-        ffi::TCOD_console_put_char(con, x as c_int, y as c_int, glyph as c_int,
-                                   background_flag);
-    }
-}
-
-pub fn console_put_char_ex(con: console_t, x: int, y: int, glyph: char,
-                           foreground: Color, background: Color) {
-    assert!(x >= 0 && y >= 0);
-    unsafe {
-        ffi::TCOD_console_put_char_ex(con, x as c_int, y as c_int, glyph as c_int,
-                                      foreground, background);
-    }
-}
-
-pub fn console_clear(con: console_t) {
-    unsafe {
-        ffi::TCOD_console_clear(con);
-    }
-}
-
-pub fn console_flush() {
-    unsafe {
-        ffi::TCOD_console_flush();
-    }
-}
-
-pub fn console_print_ex(con: console_t, x: int, y: int,
-                        background_flag: ffi::BackgroundFlag,
-                        alignment: ffi::TextAlignment,
-                        text: &str) {
-    assert!(x >= 0 && y >= 0);
-    unsafe {
-        text.with_c_str(
-            |c_text|
-                ffi::TCOD_console_print_ex(con, x as c_int, y as c_int,
-                                           background_flag, alignment, c_text));
-    }
-}
-
-pub fn console_get_width(con: console_t) -> int {
-    unsafe {
-        ffi::TCOD_console_get_width(con) as int
-    }
-}
-
-pub fn console_get_height(con: console_t) -> int {
-    unsafe {
-        ffi::TCOD_console_get_height(con) as int
-    }
-}
-
-pub fn console_set_default_background(con: console_t, color: Color) {
-    unsafe {
-        ffi::TCOD_console_set_default_background(con, color);
-    }
-}
-
-pub fn console_set_default_foreground(con: console_t, color: Color) {
-    unsafe {
-        ffi::TCOD_console_set_default_foreground(con, color);
-    }
-}
-
-pub fn console_set_key_color(con: console_t, color: Color) {
-    unsafe {
-        ffi::TCOD_console_set_key_color(con, color);
-    }
-}
-
-pub fn console_blit(source_console: console_t,
+pub fn console_blit(source_console: &Console,
                     source_x: int, source_y: int,
                     source_width: int, source_height: int,
-                    destination_console: console_t,
+                    destination_console: &mut Console,
                     destination_x: int, destination_y: int,
                     foreground_alpha: f32, background_alpha: f32) {
     assert!(source_x >= 0 && source_y >= 0 &&
             source_width > 0 && source_height > 0 &&
             destination_x >= 0 && destination_y >= 0);
     unsafe {
-        ffi::TCOD_console_blit(source_console, source_x as c_int, source_y as c_int,
+        ffi::TCOD_console_blit(source_console.con, source_x as c_int, source_y as c_int,
                                source_width as c_int, source_height as c_int,
-                               destination_console,
+                               destination_console.con,
                                destination_x as c_int, destination_y as c_int,
                                foreground_alpha as c_float,
                                background_alpha as c_float);
     }
 }
-*/
