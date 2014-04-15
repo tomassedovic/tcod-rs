@@ -155,14 +155,14 @@ pub static TCODK_SCROLLLOCK: c_uint = 63;
 pub static TCODK_SPACE: c_uint = 64;
 pub static TCODK_CHAR: c_uint = 65;
 pub struct TCOD_key_t {
-    vk: TCOD_keycode_t,
-    c: c_schar,
-    pressed: _bool,
-    lalt: _bool,
-    lctrl: _bool,
-    ralt: _bool,
-    rctrl: _bool,
-    shift: _bool,
+    pub vk: TCOD_keycode_t,
+    pub c: c_schar,
+    pub pressed: _bool,
+    pub lalt: _bool,
+    pub lctrl: _bool,
+    pub ralt: _bool,
+    pub rctrl: _bool,
+    pub shift: _bool,
 }
 pub type TCOD_chars_t = c_uint;
 pub static TCOD_CHAR_HLINE: c_uint = 196;

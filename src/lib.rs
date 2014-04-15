@@ -1,6 +1,7 @@
 #![crate_id = "tcod#0.1.0"]
 #![crate_type = "lib"]
 #![feature(globs)]
+#![allow(dead_code)]
 
 extern crate libc;
 
@@ -8,7 +9,7 @@ use std::cast;
 use std::intrinsics::transmute;
 use std::path;
 
-use libc::{c_char, c_int, c_float, uint8_t};
+use libc::{c_int, c_float, uint8_t};
 
 pub mod ffi;
 
@@ -153,20 +154,52 @@ impl Console {
         }
     }
 
-    pub fn wait_for_keypress(&self, flush: bool) -> Key {
+    pub fn wait_for_keypress(&self, flush: bool) -> KeyState {
         assert!(self.con == 0 as ffi::TCOD_console_t,
                 "wait_for_keypress can be called on the root console only.");
-        unsafe {
-            transmute(ffi::TCOD_console_wait_for_keypress(flush as c_bool))
+        let tcod_key = unsafe {
+            ffi::TCOD_console_wait_for_keypress(flush as c_bool)
+        };
+        assert!(tcod_key.vk != ffi::TCODK_NONE);
+        let key = if tcod_key.vk == ffi::TCODK_CHAR {
+            Printable(tcod_key.c as u8 as char)
+        } else {
+            Special(FromPrimitive::from_u32(tcod_key.vk).unwrap())
+        };
+        KeyState{
+            key: key,
+            pressed: tcod_key.pressed != 0,
+            left_alt: tcod_key.lalt != 0,
+            left_ctrl: tcod_key.lctrl != 0,
+            right_alt: tcod_key.ralt != 0,
+            right_ctrl: tcod_key.rctrl != 0,
+            shift: tcod_key.shift != 0,
         }
     }
 
-    pub fn check_for_keypress(&self, status: KeyStatus) -> Key {
+    pub fn check_for_keypress(&self, status: KeyPressFlag) -> Option<KeyState> {
         assert!(self.con == 0 as ffi::TCOD_console_t,
                 "check_for_keypress can be called on the root console only.");
-        unsafe {
-            transmute(ffi::TCOD_console_check_for_keypress(status as c_int))
+        let tcod_key = unsafe {
+            ffi::TCOD_console_check_for_keypress(status as c_int)
+        };
+        if tcod_key.vk == ffi::TCODK_NONE {
+            return None;
         }
+        let key = if tcod_key.vk == ffi::TCODK_CHAR {
+            Printable(tcod_key.c as u8 as char)
+        } else {
+            Special(FromPrimitive::from_u32(tcod_key.vk).unwrap())
+        };
+        Some(KeyState{
+            key: key,
+            pressed: tcod_key.pressed != 0,
+            left_alt: tcod_key.lalt != 0,
+            left_ctrl: tcod_key.lctrl != 0,
+            right_alt: tcod_key.ralt != 0,
+            right_ctrl: tcod_key.rctrl != 0,
+            shift: tcod_key.shift != 0,
+        })
     }
 
     pub fn window_closed(&mut self) -> bool {
@@ -345,7 +378,7 @@ pub enum FontFlags {
 }
 
 pub mod key_code {
-    #[deriving(Eq, Show)]
+    #[deriving(Eq, FromPrimitive, Show)]
     #[repr(C)]
     pub enum KeyCode {
         NoKey,
@@ -419,24 +452,28 @@ pub mod key_code {
     }
 }
 
-#[repr(C)]
-pub struct Key {
-    vk: key_code::KeyCode,
-    c: c_char,
-    pressed: c_bool,
-    lalt: c_bool,
-    lctrl: c_bool,
-    ralt: c_bool,
-    rctrl: c_bool,
-    shift: c_bool,
+
+pub enum Key {
+    Printable(char),
+    Special(key_code::KeyCode),
+}
+
+pub struct KeyState {
+    key: Key,
+    pressed: bool,
+    left_alt: bool,
+    left_ctrl: bool,
+    right_alt: bool,
+    right_ctrl: bool,
+    shift: bool,
 }
 
 #[deriving(Clone, Eq)]
 #[repr(C)]
 pub struct Color {
-    r: uint8_t,
-    g: uint8_t,
-    b: uint8_t,
+    pub r: uint8_t,
+    pub g: uint8_t,
+    pub b: uint8_t,
 }
 
 impl Color {
@@ -475,33 +512,38 @@ pub mod background_flag {
 }
 
 
-pub fn sys_set_fps(fps: int) {
-    assert!(fps > 0);
-    unsafe {
-        ffi::TCOD_sys_set_fps(fps as c_int)
+mod system {
+    use libc::{c_int};
+    use ffi;
+
+    pub fn set_fps(fps: int) {
+        assert!(fps > 0);
+        unsafe {
+            ffi::TCOD_sys_set_fps(fps as c_int)
+        }
+    }
+
+    pub fn get_fps() -> int {
+        let mut result;
+        unsafe {
+            result = ffi::TCOD_sys_get_fps();
+        }
+        assert!(result >= 0);
+        return result as int
+    }
+
+    pub fn get_last_frame_length() -> f32 {
+        unsafe {
+            ffi::TCOD_sys_get_last_frame_length() as f32
+        }
     }
 }
 
-pub fn sys_get_fps() -> int {
-    let mut result;
-    unsafe {
-        result = ffi::TCOD_sys_get_fps();
-    }
-    assert!(result >= 0);
-    return result as int
-}
 
-pub fn sys_get_last_frame_length() -> f32 {
-    unsafe {
-        ffi::TCOD_sys_get_last_frame_length() as f32
-    }
-}
-
-
-pub enum KeyStatus {
-    KeyPressed = 1,
-    KeyReleased = 2,
-    KeyPressedOrReleased = 1 | 2,
+pub enum KeyPressFlag {
+    Pressed = 1,
+    Released = 2,
+    PressedOrReleased = 1 | 2,
 }
 
 pub fn console_blit(source_console: &Console,
