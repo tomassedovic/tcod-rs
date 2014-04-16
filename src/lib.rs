@@ -359,9 +359,6 @@ impl Drop for Path {
 }
 
 
-// TODO: exlpcitly add the correct FFI values to the enums
-
-
 #[repr(C)]
 pub enum Renderer {
     GLSL = ffi::TCOD_RENDERER_GLSL,
@@ -484,9 +481,9 @@ impl Color {
 
 #[repr(C)]
 pub enum TextAlignment {
-    Left,
-    Right,
-    Center,
+    Left = ffi::TCOD_LEFT,
+    Right = ffi::TCOD_RIGHT,
+    Center = ffi::TCOD_CENTER,
 }
 
 pub mod background_flag {
