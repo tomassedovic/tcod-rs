@@ -478,16 +478,16 @@ pub enum Key {
 }
 
 pub struct KeyState {
-    key: Key,
-    pressed: bool,
-    left_alt: bool,
-    left_ctrl: bool,
-    right_alt: bool,
-    right_ctrl: bool,
-    shift: bool,
+    pub key: Key,
+    pub pressed: bool,
+    pub left_alt: bool,
+    pub left_ctrl: bool,
+    pub right_alt: bool,
+    pub right_ctrl: bool,
+    pub shift: bool,
 }
 
-#[deriving(Clone, Eq)]
+#[deriving(Eq, Clone, Show)]
 #[repr(C)]
 pub struct Color {
     pub r: uint8_t,
