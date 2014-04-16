@@ -471,6 +471,7 @@ pub mod key_code {
 }
 
 
+#[deriving(Eq, Show)]
 pub enum Key {
     Printable(char),
     Special(key_code::KeyCode),
@@ -530,7 +531,7 @@ pub mod background_flag {
 }
 
 
-mod system {
+pub mod system {
     use libc::{c_int};
     use ffi;
 
