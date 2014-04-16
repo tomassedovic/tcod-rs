@@ -41,6 +41,27 @@ impl Console {
         Console{con: 0 as ffi::TCOD_console_t}
     }
 
+
+    pub fn blit(source_console: &Console,
+                source_x: int, source_y: int,
+                source_width: int, source_height: int,
+                destination_console: &mut Console,
+                destination_x: int, destination_y: int,
+                foreground_alpha: f32, background_alpha: f32) {
+        assert!(source_x >= 0 && source_y >= 0 &&
+                source_width > 0 && source_height > 0 &&
+                destination_x >= 0 && destination_y >= 0);
+        unsafe {
+            ffi::TCOD_console_blit(source_console.con,
+                                   source_x as c_int, source_y as c_int,
+                                   source_width as c_int, source_height as c_int,
+                                   destination_console.con,
+                                   destination_x as c_int, destination_y as c_int,
+                                   foreground_alpha as c_float,
+                                   background_alpha as c_float)
+        }
+    }
+
     pub fn set_key_color(&mut self, color: Color) {
         unsafe {
             ffi::TCOD_console_set_key_color(self.con, transmute(color));
@@ -541,23 +562,4 @@ pub enum KeyPressFlag {
     Pressed = 1,
     Released = 2,
     PressedOrReleased = 1 | 2,
-}
-
-pub fn console_blit(source_console: &Console,
-                    source_x: int, source_y: int,
-                    source_width: int, source_height: int,
-                    destination_console: &mut Console,
-                    destination_x: int, destination_y: int,
-                    foreground_alpha: f32, background_alpha: f32) {
-    assert!(source_x >= 0 && source_y >= 0 &&
-            source_width > 0 && source_height > 0 &&
-            destination_x >= 0 && destination_y >= 0);
-    unsafe {
-        ffi::TCOD_console_blit(source_console.con, source_x as c_int, source_y as c_int,
-                               source_width as c_int, source_height as c_int,
-                               destination_console.con,
-                               destination_x as c_int, destination_y as c_int,
-                               foreground_alpha as c_float,
-                               background_alpha as c_float);
-    }
 }
