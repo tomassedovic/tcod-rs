@@ -164,9 +164,7 @@ impl Console {
         }
     }
 
-    pub fn set_custom_font(&mut self, font_path: path::Path) {
-        assert!(self.con == 0 as ffi::TCOD_console_t,
-                "Custom font can be set on the root console only.");
+    pub fn set_custom_font(font_path: path::Path) {
         unsafe {
             let flags = LayoutTcod as c_int | TypeGreyscale as c_int;
             font_path.with_c_str( |path| {
@@ -223,9 +221,7 @@ impl Console {
         })
     }
 
-    pub fn window_closed(&mut self) -> bool {
-        assert!(self.con == 0 as ffi::TCOD_console_t,
-                "Window checks can be done on the root console only.");
+    pub fn window_closed() -> bool {
         unsafe {
             ffi::TCOD_console_is_window_closed() != 0
         }
