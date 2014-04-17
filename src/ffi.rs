@@ -13,7 +13,7 @@ pub type size_t = c_ulong;
 pub type wchar_t = c_int;
 pub type wint_t = c_uint;
 pub struct Union_Unnamed1 {
-    data: [u32, ..1u],
+    pub data: [u32, ..1u],
 }
 impl Union_Unnamed1 {
     pub fn __wch(&mut self) -> *mut c_uint {
@@ -24,17 +24,17 @@ impl Union_Unnamed1 {
     }
 }
 pub struct __mbstate_t {
-    __count: c_int,
-    __value: Union_Unnamed1,
+    pub __count: c_int,
+    pub __value: Union_Unnamed1,
 }
 pub type mbstate_t = __mbstate_t;
 pub type Struct_tm = c_void;
 pub struct Struct___locale_struct {
-    __locales: [*mut Struct___locale_data, ..13u],
-    __ctype_b: *c_ushort,
-    __ctype_tolower: *c_int,
-    __ctype_toupper: *c_int,
-    __names: [*c_schar, ..13u],
+    pub __locales: [*mut Struct___locale_data, ..13u],
+    pub __ctype_b: *c_ushort,
+    pub __ctype_tolower: *c_int,
+    pub __ctype_toupper: *c_int,
+    pub __names: [*c_schar, ..13u],
 }
 pub type Struct___locale_data = c_void;
 pub type __locale_t = *mut Struct___locale_struct;
@@ -50,9 +50,9 @@ pub type uintptr = c_ulong;
 pub type _bool = uint8;
 pub type TCOD_list_t = *mut c_void;
 pub struct TCOD_color_t {
-    r: uint8,
-    g: uint8,
-    b: uint8,
+    pub r: uint8,
+    pub g: uint8,
+    pub b: uint8,
 }
 pub type Enum_Unnamed2 = c_uint;
 pub static TCOD_COLOR_RED: c_uint = 0;
@@ -291,22 +291,22 @@ pub static TCOD_CENTER: c_uint = 2;
 pub type TCOD_console_t = *mut c_void;
 pub type TCOD_image_t = *mut c_void;
 pub struct TCOD_mouse_t {
-    x: c_int,
-    y: c_int,
-    dx: c_int,
-    dy: c_int,
-    cx: c_int,
-    cy: c_int,
-    dcx: c_int,
-    dcy: c_int,
-    lbutton: _bool,
-    rbutton: _bool,
-    mbutton: _bool,
-    lbutton_pressed: _bool,
-    rbutton_pressed: _bool,
-    mbutton_pressed: _bool,
-    wheel_up: _bool,
-    wheel_down: _bool,
+    pub x: c_int,
+    pub y: c_int,
+    pub dx: c_int,
+    pub dy: c_int,
+    pub cx: c_int,
+    pub cy: c_int,
+    pub dcx: c_int,
+    pub dcy: c_int,
+    pub lbutton: _bool,
+    pub rbutton: _bool,
+    pub mbutton: _bool,
+    pub lbutton_pressed: _bool,
+    pub rbutton_pressed: _bool,
+    pub mbutton_pressed: _bool,
+    pub wheel_up: _bool,
+    pub wheel_down: _bool,
 }
 pub type TCOD_event_t = c_uint;
 pub static TCOD_EVENT_KEY_PRESS: c_uint = 1;
@@ -325,10 +325,10 @@ pub type TCOD_library_t = *mut c_void;
 pub type SDL_renderer_t =
     ::std::option::Option<extern "C" fn(arg1: *mut c_void)>;
 pub struct TCOD_dice_t {
-    nb_rolls: c_int,
-    nb_faces: c_int,
-    multiplier: c_float,
-    addsub: c_float,
+    pub nb_rolls: c_int,
+    pub nb_faces: c_int,
+    pub multiplier: c_float,
+    pub addsub: c_float,
 }
 pub type TCOD_random_algo_t = c_uint;
 pub static TCOD_RNG_MT: c_uint = 0;
@@ -343,15 +343,15 @@ pub type TCOD_random_t = *mut c_void;
 pub type TCOD_line_listener_t =
     ::std::option::Option<extern "C" fn(arg1: c_int, arg2: c_int) -> _bool>;
 pub struct TCOD_bresenham_data_t {
-    stepx: c_int,
-    stepy: c_int,
-    e: c_int,
-    deltax: c_int,
-    deltay: c_int,
-    origx: c_int,
-    origy: c_int,
-    destx: c_int,
-    desty: c_int,
+    pub stepx: c_int,
+    pub stepy: c_int,
+    pub e: c_int,
+    pub deltax: c_int,
+    pub deltay: c_int,
+    pub origx: c_int,
+    pub origy: c_int,
+    pub destx: c_int,
+    pub desty: c_int,
 }
 pub type TCOD_noise_t = *mut c_void;
 pub type TCOD_noise_type_t = c_uint;
@@ -382,31 +382,31 @@ pub type TCOD_path_func_t =
 pub type TCOD_path_t = *mut c_void;
 pub type TCOD_dijkstra_t = *mut c_void;
 pub struct TCOD_lex_t {
-    file_line: c_int,
-    token_type: c_int,
-    token_int_val: c_int,
-    token_idx: c_int,
-    token_float_val: c_float,
-    tok: *mut c_schar,
-    toklen: c_int,
-    lastStringDelim: c_schar,
-    pos: *mut c_schar,
-    buf: *mut c_schar,
-    filename: *mut c_schar,
-    last_javadoc_comment: *mut c_schar,
-    nb_symbols: c_int,
-    nb_keywords: c_int,
-    flags: c_int,
-    symbols: [[c_schar, ..5u], ..100u],
-    keywords: [[c_schar, ..20u], ..100u],
-    simpleCmt: *c_schar,
-    cmtStart: *c_schar,
-    cmtStop: *c_schar,
-    javadocCmtStart: *c_schar,
-    stringDelim: *c_schar,
-    javadoc_read: _bool,
-    allocBuf: _bool,
-    savept: _bool,
+    pub file_line: c_int,
+    pub token_type: c_int,
+    pub token_int_val: c_int,
+    pub token_idx: c_int,
+    pub token_float_val: c_float,
+    pub tok: *mut c_schar,
+    pub toklen: c_int,
+    pub lastStringDelim: c_schar,
+    pub pos: *mut c_schar,
+    pub buf: *mut c_schar,
+    pub filename: *mut c_schar,
+    pub last_javadoc_comment: *mut c_schar,
+    pub nb_symbols: c_int,
+    pub nb_keywords: c_int,
+    pub flags: c_int,
+    pub symbols: [[c_schar, ..5u], ..100u],
+    pub keywords: [[c_schar, ..20u], ..100u],
+    pub simpleCmt: *c_schar,
+    pub cmtStart: *c_schar,
+    pub cmtStop: *c_schar,
+    pub javadocCmtStart: *c_schar,
+    pub stringDelim: *c_schar,
+    pub javadoc_read: _bool,
+    pub allocBuf: _bool,
+    pub savept: _bool,
 }
 pub type TCOD_value_type_t = c_uint;
 pub static TCOD_TYPE_NONE: c_uint = 0;
@@ -451,7 +451,7 @@ pub static TCOD_TYPE_CUSTOM14: c_uint = 38;
 pub static TCOD_TYPE_CUSTOM15: c_uint = 39;
 pub static TCOD_TYPE_LIST: c_uint = 1024;
 pub struct TCOD_value_t {
-    data: [u64, ..2u],
+    pub data: [u64, ..2u],
 }
 impl TCOD_value_t {
     pub fn b(&mut self) -> *mut _bool {
@@ -484,18 +484,20 @@ impl TCOD_value_t {
 }
 pub type TCOD_parser_struct_t = *mut c_void;
 pub struct TCOD_parser_listener_t {
-    new_struct: ::std::option::Option<extern "C" fn
-                                          (arg1: TCOD_parser_struct_t,
-                                           arg2: *c_schar) -> _bool>,
-    new_flag: ::std::option::Option<extern "C" fn(arg1: *c_schar) -> _bool>,
-    new_property: ::std::option::Option<extern "C" fn
-                                            (arg1: *c_schar,
-                                             arg2: TCOD_value_type_t,
-                                             arg3: TCOD_value_t) -> _bool>,
-    end_struct: ::std::option::Option<extern "C" fn
-                                          (arg1: TCOD_parser_struct_t,
-                                           arg2: *c_schar) -> _bool>,
-    error: ::std::option::Option<extern "C" fn(arg1: *c_schar)>,
+    pub new_struct: ::std::option::Option<extern "C" fn
+                                              (arg1: TCOD_parser_struct_t,
+                                               arg2: *c_schar) -> _bool>,
+    pub new_flag: ::std::option::Option<extern "C" fn(arg1: *c_schar)
+                                            -> _bool>,
+    pub new_property: ::std::option::Option<extern "C" fn
+                                                (arg1: *c_schar,
+                                                 arg2: TCOD_value_type_t,
+                                                 arg3: TCOD_value_t)
+                                                -> _bool>,
+    pub end_struct: ::std::option::Option<extern "C" fn
+                                              (arg1: TCOD_parser_struct_t,
+                                               arg2: *c_schar) -> _bool>,
+    pub error: ::std::option::Option<extern "C" fn(arg1: *c_schar)>,
 }
 pub type TCOD_parser_custom_t =
     ::std::option::Option<extern "C" fn
@@ -505,52 +507,52 @@ pub type TCOD_parser_custom_t =
                               -> TCOD_value_t>;
 pub type TCOD_parser_t = *mut c_void;
 pub struct TCOD_struct_int_t {
-    name: *mut c_schar,
-    flags: TCOD_list_t,
-    props: TCOD_list_t,
-    lists: TCOD_list_t,
-    structs: TCOD_list_t,
+    pub name: *mut c_schar,
+    pub flags: TCOD_list_t,
+    pub props: TCOD_list_t,
+    pub lists: TCOD_list_t,
+    pub structs: TCOD_list_t,
 }
 pub struct TCOD_parser_int_t {
-    structs: TCOD_list_t,
-    customs: [TCOD_parser_custom_t, ..16u],
-    fatal: _bool,
-    props: TCOD_list_t,
+    pub structs: TCOD_list_t,
+    pub customs: [TCOD_parser_custom_t, ..16u],
+    pub fatal: _bool,
+    pub props: TCOD_list_t,
 }
 pub struct Struct__TCOD_tree_t {
-    next: *mut Struct__TCOD_tree_t,
-    father: *mut Struct__TCOD_tree_t,
-    sons: *mut Struct__TCOD_tree_t,
+    pub next: *mut Struct__TCOD_tree_t,
+    pub father: *mut Struct__TCOD_tree_t,
+    pub sons: *mut Struct__TCOD_tree_t,
 }
 pub type TCOD_tree_t = Struct__TCOD_tree_t;
 pub struct TCOD_bsp_t {
-    tree: TCOD_tree_t,
-    x: c_int,
-    y: c_int,
-    w: c_int,
-    h: c_int,
-    position: c_int,
-    level: uint8,
-    horizontal: _bool,
+    pub tree: TCOD_tree_t,
+    pub x: c_int,
+    pub y: c_int,
+    pub w: c_int,
+    pub h: c_int,
+    pub position: c_int,
+    pub level: uint8,
+    pub horizontal: _bool,
 }
 pub type TCOD_bsp_callback_t =
     ::std::option::Option<extern "C" fn
                               (arg1: *mut TCOD_bsp_t, arg2: *mut c_void)
                               -> _bool>;
 pub struct TCOD_heightmap_t {
-    w: c_int,
-    h: c_int,
-    values: *mut c_float,
+    pub w: c_int,
+    pub h: c_int,
+    pub values: *mut c_float,
 }
 pub type TCOD_zip_t = *mut c_void;
 pub type TCOD_namegen_t = *mut c_void;
 pub type TCOD_text_t = *mut c_void;
 pub type __va_list_tag = Struct___va_list_tag;
 pub struct Struct___va_list_tag {
-    gp_offset: c_uint,
-    fp_offset: c_uint,
-    overflow_arg_area: *mut c_void,
-    reg_save_area: *mut c_void,
+    pub gp_offset: c_uint,
+    pub fp_offset: c_uint,
+    pub overflow_arg_area: *mut c_void,
+    pub reg_save_area: *mut c_void,
 }
 #[link(name = "tcod")]
 extern "C" {
