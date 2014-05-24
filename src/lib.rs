@@ -5,7 +5,6 @@
 
 extern crate libc;
 
-use std::cast;
 use std::intrinsics::transmute;
 use std::path;
 
@@ -313,7 +312,7 @@ impl Path {
                 tcod_path: ffi::TCOD_path_new_using_function(map_width as c_int,
                                                              map_height as c_int,
                                                              path_cb,
-                                                             cast::transmute(user_data),
+                                                             transmute(user_data),
                                                              diagonal_cost as c_float)
             }
         }
