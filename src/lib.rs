@@ -391,7 +391,7 @@ pub enum FontFlags {
 }
 
 pub mod key_code {
-    #[deriving(Eq, FromPrimitive, Show)]
+    #[deriving(PartialEq, FromPrimitive, Show)]
     #[repr(C)]
     pub enum KeyCode {
         NoKey,
@@ -466,7 +466,7 @@ pub mod key_code {
 }
 
 
-#[deriving(Eq, Show)]
+#[deriving(PartialEq, Show)]
 pub enum Key {
     Printable(char),
     Special(key_code::KeyCode),
@@ -482,7 +482,7 @@ pub struct KeyState {
     pub shift: bool,
 }
 
-#[deriving(Eq, Clone, Show)]
+#[deriving(PartialEq, Clone, Show)]
 #[repr(C)]
 pub struct Color {
     pub r: uint8_t,
