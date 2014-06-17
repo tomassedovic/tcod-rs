@@ -76,7 +76,8 @@ Other than that, look at the source and read
 Contributing
 ------------
 
-The raw bindings were generated using [rust-bindgen](rust-bindgen) and are located at
+The raw bindings were generated using
+[rust-bindgen](https://github.com/crabtw/rust-bindgen) and are located at
 `src/ffi.rs`. The safe (hopefully?) wrapper was built on top of them at
 `src/lib.rs`.
 
