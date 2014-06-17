@@ -1,7 +1,6 @@
 #![crate_id = "tcod#0.1.0"]
 #![crate_type = "lib"]
 #![feature(globs)]
-#![allow(dead_code)]
 
 extern crate libc;
 
