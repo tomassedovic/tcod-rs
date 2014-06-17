@@ -237,6 +237,7 @@ impl Console {
 impl Drop for Console {
     fn drop(&mut self) {
         unsafe {
+            // TODO: do we want to do this for the root console as well??
             ffi::TCOD_console_delete(self.con);
         }
     }
