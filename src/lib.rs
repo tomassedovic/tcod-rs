@@ -1,6 +1,8 @@
-#![crate_id = "tcod#0.1.0"]
+#![crate_name = "tcod"]
+#![crate_version = "0.1.0"]
 #![crate_type = "lib"]
 #![feature(globs)]
+#![allow(non_camel_case_types)]
 
 extern crate libc;
 
@@ -377,17 +379,17 @@ impl Drop for Path {
 
 #[repr(C)]
 pub enum Renderer {
-    GLSL = ffi::TCOD_RENDERER_GLSL,
-    OpenGL = ffi::TCOD_RENDERER_OPENGL,
-    SDL = ffi::TCOD_RENDERER_SDL,
+    GLSL = ffi::TCOD_RENDERER_GLSL as int,
+    OpenGL = ffi::TCOD_RENDERER_OPENGL as int,
+    SDL = ffi::TCOD_RENDERER_SDL as int,
 }
 
 #[repr(C)]
 pub enum FontFlags {
-    LayoutAsciiIncol = ffi::TCOD_FONT_LAYOUT_ASCII_INCOL,
-    LayoutAsciiInrow = ffi::TCOD_FONT_LAYOUT_ASCII_INROW,
-    TypeGreyscale = ffi::TCOD_FONT_TYPE_GREYSCALE,
-    LayoutTcod = ffi::TCOD_FONT_LAYOUT_TCOD,
+    LayoutAsciiIncol = ffi::TCOD_FONT_LAYOUT_ASCII_INCOL as int,
+    LayoutAsciiInrow = ffi::TCOD_FONT_LAYOUT_ASCII_INROW as int,
+    TypeGreyscale = ffi::TCOD_FONT_TYPE_GREYSCALE as int,
+    LayoutTcod = ffi::TCOD_FONT_LAYOUT_TCOD as int,
 }
 
 pub mod key_code {
@@ -498,9 +500,9 @@ impl Color {
 
 #[repr(C)]
 pub enum TextAlignment {
-    Left = ffi::TCOD_LEFT,
-    Right = ffi::TCOD_RIGHT,
-    Center = ffi::TCOD_CENTER,
+    Left = ffi::TCOD_LEFT as int,
+    Right = ffi::TCOD_RIGHT as int,
+    Center = ffi::TCOD_CENTER as int,
 }
 
 pub mod background_flag {
@@ -508,20 +510,20 @@ pub mod background_flag {
 
     #[repr(C)]
     pub enum BackgroundFlag {
-        None = ffi::TCOD_BKGND_NONE,
-        Set = ffi::TCOD_BKGND_SET,
-        Multiply = ffi::TCOD_BKGND_MULTIPLY,
-        Lighten = ffi::TCOD_BKGND_LIGHTEN,
-        Darken = ffi::TCOD_BKGND_DARKEN,
-        Screen = ffi::TCOD_BKGND_SCREEN,
-        ColorDodge = ffi::TCOD_BKGND_COLOR_DODGE,
-        ColorBurn = ffi::TCOD_BKGND_COLOR_BURN,
-        Add = ffi::TCOD_BKGND_ADD,
-        AddA = ffi::TCOD_BKGND_ADDA,
-        Burn = ffi::TCOD_BKGND_BURN,
-        Overlay = ffi::TCOD_BKGND_OVERLAY,
-        Alph = ffi::TCOD_BKGND_ALPH,
-        Default = ffi::TCOD_BKGND_DEFAULT
+        None = ffi::TCOD_BKGND_NONE as int,
+        Set = ffi::TCOD_BKGND_SET as int,
+        Multiply = ffi::TCOD_BKGND_MULTIPLY as int,
+        Lighten = ffi::TCOD_BKGND_LIGHTEN as int,
+        Darken = ffi::TCOD_BKGND_DARKEN as int,
+        Screen = ffi::TCOD_BKGND_SCREEN as int,
+        ColorDodge = ffi::TCOD_BKGND_COLOR_DODGE as int,
+        ColorBurn = ffi::TCOD_BKGND_COLOR_BURN as int,
+        Add = ffi::TCOD_BKGND_ADD as int,
+        AddA = ffi::TCOD_BKGND_ADDA as int,
+        Burn = ffi::TCOD_BKGND_BURN as int,
+        Overlay = ffi::TCOD_BKGND_OVERLAY as int,
+        Alph = ffi::TCOD_BKGND_ALPH as int,
+        Default = ffi::TCOD_BKGND_DEFAULT as int
     }
 }
 
