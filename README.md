@@ -63,12 +63,11 @@ complete however.
 How to use this
 ---------------
 
-_We'll provide code samples and a guide on building and linking this at some
-point, but these don't exist yet, sorry!_
+You can build this library by cloning the repository and typing `cargo build`. You need to have `libtcod` in your library path, you can
+download it from the [libtcod download page](http://doryen.eptalys.net/libtcod/download/), or install it using some package manager (on OSX with Homebrew,
+you can just do `brew install libtcod`).
 
-You can build this library by cloning the repository and typing `make`, link
-your Rust binary against this and tcod dll/so which you can get from
-[libtcod download page](http://doryen.eptalys.net/libtcod/download/).
+This will compile and link the library and a simple example in `target`
 
 Other than that, look at the source and read
 [libtcod documentation](http://doryen.eptalys.net/data/libtcod/doc/1.5.1/index2.html?c=true&cpp=true&cs=true&py=true&lua=true).
