@@ -1,6 +1,3 @@
-#![crate_name = "tcod"]
-#![crate_version = "0.1.0"]
-#![crate_type = "lib"]
 #![feature(globs)]
 #![allow(non_camel_case_types)]
 
@@ -11,6 +8,8 @@ use std::path;
 
 use libc::{c_int, c_float, uint8_t};
 
+#[allow(non_snake_case_functions)]
+#[allow(uppercase_variables)]
 pub mod ffi;
 
 #[allow(non_camel_case_types)]

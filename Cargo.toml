@@ -2,3 +2,8 @@
 name = "tcod"
 version = "0.1.0"
 authors = ["tomas@sedovic.cz", "arcnorj@gmail.com"]
+
+[[lib]]
+
+name = "tcod"
+path = "src/lib.rs"
