@@ -64,13 +64,81 @@ How to use this
 ---------------
 
 You can build this library by cloning the repository and typing `cargo build`. You need to have `libtcod` in your library path, you can
-download it from the [libtcod download page](http://doryen.eptalys.net/libtcod/download/), or install it using some package manager (on OSX with Homebrew,
-you can just do `brew install libtcod`).
+download it from the [libtcod download page](http://doryen.eptalys.net/libtcod/download/), or install it using some package manager. See below for Mac OS X specific install instructions.
 
 This will compile and link the library and a simple example in `target`
 
 Other than that, look at the source and read
 [libtcod documentation](http://doryen.eptalys.net/data/libtcod/doc/1.5.1/index2.html?c=true&cpp=true&cs=true&py=true&lua=true).
+
+## OS X specific instructions
+
+There are two dependencies to installing on OS X:
+ * [Homebrew](http://brew.sh/)
+ * `mercurial`
+ * `sdl`
+ * `wget`
+ * `libtcod`
+
+Unfortunately, `libtcod` is no longer officially supported on Mac OS X. As of 8/20/2014 the following instructinos work:
+
+Start off by installing `mercurial`, `sdl` and `wget`:
+
+```sh
+brew install mercurial sdl wget
+```
+
+Then clone the offical `libtcod` repository (it helps if you put it in a safe place, like `~/src` or something):
+
+```sh
+hg clone https://bitbucket.org/jice/libtcod
+```
+
+Then make `libtcod` with the following commands:
+
+ ```sh
+cd libtcod
+wget https://gist.githubusercontent.com/jaredonline/daf3c5f1ea6c7ca00e29/raw/ae91b3e47bf0de5b772eff882e477d8144cfbaf8/makefile-osx > makefiles/makefile-osx
+wget https://dl.dropboxusercontent.com/u/169446/osx.tar.gz
+tar -xzvf osx.tar.gz
+make -f makefiles/makefile-osx
+```
+
+If this seems a bit convoluted that's because it is. I managed to find instructions [here](http://zackhovatter.com/gamedev/2013/11/26/building-libtcod-on-os-x-mavericks.html) but at the time of writing that link was broken. I grabbed a screenshot from Google Cache and put together my own packages of OS X specific materials. In step two above you're getting an OS X specific makefile and in step three you're getting some OS X specific headers.
+
+You can test that it all worked by running
+
+```sh
+./samples_c
+./samples_cpp
+```
+
+And you should get some pretty windows.
+
+### Building a project with it:
+
+Now, to get a project up and running with Cargo, add this to your `Cargo.toml` file:
+
+```toml
+build = "sh .build.sh"
+
+[dependencies.tcod]
+git = "https://github.com/tomassedovic/tcod-rs.git"
+```
+
+And add this file to your project root (`.build.sh`):
+
+```sh
+#!/bin/sh
+
+export LIBTCOD_SRC_DIR="/PATH/TO/YOUR/src/libtcod"
+cp $LIBTCOD_SRC_DIR/*.dylib $OUT_DIR/
+cp $LIBTCOD_SRC_DIR/terminal.png $OUT_DIR/../../../
+```
+
+That copies the required `.dyblib` files from where you built `libtcod` to your project's target directory, and the `terminal.png` that `sdl` requires to your projects root directory.
+
+After that you should be good to go! Happy building!
 
 Contributing
 ------------
