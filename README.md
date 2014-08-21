@@ -164,6 +164,8 @@ You can regenerate the raw bindings by running:
 
 ### Contributors
 
+* Edu Garcia <arcnorj@gmail.com>
+* Jared McFarland <jared.online@gmail.com>
 * Tomas Sedovic <tomas@sedovic.cz>
 
 
