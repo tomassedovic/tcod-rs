@@ -10,7 +10,7 @@ functionality such as:
 * Keyboard and mouse input
 * Path finding
 * Field of view
-* Kind of portable (a.k.a. what's this mac thing again?)
+* Portable (works on linux and windows; mac too but requires some effort)
 * [lots of other stuff](http://doryen.eptalys.net/libtcod/features/)
 
 
