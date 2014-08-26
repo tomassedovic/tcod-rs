@@ -287,133 +287,124 @@ impl Drop for Map {
     }
 }
 
-pub mod path {
-    use std::intrinsics::transmute;
-    use libc::{c_int, c_float, uint8_t};
-    use super::ffi;
-
-    #[allow(non_camel_case_types)]
-    type c_bool = uint8_t;
-
-    pub struct AStarWithCallback<'a>{
-        tcod_path: ffi::TCOD_path_t,
-        // We need to keep a reference of the callback to safely dispose of it
-        // when the entire struct goes away. But it's only used in the FFI, not
-        // in the Rust code directly so the compiler thinks it's dead code.
-        #[allow(dead_code)]
-        cb: Box<|int, int, int, int|:'a -> f32>,
-    }
-
-    extern fn astar_path_callback(xf: c_int, yf: c_int,
-                                  xt: c_int, yt: c_int,
-                                  user_data: *mut ::libc::c_void) -> c_float {
-        let cb: Box<|int, int, int, int| -> f32> = unsafe { transmute(user_data) };
-        (*cb)(xf as int, yf as int, xt as int, yt as int) as c_float
-    }
-
-    impl<'a> AStarWithCallback<'a> {
-        pub fn new(map_width: int, map_height: int,
-                   path_callback: |int, int, int, int| -> f32,
-                   diagonal_cost: f32) -> AStarWithCallback {
-            let user_callback = box path_callback;
-            let tcod_path = unsafe {
-                ffi::TCOD_path_new_using_function(map_width as c_int,
-                                                  map_height as c_int,
-                                                  Some(astar_path_callback),
-                                                  transmute(&*user_callback),
-                                                  diagonal_cost as c_float)
-            };
-            AStarWithCallback {
-                tcod_path: tcod_path,
-                cb: user_callback,
-            }
-        }
-
-        pub fn find(&mut self,
-                    from_x: int, from_y: int,
-                    to_x: int, to_y: int) -> bool {
-            assert!(from_x >= 0 && from_y >= 0 && to_x >= 0 && to_y >= 0);
-            unsafe {
-                ffi::TCOD_path_compute(self.tcod_path,
-                                       from_x as c_int, from_y as c_int,
-                                       to_x as c_int, to_y as c_int) != 0
-            }
-        }
-
-        pub fn walk(&mut self, recalculate_when_needed: bool) -> Option<(int, int)> {
-            unsafe {
-                let mut x: c_int = 0;
-                let mut y: c_int = 0;
-                match ffi::TCOD_path_walk(self.tcod_path, &mut x, &mut y,
-                                          recalculate_when_needed as c_bool) != 0 {
-                    true => Some((x as int, y as int)),
-                    false => None,
-                }
-            }
-        }
-
-        pub fn reverse(&mut self) {
-            unsafe {
-                ffi::TCOD_path_reverse(self.tcod_path)
-            }
-        }
-
-        pub fn origin(&self) -> (int, int) {
-            unsafe {
-                let mut x: c_int = 0;
-                let mut y: c_int = 0;
-                ffi::TCOD_path_get_origin(self.tcod_path, &mut x, &mut y);
-                (x as int, y as int)
-            }
-        }
-
-        pub fn destination(&self) -> (int, int) {
-            unsafe {
-                let mut x: c_int = 0;
-                let mut y: c_int = 0;
-                ffi::TCOD_path_get_destination(self.tcod_path, &mut x, &mut y);
-                (x as int, y as int)
-            }
-        }
-
-        pub fn get(&self, index: int) -> (int, int) {
-            unsafe {
-                let mut x: c_int = 0;
-                let mut y: c_int = 0;
-                ffi::TCOD_path_get(self.tcod_path, index as c_int, &mut x, &mut y);
-                (x as int, y as int)
-            }
-        }
-
-        pub fn is_empty(&self) -> bool {
-            unsafe {
-                ffi::TCOD_path_is_empty(self.tcod_path) != 0
-            }
-        }
-
-        pub fn len(&self) -> int {
-            unsafe {
-                ffi::TCOD_path_size(self.tcod_path) as int
-            }
-        }
-    }
-
-    #[unsafe_destructor]
-    impl<'a> Drop for AStarWithCallback<'a> {
-        fn drop(&mut self) {
-            unsafe {
-                ffi::TCOD_path_delete(self.tcod_path);
-            }
-        }
-    }
-
-
-    pub struct AStarFromMap; //TODO
-
-    pub struct DijkstraWithCallback; //TODO
-
-    pub struct DijkstraFromMap; //TODO
+pub struct AStarWithCallback<'a>{
+    tcod_path: ffi::TCOD_path_t,
+    // We need to keep a reference of the callback to safely dispose of it
+    // when the entire struct goes away. But it's only used in the FFI, not
+    // in the Rust code directly so the compiler thinks it's dead code.
+    #[allow(dead_code)]
+    cb: Box<|int, int, int, int|:'a -> f32>,
 }
+
+extern fn astar_path_callback(xf: c_int, yf: c_int,
+                              xt: c_int, yt: c_int,
+                              user_data: *mut ::libc::c_void) -> c_float {
+    let cb: Box<|int, int, int, int| -> f32> = unsafe { transmute(user_data) };
+    (*cb)(xf as int, yf as int, xt as int, yt as int) as c_float
+}
+
+impl<'a> AStarWithCallback<'a> {
+    pub fn new(map_width: int, map_height: int,
+               path_callback: |int, int, int, int| -> f32,
+               diagonal_cost: f32) -> AStarWithCallback {
+        let user_callback = box path_callback;
+        let tcod_path = unsafe {
+            ffi::TCOD_path_new_using_function(map_width as c_int,
+                                              map_height as c_int,
+                                              Some(astar_path_callback),
+                                              transmute(&*user_callback),
+                                              diagonal_cost as c_float)
+        };
+        AStarWithCallback {
+            tcod_path: tcod_path,
+            cb: user_callback,
+        }
+    }
+
+    pub fn find(&mut self,
+                from_x: int, from_y: int,
+                to_x: int, to_y: int) -> bool {
+        assert!(from_x >= 0 && from_y >= 0 && to_x >= 0 && to_y >= 0);
+        unsafe {
+            ffi::TCOD_path_compute(self.tcod_path,
+                                   from_x as c_int, from_y as c_int,
+                                   to_x as c_int, to_y as c_int) != 0
+        }
+    }
+
+    pub fn walk(&mut self, recalculate_when_needed: bool) -> Option<(int, int)> {
+        unsafe {
+            let mut x: c_int = 0;
+            let mut y: c_int = 0;
+            match ffi::TCOD_path_walk(self.tcod_path, &mut x, &mut y,
+                                      recalculate_when_needed as c_bool) != 0 {
+                true => Some((x as int, y as int)),
+                false => None,
+            }
+        }
+    }
+
+    pub fn reverse(&mut self) {
+        unsafe {
+            ffi::TCOD_path_reverse(self.tcod_path)
+        }
+    }
+
+    pub fn origin(&self) -> (int, int) {
+        unsafe {
+            let mut x: c_int = 0;
+            let mut y: c_int = 0;
+            ffi::TCOD_path_get_origin(self.tcod_path, &mut x, &mut y);
+            (x as int, y as int)
+        }
+    }
+
+    pub fn destination(&self) -> (int, int) {
+        unsafe {
+            let mut x: c_int = 0;
+            let mut y: c_int = 0;
+            ffi::TCOD_path_get_destination(self.tcod_path, &mut x, &mut y);
+            (x as int, y as int)
+        }
+    }
+
+    pub fn get(&self, index: int) -> (int, int) {
+        unsafe {
+            let mut x: c_int = 0;
+            let mut y: c_int = 0;
+            ffi::TCOD_path_get(self.tcod_path, index as c_int, &mut x, &mut y);
+            (x as int, y as int)
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        unsafe {
+            ffi::TCOD_path_is_empty(self.tcod_path) != 0
+        }
+    }
+
+    pub fn len(&self) -> int {
+        unsafe {
+            ffi::TCOD_path_size(self.tcod_path) as int
+        }
+    }
+}
+
+#[unsafe_destructor]
+impl<'a> Drop for AStarWithCallback<'a> {
+    fn drop(&mut self) {
+        unsafe {
+            ffi::TCOD_path_delete(self.tcod_path);
+        }
+    }
+}
+
+
+pub struct AStarFromMap; //TODO
+
+pub struct DijkstraWithCallback; //TODO
+
+pub struct DijkstraFromMap; //TODO
 
 
 #[repr(C)]
