@@ -368,12 +368,15 @@ impl<'a> AStarWithCallback<'a> {
         }
     }
 
-    pub fn get(&self, index: int) -> (int, int) {
+    pub fn get(&self, index: int) -> Option<(int, int)> {
+        if self.is_empty() {
+            return None;
+        }
         unsafe {
             let mut x: c_int = 0;
             let mut y: c_int = 0;
             ffi::TCOD_path_get(self.tcod_path, index as c_int, &mut x, &mut y);
-            (x as int, y as int)
+            (Some((x as int, y as int)))
         }
     }
 
