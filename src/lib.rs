@@ -299,13 +299,8 @@ pub struct AStarWithCallback<'a>{
 extern fn astar_path_callback(xf: c_int, yf: c_int,
                               xt: c_int, yt: c_int,
                               user_data: *mut c_void) -> c_float {
-    let cb: Box<|int, int, int, int| -> f32> = unsafe { transmute(user_data) };
-    let result = (*cb)(xf as int, yf as int, xt as int, yt as int);
-    // Prevent Rust from freeing `cb` when it goes out of scope:
-    unsafe {
-        let _sink: *mut c_void = transmute(cb);
-    }
-    result as c_float
+    let cb: &mut |int, int, int, int| -> f32 = unsafe { transmute(user_data) };
+    (*cb)(xf as int, yf as int, xt as int, yt as int) as c_float
 }
 
 impl<'a> AStarWithCallback<'a> {
