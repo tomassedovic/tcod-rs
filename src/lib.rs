@@ -285,7 +285,7 @@ impl Drop for Map {
     }
 }
 
-pub struct AStarWithCallback<'a>{
+pub struct AStarPathWithCallback<'a>{
     tcod_path: ffi::TCOD_path_t,
     // We need to keep a reference of the callback to safely dispose of it
     // when the entire struct goes away. But it's only used in the FFI, not
@@ -301,10 +301,10 @@ extern fn astar_path_callback(xf: c_int, yf: c_int,
     (*cb)(xf as int, yf as int, xt as int, yt as int) as c_float
 }
 
-impl<'a> AStarWithCallback<'a> {
+impl<'a> AStarPathWithCallback<'a> {
     pub fn new(map_width: int, map_height: int,
                path_callback: |int, int, int, int| -> f32,
-               diagonal_cost: f32) -> AStarWithCallback {
+               diagonal_cost: f32) -> AStarPathWithCallback {
         let user_callback = box path_callback;
         let tcod_path = unsafe {
             ffi::TCOD_path_new_using_function(map_width as c_int,
@@ -313,7 +313,7 @@ impl<'a> AStarWithCallback<'a> {
                                               transmute_copy(&user_callback),
                                               diagonal_cost as c_float)
         };
-        AStarWithCallback {
+        AStarPathWithCallback {
             tcod_path: tcod_path,
             cb: user_callback,
         }
@@ -392,7 +392,7 @@ impl<'a> AStarWithCallback<'a> {
 }
 
 #[unsafe_destructor]
-impl<'a> Drop for AStarWithCallback<'a> {
+impl<'a> Drop for AStarPathWithCallback<'a> {
     fn drop(&mut self) {
         unsafe {
             ffi::TCOD_path_delete(self.tcod_path);

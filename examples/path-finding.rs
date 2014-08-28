@@ -1,6 +1,6 @@
 extern crate tcod;
 
-use tcod::AStarWithCallback;
+use tcod::AStarPathWithCallback;
 
 
 fn main() {
@@ -22,7 +22,7 @@ fn main() {
             0.0
         }
     };
-    let mut path = AStarWithCallback::new(8, 8, can_move, 1.0);
+    let mut path = AStarPathWithCallback::new(8, 8, can_move, 1.0);
     assert_eq!(path.find(0, 0, 1, 1), true);
     assert_eq!(path.len(), 1);
     assert_eq!(path.is_empty(), false);
