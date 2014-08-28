@@ -42,6 +42,9 @@ fn main() {
     assert_eq!(path.get(3), Some((0, 4)));
     assert_eq!(path.get(4), Some((1, 5)));
     assert_eq!(path.get(5), Some((0, 6)));
+    assert_eq!(path.get(-1), None);
+    assert_eq!(path.get(6), None);
+    assert_eq!(path.get(7), None);
 
     // Walk the path (consuming it):
     assert_eq!(path.walk(false), Some((1, 1)));

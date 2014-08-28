@@ -367,7 +367,7 @@ impl<'a> AStarPathWithCallback<'a> {
     }
 
     pub fn get(&self, index: int) -> Option<(int, int)> {
-        if self.is_empty() {
+        if index < 0 || index >= self.len() {
             return None;
         }
         unsafe {
@@ -466,7 +466,7 @@ impl AStarPathFromMap {
     }
 
     pub fn get(&self, index: int) -> Option<(int, int)> {
-        if self.is_empty() {
+        if index < 0 || index >= self.len() {
             return None;
         }
         unsafe {
