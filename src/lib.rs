@@ -294,9 +294,9 @@ pub struct AStarPathWithCallback<'a>{
     cb: Box<|int, int, int, int|:'a -> f32>,
 }
 
-extern fn astar_path_callback(xf: c_int, yf: c_int,
-                              xt: c_int, yt: c_int,
-                              user_data: *mut c_void) -> c_float {
+extern fn c_path_callback(xf: c_int, yf: c_int,
+                          xt: c_int, yt: c_int,
+                          user_data: *mut c_void) -> c_float {
     let cb: &mut |int, int, int, int| -> f32 = unsafe { transmute(user_data) };
     (*cb)(xf as int, yf as int, xt as int, yt as int) as c_float
 }
@@ -309,7 +309,7 @@ impl<'a> AStarPathWithCallback<'a> {
         let tcod_path = unsafe {
             ffi::TCOD_path_new_using_function(map_width as c_int,
                                               map_height as c_int,
-                                              Some(astar_path_callback),
+                                              Some(c_path_callback),
                                               transmute_copy(&user_callback),
                                               diagonal_cost as c_float)
         };
@@ -498,9 +498,211 @@ impl Drop for AStarPathFromMap {
     }
 }
 
-pub struct DijkstraWithCallback; //TODO
+pub struct DijkstraPathWithCallback<'a> {
+    tcod_path: ffi::TCOD_dijkstra_t,
+    #[allow(dead_code)]
+    cb: Box<|int, int, int, int|:'a -> f32>,
+    width: int,
+    height: int,
+}
 
-pub struct DijkstraFromMap; //TODO
+impl<'a> DijkstraPathWithCallback<'a> {
+    pub fn new(width: int, height: int,
+               path_callback: |int, int, int, int| -> f32,
+               diagonal_cost: f32) -> DijkstraPathWithCallback {
+        let user_closure = box path_callback;
+        let tcod_path = unsafe {
+            ffi::TCOD_dijkstra_new_using_function(width as c_int,
+                                                  height as c_int,
+                                                  Some(c_path_callback),
+                                                  transmute_copy(&user_closure),
+                                                  diagonal_cost as c_float)
+        };
+        DijkstraPathWithCallback {
+            tcod_path: tcod_path,
+            cb: user_closure,
+            width: width,
+            height: height,
+        }
+    }
+
+    pub fn reverse(&mut self) {
+        unsafe {
+            ffi::TCOD_dijkstra_reverse(self.tcod_path);
+        }
+    }
+
+    pub fn compute_grid(&mut self, root_x: int, root_y: int) {
+        assert!(root_x > 0 && root_y > 0 && root_x < self.width && root_y < self.height);
+        unsafe {
+            ffi::TCOD_dijkstra_compute(self.tcod_path, root_x as c_int, root_y as c_int);
+        }
+    }
+
+    pub fn find(&mut self, to_x: int, to_y: int) -> bool {
+        if to_x > 0 && to_y > 0 && to_y < self.width && to_y < self.height {
+            unsafe {
+                ffi::TCOD_dijkstra_path_set(self.tcod_path, to_x as c_int, to_y as c_int) != 0
+            }
+        } else {
+            false
+        }
+    }
+
+    pub fn len(&self) -> int {
+        unsafe {
+            ffi::TCOD_dijkstra_size(self.tcod_path) as int
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        unsafe {
+            ffi::TCOD_dijkstra_is_empty(self.tcod_path) != 0
+        }
+    }
+
+    pub fn get(&self, index: int) -> Option<(int, int)> {
+        if index < 0 || index >= self.len() {
+            return None;
+        }
+        unsafe {
+            let mut x: c_int = 0;
+            let mut y: c_int = 0;
+            ffi::TCOD_dijkstra_get(self.tcod_path, index as c_int, &mut x, &mut y);
+            Some((x as int, y as int))
+        }
+    }
+
+    pub fn walk(&mut self) -> Option<(int, int)> {
+        unsafe {
+            let mut x: c_int = 0;
+            let mut y: c_int = 0;
+            match ffi::TCOD_dijkstra_path_walk(self.tcod_path, &mut x, &mut y) != 0 {
+                true => Some((x as int, y as int)),
+                false => None,
+            }
+        }
+    }
+
+    pub fn distance_from_root(&self, x: int, y: int) -> Option<f32> {
+        let result = unsafe {
+            ffi::TCOD_dijkstra_get_distance(self.tcod_path, x as c_int, y as c_int)
+        };
+        if result == -1.0 {
+            None
+        } else {
+            Some(result as f32)
+        }
+    }
+}
+
+#[unsafe_destructor]
+impl<'a> Drop for DijkstraPathWithCallback<'a> {
+    fn drop(&mut self) {
+        unsafe {
+            ffi::TCOD_dijkstra_delete(self.tcod_path);
+        }
+    }
+}
+
+
+pub struct DijkstraPathFromMap {
+    tcod_path: ffi::TCOD_dijkstra_t,
+    #[allow(dead_code)]
+    map: Map,
+}
+
+impl DijkstraPathFromMap {
+    pub fn new(map: Map, diagonal_cost: f32) -> DijkstraPathFromMap {
+        let tcod_path = unsafe {
+            ffi::TCOD_dijkstra_new(map.tcod_map, diagonal_cost as c_float)
+        };
+        DijkstraPathFromMap {
+            tcod_path: tcod_path,
+            map: map,
+        }
+    }
+
+    pub fn reverse(&mut self) {
+        unsafe {
+            ffi::TCOD_dijkstra_reverse(self.tcod_path);
+        }
+    }
+
+    pub fn compute_grid(&mut self, root_x: int, root_y: int) {
+        let (width, height) = self.map.size();
+        let walkable = self.map.is_walkable(root_x, root_y);
+        assert!(root_x > 0 && root_y > 0 && root_x < width && root_y < height && walkable);
+        unsafe {
+            ffi::TCOD_dijkstra_compute(self.tcod_path, root_x as c_int, root_y as c_int);
+        }
+    }
+
+    pub fn find(&mut self, to_x: int, to_y: int) -> bool {
+        let (width, height) = self.map.size();
+        if to_x > 0 && to_y > 0 && to_y < width && to_y < height {
+            unsafe {
+                ffi::TCOD_dijkstra_path_set(self.tcod_path, to_x as c_int, to_y as c_int) != 0
+            }
+        } else {
+            false
+        }
+    }
+
+    pub fn len(&self) -> int {
+        unsafe {
+            ffi::TCOD_dijkstra_size(self.tcod_path) as int
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        unsafe {
+            ffi::TCOD_dijkstra_is_empty(self.tcod_path) != 0
+        }
+    }
+
+    pub fn get(&self, index: int) -> Option<(int, int)> {
+        if index < 0 || index >= self.len() {
+            return None;
+        }
+        unsafe {
+            let mut x: c_int = 0;
+            let mut y: c_int = 0;
+            ffi::TCOD_dijkstra_get(self.tcod_path, index as c_int, &mut x, &mut y);
+            Some((x as int, y as int))
+        }
+    }
+
+    pub fn walk(&mut self) -> Option<(int, int)> {
+        unsafe {
+            let mut x: c_int = 0;
+            let mut y: c_int = 0;
+            match ffi::TCOD_dijkstra_path_walk(self.tcod_path, &mut x, &mut y) != 0 {
+                true => Some((x as int, y as int)),
+                false => None,
+            }
+        }
+    }
+
+    pub fn distance_from_root(&self, x: int, y: int) -> Option<f32> {
+        let result = unsafe {
+            ffi::TCOD_dijkstra_get_distance(self.tcod_path, x as c_int, y as c_int)
+        };
+        if result == -1.0 {
+            None
+        } else {
+            Some(result as f32)
+        }
+    }
+}
+
+impl Drop for DijkstraPathFromMap {
+    fn drop(&mut self) {
+        unsafe {
+            ffi::TCOD_dijkstra_delete(self.tcod_path);
+        };
+    }
+}
 
 
 #[repr(C)]
