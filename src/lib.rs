@@ -401,7 +401,102 @@ impl<'a> Drop for AStarPathWithCallback<'a> {
 }
 
 
-pub struct AStarFromMap; //TODO
+pub struct AStarPathFromMap {
+    tcod_path: ffi::TCOD_path_t,
+    #[allow(dead_code)]
+    map: Map,
+}
+
+impl AStarPathFromMap {
+    pub fn new(map: Map, diagonal_cost: f32) -> AStarPathFromMap {
+        let tcod_path = unsafe {
+            ffi::TCOD_path_new_using_map(map.tcod_map, diagonal_cost as c_float)
+        };
+        AStarPathFromMap {
+            tcod_path: tcod_path,
+            map: map,
+        }
+    }
+
+    pub fn find(&mut self,
+                from_x: int, from_y: int,
+                to_x: int, to_y: int) -> bool {
+        assert!(from_x >= 0 && from_y >= 0 && to_x >= 0 && to_y >= 0);
+        unsafe {
+            ffi::TCOD_path_compute(self.tcod_path,
+                                   from_x as c_int, from_y as c_int,
+                                   to_x as c_int, to_y as c_int) != 0
+        }
+    }
+
+    pub fn walk(&mut self, recalculate_when_needed: bool) -> Option<(int, int)> {
+        unsafe {
+            let mut x: c_int = 0;
+            let mut y: c_int = 0;
+            match ffi::TCOD_path_walk(self.tcod_path, &mut x, &mut y,
+                                      recalculate_when_needed as c_bool) != 0 {
+                true => Some((x as int, y as int)),
+                false => None,
+            }
+        }
+    }
+
+    pub fn reverse(&mut self) {
+        unsafe {
+            ffi::TCOD_path_reverse(self.tcod_path)
+        }
+    }
+
+    pub fn origin(&self) -> (int, int) {
+        unsafe {
+            let mut x: c_int = 0;
+            let mut y: c_int = 0;
+            ffi::TCOD_path_get_origin(self.tcod_path, &mut x, &mut y);
+            (x as int, y as int)
+        }
+    }
+
+    pub fn destination(&self) -> (int, int) {
+        unsafe {
+            let mut x: c_int = 0;
+            let mut y: c_int = 0;
+            ffi::TCOD_path_get_destination(self.tcod_path, &mut x, &mut y);
+            (x as int, y as int)
+        }
+    }
+
+    pub fn get(&self, index: int) -> Option<(int, int)> {
+        if self.is_empty() {
+            return None;
+        }
+        unsafe {
+            let mut x: c_int = 0;
+            let mut y: c_int = 0;
+            ffi::TCOD_path_get(self.tcod_path, index as c_int, &mut x, &mut y);
+            (Some((x as int, y as int)))
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        unsafe {
+            ffi::TCOD_path_is_empty(self.tcod_path) != 0
+        }
+    }
+
+    pub fn len(&self) -> int {
+        unsafe {
+            ffi::TCOD_path_size(self.tcod_path) as int
+        }
+    }
+}
+
+impl Drop for AStarPathFromMap {
+    fn drop(&mut self) {
+        unsafe {
+            ffi::TCOD_path_delete(self.tcod_path);
+        }
+    }
+}
 
 pub struct DijkstraWithCallback; //TODO
 
