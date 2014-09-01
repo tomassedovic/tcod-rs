@@ -1,5 +1,4 @@
 #![feature(globs, unsafe_destructor)]
-#![allow(non_camel_case_types)]
 
 extern crate libc;
 
@@ -7,8 +6,7 @@ use std::mem::{transmute, transmute_copy};
 
 use libc::{c_int, c_float, uint8_t, c_void};
 
-#[allow(non_snake_case_functions)]
-#[allow(uppercase_variables)]
+#[allow(non_camel_case_types, non_snake_case)]
 pub mod ffi;
 
 #[allow(non_camel_case_types)]
