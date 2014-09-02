@@ -351,6 +351,14 @@ impl<'a> AStarPath<'a> {
         }
     }
 
+    pub fn walk<'a>(&'a mut self) -> AStarPathIterator<'a> {
+        AStarPathIterator{tcod_path: self.tcod_path, recalculate: false}
+    }
+
+    pub fn walk_recalculate<'a>(&'a mut self) -> AStarPathIterator<'a> {
+        AStarPathIterator{tcod_path: self.tcod_path, recalculate: true}
+    }
+
     pub fn walk_one_step(&mut self, recalculate_when_needed: bool) -> Option<(int, int)> {
         unsafe {
             let mut x: c_int = 0;
@@ -421,7 +429,6 @@ impl<'a> Drop for AStarPath<'a> {
     }
 }
 
-
 pub struct DijkstraPath<'a> {
     tcod_path: ffi::TCOD_dijkstra_t,
     #[allow(dead_code)]
@@ -480,6 +487,10 @@ impl<'a> DijkstraPath<'a> {
         } else {
             false
         }
+    }
+
+    pub fn walk<'a>(&'a mut self) -> DijkstraPathIterator<'a> {
+        DijkstraPathIterator{tcod_path: self.tcod_path}
     }
 
     pub fn walk_one_step(&mut self) -> Option<(int, int)> {
@@ -542,6 +553,42 @@ impl<'a> Drop for DijkstraPath<'a> {
     fn drop(&mut self) {
         unsafe {
             ffi::TCOD_dijkstra_delete(self.tcod_path);
+        }
+    }
+}
+
+pub struct AStarPathIterator<'a> {
+    tcod_path: ffi::TCOD_path_t,
+    recalculate: bool,
+}
+
+impl<'a> Iterator<(int, int)> for AStarPathIterator<'a> {
+    fn next(&mut self) -> Option<(int, int)> {
+        unsafe {
+            let mut x: c_int = 0;
+            let mut y: c_int = 0;
+            match ffi::TCOD_path_walk(self.tcod_path, &mut x, &mut y,
+                                      self.recalculate as c_bool) != 0 {
+                true => Some((x as int, y as int)),
+                false => None,
+            }
+        }
+    }
+}
+
+pub struct DijkstraPathIterator<'a> {
+    tcod_path: ffi::TCOD_path_t,
+}
+
+impl<'a> Iterator<(int, int)> for DijkstraPathIterator<'a> {
+    fn next(&mut self) -> Option<(int, int)> {
+        unsafe {
+            let mut x: c_int = 0;
+            let mut y: c_int = 0;
+            match ffi::TCOD_dijkstra_path_walk(self.tcod_path, &mut x, &mut y) != 0 {
+                true => Some((x as int, y as int)),
+                false => None,
+            }
         }
     }
 }
