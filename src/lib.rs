@@ -285,44 +285,65 @@ impl Drop for Map {
     }
 }
 
-pub struct AStarWithCallback<'a>{
+enum PathInnerData<'a> {
+    PathMap(Map),
+    PathCallback(Box<|(int, int), (int, int)|:'a -> f32>),
+}
+
+pub struct AStarPath<'a>{
     tcod_path: ffi::TCOD_path_t,
-    // We need to keep a reference of the callback to safely dispose of it
-    // when the entire struct goes away. But it's only used in the FFI, not
-    // in the Rust code directly so the compiler thinks it's dead code.
     #[allow(dead_code)]
-    cb: Box<|int, int, int, int|:'a -> f32>,
+    inner: PathInnerData<'a>,
+    width: int,
+    height: int,
 }
 
-extern fn astar_path_callback(xf: c_int, yf: c_int,
-                              xt: c_int, yt: c_int,
-                              user_data: *mut c_void) -> c_float {
-    let cb: &mut |int, int, int, int| -> f32 = unsafe { transmute(user_data) };
-    (*cb)(xf as int, yf as int, xt as int, yt as int) as c_float
+extern fn c_path_callback(xf: c_int, yf: c_int,
+                          xt: c_int, yt: c_int,
+                          user_data: *mut c_void) -> c_float {
+    let cb: &mut |(int, int), (int, int)| -> f32 = unsafe { transmute(user_data) };
+    (*cb)((xf as int, yf as int), (xt as int, yt as int)) as c_float
 }
 
-impl<'a> AStarWithCallback<'a> {
-    pub fn new(map_width: int, map_height: int,
-               path_callback: |int, int, int, int| -> f32,
-               diagonal_cost: f32) -> AStarWithCallback {
-        let user_callback = box path_callback;
+impl<'a> AStarPath<'a> {
+    pub fn new_from_callback(width: int, height: int,
+                             path_callback: |from: (int, int), to: (int, int)| -> f32,
+                             diagonal_cost: f32) -> AStarPath {
+        let user_closure = box path_callback;
         let tcod_path = unsafe {
-            ffi::TCOD_path_new_using_function(map_width as c_int,
-                                              map_height as c_int,
-                                              Some(astar_path_callback),
-                                              transmute_copy(&user_callback),
+            ffi::TCOD_path_new_using_function(width as c_int, height as c_int,
+                                              Some(c_path_callback),
+                                              transmute_copy(&user_closure),
                                               diagonal_cost as c_float)
         };
-        AStarWithCallback {
+        AStarPath {
             tcod_path: tcod_path,
-            cb: user_callback,
+            inner: PathCallback(user_closure),
+            width: width,
+            height: height,
+        }
+    }
+
+    pub fn new_from_map(map: Map, diagonal_cost: f32) -> AStarPath<'a> {
+        let tcod_path = unsafe {
+            ffi::TCOD_path_new_using_map(map.tcod_map, diagonal_cost as c_float)
+        };
+        let (w, h) = map.size();
+        AStarPath {
+            tcod_path: tcod_path,
+            inner: PathMap(map),
+            width: w,
+            height: h,
         }
     }
 
     pub fn find(&mut self,
-                from_x: int, from_y: int,
-                to_x: int, to_y: int) -> bool {
+                from: (int, int),
+                to: (int, int)) -> bool {
+        let (from_x, from_y) = from;
+        let (to_x, to_y) = to;
         assert!(from_x >= 0 && from_y >= 0 && to_x >= 0 && to_y >= 0);
+        assert!(from_x < self.width && from_y < self.height && to_x < self.width && to_y < self.height);
         unsafe {
             ffi::TCOD_path_compute(self.tcod_path,
                                    from_x as c_int, from_y as c_int,
@@ -330,7 +351,7 @@ impl<'a> AStarWithCallback<'a> {
         }
     }
 
-    pub fn walk(&mut self, recalculate_when_needed: bool) -> Option<(int, int)> {
+    pub fn walk_one_step(&mut self, recalculate_when_needed: bool) -> Option<(int, int)> {
         unsafe {
             let mut x: c_int = 0;
             let mut y: c_int = 0;
@@ -367,7 +388,7 @@ impl<'a> AStarWithCallback<'a> {
     }
 
     pub fn get(&self, index: int) -> Option<(int, int)> {
-        if self.is_empty() {
+        if index < 0 || index >= self.len() {
             return None;
         }
         unsafe {
@@ -392,7 +413,7 @@ impl<'a> AStarWithCallback<'a> {
 }
 
 #[unsafe_destructor]
-impl<'a> Drop for AStarWithCallback<'a> {
+impl<'a> Drop for AStarPath<'a> {
     fn drop(&mut self) {
         unsafe {
             ffi::TCOD_path_delete(self.tcod_path);
@@ -401,11 +422,129 @@ impl<'a> Drop for AStarWithCallback<'a> {
 }
 
 
-pub struct AStarFromMap; //TODO
+pub struct DijkstraPath<'a> {
+    tcod_path: ffi::TCOD_dijkstra_t,
+    #[allow(dead_code)]
+    inner: PathInnerData<'a>,
+    width: int,
+    height: int,
+}
 
-pub struct DijkstraWithCallback; //TODO
+impl<'a> DijkstraPath<'a> {
+    pub fn new_from_callback(width: int, height: int,
+                             path_callback: |(int, int), (int, int)| -> f32,
+                             diagonal_cost: f32) -> DijkstraPath {
+        let user_closure = box path_callback;
+        let tcod_path = unsafe {
+            ffi::TCOD_dijkstra_new_using_function(width as c_int,
+                                                  height as c_int,
+                                                  Some(c_path_callback),
+                                                  transmute_copy(&user_closure),
+                                                  diagonal_cost as c_float)
+        };
+        DijkstraPath {
+            tcod_path: tcod_path,
+            inner: PathCallback(user_closure),
+            width: width,
+            height: height,
+        }
+    }
 
-pub struct DijkstraFromMap; //TODO
+    pub fn new_from_map(map: Map, diagonal_cost: f32) -> DijkstraPath<'a> {
+        let tcod_path = unsafe {
+            ffi::TCOD_dijkstra_new(map.tcod_map, diagonal_cost as c_float)
+        };
+        let (w, h) = map.size();
+        DijkstraPath {
+            tcod_path: tcod_path,
+            inner: PathMap(map),
+            width: w,
+            height: h,
+        }
+    }
+
+    pub fn compute_grid(&mut self, root: (int, int)) {
+        let (x, y) = root;
+        assert!(x > 0 && y > 0 && x < self.width && y < self.height);
+        unsafe {
+            ffi::TCOD_dijkstra_compute(self.tcod_path, x as c_int, y as c_int);
+        }
+    }
+
+    pub fn find(&mut self, destination: (int, int)) -> bool {
+        let (x, y) = destination;
+        if x > 0 && y > 0 && x < self.width && y < self.height {
+            unsafe {
+                ffi::TCOD_dijkstra_path_set(self.tcod_path, x as c_int, y as c_int) != 0
+            }
+        } else {
+            false
+        }
+    }
+
+    pub fn walk_one_step(&mut self) -> Option<(int, int)> {
+        unsafe {
+            let mut x: c_int = 0;
+            let mut y: c_int = 0;
+            match ffi::TCOD_dijkstra_path_walk(self.tcod_path, &mut x, &mut y) != 0 {
+                true => Some((x as int, y as int)),
+                false => None,
+            }
+        }
+    }
+
+
+    pub fn distance_from_root(&self, point: (int, int)) -> Option<f32> {
+        let (x, y) = point;
+        let result = unsafe {
+            ffi::TCOD_dijkstra_get_distance(self.tcod_path, x as c_int, y as c_int)
+        };
+        if result == -1.0 {
+            None
+        } else {
+            Some(result as f32)
+        }
+    }
+
+    pub fn reverse(&mut self) {
+        unsafe {
+            ffi::TCOD_dijkstra_reverse(self.tcod_path);
+        }
+    }
+
+    pub fn get(&self, index: int) -> Option<(int, int)> {
+        if index < 0 || index >= self.len() {
+            return None;
+        }
+        unsafe {
+            let mut x: c_int = 0;
+            let mut y: c_int = 0;
+            ffi::TCOD_dijkstra_get(self.tcod_path, index as c_int, &mut x, &mut y);
+            Some((x as int, y as int))
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        unsafe {
+            ffi::TCOD_dijkstra_is_empty(self.tcod_path) != 0
+        }
+    }
+
+    pub fn len(&self) -> int {
+        unsafe {
+            ffi::TCOD_dijkstra_size(self.tcod_path) as int
+        }
+    }
+}
+
+#[unsafe_destructor]
+impl<'a> Drop for DijkstraPath<'a> {
+    fn drop(&mut self) {
+        unsafe {
+            ffi::TCOD_dijkstra_delete(self.tcod_path);
+        }
+    }
+}
 
 
 #[repr(C)]
