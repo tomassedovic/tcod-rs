@@ -52,11 +52,8 @@ fn main() {
 
 
     // Walk the path (consuming it):
-    loop {
-        match path.walk_one_step(false) {
-            Some(square) => println!("Walking to {}", square),
-            None => break,
-        }
+    for pos in path.walk() {
+        println!("Walking to {}", pos)
     }
 
     assert_eq!(path.len(), 0);
