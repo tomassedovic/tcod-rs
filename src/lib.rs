@@ -472,7 +472,7 @@ impl<'a> DijkstraPath<'a> {
 
     pub fn compute_grid(&mut self, root: (int, int)) {
         let (x, y) = root;
-        assert!(x > 0 && y > 0 && x < self.width && y < self.height);
+        assert!(x >= 0 && y >= 0 && x < self.width && y < self.height);
         unsafe {
             ffi::TCOD_dijkstra_compute(self.tcod_path, x as c_int, y as c_int);
         }
@@ -480,7 +480,7 @@ impl<'a> DijkstraPath<'a> {
 
     pub fn find(&mut self, destination: (int, int)) -> bool {
         let (x, y) = destination;
-        if x > 0 && y > 0 && x < self.width && y < self.height {
+        if x >= 0 && y >= 0 && x < self.width && y < self.height {
             unsafe {
                 ffi::TCOD_dijkstra_path_set(self.tcod_path, x as c_int, y as c_int) != 0
             }
