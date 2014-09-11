@@ -2,7 +2,7 @@
 
 extern crate libc;
 
-use std::mem::{transmute, transmute_copy};
+use std::mem::transmute;
 
 use libc::{c_int, c_float, uint8_t, c_void};
 
@@ -329,26 +329,39 @@ extern "C" fn c_path_callback(xf: c_int, yf: c_int,
 
 impl AStarPath {
     pub fn new_from_callback<T: |&mut: from: (int, int), to: (int, int)| -> f32>(width: int, height: int,
-                             path_callback: T,
-                             diagonal_cost: f32) -> AStarPath {
+                                                                                 path_callback: T,
+                                                                                 diagonal_cost: f32) -> AStarPath {
         // Convert the closure to a trait object. This will turn it into a fat pointer:
         let user_closure: Box<FnMut<((int, int), (int, int)), f32>> = box path_callback;
-        // Allocate the fat pointer on the heap:
-        let fat_ptr: (uint, uint) = unsafe { transmute_copy(&user_closure) };
-        let ptr: Box<(uint, uint)> = box fat_ptr;
 
-        let tcod_path = unsafe {
-            ffi::TCOD_path_new_using_function(width as c_int, height as c_int,
-                                              Some(c_path_callback),
-                                              // Pass in a pointer to the fat pointer to the closure:
-                                              transmute_copy(&ptr),
-                                              diagonal_cost as c_float)
-        };
-        AStarPath {
-            tcod_path: TCODPath{ptr: tcod_path},
-            inner: PathCallback(user_closure, ptr),
-            width: width,
-            height: height,
+        // NOTE: This could be shorted & cleaner with mem::transmute_copy, but
+        // unlike mem::transmute, it doesn't check sizes which makes it more
+        // dangerous. Which means we have to do the back-and-forth conversions
+        // to preserve the ownership of the data we've alocated on the heap.
+        unsafe {
+            let fat_ptr: (uint, uint) = transmute(user_closure);
+            // Take ownership of the closure back:
+            let user_closure: Box<FnMut<((int, int), (int, int)), f32>> = transmute(fat_ptr);
+            // Allocate the fat pointer on the heap:
+            let ptr: Box<(uint, uint)> = box fat_ptr;
+            // Create a pointer to the fat pointer. This well be passed as *void user_data:
+            let user_data_ptr: *mut c_void = transmute(ptr);
+            // Take ownership of the fat pointer back:
+            let ptr: Box<(uint, uint)> = transmute(user_data_ptr);
+
+            let tcod_path = ffi::TCOD_path_new_using_function(width as c_int, height as c_int,
+                                                              Some(c_path_callback),
+                                                              user_data_ptr,
+                                                              diagonal_cost as c_float);
+            AStarPath {
+                tcod_path: TCODPath{ptr: tcod_path},
+                // Keep track of everything we've allocated on the heap. Both
+                // `user_closure` and `ptr` will be deallocated when AStarPath
+                // is dropped:
+                inner: PathCallback(user_closure, ptr),
+                width: width,
+                height: height,
+            }
         }
     }
 
@@ -470,24 +483,28 @@ pub struct DijkstraPath {
 
 impl DijkstraPath {
     pub fn new_from_callback<T: |&mut: (int, int), (int, int)| -> f32>(width: int, height: int,
-                             path_callback: T,
-                             diagonal_cost: f32) -> DijkstraPath {
+                                                                       path_callback: T,
+                                                                       diagonal_cost: f32) -> DijkstraPath {
+        // NOTE: this is might be a bit confusing. See the
+        // AStarPath::new_from_callback implementation comments.
         let user_closure: Box<FnMut<((int, int), (int, int)), f32>> = box path_callback;
-        let fat_ptr: (uint, uint) = unsafe { transmute_copy(&user_closure) };
-        let ptr: Box<(uint, uint)> = box fat_ptr;
-
-        let tcod_path = unsafe {
-            ffi::TCOD_dijkstra_new_using_function(width as c_int,
-                                                  height as c_int,
-                                                  Some(c_path_callback),
-                                                  transmute_copy(&ptr),
-                                                  diagonal_cost as c_float)
-        };
-        DijkstraPath {
-            tcod_path: TCODDijkstraPath{ptr: tcod_path},
-            inner: PathCallback(user_closure, ptr),
-            width: width,
-            height: height,
+        unsafe {
+            let fat_ptr: (uint, uint) = transmute(user_closure);
+            let user_closure: Box<FnMut<((int, int), (int, int)), f32>> = transmute(fat_ptr);
+            let ptr: Box<(uint, uint)> = box fat_ptr;
+            let user_data_ptr: *mut c_void = transmute(ptr);
+            let ptr: Box<(uint, uint)> = transmute(user_data_ptr);
+            let tcod_path = ffi::TCOD_dijkstra_new_using_function(width as c_int,
+                                                                  height as c_int,
+                                                                  Some(c_path_callback),
+                                                                  user_data_ptr,
+                                                                  diagonal_cost as c_float);
+            DijkstraPath {
+                tcod_path: TCODDijkstraPath{ptr: tcod_path},
+                inner: PathCallback(user_closure, ptr),
+                width: width,
+                height: height,
+            }
         }
     }
 
