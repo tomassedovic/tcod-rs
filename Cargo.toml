@@ -8,3 +8,7 @@ build = "./build.sh"
 
 name = "tcod"
 path = "src/lib.rs"
+
+[profile.test]
+# Workaround for https://github.com/rust-lang/rust/issues/17021
+debug = false
