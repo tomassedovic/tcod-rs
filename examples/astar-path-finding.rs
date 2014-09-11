@@ -1,9 +1,10 @@
+#![feature(unboxed_closures)]
+
 extern crate tcod;
 
 use tcod::AStarPath;
 
-
-fn main() {
+fn create_path() -> AStarPath {
     let chess_board: [[int, ..8], ..8] = [
         [1, 0, 1, 0, 1, 0, 1, 0],
         [0, 1, 0, 1, 0, 1, 0, 1],
@@ -15,7 +16,7 @@ fn main() {
         [0, 1, 0, 1, 0, 1, 0, 1],
     ];
     // Movement like in Checkers: you can only move to the square of the same colour
-    let can_move = |from: (int, int), to: (int, int)| -> f32 {
+    let can_move = |&mut: from: (int, int), to: (int, int)| -> f32 {
         let (fx, fy) = from;
         let (tx, ty) = to;
         if chess_board[fy as uint][fx as uint] == chess_board[ty as uint][tx as uint] {
@@ -24,7 +25,11 @@ fn main() {
             0.0
         }
     };
-    let mut path = AStarPath::new_from_callback(8, 8, can_move, 1.0);
+    AStarPath::new_from_callback(8, 8, can_move, 1.0)
+}
+
+fn main() {
+    let mut path = create_path();
     assert_eq!(path.find((0, 0), (1, 1)), true);
     assert_eq!(path.len(), 1);
     assert_eq!(path.is_empty(), false);
