@@ -320,9 +320,8 @@ extern "C" fn c_path_callback(xf: c_int, yf: c_int,
                           xt: c_int, yt: c_int,
                           user_data: *mut c_void) -> c_float {
     unsafe {
-        let ptr: &(uint, uint) = transmute(user_data);
-        let d: (uint, uint) = *ptr;
-        let cb: &mut FnMut<((int, int), (int, int)), f32> = transmute(d);
+        let ptr: &(uint, uint) = &*(user_data as *const (uint, uint));
+        let cb: &mut FnMut<((int, int), (int, int)), f32> = transmute(*ptr);
         cb.call_mut(((xf as int, yf as int), (xt as int, yt as int))) as c_float
     }
 }
@@ -333,25 +332,16 @@ impl AStarPath {
                                                                                  diagonal_cost: f32) -> AStarPath {
         // Convert the closure to a trait object. This will turn it into a fat pointer:
         let user_closure: Box<FnMut<((int, int), (int, int)), f32>> = box path_callback;
-
-        // NOTE: This could be shorted & cleaner with mem::transmute_copy, but
-        // unlike mem::transmute, it doesn't check sizes which makes it more
-        // dangerous. Which means we have to do the back-and-forth conversions
-        // to preserve the ownership of the data we've alocated on the heap.
         unsafe {
-            let fat_ptr: (uint, uint) = transmute(user_closure);
-            // Take ownership of the closure back:
-            let user_closure: Box<FnMut<((int, int), (int, int)), f32>> = transmute(fat_ptr);
+            let fat_ptr: (uint, uint) = transmute(&*user_closure);
             // Allocate the fat pointer on the heap:
-            let ptr: Box<(uint, uint)> = box fat_ptr;
+            let mut ptr: Box<(uint, uint)> = box fat_ptr;
             // Create a pointer to the fat pointer. This well be passed as *void user_data:
-            let user_data_ptr: *mut c_void = transmute(ptr);
-            // Take ownership of the fat pointer back:
-            let ptr: Box<(uint, uint)> = transmute(user_data_ptr);
+            let user_data_ptr: *mut (uint, uint) = &mut *ptr;
 
             let tcod_path = ffi::TCOD_path_new_using_function(width as c_int, height as c_int,
                                                               Some(c_path_callback),
-                                                              user_data_ptr,
+                                                              user_data_ptr as *mut c_void,
                                                               diagonal_cost as c_float);
             AStarPath {
                 tcod_path: TCODPath{ptr: tcod_path},
@@ -489,15 +479,13 @@ impl DijkstraPath {
         // AStarPath::new_from_callback implementation comments.
         let user_closure: Box<FnMut<((int, int), (int, int)), f32>> = box path_callback;
         unsafe {
-            let fat_ptr: (uint, uint) = transmute(user_closure);
-            let user_closure: Box<FnMut<((int, int), (int, int)), f32>> = transmute(fat_ptr);
-            let ptr: Box<(uint, uint)> = box fat_ptr;
-            let user_data_ptr: *mut c_void = transmute(ptr);
-            let ptr: Box<(uint, uint)> = transmute(user_data_ptr);
+            let fat_ptr: (uint, uint) = transmute(&*user_closure);
+            let mut ptr: Box<(uint, uint)> = box fat_ptr;
+            let user_data_ptr: *mut (uint, uint) = &mut *ptr;
             let tcod_path = ffi::TCOD_dijkstra_new_using_function(width as c_int,
                                                                   height as c_int,
                                                                   Some(c_path_callback),
-                                                                  user_data_ptr,
+                                                                  user_data_ptr as *mut c_void,
                                                                   diagonal_cost as c_float);
             DijkstraPath {
                 tcod_path: TCODDijkstraPath{ptr: tcod_path},
