@@ -327,9 +327,9 @@ extern "C" fn c_path_callback(xf: c_int, yf: c_int,
 }
 
 impl AStarPath {
-    pub fn new_from_callback<T: |&mut: from: (int, int), to: (int, int)| -> f32>(width: int, height: int,
-                                                                                 path_callback: T,
-                                                                                 diagonal_cost: f32) -> AStarPath {
+    pub fn new_from_callback<T: FnMut(from: (int, int), to: (int, int)) -> f32>(width: int, height: int,
+                                                                                path_callback: T,
+                                                                                diagonal_cost: f32) -> AStarPath {
         // Convert the closure to a trait object. This will turn it into a fat pointer:
         let user_closure: Box<FnMut<((int, int), (int, int)), f32>> = box path_callback;
         unsafe {
@@ -472,9 +472,9 @@ pub struct DijkstraPath {
 }
 
 impl DijkstraPath {
-    pub fn new_from_callback<T: |&mut: (int, int), (int, int)| -> f32>(width: int, height: int,
-                                                                       path_callback: T,
-                                                                       diagonal_cost: f32) -> DijkstraPath {
+    pub fn new_from_callback<T: FnMut((int, int), (int, int)) -> f32>(width: int, height: int,
+                                                                      path_callback: T,
+                                                                      diagonal_cost: f32) -> DijkstraPath {
         // NOTE: this is might be a bit confusing. See the
         // AStarPath::new_from_callback implementation comments.
         let user_closure: Box<FnMut<((int, int), (int, int)), f32>> = box path_callback;
