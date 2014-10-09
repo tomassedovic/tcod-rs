@@ -16,7 +16,7 @@ fn create_path() -> AStarPath {
         [0, 1, 0, 1, 0, 1, 0, 1],
     ];
     // Movement like in Checkers: you can only move to the square of the same colour
-    let can_move = |&mut: from: (int, int), to: (int, int)| -> f32 {
+    let can_move = move |&mut: from: (int, int), to: (int, int)| -> f32 {
         let (fx, fy) = from;
         let (tx, ty) = to;
         if chess_board[fy as uint][fx as uint] == chess_board[ty as uint][tx as uint] {
