@@ -17,6 +17,9 @@ functionality such as:
 This project provides [Rust](http://www.rust-lang.org/) bindings for libtcod
 v1.5.1 (current stable).
 
+**The only version tested and known to work is `libtcod 1.5.1`.** Link to other
+versions (e.g. the `1.5.2` or `1.6.0` nightlies) at your own peril!
+
 Rust is a new-ish systems programming language that aims to be fast (on the C++
 level), memory and data-race safe, modern (first-class modules instead of a
 preprocessor text-include hack, type inference, pattern matching, closures).
