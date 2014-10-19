@@ -152,9 +152,7 @@ impl Console {
         }
     }
 
-    pub fn set_fade(&mut self, fade: u8, fading_color: Color) {
-        assert!(self.con == 0 as ffi::TCOD_console_t,
-                "Fade can be set on the root console only.");
+    pub fn set_fade(fade: u8, fading_color: Color) {
         unsafe {
             ffi::TCOD_console_set_fade(fade, transmute(fading_color));
         }
@@ -169,9 +167,7 @@ impl Console {
         }
     }
 
-    pub fn wait_for_keypress(&self, flush: bool) -> KeyState {
-        assert!(self.con == 0 as ffi::TCOD_console_t,
-                "wait_for_keypress can be called on the root console only.");
+    pub fn wait_for_keypress(flush: bool) -> KeyState {
         let tcod_key = unsafe {
             ffi::TCOD_console_wait_for_keypress(flush as c_bool)
         };
@@ -192,9 +188,7 @@ impl Console {
         }
     }
 
-    pub fn check_for_keypress(&self, status: KeyPressFlag) -> Option<KeyState> {
-        assert!(self.con == 0 as ffi::TCOD_console_t,
-                "check_for_keypress can be called on the root console only.");
+    pub fn check_for_keypress(status: KeyPressFlag) -> Option<KeyState> {
         let tcod_key = unsafe {
             ffi::TCOD_console_check_for_keypress(status as c_int)
         };
@@ -223,9 +217,7 @@ impl Console {
         }
     }
 
-    pub fn flush(&mut self) {
-        assert!(self.con == 0 as ffi::TCOD_console_t,
-                "Only the root console can be flushed.");
+    pub fn flush() {
         unsafe {
             ffi::TCOD_console_flush();
         }

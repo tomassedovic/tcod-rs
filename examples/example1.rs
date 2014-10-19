@@ -8,8 +8,8 @@ fn main() {
 	while !(Console::window_closed() || exit) {
 		con.clear();
 		con.put_char(40, 25, '@', background_flag::Set);
-		con.flush();
-		let keypress = con.wait_for_keypress(true);
+		Console::flush();
+		let keypress = Console::wait_for_keypress(true);
 		match keypress.key {
 			Special(key_code::Escape) => exit = true,
 			_ => {}
