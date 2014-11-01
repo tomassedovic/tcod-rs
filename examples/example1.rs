@@ -1,9 +1,11 @@
 extern crate tcod;
 
 use tcod::{Console, background_flag, key_code, Special};
+use tcod::colors;
 
 fn main() {
 	let mut con = Console::init_root(80, 50, "libtcod Rust tutorial", false);
+    con.set_default_foreground(colors::lighter_azure);
 	let mut exit = false;
 	while !(Console::window_closed() || exit) {
 		con.clear();
