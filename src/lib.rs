@@ -6,7 +6,7 @@ use std::mem::transmute;
 
 use libc::{c_int, c_float, uint8_t, c_void};
 
-#[allow(non_camel_case_types, non_snake_case, non_uppercase_statics)]
+#[allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
 pub mod ffi;
 
 #[allow(non_camel_case_types)]
