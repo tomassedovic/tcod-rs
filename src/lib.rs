@@ -732,10 +732,6 @@ pub struct Color {
     pub b: uint8_t,
 }
 
-pub mod colors {
-    pub use ffi::TCOD_lighter_azure as lighter_azure;
-}
-
 impl Color {
     pub fn new(red: u8, green: u8, blue: u8) -> Color {
         Color{r: red as uint8_t, g: green as uint8_t, b: blue as uint8_t}
