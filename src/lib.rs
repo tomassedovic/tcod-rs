@@ -12,17 +12,35 @@ pub mod ffi;
 #[allow(non_camel_case_types)]
 type c_bool = uint8_t;
 
-pub struct Console {
+
+// Private wrapper over TCOD_console_t. Ideally, we'd have it as a private field
+// in OffscreenConsole, but that doesn't seem to be possible now.
+pub struct LibtcodConsole {
     con: ffi::TCOD_console_t,
+}
+
+pub enum Console {
+    RootConsole,
+    OffscreenConsole(LibtcodConsole)
 }
 
 impl Console {
     pub fn new(width: int, height: int) -> Console {
         assert!(width > 0 && height > 0);
         unsafe {
-            Console{
-                con: ffi::TCOD_console_new(width as c_int, height as c_int)
-            }
+            OffscreenConsole(
+                LibtcodConsole{
+                    con: ffi::TCOD_console_new(width as c_int, height as c_int)
+                }
+            )
+        }
+    }
+
+    #[inline]
+    fn con(&self) -> ffi::TCOD_console_t {
+        match self {
+            &RootConsole => 0 as ffi::TCOD_console_t,
+            &OffscreenConsole(LibtcodConsole{con}) => con,
         }
     }
 
@@ -34,7 +52,7 @@ impl Console {
                                                       c_title, fullscreen as c_bool,
                                                       ffi::TCOD_RENDERER_SDL));
         }
-        Console{con: 0 as ffi::TCOD_console_t}
+        RootConsole
     }
 
 
@@ -48,10 +66,10 @@ impl Console {
                 source_width > 0 && source_height > 0 &&
                 destination_x >= 0 && destination_y >= 0);
         unsafe {
-            ffi::TCOD_console_blit(source_console.con,
+            ffi::TCOD_console_blit(source_console.con(),
                                    source_x as c_int, source_y as c_int,
                                    source_width as c_int, source_height as c_int,
-                                   destination_console.con,
+                                   destination_console.con(),
                                    destination_x as c_int, destination_y as c_int,
                                    foreground_alpha as c_float,
                                    background_alpha as c_float)
@@ -60,37 +78,37 @@ impl Console {
 
     pub fn set_key_color(&mut self, color: Color) {
         unsafe {
-            ffi::TCOD_console_set_key_color(self.con, transmute(color));
+            ffi::TCOD_console_set_key_color(self.con(), transmute(color));
         }
     }
 
     pub fn width(&self) -> int {
         unsafe {
-            ffi::TCOD_console_get_width(self.con) as int
+            ffi::TCOD_console_get_width(self.con()) as int
         }
     }
 
     pub fn height(&self) -> int {
         unsafe {
-            ffi::TCOD_console_get_height(self.con) as int
+            ffi::TCOD_console_get_height(self.con()) as int
         }
     }
 
     pub fn set_default_background(&mut self, color: Color) {
         unsafe {
-            ffi::TCOD_console_set_default_background(self.con, transmute(color));
+            ffi::TCOD_console_set_default_background(self.con(), transmute(color));
         }
     }
 
     pub fn set_default_foreground(&mut self, color: Color) {
         unsafe {
-            ffi::TCOD_console_set_default_foreground(self.con, transmute(color));
+            ffi::TCOD_console_set_default_foreground(self.con(), transmute(color));
         }
     }
 
     pub fn console_set_key_color(&mut self, color: Color) {
         unsafe {
-            ffi::TCOD_console_set_key_color(self.con, transmute(color));
+            ffi::TCOD_console_set_key_color(self.con(), transmute(color));
         }
     }
 
@@ -99,7 +117,7 @@ impl Console {
                                background_flag: background_flag::BackgroundFlag) {
         assert!(x >= 0 && y >= 0);
         unsafe {
-            ffi::TCOD_console_set_char_background(self.con,
+            ffi::TCOD_console_set_char_background(self.con(),
                                                   x as c_int, y as c_int,
                                                   transmute(color),
                                                   background_flag as u32)
@@ -111,7 +129,7 @@ impl Console {
                     background_flag: background_flag::BackgroundFlag) {
         assert!(x >= 0 && y >= 0);
         unsafe {
-            ffi::TCOD_console_put_char(self.con,
+            ffi::TCOD_console_put_char(self.con(),
                                        x as c_int, y as c_int, glyph as c_int,
                                        background_flag as u32);
         }
@@ -122,7 +140,7 @@ impl Console {
                        foreground: Color, background: Color) {
         assert!(x >= 0 && y >= 0);
         unsafe {
-            ffi::TCOD_console_put_char_ex(self.con,
+            ffi::TCOD_console_put_char_ex(self.con(),
                                           x as c_int, y as c_int, glyph as c_int,
                                           transmute(foreground),
                                           transmute(background));
@@ -131,7 +149,7 @@ impl Console {
 
     pub fn clear(&mut self) {
         unsafe {
-            ffi::TCOD_console_clear(self.con);
+            ffi::TCOD_console_clear(self.con());
         }
     }
 
@@ -144,7 +162,7 @@ impl Console {
         unsafe {
             text.with_c_str(
                 |c_text|
-                ffi::TCOD_console_print_ex(self.con,
+                ffi::TCOD_console_print_ex(self.con(),
                                            x as c_int, y as c_int,
                                            background_flag as u32,
                                            alignment as u32,
@@ -226,9 +244,11 @@ impl Console {
 
 impl Drop for Console {
     fn drop(&mut self) {
-        unsafe {
-            // TODO: do we want to do this for the root console as well??
-            ffi::TCOD_console_delete(self.con);
+        match *self {
+            RootConsole => (),
+            OffscreenConsole(LibtcodConsole{con}) => unsafe {
+                ffi::TCOD_console_delete(con);
+            }
         }
     }
 }
