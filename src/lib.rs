@@ -734,6 +734,7 @@ pub enum Key {
     Special(key_code::KeyCode),
 }
 
+#[deriving(PartialEq, Show)]
 pub struct KeyState {
     pub key: Key,
     pub pressed: bool,
