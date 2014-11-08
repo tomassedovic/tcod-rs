@@ -2,8 +2,6 @@
 
 extern crate libc;
 
-use std::mem::transmute;
-
 use libc::{c_int, c_float, uint8_t, c_void};
 
 #[allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
@@ -78,7 +76,7 @@ impl Console {
 
     pub fn set_key_color(&mut self, color: Color) {
         unsafe {
-            ffi::TCOD_console_set_key_color(self.con(), transmute(color));
+            ffi::TCOD_console_set_key_color(self.con(), color);
         }
     }
 
@@ -96,19 +94,19 @@ impl Console {
 
     pub fn set_default_background(&mut self, color: Color) {
         unsafe {
-            ffi::TCOD_console_set_default_background(self.con(), transmute(color));
+            ffi::TCOD_console_set_default_background(self.con(), color);
         }
     }
 
     pub fn set_default_foreground(&mut self, color: Color) {
         unsafe {
-            ffi::TCOD_console_set_default_foreground(self.con(), transmute(color));
+            ffi::TCOD_console_set_default_foreground(self.con(), color);
         }
     }
 
     pub fn console_set_key_color(&mut self, color: Color) {
         unsafe {
-            ffi::TCOD_console_set_key_color(self.con(), transmute(color));
+            ffi::TCOD_console_set_key_color(self.con(), color);
         }
     }
 
@@ -119,7 +117,7 @@ impl Console {
         unsafe {
             ffi::TCOD_console_set_char_background(self.con(),
                                                   x as c_int, y as c_int,
-                                                  transmute(color),
+                                                  color,
                                                   background_flag as u32)
         }
     }
@@ -142,8 +140,7 @@ impl Console {
         unsafe {
             ffi::TCOD_console_put_char_ex(self.con(),
                                           x as c_int, y as c_int, glyph as c_int,
-                                          transmute(foreground),
-                                          transmute(background));
+                                          foreground, background);
         }
     }
 
@@ -172,7 +169,7 @@ impl Console {
 
     pub fn set_fade(fade: u8, fading_color: Color) {
         unsafe {
-            ffi::TCOD_console_set_fade(fade, transmute(fading_color));
+            ffi::TCOD_console_set_fade(fade, fading_color);
         }
     }
 
@@ -333,7 +330,7 @@ extern "C" fn c_path_callback(xf: c_int, yf: c_int,
                           user_data: *mut c_void) -> c_float {
     unsafe {
         let ptr: &(uint, uint) = &*(user_data as *const (uint, uint));
-        let cb: &mut FnMut<((int, int), (int, int)), f32> = transmute(*ptr);
+        let cb: &mut FnMut<((int, int), (int, int)), f32> = ::std::mem::transmute(*ptr);
         cb.call_mut(((xf as int, yf as int), (xt as int, yt as int))) as c_float
     }
 }
@@ -345,7 +342,7 @@ impl AStarPath {
         // Convert the closure to a trait object. This will turn it into a fat pointer:
         let user_closure: Box<FnMut<((int, int), (int, int)), f32>> = box path_callback;
         unsafe {
-            let fat_ptr: (uint, uint) = transmute(&*user_closure);
+            let fat_ptr: (uint, uint) = ::std::mem::transmute(&*user_closure);
             // Allocate the fat pointer on the heap:
             let mut ptr: Box<(uint, uint)> = box fat_ptr;
             // Create a pointer to the fat pointer. This well be passed as *void user_data:
@@ -492,7 +489,7 @@ impl DijkstraPath {
         // AStarPath::new_from_callback implementation comments.
         let user_closure: Box<FnMut<((int, int), (int, int)), f32>> = box path_callback;
         unsafe {
-            let fat_ptr: (uint, uint) = transmute(&*user_closure);
+            let fat_ptr: (uint, uint) = ::std::mem::transmute(&*user_closure);
             let mut ptr: Box<(uint, uint)> = box fat_ptr;
             let user_data_ptr: *mut (uint, uint) = &mut *ptr;
             let tcod_path = ffi::TCOD_dijkstra_new_using_function(width as c_int,
