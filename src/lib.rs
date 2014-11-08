@@ -339,7 +339,7 @@ extern "C" fn c_path_callback(xf: c_int, yf: c_int,
 }
 
 impl AStarPath {
-    pub fn new_from_callback<T: 'static+FnMut(from: (int, int), to: (int, int)) -> f32>(
+    pub fn new_from_callback<T: 'static+FnMut((int, int), (int, int)) -> f32>(
         width: int, height: int, path_callback: T,
         diagonal_cost: f32) -> AStarPath {
         // Convert the closure to a trait object. This will turn it into a fat pointer:
