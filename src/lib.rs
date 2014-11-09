@@ -294,9 +294,9 @@ impl Drop for Map {
     }
 }
 
-enum PathInnerData {
+enum PathInnerData<'a> {
     PathMap(Map),
-    PathCallback(Box<FnMut<((int, int), (int, int)), f32>+'static>, Box<(uint, uint)>),
+    PathCallback(Box<FnMut<((int, int), (int, int)), f32>+'a>, Box<(uint, uint)>),
 }
 
 // We need to wrap the pointer in a struct so that we can implement a
@@ -317,10 +317,10 @@ impl Drop for TCODPath {
     }
 }
 
-pub struct AStarPath{
+pub struct AStarPath<'a>{
     tcod_path: TCODPath,
     #[allow(dead_code)]
-    inner: PathInnerData,
+    inner: PathInnerData<'a>,
     width: int,
     height: int,
 }
@@ -335,10 +335,10 @@ extern "C" fn c_path_callback(xf: c_int, yf: c_int,
     }
 }
 
-impl AStarPath {
-    pub fn new_from_callback<T: 'static+FnMut((int, int), (int, int)) -> f32>(
+impl<'a> AStarPath<'a> {
+    pub fn new_from_callback<T: 'a+FnMut((int, int), (int, int)) -> f32>(
         width: int, height: int, path_callback: T,
-        diagonal_cost: f32) -> AStarPath {
+        diagonal_cost: f32) -> AStarPath<'a> {
         // Convert the closure to a trait object. This will turn it into a fat pointer:
         let user_closure: Box<FnMut<((int, int), (int, int)), f32>> = box path_callback;
         unsafe {
@@ -364,7 +364,7 @@ impl AStarPath {
         }
     }
 
-    pub fn new_from_map(map: Map, diagonal_cost: f32) -> AStarPath {
+    pub fn new_from_map(map: Map, diagonal_cost: f32) -> AStarPath<'static> {
         let tcod_path = unsafe {
             ffi::TCOD_path_new_using_map(map.tcod_map, diagonal_cost as c_float)
         };
@@ -472,19 +472,19 @@ impl Drop for TCODDijkstraPath {
     }
 }
 
-pub struct DijkstraPath {
+pub struct DijkstraPath<'a> {
     tcod_path: TCODDijkstraPath,
     #[allow(dead_code)]
-    inner: PathInnerData,
+    inner: PathInnerData<'a>,
     width: int,
     height: int,
 }
 
-impl DijkstraPath {
-    pub fn new_from_callback<T: 'static+FnMut((int, int), (int, int)) -> f32>(
+impl<'a> DijkstraPath<'a> {
+    pub fn new_from_callback<T: 'a+FnMut((int, int), (int, int)) -> f32>(
         width: int, height: int,
         path_callback: T,
-        diagonal_cost: f32) -> DijkstraPath {
+        diagonal_cost: f32) -> DijkstraPath<'a> {
         // NOTE: this is might be a bit confusing. See the
         // AStarPath::new_from_callback implementation comments.
         let user_closure: Box<FnMut<((int, int), (int, int)), f32>> = box path_callback;
@@ -506,7 +506,7 @@ impl DijkstraPath {
         }
     }
 
-    pub fn new_from_map(map: Map, diagonal_cost: f32) -> DijkstraPath {
+    pub fn new_from_map(map: Map, diagonal_cost: f32) -> DijkstraPath<'static> {
         let tcod_path = unsafe {
             ffi::TCOD_dijkstra_new(map.tcod_map, diagonal_cost as c_float)
         };
