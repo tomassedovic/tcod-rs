@@ -4,7 +4,7 @@ extern crate tcod;
 
 use tcod::AStarPath;
 
-fn create_path() -> AStarPath {
+fn create_path() -> AStarPath<'static> {
     let chess_board: [[int, ..8], ..8] = [
         [1, 0, 1, 0, 1, 0, 1, 0],
         [0, 1, 0, 1, 0, 1, 0, 1],
