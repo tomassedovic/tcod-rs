@@ -222,6 +222,13 @@ impl Console {
             ffi::TCOD_console_flush();
         }
     }
+
+    pub fn set_window_title(title: &str) {
+        unsafe {
+            title.with_c_str(
+                |c_title| { ffi::TCOD_console_set_window_title(c_title); } );
+        }
+    }
 }
 
 impl Drop for Console {
