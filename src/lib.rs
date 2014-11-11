@@ -176,11 +176,17 @@ impl Console {
         }
     }
 
-    pub fn set_custom_font(font_path: ::std::path::Path) {
+    pub fn set_custom_font(font_path: ::std::path::Path, flags: Vec<FontFlags>,
+                           nb_char_horizontal: int,
+                           nb_char_vertical: int) {
         unsafe {
-            let flags = FontFlags::LayoutTcod as c_int | FontFlags::TypeGreyscale as c_int;
+            let c_flags = (flags
+                           .iter()
+                           .fold(0, |a, b| a as c_int | *b as c_int));
             font_path.with_c_str( |path| {
-                ffi::TCOD_console_set_custom_font(path, flags, 32, 8);
+                ffi::TCOD_console_set_custom_font(
+                    path, c_flags, nb_char_horizontal as c_int,
+                    nb_char_vertical as c_int);
             });
         }
     }
