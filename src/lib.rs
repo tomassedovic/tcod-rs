@@ -186,7 +186,6 @@ impl Console {
         let tcod_key = unsafe {
             ffi::TCOD_console_wait_for_keypress(flush as c_bool)
         };
-        assert!(tcod_key.vk != ffi::TCODK_NONE);
         let key = if tcod_key.vk == ffi::TCODK_CHAR {
             Printable(tcod_key.c as u8 as char)
         } else {
