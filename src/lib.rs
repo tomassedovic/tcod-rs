@@ -173,11 +173,17 @@ impl Console {
         }
     }
 
-    pub fn set_custom_font(font_path: ::std::path::Path) {
+    pub fn set_custom_font(font_path: ::std::path::Path, flags: &[FontFlags],
+                           nb_char_horizontal: int,
+                           nb_char_vertical: int) {
         unsafe {
-            let flags = LayoutTcod as c_int | TypeGreyscale as c_int;
+            let c_flags = (flags
+                           .iter()
+                           .fold(0, |a, b| a as c_int | *b as c_int));
             font_path.with_c_str( |path| {
-                ffi::TCOD_console_set_custom_font(path, flags, 32, 8);
+                ffi::TCOD_console_set_custom_font(
+                    path, c_flags, nb_char_horizontal as c_int,
+                    nb_char_vertical as c_int);
             });
         }
     }
@@ -234,6 +240,13 @@ impl Console {
     pub fn flush() {
         unsafe {
             ffi::TCOD_console_flush();
+        }
+    }
+
+    pub fn set_window_title(title: &str) {
+        unsafe {
+            title.with_c_str(
+                |c_title| { ffi::TCOD_console_set_window_title(c_title); } );
         }
     }
 }
