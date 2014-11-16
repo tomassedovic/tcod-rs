@@ -173,7 +173,7 @@ impl Console {
         }
     }
 
-    pub fn set_custom_font(font_path: ::std::path::Path, flags: Vec<FontFlags>,
+    pub fn set_custom_font(font_path: ::std::path::Path, flags: &[FontFlags],
                            nb_char_horizontal: int,
                            nb_char_vertical: int) {
         unsafe {
