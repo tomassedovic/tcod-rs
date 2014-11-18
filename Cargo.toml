@@ -2,10 +2,8 @@
 name = "tcod"
 version = "0.3.0"
 authors = ["tomas@sedovic.cz", "arcnorj@gmail.com"]
-build = "./build.sh"
 
 [lib]
-
 name = "tcod"
 path = "src/lib.rs"
 
