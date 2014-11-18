@@ -180,9 +180,9 @@ impl Console {
                            nb_char_horizontal: int,
                            nb_char_vertical: int) {
         unsafe {
-            let c_flags = (flags
-                           .iter()
-                           .fold(0, |a, b| a as c_int | *b as c_int));
+            let c_flags = flags
+                          .iter()
+                          .fold(0, |a, b| a as c_int | *b as c_int);
             font_path.with_c_str( |path| {
                 ffi::TCOD_console_set_custom_font(
                     path, c_flags, nb_char_horizontal as c_int,
