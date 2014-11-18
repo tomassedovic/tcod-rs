@@ -4,7 +4,7 @@ extern crate libc;
 
 use libc::{c_int, c_float, uint8_t, c_void};
 
-pub use Console::RootConsole;
+pub use Console::Root as RootConsole;
 
 
 #[allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
@@ -21,15 +21,15 @@ pub struct LibtcodConsole {
 }
 
 pub enum Console {
-    RootConsole,
-    OffscreenConsole(LibtcodConsole)
+    Root,
+    Offscreen(LibtcodConsole)
 }
 
 impl Console {
     pub fn new(width: int, height: int) -> Console {
         assert!(width > 0 && height > 0);
         unsafe {
-            Console::OffscreenConsole(
+            Console::Offscreen(
                 LibtcodConsole{
                     con: ffi::TCOD_console_new(width as c_int, height as c_int)
                 }
@@ -40,8 +40,8 @@ impl Console {
     #[inline]
     fn con(&self) -> ffi::TCOD_console_t {
         match self {
-            &Console::RootConsole => 0 as ffi::TCOD_console_t,
-            &Console::OffscreenConsole(LibtcodConsole{con}) => con,
+            &Console::Root => 0 as ffi::TCOD_console_t,
+            &Console::Offscreen(LibtcodConsole{con}) => con,
         }
     }
 
@@ -53,7 +53,7 @@ impl Console {
                                                       c_title, fullscreen as c_bool,
                                                       ffi::TCOD_RENDERER_SDL));
         }
-        Console::RootConsole
+        Console::Root
     }
 
 
@@ -244,8 +244,8 @@ impl Console {
 impl Drop for Console {
     fn drop(&mut self) {
         match *self {
-            Console::RootConsole => (),
-            Console::OffscreenConsole(LibtcodConsole{con}) => unsafe {
+            Console::Root => (),
+            Console::Offscreen(LibtcodConsole{con}) => unsafe {
                 ffi::TCOD_console_delete(con);
             }
         }
