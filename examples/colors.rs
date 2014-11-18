@@ -1,6 +1,6 @@
 extern crate tcod;
 
-use tcod::{Console, Color, background_flag};
+use tcod::{Console, Color, BackgroundFlag};
 use tcod::colors;
 
 
@@ -11,7 +11,7 @@ fn main() {
 
     con.clear();
     // Uses the default foreground and background:
-    con.put_char(40, 25, '@', background_flag::Set);
+    con.put_char(40, 25, '@', BackgroundFlag::Set);
     // Custom foreground and background:
     con.put_char_ex(42, 25, '!', Color::new(240, 13, 20), Color::new(0, 0, 0));
 
