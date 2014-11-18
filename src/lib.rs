@@ -4,6 +4,9 @@ extern crate libc;
 
 use libc::{c_int, c_float, uint8_t, c_void};
 
+pub use Console::Root as RootConsole;
+
+
 #[allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
 pub mod ffi;
 
@@ -18,15 +21,15 @@ pub struct LibtcodConsole {
 }
 
 pub enum Console {
-    RootConsole,
-    OffscreenConsole(LibtcodConsole)
+    Root,
+    Offscreen(LibtcodConsole)
 }
 
 impl Console {
     pub fn new(width: int, height: int) -> Console {
         assert!(width > 0 && height > 0);
         unsafe {
-            OffscreenConsole(
+            Console::Offscreen(
                 LibtcodConsole{
                     con: ffi::TCOD_console_new(width as c_int, height as c_int)
                 }
@@ -37,8 +40,8 @@ impl Console {
     #[inline]
     fn con(&self) -> ffi::TCOD_console_t {
         match self {
-            &RootConsole => 0 as ffi::TCOD_console_t,
-            &OffscreenConsole(LibtcodConsole{con}) => con,
+            &Console::Root => 0 as ffi::TCOD_console_t,
+            &Console::Offscreen(LibtcodConsole{con}) => con,
         }
     }
 
@@ -50,7 +53,7 @@ impl Console {
                                                       c_title, fullscreen as c_bool,
                                                       ffi::TCOD_RENDERER_SDL));
         }
-        RootConsole
+        Console::Root
     }
 
 
@@ -112,7 +115,7 @@ impl Console {
 
     pub fn set_char_background(&mut self, x: int, y: int,
                                color: Color,
-                               background_flag: background_flag::BackgroundFlag) {
+                               background_flag: BackgroundFlag) {
         assert!(x >= 0 && y >= 0);
         unsafe {
             ffi::TCOD_console_set_char_background(self.con(),
@@ -124,7 +127,7 @@ impl Console {
 
     pub fn put_char(&mut self,
                     x: int, y: int, glyph: char,
-                    background_flag: background_flag::BackgroundFlag) {
+                    background_flag: BackgroundFlag) {
         assert!(x >= 0 && y >= 0);
         unsafe {
             ffi::TCOD_console_put_char(self.con(),
@@ -152,7 +155,7 @@ impl Console {
 
     pub fn print_ex(&mut self,
                     x: int, y: int,
-                    background_flag: background_flag::BackgroundFlag,
+                    background_flag: BackgroundFlag,
                     alignment: TextAlignment,
                     text: &str) {
         assert!(x >= 0 && y >= 0);
@@ -175,7 +178,7 @@ impl Console {
 
     pub fn set_custom_font(font_path: ::std::path::Path) {
         unsafe {
-            let flags = LayoutTcod as c_int | TypeGreyscale as c_int;
+            let flags = FontFlags::LayoutTcod as c_int | FontFlags::TypeGreyscale as c_int;
             font_path.with_c_str( |path| {
                 ffi::TCOD_console_set_custom_font(path, flags, 32, 8);
             });
@@ -187,9 +190,9 @@ impl Console {
             ffi::TCOD_console_wait_for_keypress(flush as c_bool)
         };
         let key = if tcod_key.vk == ffi::TCODK_CHAR {
-            Printable(tcod_key.c as u8 as char)
+            Key::Printable(tcod_key.c as u8 as char)
         } else {
-            Special(FromPrimitive::from_u32(tcod_key.vk).unwrap())
+            Key::Special(FromPrimitive::from_u32(tcod_key.vk).unwrap())
         };
         KeyState{
             key: key,
@@ -210,9 +213,9 @@ impl Console {
             return None;
         }
         let key = if tcod_key.vk == ffi::TCODK_CHAR {
-            Printable(tcod_key.c as u8 as char)
+            Key::Printable(tcod_key.c as u8 as char)
         } else {
-            Special(FromPrimitive::from_u32(tcod_key.vk).unwrap())
+            Key::Special(FromPrimitive::from_u32(tcod_key.vk).unwrap())
         };
         Some(KeyState{
             key: key,
@@ -241,8 +244,8 @@ impl Console {
 impl Drop for Console {
     fn drop(&mut self) {
         match *self {
-            RootConsole => (),
-            OffscreenConsole(LibtcodConsole{con}) => unsafe {
+            Console::Root => (),
+            Console::Offscreen(LibtcodConsole{con}) => unsafe {
                 ffi::TCOD_console_delete(con);
             }
         }
@@ -294,8 +297,8 @@ impl Drop for Map {
 }
 
 enum PathInnerData<'a> {
-    PathMap(Map),
-    PathCallback(Box<FnMut<((int, int), (int, int)), f32>+'a>, Box<(uint, uint)>),
+    Map(Map),
+    Callback(Box<FnMut<((int, int), (int, int)), f32>+'a>, Box<(uint, uint)>),
 }
 
 // We need to wrap the pointer in a struct so that we can implement a
@@ -356,7 +359,7 @@ impl<'a> AStarPath<'a> {
                 // Keep track of everything we've allocated on the heap. Both
                 // `user_closure` and `ptr` will be deallocated when AStarPath
                 // is dropped:
-                inner: PathCallback(user_closure, ptr),
+                inner: PathInnerData::Callback(user_closure, ptr),
                 width: width,
                 height: height,
             }
@@ -370,7 +373,7 @@ impl<'a> AStarPath<'a> {
         let (w, h) = map.size();
         AStarPath {
             tcod_path: TCODPath{ptr: tcod_path},
-            inner: PathMap(map),
+            inner: PathInnerData::Map(map),
             width: w,
             height: h,
         }
@@ -498,7 +501,7 @@ impl<'a> DijkstraPath<'a> {
                                                                   diagonal_cost as c_float);
             DijkstraPath {
                 tcod_path: TCODDijkstraPath{ptr: tcod_path},
-                inner: PathCallback(user_closure, ptr),
+                inner: PathInnerData::Callback(user_closure, ptr),
                 width: width,
                 height: height,
             }
@@ -512,7 +515,7 @@ impl<'a> DijkstraPath<'a> {
         let (w, h) = map.size();
         DijkstraPath {
             tcod_path: TCODDijkstraPath{ptr: tcod_path},
-            inner: PathMap(map),
+            inner: PathInnerData::Map(map),
             width: w,
             height: h,
         }
@@ -648,86 +651,84 @@ pub enum FontFlags {
     LayoutTcod = ffi::TCOD_FONT_LAYOUT_TCOD as int,
 }
 
-pub mod key_code {
-    #[deriving(PartialEq, FromPrimitive, Show)]
-    #[repr(C)]
-    pub enum KeyCode {
-        NoKey,
-        Escape,
-        Backspace,
-        Tab,
-        Enter,
-        Shift,
-        Control,
-        Alt,
-        Pause,
-        Capslock,
-        Pageup,
-        Pagedown,
-        End,
-        Home,
-        Up,
-        Left,
-        Right,
-        Down,
-        PrintScreen,
-        Insert,
-        Delete,
-        LeftWin,
-        RightWin,
-        Apps,
-        // The numbers on the alphanum section of the keyboard
-        Number0,
-        Number1,
-        Number2,
-        Number3,
-        Number4,
-        Number5,
-        Number6,
-        Number7,
-        Number8,
-        Number9,
-        // The numbers on the numeric keypad
-        NumPad0,
-        NumPad1,
-        NumPad2,
-        NumPad3,
-        NumPad4,
-        NumPad5,
-        NumPad6,
-        NumPad7,
-        NumPad8,
-        NumPad9,
-        NumPadAdd,
-        NumPadSubtract,
-        NumPadDivide,
-        NumPadMultiply,
-        NumPadDecimal,
-        NumPadEnter,
-        F1,
-        F2,
-        F3,
-        F4,
-        F5,
-        F6,
-        F7,
-        F8,
-        F9,
-        F10,
-        F11,
-        F12,
-        NUMLOCK,
-        SCROLLLOCK,
-        Spacebar,
-        Char,
-    }
+#[deriving(PartialEq, FromPrimitive, Show)]
+#[repr(C)]
+pub enum KeyCode {
+    NoKey,
+    Escape,
+    Backspace,
+    Tab,
+    Enter,
+    Shift,
+    Control,
+    Alt,
+    Pause,
+    Capslock,
+    Pageup,
+    Pagedown,
+    End,
+    Home,
+    Up,
+    Left,
+    Right,
+    Down,
+    PrintScreen,
+    Insert,
+    Delete,
+    LeftWin,
+    RightWin,
+    Apps,
+    // The numbers on the alphanum section of the keyboard
+    Number0,
+    Number1,
+    Number2,
+    Number3,
+    Number4,
+    Number5,
+    Number6,
+    Number7,
+    Number8,
+    Number9,
+    // The numbers on the numeric keypad
+    NumPad0,
+    NumPad1,
+    NumPad2,
+    NumPad3,
+    NumPad4,
+    NumPad5,
+    NumPad6,
+    NumPad7,
+    NumPad8,
+    NumPad9,
+    NumPadAdd,
+    NumPadSubtract,
+    NumPadDivide,
+    NumPadMultiply,
+    NumPadDecimal,
+    NumPadEnter,
+    F1,
+    F2,
+    F3,
+    F4,
+    F5,
+    F6,
+    F7,
+    F8,
+    F9,
+    F10,
+    F11,
+    F12,
+    NUMLOCK,
+    SCROLLLOCK,
+    Spacebar,
+    Char,
 }
 
 
 #[deriving(PartialEq, Show)]
 pub enum Key {
     Printable(char),
-    Special(key_code::KeyCode),
+    Special(KeyCode),
 }
 
 #[deriving(PartialEq, Show)]
@@ -962,26 +963,23 @@ pub enum TextAlignment {
     Center = ffi::TCOD_CENTER as int,
 }
 
-pub mod background_flag {
-    use super::ffi;
 
-    #[repr(C)]
-    pub enum BackgroundFlag {
-        None = ffi::TCOD_BKGND_NONE as int,
-        Set = ffi::TCOD_BKGND_SET as int,
-        Multiply = ffi::TCOD_BKGND_MULTIPLY as int,
-        Lighten = ffi::TCOD_BKGND_LIGHTEN as int,
-        Darken = ffi::TCOD_BKGND_DARKEN as int,
-        Screen = ffi::TCOD_BKGND_SCREEN as int,
-        ColorDodge = ffi::TCOD_BKGND_COLOR_DODGE as int,
-        ColorBurn = ffi::TCOD_BKGND_COLOR_BURN as int,
-        Add = ffi::TCOD_BKGND_ADD as int,
-        AddA = ffi::TCOD_BKGND_ADDA as int,
-        Burn = ffi::TCOD_BKGND_BURN as int,
-        Overlay = ffi::TCOD_BKGND_OVERLAY as int,
-        Alph = ffi::TCOD_BKGND_ALPH as int,
-        Default = ffi::TCOD_BKGND_DEFAULT as int
-    }
+#[repr(C)]
+pub enum BackgroundFlag {
+    None = ffi::TCOD_BKGND_NONE as int,
+    Set = ffi::TCOD_BKGND_SET as int,
+    Multiply = ffi::TCOD_BKGND_MULTIPLY as int,
+    Lighten = ffi::TCOD_BKGND_LIGHTEN as int,
+    Darken = ffi::TCOD_BKGND_DARKEN as int,
+    Screen = ffi::TCOD_BKGND_SCREEN as int,
+    ColorDodge = ffi::TCOD_BKGND_COLOR_DODGE as int,
+    ColorBurn = ffi::TCOD_BKGND_COLOR_BURN as int,
+    Add = ffi::TCOD_BKGND_ADD as int,
+    AddA = ffi::TCOD_BKGND_ADDA as int,
+    Burn = ffi::TCOD_BKGND_BURN as int,
+    Overlay = ffi::TCOD_BKGND_OVERLAY as int,
+    Alph = ffi::TCOD_BKGND_ALPH as int,
+    Default = ffi::TCOD_BKGND_DEFAULT as int
 }
 
 
