@@ -4,6 +4,9 @@ extern crate libc;
 
 use libc::{c_int, c_float, uint8_t, c_void};
 
+pub use Console::RootConsole;
+
+
 #[allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
 pub mod ffi;
 
@@ -26,7 +29,7 @@ impl Console {
     pub fn new(width: int, height: int) -> Console {
         assert!(width > 0 && height > 0);
         unsafe {
-            OffscreenConsole(
+            Console::OffscreenConsole(
                 LibtcodConsole{
                     con: ffi::TCOD_console_new(width as c_int, height as c_int)
                 }
@@ -37,8 +40,8 @@ impl Console {
     #[inline]
     fn con(&self) -> ffi::TCOD_console_t {
         match self {
-            &RootConsole => 0 as ffi::TCOD_console_t,
-            &OffscreenConsole(LibtcodConsole{con}) => con,
+            &Console::RootConsole => 0 as ffi::TCOD_console_t,
+            &Console::OffscreenConsole(LibtcodConsole{con}) => con,
         }
     }
 
@@ -50,7 +53,7 @@ impl Console {
                                                       c_title, fullscreen as c_bool,
                                                       ffi::TCOD_RENDERER_SDL));
         }
-        RootConsole
+        Console::RootConsole
     }
 
 
@@ -175,7 +178,7 @@ impl Console {
 
     pub fn set_custom_font(font_path: ::std::path::Path) {
         unsafe {
-            let flags = LayoutTcod as c_int | TypeGreyscale as c_int;
+            let flags = FontFlags::LayoutTcod as c_int | FontFlags::TypeGreyscale as c_int;
             font_path.with_c_str( |path| {
                 ffi::TCOD_console_set_custom_font(path, flags, 32, 8);
             });
@@ -187,9 +190,9 @@ impl Console {
             ffi::TCOD_console_wait_for_keypress(flush as c_bool)
         };
         let key = if tcod_key.vk == ffi::TCODK_CHAR {
-            Printable(tcod_key.c as u8 as char)
+            Key::Printable(tcod_key.c as u8 as char)
         } else {
-            Special(FromPrimitive::from_u32(tcod_key.vk).unwrap())
+            Key::Special(FromPrimitive::from_u32(tcod_key.vk).unwrap())
         };
         KeyState{
             key: key,
@@ -210,9 +213,9 @@ impl Console {
             return None;
         }
         let key = if tcod_key.vk == ffi::TCODK_CHAR {
-            Printable(tcod_key.c as u8 as char)
+            Key::Printable(tcod_key.c as u8 as char)
         } else {
-            Special(FromPrimitive::from_u32(tcod_key.vk).unwrap())
+            Key::Special(FromPrimitive::from_u32(tcod_key.vk).unwrap())
         };
         Some(KeyState{
             key: key,
@@ -241,8 +244,8 @@ impl Console {
 impl Drop for Console {
     fn drop(&mut self) {
         match *self {
-            RootConsole => (),
-            OffscreenConsole(LibtcodConsole{con}) => unsafe {
+            Console::RootConsole => (),
+            Console::OffscreenConsole(LibtcodConsole{con}) => unsafe {
                 ffi::TCOD_console_delete(con);
             }
         }
@@ -356,7 +359,7 @@ impl<'a> AStarPath<'a> {
                 // Keep track of everything we've allocated on the heap. Both
                 // `user_closure` and `ptr` will be deallocated when AStarPath
                 // is dropped:
-                inner: PathCallback(user_closure, ptr),
+                inner: PathInnerData::PathCallback(user_closure, ptr),
                 width: width,
                 height: height,
             }
@@ -370,7 +373,7 @@ impl<'a> AStarPath<'a> {
         let (w, h) = map.size();
         AStarPath {
             tcod_path: TCODPath{ptr: tcod_path},
-            inner: PathMap(map),
+            inner: PathInnerData::PathMap(map),
             width: w,
             height: h,
         }
@@ -498,7 +501,7 @@ impl<'a> DijkstraPath<'a> {
                                                                   diagonal_cost as c_float);
             DijkstraPath {
                 tcod_path: TCODDijkstraPath{ptr: tcod_path},
-                inner: PathCallback(user_closure, ptr),
+                inner: PathInnerData::PathCallback(user_closure, ptr),
                 width: width,
                 height: height,
             }
@@ -512,7 +515,7 @@ impl<'a> DijkstraPath<'a> {
         let (w, h) = map.size();
         DijkstraPath {
             tcod_path: TCODDijkstraPath{ptr: tcod_path},
-            inner: PathMap(map),
+            inner: PathInnerData::PathMap(map),
             width: w,
             height: h,
         }
