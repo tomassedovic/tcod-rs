@@ -297,8 +297,8 @@ impl Drop for Map {
 }
 
 enum PathInnerData<'a> {
-    PathMap(Map),
-    PathCallback(Box<FnMut<((int, int), (int, int)), f32>+'a>, Box<(uint, uint)>),
+    Map(Map),
+    Callback(Box<FnMut<((int, int), (int, int)), f32>+'a>, Box<(uint, uint)>),
 }
 
 // We need to wrap the pointer in a struct so that we can implement a
@@ -359,7 +359,7 @@ impl<'a> AStarPath<'a> {
                 // Keep track of everything we've allocated on the heap. Both
                 // `user_closure` and `ptr` will be deallocated when AStarPath
                 // is dropped:
-                inner: PathInnerData::PathCallback(user_closure, ptr),
+                inner: PathInnerData::Callback(user_closure, ptr),
                 width: width,
                 height: height,
             }
@@ -373,7 +373,7 @@ impl<'a> AStarPath<'a> {
         let (w, h) = map.size();
         AStarPath {
             tcod_path: TCODPath{ptr: tcod_path},
-            inner: PathInnerData::PathMap(map),
+            inner: PathInnerData::Map(map),
             width: w,
             height: h,
         }
@@ -501,7 +501,7 @@ impl<'a> DijkstraPath<'a> {
                                                                   diagonal_cost as c_float);
             DijkstraPath {
                 tcod_path: TCODDijkstraPath{ptr: tcod_path},
-                inner: PathInnerData::PathCallback(user_closure, ptr),
+                inner: PathInnerData::Callback(user_closure, ptr),
                 width: width,
                 height: height,
             }
@@ -515,7 +515,7 @@ impl<'a> DijkstraPath<'a> {
         let (w, h) = map.size();
         DijkstraPath {
             tcod_path: TCODDijkstraPath{ptr: tcod_path},
-            inner: PathInnerData::PathMap(map),
+            inner: PathInnerData::Map(map),
             width: w,
             height: h,
         }
