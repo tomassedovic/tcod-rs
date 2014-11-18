@@ -1,15 +1,12 @@
 #![feature(globs, unboxed_closures)]
 
 extern crate libc;
+extern crate "tcod-sys" as ffi;
 
 use libc::{c_int, c_uint, c_float, uint8_t, c_void};
 
 pub use Console::Root as RootConsole;
-
-
-#[allow(non_camel_case_types, non_snake_case, non_upper_case_globals,
-        missing_copy_implementations)]
-pub mod ffi;
+pub use ffi::TCOD_color_t as Color;
 
 #[allow(non_camel_case_types)]
 type c_bool = uint8_t;
@@ -756,19 +753,6 @@ pub struct KeyState {
     pub shift: bool,
 }
 
-#[deriving(PartialEq, Copy, Clone, Show)]
-#[repr(C)]
-pub struct Color {
-    pub r: uint8_t,
-    pub g: uint8_t,
-    pub b: uint8_t,
-}
-
-impl Color {
-    pub fn new(red: u8, green: u8, blue: u8) -> Color {
-        Color{r: red as uint8_t, g: green as uint8_t, b: blue as uint8_t}
-    }
-}
 
 pub mod colors {
     pub use ffi::TCOD_black as black;

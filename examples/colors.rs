@@ -13,7 +13,7 @@ fn main() {
     // Uses the default foreground and background:
     con.put_char(40, 25, '@', BackgroundFlag::Set);
     // Custom foreground and background:
-    con.put_char_ex(42, 25, '!', Color::new(240, 13, 20), Color::new(0, 0, 0));
+    con.put_char_ex(42, 25, '!', Color{r: 240, g: 13, b: 20}, Color{r: 0, g: 0, b: 0});
 
     Console::flush();
 
