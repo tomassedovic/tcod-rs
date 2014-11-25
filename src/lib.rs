@@ -2,7 +2,7 @@
 
 extern crate libc;
 
-use libc::{c_int, c_float, uint8_t, c_void};
+use libc::{c_int, c_uint, c_float, uint8_t, c_void};
 
 pub use Console::Root as RootConsole;
 
@@ -176,16 +176,13 @@ impl Console {
         }
     }
 
-    pub fn set_custom_font(font_path: ::std::path::Path, flags: &[FontFlags],
+    pub fn set_custom_font(font_path: ::std::path::Path, flags: FontFlags,
                            nb_char_horizontal: int,
                            nb_char_vertical: int) {
         unsafe {
-            let c_flags = flags
-                          .iter()
-                          .fold(0, |a, b| a as c_int | *b as c_int);
             font_path.with_c_str( |path| {
                 ffi::TCOD_console_set_custom_font(
-                    path, c_flags, nb_char_horizontal as c_int,
+                    path, flags.bits() as c_int, nb_char_horizontal as c_int,
                     nb_char_vertical as c_int);
             });
         }
@@ -211,9 +208,9 @@ impl Console {
         }
     }
 
-    pub fn check_for_keypress(status: KeyPressFlag) -> Option<KeyState> {
+    pub fn check_for_keypress(status: KeyPressFlags) -> Option<KeyState> {
         let tcod_key = unsafe {
-            ffi::TCOD_console_check_for_keypress(status as c_int)
+            ffi::TCOD_console_check_for_keypress(status.bits() as c_int)
         };
         if tcod_key.vk == ffi::TCODK_NONE {
             return None;
@@ -656,12 +653,13 @@ pub enum Renderer {
     SDL = ffi::TCOD_RENDERER_SDL as int,
 }
 
-#[repr(C)]
-pub enum FontFlags {
-    LayoutAsciiIncol = ffi::TCOD_FONT_LAYOUT_ASCII_INCOL as int,
-    LayoutAsciiInrow = ffi::TCOD_FONT_LAYOUT_ASCII_INROW as int,
-    TypeGreyscale = ffi::TCOD_FONT_TYPE_GREYSCALE as int,
-    LayoutTcod = ffi::TCOD_FONT_LAYOUT_TCOD as int,
+bitflags! {
+    flags FontFlags: c_uint {
+        const FONT_LAYOUT_ASCII_INCOL = ffi::TCOD_FONT_LAYOUT_ASCII_INCOL,
+        const FONT_LAYOUT_ASCII_INROW = ffi::TCOD_FONT_LAYOUT_ASCII_INROW,
+        const FONT_TYPE_GREYSCALE = ffi::TCOD_FONT_TYPE_GREYSCALE,
+        const FONT_LAYOUT_TCOD = ffi::TCOD_FONT_LAYOUT_TCOD,
+    }
 }
 
 #[deriving(PartialEq, FromPrimitive, Show)]
@@ -1024,8 +1022,9 @@ pub mod system {
 }
 
 
-pub enum KeyPressFlag {
-    Pressed = 1,
-    Released = 2,
-    PressedOrReleased = 1 | 2,
+bitflags! {
+    flags KeyPressFlags: c_uint {
+        const KEY_PRESSED = ffi::TCOD_KEY_PRESSED,
+        const KEY_RELEASED = ffi::TCOD_KEY_RELEASED,
+    }
 }
