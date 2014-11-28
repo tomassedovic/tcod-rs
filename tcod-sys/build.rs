@@ -3,6 +3,7 @@ use std::os;
 
 
 fn main() {
+    panic!("cannot compile");
     let src = Path::new(os::getenv("CARGO_MANIFEST_DIR").unwrap());
     let dst = Path::new(os::getenv("OUT_DIR").unwrap());
 

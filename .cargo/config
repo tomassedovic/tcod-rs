@@ -1,0 +1,39 @@
+# Using binary distribution of libtcod instead of building it from source:
+# For more info, read: http://doc.crates.io/build-script.html and http://doc.crates.io/config.html
+#
+# In general, you download your the compiled libraries (libtcod.so/dll/ and
+# libtcodgui.so/dll), put them into `precompiled/$target` and uncomment the
+# corresponding section below.
+
+
+# 64-bit Linux:
+#
+# Download this: http://roguecentral.org/doryen/?file_id=28
+# Copy libtcod.so and libtcodgui.so to: precompiled/x86_64-unknown-linux-gnu
+# You may also need to create libtcod.so.1 and libtcodgui.so.1 because reasons?
+# Uncomment this section:
+#
+# [target.x86_64-unknown-linux-gnu.tcod]
+# rustc-flags = "-L precompiled/x86_64-unknown-linux-gnu -l tcod"
+
+
+# 32-bit Linux:
+#
+# Download this: http://roguecentral.org/doryen/?file_id=26
+# Copy libtcod.so and libtcodgui.so to: precompiled/i686-unknown-linux-gnu
+# You may also need to create libtcod.so.1 and libtcodgui.so.1 because reasons?
+# Uncomment this section:
+#
+# [target.i686-unknown-linux-gnu.tcod]
+# rustc-flags = "-L precompiled/i686-unknown-linux-gnu -l tcod"
+
+
+# Windows:
+#
+# Download this: http://roguecentral.org/doryen/?file_id=27
+# Copy libtcod-mingw.dll, libtcod-gui-mingw.dll and SDL.dll to: precompiled/i686-pc-windows-gnu
+# You must also create libtcod.dll and libtcod-gui.dll because reasons?
+# Uncomment this section:
+#
+# [target.i686-pc-windows-gnu.tcod]
+# rustc-flags = "-L precompiled/i686-pc-windows-gnu -l tcod"
