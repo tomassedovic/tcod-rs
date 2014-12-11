@@ -968,6 +968,7 @@ pub mod colors {
 }
 
 #[repr(C)]
+#[deriving(Copy)]
 pub enum TextAlignment {
     Left = ffi::TCOD_LEFT as int,
     Right = ffi::TCOD_RIGHT as int,
@@ -976,6 +977,7 @@ pub enum TextAlignment {
 
 
 #[repr(C)]
+#[deriving(Copy)]
 pub enum BackgroundFlag {
     None = ffi::TCOD_BKGND_NONE as int,
     Set = ffi::TCOD_BKGND_SET as int,
