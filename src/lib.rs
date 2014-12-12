@@ -7,7 +7,8 @@ use libc::{c_int, c_uint, c_float, uint8_t, c_void};
 pub use Console::Root as RootConsole;
 
 
-#[allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
+#[allow(non_camel_case_types, non_snake_case, non_upper_case_globals,
+        missing_copy_implementations)]
 pub mod ffi;
 
 #[allow(non_camel_case_types)]
@@ -18,6 +19,15 @@ type c_bool = uint8_t;
 // in OffscreenConsole, but that doesn't seem to be possible now.
 pub struct LibtcodConsole {
     con: ffi::TCOD_console_t,
+}
+
+
+impl Drop for LibtcodConsole {
+    fn drop(&mut self) {
+        unsafe {
+            ffi::TCOD_console_delete(self.con);
+        }
+    }
 }
 
 pub enum Console {
@@ -247,17 +257,6 @@ impl Console {
         unsafe {
             title.with_c_str(
                 |c_title| { ffi::TCOD_console_set_window_title(c_title); } );
-        }
-    }
-}
-
-impl Drop for Console {
-    fn drop(&mut self) {
-        match *self {
-            Console::Root => (),
-            Console::Offscreen(LibtcodConsole{con}) => unsafe {
-                ffi::TCOD_console_delete(con);
-            }
         }
     }
 }
@@ -647,6 +646,7 @@ impl<'a> Iterator<(int, int)> for DijkstraPathIterator<'a> {
 
 
 #[repr(C)]
+#[deriving(Copy)]
 pub enum Renderer {
     GLSL = ffi::TCOD_RENDERER_GLSL as int,
     OpenGL = ffi::TCOD_RENDERER_OPENGL as int,
@@ -662,7 +662,10 @@ bitflags! {
     }
 }
 
-#[deriving(PartialEq, FromPrimitive, Show)]
+impl Copy for FontFlags {}
+
+
+#[deriving(Copy, PartialEq, FromPrimitive, Show)]
 #[repr(C)]
 pub enum KeyCode {
     NoKey,
@@ -736,13 +739,13 @@ pub enum KeyCode {
 }
 
 
-#[deriving(PartialEq, Show)]
+#[deriving(Copy, PartialEq, Show)]
 pub enum Key {
     Printable(char),
     Special(KeyCode),
 }
 
-#[deriving(PartialEq, Show)]
+#[deriving(Copy, PartialEq, Show)]
 pub struct KeyState {
     pub key: Key,
     pub pressed: bool,
@@ -753,7 +756,7 @@ pub struct KeyState {
     pub shift: bool,
 }
 
-#[deriving(PartialEq, Clone, Show)]
+#[deriving(PartialEq, Copy, Clone, Show)]
 #[repr(C)]
 pub struct Color {
     pub r: uint8_t,
@@ -1030,3 +1033,5 @@ bitflags! {
         const KEY_RELEASED = ffi::TCOD_KEY_RELEASED,
     }
 }
+
+impl Copy for KeyPressFlags {}
