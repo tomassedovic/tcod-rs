@@ -1801,6 +1801,7 @@ pub const TCODK_CHAR: ::libc::c_uint = 65;
 pub struct TCOD_key_t {
     pub vk: TCOD_keycode_t,
     pub c: ::libc::c_char,
+    pub text: [u8, ..32],
     pub pressed: _bool,
     pub lalt: _bool,
     pub lctrl: _bool,

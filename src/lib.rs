@@ -209,6 +209,7 @@ impl Console {
         };
         KeyState{
             key: key,
+            text: [0u8, ..32],
             pressed: tcod_key.pressed != 0,
             left_alt: tcod_key.lalt != 0,
             left_ctrl: tcod_key.lctrl != 0,
@@ -232,6 +233,7 @@ impl Console {
         };
         Some(KeyState{
             key: key,
+            text: [0u8, ..32],
             pressed: tcod_key.pressed != 0,
             left_alt: tcod_key.lalt != 0,
             left_ctrl: tcod_key.lctrl != 0,
@@ -746,6 +748,7 @@ pub enum Key {
 #[deriving(Copy, PartialEq, Show)]
 pub struct KeyState {
     pub key: Key,
+    pub text: [u8, ..32],
     pub pressed: bool,
     pub left_alt: bool,
     pub left_ctrl: bool,
