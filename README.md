@@ -97,10 +97,16 @@ Then clone the offical `libtcod` repository (it helps if you put it in a safe pl
 hg clone https://bitbucket.org/jice/libtcod
 ```
 
+Make sure you use the supported libtcod version:
+
+```sh
+cd libtcod
+hg checkout 1.5.x
+```
+
 Then make `libtcod` with the following commands:
 
  ```sh
-cd libtcod
 wget https://gist.githubusercontent.com/jaredonline/daf3c5f1ea6c7ca00e29/raw/ae91b3e47bf0de5b772eff882e477d8144cfbaf8/makefile-osx > makefiles/makefile-osx
 wget https://dl.dropboxusercontent.com/u/169446/osx.tar.gz
 tar -xzvf osx.tar.gz
