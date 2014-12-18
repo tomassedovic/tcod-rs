@@ -402,11 +402,11 @@ impl<'a> AStarPath<'a> {
         }
     }
 
-    pub fn walk<'a>(&'a mut self) -> AStarPathIterator<'a> {
+    pub fn walk<'b>(&'b mut self) -> AStarPathIterator<'b> {
         AStarPathIterator{tcod_path: self.tcod_path.ptr, recalculate: false}
     }
 
-    pub fn walk_recalculate<'a>(&'a mut self) -> AStarPathIterator<'a> {
+    pub fn walk_recalculate<'b>(&'b mut self) -> AStarPathIterator<'b> {
         AStarPathIterator{tcod_path: self.tcod_path.ptr, recalculate: true}
     }
 
@@ -549,7 +549,7 @@ impl<'a> DijkstraPath<'a> {
         }
     }
 
-    pub fn walk<'a>(&'a mut self) -> DijkstraPathIterator<'a> {
+    pub fn walk<'b>(&'b mut self) -> DijkstraPathIterator<'b> {
         DijkstraPathIterator{tcod_path: self.tcod_path.ptr}
     }
 
