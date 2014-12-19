@@ -1,7 +1,10 @@
 .DS_Store
 *~
 *#
+*.a
 *.o
+*.so
+*.dylib
 *.swp
 *.dSYM
 *.dll
@@ -23,3 +26,5 @@ watch.sh
 !/examples/assets/
 /Cargo.lock
 /tcod-sys/target/
+!/tcod-sys/libtcod/SDL*.dll
+!/tcod-sys/libtcod/dependencies/**
