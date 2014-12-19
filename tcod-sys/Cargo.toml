@@ -1,6 +1,6 @@
 [package]
 name = "tcod-sys"
-version = "1.5.1"
+version = "1.5.2"
 authors = ["tomas@sedovic.cz"]
 links = "tcod"
 build = "build.rs"
