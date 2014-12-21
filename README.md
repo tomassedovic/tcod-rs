@@ -1,9 +1,9 @@
 libtcod bindings for Rust
 -------------------------
 
-[libtcod a.k.a. "The Doryen Library"](http://doryen.eptalys.net/libtcod/) is a
-smallish library designed for writing roguelikes. It provides a bunch of useful
-functionality such as:
+[libtcod a.k.a. "The Doryen Library"](http://roguecentral.org/doryen/libtcod/)
+is a smallish library designed for writing roguelikes. It provides a bunch of
+useful functionality such as:
 
 * Text-based graphics API that doesn't suck as much as curses or OpenGL
 * Colours! (like, more than 16)
@@ -11,7 +11,7 @@ functionality such as:
 * Path finding
 * Field of view
 * Portable (works on linux and windows; mac too but requires some effort)
-* [lots of other stuff](http://doryen.eptalys.net/libtcod/features/)
+* [lots of other stuff](http://roguecentral.org/doryen/libtcod/features/)
 
 
 This project provides [Rust](http://www.rust-lang.org/) bindings for libtcod
@@ -49,7 +49,7 @@ complete however.
 * Most of the _Console_ features (new, init_root, blit, putting text on the
   screen, reading key presses, etc.)
 * Most of _Map_ (new, size, set, is_walkable)
-* Most of the A* _Path_ features (no Dijkstra yet)
+* A* and Dijkstra _Path_ finding
 * Some of the _System_ layer (get/set FPS, last frame length)
 
 ### Probably Won't Ever Be Implemented Because Rust Provides This Already
@@ -66,88 +66,91 @@ complete however.
 How to use this
 ---------------
 
-You can build this library by cloning the repository and typing `cargo build`. You need to have `libtcod` in your library path, you can
-download it from the [libtcod download page](http://doryen.eptalys.net/libtcod/download/), or install it using some package manager. See below for Mac OS X specific install instructions.
+`tcod-rs` depends on `libtcod` so you need to build or download the official
+version. The `libtcod` version known to work is bundled with `tcod-sys` and
+Cargo will build it for you, but you need the build dependencies installed.
 
-This will compile and link the library and a simple example in `target`
+Alternatively, you can provide the precompiled libtcod library to override the
+building process. [See below](#using-existing-binary-distribution).
 
-Other than that, look at the source and read
-[libtcod documentation](http://doryen.eptalys.net/data/libtcod/doc/1.5.1/index2.html?c=true&cpp=true&cs=true&py=true&lua=true).
+To use `tcod-rs`, add this to your game's `Cargo.toml`:
 
-## OS X specific instructions
+    [dependencies.tcod]
+    git = "https://github.com/tomassedovic/tcod-rs.git"
 
-There are two dependencies to installing on OS X:
- * [Homebrew](http://brew.sh/)
- * `mercurial`
- * `sdl`
- * `wget`
- * `libtcod`
 
-Unfortunately, `libtcod` is no longer officially supported on Mac OS X. As of 8/20/2014 the following instructinos work:
+### Building on Linux
 
-Start off by installing `mercurial`, `sdl` and `wget`:
+Run the equivalent of:
 
-```sh
-brew install mercurial sdl wget
-```
+    $ sudo apt-get install gcc g++ make upx electric-fence libsdl1.2-dev mercurial
+    $ cd yourgame
+    $ cargo build
+    $ cargo run
 
-Then clone the offical `libtcod` repository (it helps if you put it in a safe place, like `~/src` or something):
+on your distro.
 
-```sh
-hg clone https://bitbucket.org/jice/libtcod
-```
+You can also check the [official libtcod build instructions for Linux][linux].
 
-Make sure you use the supported libtcod version:
+linux: http://roguecentral.org/doryen/data/libtcod/doc/1.5.2/html2/compile_libtcod_linux.html?c=true
 
-```sh
-cd libtcod
-hg checkout 1.5.x
-```
 
-Then make `libtcod` with the following commands:
+### Building on Windows (with MinGW)
 
- ```sh
-wget https://gist.githubusercontent.com/jaredonline/daf3c5f1ea6c7ca00e29/raw/ae91b3e47bf0de5b772eff882e477d8144cfbaf8/makefile-osx > makefiles/makefile-osx
-wget https://dl.dropboxusercontent.com/u/169446/osx.tar.gz
-tar -xzvf osx.tar.gz
-make -f makefiles/makefile-osx
-```
+The Windows version of `libtcod` relies on MinGW and MSYS so you have to install
+them:
 
-If this seems a bit convoluted that's because it is. I managed to find instructions [here](http://zackhovatter.com/gamedev/2013/11/26/building-libtcod-on-os-x-mavericks.html) but at the time of writing that link was broken. I grabbed a screenshot from Google Cache and put together my own packages of OS X specific materials. In step two above you're getting an OS X specific makefile and in step three you're getting some OS X specific headers.
+1. [Download and run MinGW][mingw]
+2. In the MinGW installer, mark the following sections for installation:
+   * C compiler (gcc)
+   * C++ compiler (g++)
+   * MSYS Basic System
+3. Open the Command prompt (cmd.exe)
+4. Run:
 
-You can test that it all worked by running
+    cd yourgame
+    cargo build
+    cargo run
 
-```sh
-./samples_c
-./samples_cpp
-```
+mingw: http://sourceforge.net/projects/mingw/files/
 
-And you should get some pretty windows.
+You can also check the [official libtcod build instructions for Windows][windows].
 
-### Building a project with it:
+windows: http://roguecentral.org/doryen/data/libtcod/doc/1.5.2/html2/compile_libtcod_mingw.html?c=true
 
-Now, to get a project up and running with Cargo, add this to your `Cargo.toml` file:
 
-```toml
-build = "sh .build.sh"
+### Building on Mac OS X
 
-[dependencies.tcod]
-git = "https://github.com/tomassedovic/tcod-rs.git"
-```
+1. [Install Homebrew](http://brew.sh/)
+2. Run:
 
-And add this file to your project root (`.build.sh`):
+    $ brew install sdl wget
+    $ cd yourgame
+    $ cargo build
+    $ cargo run
 
-```sh
-#!/bin/sh
+This is based on the instructions from [Jared McFarland's roguelike tutorial][macosx].
 
-export LIBTCOD_SRC_DIR="/PATH/TO/YOUR/src/libtcod"
-cp $LIBTCOD_SRC_DIR/*.dylib $OUT_DIR/
-cp $LIBTCOD_SRC_DIR/terminal.png $OUT_DIR/../../../
-```
+macosx: http://jaredonline.svbtle.com/roguelike-tutorial-in-rust-part-1
 
-That copies the required `.dyblib` files from where you built `libtcod` to your project's target directory, and the `terminal.png` that `sdl` requires to your projects root directory.
+---
 
-After that you should be good to go! Happy building!
+To test this, you can clone this repository directly and run the one of the
+provided examples:
+
+    $ git clone https://github.com/tomassedovic/tcod-rs.git
+    $ cd tcod-rs
+    $ cargo run --example keyboard
+
+
+### Using existing binary distribution
+
+If you don't want to build libtcod yourself, you can
+[instruct Cargo to override the build script][override]. See `.cargo/config`
+from the repository for an example.
+
+override: http://doc.crates.io/build-script.html#overriding-build-scripts
+
 
 Contributing
 ------------
@@ -173,9 +176,14 @@ You can regenerate the raw bindings by running:
 
 ### Contributors
 
-* Edu Garcia <arcnorj@gmail.com>
-* Jared McFarland <jared.online@gmail.com>
-* Tomas Sedovic <tomas@sedovic.cz>
+
+* Bastien Léonard, @bastienleonard, <bastien.leonard@gmail.com>
+* Edu Garcia, @Arcnor, <arcnorj@gmail.com>
+* @Moredread
+* Jared McFarland, @jaredonline, <jared.online@gmail.com>
+* Paul Sanford, @pmsanford, <me@paulsanford.net>
+* @Pranz, <jesper.fridefors@gmail.com>
+* Tomas Sedovic, @tomassedovic, <tomas@sedovic.cz>
 
 
 ### License
