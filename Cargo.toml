@@ -2,13 +2,13 @@
 name = "tcod"
 version = "0.3.0"
 authors = ["tomas@sedovic.cz", "arcnorj@gmail.com"]
-build = "./build.sh"
 
 [lib]
-
 name = "tcod"
 path = "src/lib.rs"
 
+[dependencies.tcod-sys]
+path = "tcod-sys"
 
 # TODO: temporarily disabling debuginfo until this is fixed:
 # https://github.com/rust-lang/rust/issues/17257

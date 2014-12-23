@@ -2,10 +2,7 @@ language: rust
 before_install:
   - sudo apt-get update -qq
 install:
-  - sudo apt-get install -y libsdl1.2debian
-  - curl -L "http://roguecentral.org/doryen/?file_id=28" -o libtcod-1.5.1-linux64.tar.gz
-  - tar -xzf libtcod-1.5.1-linux64.tar.gz
-  - sudo cp libtcod-1.5.1/libtcod{,gui}.so /usr/lib/x86_64-linux-gnu/
+  - sudo apt-get install -y upx electric-fence libsdl1.2-dev
 script:
   - cargo build --verbose
   - cargo test --verbose

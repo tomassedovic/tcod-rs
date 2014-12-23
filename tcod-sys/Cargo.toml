@@ -1,0 +1,10 @@
+[package]
+name = "tcod-sys"
+version = "1.5.2"
+authors = ["tomas@sedovic.cz"]
+links = "tcod"
+build = "build.rs"
+
+[lib]
+name = "tcod-sys"
+path = "lib.rs"
