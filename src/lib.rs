@@ -346,6 +346,8 @@ extern "C" fn c_path_callback(xf: c_int, yf: c_int,
     }
 }
 
+type TcodPathCb = extern "C" fn(c_int, c_int, c_int, c_int, *mut c_void) -> c_float;
+
 impl<'a> AStarPath<'a> {
     pub fn new_from_callback<T: 'a+FnMut((int, int), (int, int)) -> f32>(
         width: int, height: int, path_callback: T,
@@ -360,7 +362,7 @@ impl<'a> AStarPath<'a> {
             let user_data_ptr: *mut (uint, uint) = &mut *ptr;
 
             let tcod_path = ffi::TCOD_path_new_using_function(width as c_int, height as c_int,
-                                                              Some(c_path_callback),
+                                                              Some(c_path_callback as TcodPathCb),
                                                               user_data_ptr as *mut c_void,
                                                               diagonal_cost as c_float);
             AStarPath {
@@ -505,7 +507,7 @@ impl<'a> DijkstraPath<'a> {
             let user_data_ptr: *mut (uint, uint) = &mut *ptr;
             let tcod_path = ffi::TCOD_dijkstra_new_using_function(width as c_int,
                                                                   height as c_int,
-                                                                  Some(c_path_callback),
+                                                                  Some(c_path_callback as TcodPathCb),
                                                                   user_data_ptr as *mut c_void,
                                                                   diagonal_cost as c_float);
             DijkstraPath {
