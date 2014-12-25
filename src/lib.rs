@@ -11,6 +11,23 @@ pub use ffi::TCOD_color_t as Color;
 #[allow(non_camel_case_types)]
 type c_bool = uint8_t;
 
+pub fn mouse_show_cursor(visible: bool) {
+    unsafe {
+        ffi::TCOD_mouse_show_cursor(visible as c_bool);
+    }
+}
+
+pub fn mouse_is_cursor_visible() -> bool {
+    unsafe {
+        ffi::TCOD_mouse_is_cursor_visible() != 0
+    }
+}
+
+pub fn mouse_move(x: int, y: int) {
+    unsafe {
+        ffi::TCOD_mouse_move(x as c_int, y as c_int);
+    }
+}
 
 // Private wrapper over TCOD_console_t. Ideally, we'd have it as a private field
 // in OffscreenConsole, but that doesn't seem to be possible now.
