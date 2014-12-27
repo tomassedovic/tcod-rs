@@ -3,6 +3,7 @@
 extern crate libc;
 extern crate "tcod-sys" as ffi;
 
+extern crate core;
 use libc::{c_int, c_uint, c_float, uint8_t, c_void};
 
 pub use Console::Root as RootConsole;
@@ -26,6 +27,104 @@ pub fn mouse_is_cursor_visible() -> bool {
 pub fn mouse_move(x: int, y: int) {
     unsafe {
         ffi::TCOD_mouse_move(x as c_int, y as c_int);
+    }
+}
+
+pub fn sys_check_for_event(event_mask: EventFlags,
+                           mut key: Option<&mut KeyState>,
+                           mut mouse: Option<&mut MouseState>) -> EventFlags {
+    unsafe {
+        let mut c_key_state = ffi::TCOD_key_t {
+            vk: 0,
+            c: ' ' as libc::c_char,
+            pressed: false as c_bool,
+            lalt: false as c_bool,
+            lctrl: false as c_bool,
+            ralt: false as c_bool,
+            rctrl: false as c_bool,
+            shift: false as c_bool
+        };
+
+        let mut c_mouse_state = ffi::TCOD_mouse_t {
+            x: 0 as c_int,
+            y: 0 as c_int,
+            dx: 0 as c_int,
+            dy: 0 as c_int,
+            cx: 0 as c_int,
+            cy: 0 as c_int,
+            dcx: 0 as c_int,
+            dcy: 0 as c_int,
+            lbutton: false as c_bool,
+            rbutton: false as c_bool,
+            mbutton: false as c_bool,
+            lbutton_pressed: false as c_bool,
+            rbutton_pressed: false as c_bool,
+            mbutton_pressed: false as c_bool,
+            wheel_up: false as c_bool,
+            wheel_down: false as c_bool
+        };
+
+        let event = ffi::TCOD_sys_check_for_event(
+            event_mask.bits() as c_int,
+            match key {
+                None => std::ptr::null_mut(),
+                Some(..) => &mut c_key_state
+            },
+            match mouse {
+                None => std::ptr::null_mut(),
+                Some(..) => &mut c_mouse_state
+            });
+
+        match key {
+            Some(ref mut key) => {
+                key.key = if c_key_state.vk == ffi::TCODK_CHAR {
+                    Key::Printable(c_key_state.c as u8 as char)
+                } else {
+                    Key::Special(FromPrimitive::from_u32(c_key_state.vk)
+                                 .unwrap())
+                };
+                key.pressed = c_key_state.pressed != 0;
+                key.left_alt = c_key_state.lalt != 0;
+                key.right_alt = c_key_state.ralt != 0;
+                key.left_ctrl = c_key_state.lctrl != 0;
+                key.right_ctrl = c_key_state.rctrl != 0;
+                key.shift = c_key_state.shift != 0;
+            },
+            _ => ()
+        }
+
+        match mouse {
+            Some(ref mut mouse) => {
+                mouse.x = c_mouse_state.x as int;
+                mouse.y = c_mouse_state.y as int;
+                mouse.dx = c_mouse_state.dx as int;
+                mouse.dy = c_mouse_state.dy as int;
+                mouse.cx = c_mouse_state.cx as int;
+                mouse.cy = c_mouse_state.cy as int;
+                mouse.dcx = c_mouse_state.dcx as int;
+                mouse.dcy = c_mouse_state.dcy as int;
+                mouse.lbutton = c_mouse_state.lbutton != 0;
+                mouse.rbutton = c_mouse_state.rbutton != 0;
+                mouse.mbutton = c_mouse_state.mbutton != 0;
+                mouse.lbutton_pressed = c_mouse_state.lbutton_pressed != 0;
+                mouse.rbutton_pressed = c_mouse_state.rbutton_pressed != 0;
+                mouse.mbutton_pressed = c_mouse_state.mbutton_pressed != 0;
+                mouse.wheel_up = c_mouse_state.wheel_up != 0;
+                mouse.wheel_down = c_mouse_state.wheel_down != 0;
+            },
+            _ => {}
+        }
+
+        match event {
+            ffi::TCOD_EVENT_KEY_PRESS => KEY_PRESS,
+            ffi::TCOD_EVENT_KEY_RELEASE => KEY_RELEASE,
+            ffi::TCOD_EVENT_KEY => KEY,
+            ffi::TCOD_EVENT_MOUSE => MOUSE,
+            ffi::TCOD_EVENT_MOUSE_MOVE => MOUSE_MOVE,
+            ffi::TCOD_EVENT_MOUSE_PRESS => MOUSE_PRESS,
+            ffi::TCOD_EVENT_MOUSE_RELEASE => MOUSE_RELEASE,
+            _ => ANY
+        }
     }
 }
 
@@ -759,7 +858,13 @@ pub enum Key {
     Special(KeyCode),
 }
 
-#[deriving(Copy, PartialEq, Show)]
+impl std::default::Default for Key {
+    fn default() -> Key {
+        Key::Printable(' ')
+    }
+}
+
+#[deriving(Copy, PartialEq, Show, Default)]
 pub struct KeyState {
     pub key: Key,
     pub pressed: bool,
@@ -770,6 +875,37 @@ pub struct KeyState {
     pub shift: bool,
 }
 
+impl KeyState {
+    pub fn new() -> KeyState {
+        std::default::Default::default()
+    }
+}
+
+#[deriving(Copy, PartialEq, Show, Default)]
+pub struct MouseState {
+    pub x: int,
+    pub y: int,
+    pub dx: int,
+    pub dy: int,
+    pub cx: int,
+    pub cy: int,
+    pub dcx: int,
+    pub dcy: int,
+    pub lbutton: bool,
+    pub rbutton: bool,
+    pub mbutton: bool,
+    pub lbutton_pressed: bool,
+    pub rbutton_pressed: bool,
+    pub mbutton_pressed: bool,
+    pub wheel_up: bool,
+    pub wheel_down: bool,
+}
+
+impl MouseState {
+    pub fn new() -> MouseState {
+        std::default::Default::default()
+    }
+}
 
 pub mod colors {
     pub use ffi::TCOD_black as black;
@@ -1032,5 +1168,45 @@ bitflags! {
     flags KeyPressFlags: c_uint {
         const KEY_PRESSED = ffi::TCOD_KEY_PRESSED,
         const KEY_RELEASED = ffi::TCOD_KEY_RELEASED,
+    }
+}
+
+
+impl core::fmt::Show for KeyPressFlags {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        match *self {
+            KEY_PRESSED => { write!(f, "KEY_PRESSED") },
+            KEY_RELEASED => { write!(f, "KEY_RELEASED") },
+            _ => { write!(f, "Unknown key press flag") }
+        }
+    }
+}
+
+bitflags! {
+    flags EventFlags: c_uint {
+        const KEY_PRESS = ffi::TCOD_EVENT_KEY_PRESS,
+        const KEY_RELEASE = ffi::TCOD_EVENT_KEY_RELEASE,
+        const KEY = ffi::TCOD_EVENT_KEY,
+        const MOUSE_MOVE = ffi::TCOD_EVENT_MOUSE_MOVE,
+        const MOUSE_PRESS = ffi::TCOD_EVENT_MOUSE_PRESS,
+        const MOUSE_RELEASE = ffi::TCOD_EVENT_MOUSE_RELEASE,
+        const MOUSE = ffi::TCOD_EVENT_MOUSE,
+        const ANY = ffi::TCOD_EVENT_ANY,
+    }
+}
+
+impl core::fmt::Show for EventFlags {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        match *self {
+            KEY_PRESS => { write!(f, "KEY_PRESS") },
+            KEY_RELEASE => { write!(f, "KEY_RELEASE") },
+            KEY => { write!(f, "KEY") },
+            MOUSE_MOVE => { write!(f, "MOUSE_MOVE") },
+            MOUSE_PRESS => { write!(f, "MOUSE_PRESS") },
+            MOUSE_RELEASE=> { write!(f, "MOUSE_RELEASE") },
+            MOUSE => { write!(f, "MOUSE") },
+            ANY => { write!(f, "ANY") },
+            _ => { write!(f, "Unknown event flag") }
+        }
     }
 }
