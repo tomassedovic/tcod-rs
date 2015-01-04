@@ -8,6 +8,8 @@ use libc::{c_int, c_uint, c_float, uint8_t, c_void};
 pub use Console::Root as RootConsole;
 pub use ffi::TCOD_color_t as Color;
 
+use std::num::FromPrimitive;
+
 #[allow(non_camel_case_types)]
 type c_bool = uint8_t;
 
