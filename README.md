@@ -1,4 +1,4 @@
-libtcod bindings for Rust
+libtcod bindings for Rust [![Build Status](https://travis-ci.org/tomassedovic/tcod-rs.svg?branch=master)](https://travis-ci.org/tomassedovic/tcod-rs)
 -------------------------
 
 [libtcod a.k.a. "The Doryen Library"](http://roguecentral.org/doryen/libtcod/)
