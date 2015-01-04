@@ -1,4 +1,4 @@
-#![feature(globs, unboxed_closures)]
+#![feature(associated_types, globs, unboxed_closures)]
 
 extern crate libc;
 extern crate "tcod-sys" as ffi;
@@ -7,6 +7,9 @@ use libc::{c_int, c_uint, c_float, uint8_t, c_void};
 
 pub use Console::Root as RootConsole;
 pub use ffi::TCOD_color_t as Color;
+
+use std::num::FromPrimitive;
+use std::c_str::ToCStr;
 
 #[allow(non_camel_case_types)]
 type c_bool = uint8_t;
@@ -612,7 +615,9 @@ pub struct AStarPathIterator<'a> {
     recalculate: bool,
 }
 
-impl<'a> Iterator<(int, int)> for AStarPathIterator<'a> {
+impl<'a> Iterator for AStarPathIterator<'a> {
+    type Item = (int, int);
+
     fn next(&mut self) -> Option<(int, int)> {
         unsafe {
             let mut x: c_int = 0;
@@ -630,7 +635,9 @@ pub struct DijkstraPathIterator<'a> {
     tcod_path: ffi::TCOD_path_t,
 }
 
-impl<'a> Iterator<(int, int)> for DijkstraPathIterator<'a> {
+impl<'a> Iterator for DijkstraPathIterator<'a> {
+    type Item = (int, int);
+
     fn next(&mut self) -> Option<(int, int)> {
         unsafe {
             let mut x: c_int = 0;
@@ -645,7 +652,7 @@ impl<'a> Iterator<(int, int)> for DijkstraPathIterator<'a> {
 
 
 #[repr(C)]
-#[deriving(Copy)]
+#[derive(Copy)]
 pub enum Renderer {
     GLSL = ffi::TCOD_RENDERER_GLSL as int,
     OpenGL = ffi::TCOD_RENDERER_OPENGL as int,
@@ -662,7 +669,7 @@ bitflags! {
 }
 
 
-#[deriving(Copy, PartialEq, FromPrimitive, Show)]
+#[derive(Copy, PartialEq, FromPrimitive, Show)]
 #[repr(C)]
 pub enum KeyCode {
     NoKey,
@@ -736,13 +743,13 @@ pub enum KeyCode {
 }
 
 
-#[deriving(Copy, PartialEq, Show)]
+#[derive(Copy, PartialEq, Show)]
 pub enum Key {
     Printable(char),
     Special(KeyCode),
 }
 
-#[deriving(Copy, PartialEq, Show)]
+#[derive(Copy, PartialEq, Show)]
 pub struct KeyState {
     pub key: Key,
     pub pressed: bool,
@@ -955,7 +962,7 @@ pub mod colors {
 }
 
 #[repr(C)]
-#[deriving(Copy)]
+#[derive(Copy)]
 pub enum TextAlignment {
     Left = ffi::TCOD_LEFT as int,
     Right = ffi::TCOD_RIGHT as int,
@@ -964,7 +971,7 @@ pub enum TextAlignment {
 
 
 #[repr(C)]
-#[deriving(Copy)]
+#[derive(Copy)]
 pub enum BackgroundFlag {
     None = ffi::TCOD_BKGND_NONE as int,
     Set = ffi::TCOD_BKGND_SET as int,
