@@ -181,6 +181,7 @@ You can regenerate the raw bindings by running:
 * Edu Garcia, @Arcnor, <arcnorj@gmail.com>
 * @Moredread
 * Jared McFarland, @jaredonline, <jared.online@gmail.com>
+* Jonny Gilchrist, @jgilchrist
 * Paul Sanford, @pmsanford, <me@paulsanford.net>
 * @Pranz, <jesper.fridefors@gmail.com>
 * Tomas Sedovic, @tomassedovic, <tomas@sedovic.cz>
