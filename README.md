@@ -27,8 +27,10 @@ preprocessor text-include hack, type inference, pattern matching, closures).
 We track the nightly releases of Rust, usually lagging a few days behind. The
 latest version of rustc tested:
 
-    $ rustc --version
-    rustc 0.11.0-pre-nightly (7ec7805 2014-06-16 08:16:49 +0000)
+```sh
+$ rustc --version
+rustc 0.11.0-pre-nightly (7ec7805 2014-06-16 08:16:49 +0000)
+```
 
 This project follows [Semantic Versioning](http://semver.org/). Since we're
 under `1.0.0` anything goes. The API can change at any time.
@@ -75,18 +77,21 @@ building process. [See below](#using-existing-binary-distribution).
 
 To use `tcod-rs`, add this to your game's `Cargo.toml`:
 
-    [dependencies.tcod]
-    git = "https://github.com/tomassedovic/tcod-rs.git"
-
+```toml
+[dependencies.tcod]
+git = "https://github.com/tomassedovic/tcod-rs.git"
+```
 
 ### Building on Linux
 
 Run the equivalent of:
 
-    $ sudo apt-get install gcc g++ make upx electric-fence libsdl1.2-dev mercurial
-    $ cd yourgame
-    $ cargo build
-    $ cargo run
+```sh
+$ sudo apt-get install gcc g++ make upx electric-fence libsdl1.2-dev mercurial
+$ cd yourgame
+$ cargo build
+$ cargo run
+```
 
 on your distro.
 
@@ -106,9 +111,11 @@ them:
 3. Open the Command prompt (cmd.exe)
 4. Run:
 
-    cd yourgame
-    cargo build
-    cargo run
+```sh
+cd yourgame
+cargo build
+cargo run
+```
 
 You can also check the [official libtcod build instructions for Windows](http://roguecentral.org/doryen/data/libtcod/doc/1.5.2/html2/compile_libtcod_mingw.html?c=true).
 
@@ -118,10 +125,12 @@ You can also check the [official libtcod build instructions for Windows](http://
 1. [Install Homebrew](http://brew.sh/)
 2. Run:
 
-    $ brew install sdl wget
-    $ cd yourgame
-    $ cargo build
-    $ cargo run
+```sh
+$ brew install sdl wget
+$ cd yourgame
+$ cargo build
+$ cargo run
+```
 
 This is based on the instructions from [Jared McFarland's roguelike tutorial](http://jaredonline.svbtle.com/roguelike-tutorial-in-rust-part-1).
 
@@ -130,9 +139,11 @@ This is based on the instructions from [Jared McFarland's roguelike tutorial](ht
 To test this, you can clone this repository directly and run the one of the
 provided examples:
 
-    $ git clone https://github.com/tomassedovic/tcod-rs.git
-    $ cd tcod-rs
-    $ cargo run --example keyboard
+```sh
+$ git clone https://github.com/tomassedovic/tcod-rs.git
+$ cd tcod-rs
+$ cargo run --example keyboard
+```
 
 
 ### Using existing binary distribution
@@ -161,7 +172,9 @@ Please make sure it builds against the latest `rustc`.
 
 You can regenerate the raw bindings by running:
 
-    bindgen -builtins -l tcod include/libtcod.h -o src/ffi.rs
+```sh
+bindgen -builtins -l tcod include/libtcod.h -o src/ffi.rs
+```
 
 
 ### Contributors
