@@ -9,6 +9,7 @@ pub use Console::Root as RootConsole;
 pub use ffi::TCOD_color_t as Color;
 
 use std::num::FromPrimitive;
+use std::c_str::ToCStr;
 
 #[allow(non_camel_case_types)]
 type c_bool = uint8_t;
