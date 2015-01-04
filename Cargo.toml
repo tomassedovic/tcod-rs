@@ -21,6 +21,7 @@ path = "src/lib.rs"
 
 [dependencies.tcod-sys]
 path = "tcod-sys"
+version = "1.5.2"
 
 # TODO: temporarily disabling debuginfo until this is fixed:
 # https://github.com/rust-lang/rust/issues/17257
