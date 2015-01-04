@@ -1,4 +1,4 @@
-#![feature(globs, unboxed_closures)]
+#![feature(associated_types, globs, unboxed_closures)]
 
 extern crate libc;
 extern crate "tcod-sys" as ffi;
@@ -614,7 +614,9 @@ pub struct AStarPathIterator<'a> {
     recalculate: bool,
 }
 
-impl<'a> Iterator<(int, int)> for AStarPathIterator<'a> {
+impl<'a> Iterator for AStarPathIterator<'a> {
+    type Item = (int, int);
+
     fn next(&mut self) -> Option<(int, int)> {
         unsafe {
             let mut x: c_int = 0;
@@ -632,7 +634,9 @@ pub struct DijkstraPathIterator<'a> {
     tcod_path: ffi::TCOD_path_t,
 }
 
-impl<'a> Iterator<(int, int)> for DijkstraPathIterator<'a> {
+impl<'a> Iterator for DijkstraPathIterator<'a> {
+    type Item = (int, int);
+
     fn next(&mut self) -> Option<(int, int)> {
         unsafe {
             let mut x: c_int = 0;
