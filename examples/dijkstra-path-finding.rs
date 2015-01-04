@@ -5,7 +5,7 @@ extern crate tcod;
 use tcod::DijkstraPath;
 
 fn create_path() -> DijkstraPath<'static> {
-    let chess_board: [[int, ..8], ..8] = [
+    let chess_board: [[int; 8]; 8] = [
         [1, 0, 1, 0, 1, 0, 1, 0],
         [0, 1, 0, 1, 0, 1, 0, 1],
         [1, 0, 1, 0, 1, 0, 1, 0],
