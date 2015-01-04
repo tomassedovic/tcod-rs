@@ -645,7 +645,7 @@ impl<'a> Iterator<(int, int)> for DijkstraPathIterator<'a> {
 
 
 #[repr(C)]
-#[deriving(Copy)]
+#[derive(Copy)]
 pub enum Renderer {
     GLSL = ffi::TCOD_RENDERER_GLSL as int,
     OpenGL = ffi::TCOD_RENDERER_OPENGL as int,
@@ -662,7 +662,7 @@ bitflags! {
 }
 
 
-#[deriving(Copy, PartialEq, FromPrimitive, Show)]
+#[derive(Copy, PartialEq, FromPrimitive, Show)]
 #[repr(C)]
 pub enum KeyCode {
     NoKey,
@@ -736,13 +736,13 @@ pub enum KeyCode {
 }
 
 
-#[deriving(Copy, PartialEq, Show)]
+#[derive(Copy, PartialEq, Show)]
 pub enum Key {
     Printable(char),
     Special(KeyCode),
 }
 
-#[deriving(Copy, PartialEq, Show)]
+#[derive(Copy, PartialEq, Show)]
 pub struct KeyState {
     pub key: Key,
     pub pressed: bool,
@@ -955,7 +955,7 @@ pub mod colors {
 }
 
 #[repr(C)]
-#[deriving(Copy)]
+#[derive(Copy)]
 pub enum TextAlignment {
     Left = ffi::TCOD_LEFT as int,
     Right = ffi::TCOD_RIGHT as int,
@@ -964,7 +964,7 @@ pub enum TextAlignment {
 
 
 #[repr(C)]
-#[deriving(Copy)]
+#[derive(Copy)]
 pub enum BackgroundFlag {
     None = ffi::TCOD_BKGND_NONE as int,
     Set = ffi::TCOD_BKGND_SET as int,
