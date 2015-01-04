@@ -5,13 +5,13 @@ libtcod bindings for Rust [![Build Status](https://travis-ci.org/tomassedovic/tc
 is a smallish library designed for writing roguelikes. It provides a bunch of
 useful functionality such as:
 
-* Text-based graphics API that doesn't suck as much as curses or OpenGL
+* Text-based graphics API that doesn't suck as much as Curses or OpenGL
 * Colours! (like, more than 16)
 * Keyboard and mouse input
 * Path finding
 * Field of view
 * Portable (works on linux and windows; mac too but requires some effort)
-* [lots of other stuff](http://roguecentral.org/doryen/libtcod/features/)
+* [Lots of other stuff](http://roguecentral.org/doryen/libtcod/features/)
 
 
 This project provides [Rust](http://www.rust-lang.org/) bindings for libtcod
@@ -49,7 +49,7 @@ complete however.
 * Most of the _Console_ features (new, init_root, blit, putting text on the
   screen, reading key presses, etc.)
 * Most of _Map_ (new, size, set, is_walkable)
-* A* and Dijkstra _Path_ finding
+* A\* and Dijkstra _Path_ finding
 * Some of the _System_ layer (get/set FPS, last frame length)
 
 ### Probably Won't Ever Be Implemented Because Rust Provides This Already
@@ -90,9 +90,7 @@ Run the equivalent of:
 
 on your distro.
 
-You can also check the [official libtcod build instructions for Linux][linux].
-
-linux: http://roguecentral.org/doryen/data/libtcod/doc/1.5.2/html2/compile_libtcod_linux.html?c=true
+You can also check the [official libtcod build instructions for Linux](http://roguecentral.org/doryen/data/libtcod/doc/1.5.2/html2/compile_libtcod_linux.html?c=true).
 
 
 ### Building on Windows (with MinGW)
@@ -100,7 +98,7 @@ linux: http://roguecentral.org/doryen/data/libtcod/doc/1.5.2/html2/compile_libtc
 The Windows version of `libtcod` relies on MinGW and MSYS so you have to install
 them:
 
-1. [Download and run MinGW][mingw]
+1. [Download and run MinGW](http://sourceforge.net/projects/mingw/files/)
 2. In the MinGW installer, mark the following sections for installation:
    * C compiler (gcc)
    * C++ compiler (g++)
@@ -112,11 +110,7 @@ them:
     cargo build
     cargo run
 
-mingw: http://sourceforge.net/projects/mingw/files/
-
-You can also check the [official libtcod build instructions for Windows][windows].
-
-windows: http://roguecentral.org/doryen/data/libtcod/doc/1.5.2/html2/compile_libtcod_mingw.html?c=true
+You can also check the [official libtcod build instructions for Windows](http://roguecentral.org/doryen/data/libtcod/doc/1.5.2/html2/compile_libtcod_mingw.html?c=true).
 
 
 ### Building on Mac OS X
@@ -129,9 +123,7 @@ windows: http://roguecentral.org/doryen/data/libtcod/doc/1.5.2/html2/compile_lib
     $ cargo build
     $ cargo run
 
-This is based on the instructions from [Jared McFarland's roguelike tutorial][macosx].
-
-macosx: http://jaredonline.svbtle.com/roguelike-tutorial-in-rust-part-1
+This is based on the instructions from [Jared McFarland's roguelike tutorial](http://jaredonline.svbtle.com/roguelike-tutorial-in-rust-part-1).
 
 ---
 
@@ -146,10 +138,8 @@ provided examples:
 ### Using existing binary distribution
 
 If you don't want to build libtcod yourself, you can
-[instruct Cargo to override the build script][override]. See `.cargo/config`
+[instruct Cargo to override the build script](http://doc.crates.io/build-script.html#overriding-build-scripts). See `.cargo/config`
 from the repository for an example.
-
-override: http://doc.crates.io/build-script.html#overriding-build-scripts
 
 
 Contributing
@@ -184,6 +174,7 @@ You can regenerate the raw bindings by running:
 * Paul Sanford, @pmsanford, <me@paulsanford.net>
 * @Pranz, <jesper.fridefors@gmail.com>
 * Tomas Sedovic, @tomassedovic, <tomas@sedovic.cz>
+* Jonny Gilchrist, @jgilchrist
 
 
 ### License
