@@ -188,7 +188,6 @@ bindgen -builtins -l tcod include/libtcod.h -o src/ffi.rs
 * Paul Sanford, @pmsanford, <me@paulsanford.net>
 * @Pranz, <jesper.fridefors@gmail.com>
 * Tomas Sedovic, @tomassedovic, <tomas@sedovic.cz>
-* Jonny Gilchrist, @jgilchrist
 
 
 ### License
