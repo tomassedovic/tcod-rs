@@ -1,8 +1,26 @@
 language: rust
+
 before_install:
   - sudo apt-get update -qq
+
 install:
   - sudo apt-get install -y upx electric-fence libsdl1.2-dev
+
 script:
   - cargo build --verbose
   - cargo test --verbose
+
+after_success: |
+    [ $TRAVIS_BRANCH = master ] &&
+    [ $TRAVIS_PULL_REQUEST = false ] &&
+    cargo doc &&
+    echo '<meta http-equiv=refresh content="0;url=tcod/index.html">' > target/doc/index.html &&
+    git config --global user.email "travis@travis-ci.org" &&
+    git config --global user.name "travis-ci" &&
+    sudo pip install ghp-import &&
+    ghp-import -n target/doc &&
+    git push -fq https://${TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git gh-pages
+
+env:
+    global:
+        secure: yTCiLqKu5ceqvIJhTepiv/VTUTTYTHYNeTicO6Rsfs/RLlUtbfFOXdyT5vA59g9wJAGsULPspPucedIf+g1TkG5Dz2jpuE5nvgNlUC07tcFIBYwkExJHu+KzwJUc2lhf0OI/5NsNg/AlehzYNAqF0g2cc2/ZngIi4pAscS6SzKw=
