@@ -13,7 +13,7 @@ authors = ["Tomas Sedovic <tomas@sedovic.cz>",
            "Jared McFarland <jared.online@gmail.com>",
            "Jonny Gilchrist (@jgilchrist)",
            "Paul Sanford <me@paulsanford.net>",
-           "<jesper.fridefors@gmail.com>"]
+           "@Pranz <jesper.fridefors@gmail.com>"]
 
 [lib]
 name = "tcod"
