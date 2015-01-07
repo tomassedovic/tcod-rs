@@ -9,7 +9,7 @@ pub use Console::Root as RootConsole;
 pub use ffi::TCOD_color_t as Color;
 
 use std::num::FromPrimitive;
-use std::c_str::ToCStr;
+use std::ffi::CString;
 
 #[allow(non_camel_case_types)]
 type c_bool = uint8_t;
@@ -58,10 +58,10 @@ impl Console {
     pub fn init_root(width: int, height: int, title: &str, fullscreen: bool) -> Console {
         assert!(width > 0 && height > 0);
         unsafe {
-            title.with_c_str(
-                |c_title| ffi::TCOD_console_init_root(width as c_int, height as c_int,
-                                                      c_title, fullscreen as c_bool,
-                                                      ffi::TCOD_RENDERER_SDL));
+            let c_title = CString::from_slice(title.as_bytes());
+            ffi::TCOD_console_init_root(width as c_int, height as c_int,
+                                            c_title.as_ptr(), fullscreen as c_bool,
+                                            ffi::TCOD_RENDERER_SDL);
         }
         Console::Root
     }
@@ -170,13 +170,12 @@ impl Console {
                     text: &str) {
         assert!(x >= 0 && y >= 0);
         unsafe {
-            text.with_c_str(
-                |c_text|
-                ffi::TCOD_console_print_ex(self.con(),
-                                           x as c_int, y as c_int,
-                                           background_flag as u32,
-                                           alignment as u32,
-                                           c_text));
+            let c_text = CString::from_slice(text.as_bytes());
+            ffi::TCOD_console_print_ex(self.con(),
+                                        x as c_int, y as c_int,
+                                        background_flag as u32,
+                                        alignment as u32,
+                                        c_text.as_ptr());
         }
     }
 
@@ -190,11 +189,10 @@ impl Console {
                            nb_char_horizontal: int,
                            nb_char_vertical: int) {
         unsafe {
-            font_path.with_c_str( |path| {
-                ffi::TCOD_console_set_custom_font(
-                    path, flags.bits() as c_int, nb_char_horizontal as c_int,
-                    nb_char_vertical as c_int);
-            });
+            let path = CString::from_slice(font_path.as_vec());
+            ffi::TCOD_console_set_custom_font(
+                path.as_ptr(), flags.bits() as c_int, nb_char_horizontal as c_int,
+                nb_char_vertical as c_int);
         }
     }
 
@@ -255,8 +253,8 @@ impl Console {
 
     pub fn set_window_title(title: &str) {
         unsafe {
-            title.with_c_str(
-                |c_title| { ffi::TCOD_console_set_window_title(c_title); } );
+            let c_title = CString::from_slice(title.as_bytes());
+            ffi::TCOD_console_set_window_title(c_title.as_ptr());
         }
     }
 }
