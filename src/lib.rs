@@ -1,4 +1,4 @@
-#![feature(associated_types, globs, unboxed_closures)]
+#![feature(unboxed_closures)]
 
 extern crate libc;
 extern crate "tcod-sys" as ffi;
