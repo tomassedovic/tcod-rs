@@ -7,6 +7,6 @@ fn main() {
     while !Console::window_closed() {
         Console::flush();
         let key = Console::wait_for_keypress(true);
-        println!("Pressed key: {}", key);
+        println!("Pressed key: {:?}", key);
     }
 }
