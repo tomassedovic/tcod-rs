@@ -6,7 +6,7 @@ extern crate libc;
 
 pub type __int128_t = ::libc::c_void;
 pub type __uint128_t = ::libc::c_void;
-pub type __builtin_va_list = [__va_list_tag; 1u];
+pub type __builtin_va_list = [__va_list_tag; 1us];
 pub type __int8_t = ::libc::c_char;
 pub type __uint8_t = ::libc::c_uchar;
 pub type __int16_t = ::libc::c_short;
@@ -20,10 +20,10 @@ pub type __darwin_natural_t = ::libc::c_uint;
 pub type __darwin_ct_rune_t = ::libc::c_int;
 #[repr(C)]
 pub struct __mbstate_t {
-    pub data: [u64; 16u],
+    pub data: [u64; 16us],
 }
 impl __mbstate_t {
-    pub fn __mbstate8(&mut self) -> *mut [::libc::c_char; 128u] {
+    pub fn __mbstate8(&mut self) -> *mut [::libc::c_char; 128us] {
         unsafe { ::std::mem::transmute(self) }
     }
     pub fn _mbstateL(&mut self) -> *mut ::libc::c_longlong {
@@ -51,48 +51,48 @@ pub struct Struct___darwin_pthread_handler_rec {
 #[repr(C)]
 pub struct Struct__opaque_pthread_attr_t {
     pub __sig: ::libc::c_long,
-    pub __opaque: [::libc::c_char; 56u],
+    pub __opaque: [::libc::c_char; 56us],
 }
 #[repr(C)]
 pub struct Struct__opaque_pthread_cond_t {
     pub __sig: ::libc::c_long,
-    pub __opaque: [::libc::c_char; 40u],
+    pub __opaque: [::libc::c_char; 40us],
 }
 #[repr(C)]
 pub struct Struct__opaque_pthread_condattr_t {
     pub __sig: ::libc::c_long,
-    pub __opaque: [::libc::c_char; 8u],
+    pub __opaque: [::libc::c_char; 8us],
 }
 #[repr(C)]
 pub struct Struct__opaque_pthread_mutex_t {
     pub __sig: ::libc::c_long,
-    pub __opaque: [::libc::c_char; 56u],
+    pub __opaque: [::libc::c_char; 56us],
 }
 #[repr(C)]
 pub struct Struct__opaque_pthread_mutexattr_t {
     pub __sig: ::libc::c_long,
-    pub __opaque: [::libc::c_char; 8u],
+    pub __opaque: [::libc::c_char; 8us],
 }
 #[repr(C)]
 pub struct Struct__opaque_pthread_once_t {
     pub __sig: ::libc::c_long,
-    pub __opaque: [::libc::c_char; 8u],
+    pub __opaque: [::libc::c_char; 8us],
 }
 #[repr(C)]
 pub struct Struct__opaque_pthread_rwlock_t {
     pub __sig: ::libc::c_long,
-    pub __opaque: [::libc::c_char; 192u],
+    pub __opaque: [::libc::c_char; 192us],
 }
 #[repr(C)]
 pub struct Struct__opaque_pthread_rwlockattr_t {
     pub __sig: ::libc::c_long,
-    pub __opaque: [::libc::c_char; 16u],
+    pub __opaque: [::libc::c_char; 16us],
 }
 #[repr(C)]
 pub struct Struct__opaque_pthread_t {
     pub __sig: ::libc::c_long,
     pub __cleanup_stack: *mut Struct___darwin_pthread_handler_rec,
-    pub __opaque: [::libc::c_char; 1168u],
+    pub __opaque: [::libc::c_char; 1168us],
 }
 pub type __darwin_blkcnt_t = __int64_t;
 pub type __darwin_blksize_t = __int32_t;
@@ -122,8 +122,8 @@ pub type __darwin_sigset_t = __uint32_t;
 pub type __darwin_suseconds_t = __int32_t;
 pub type __darwin_uid_t = __uint32_t;
 pub type __darwin_useconds_t = __uint32_t;
-pub type __darwin_uuid_t = [::libc::c_uchar; 16u];
-pub type __darwin_uuid_string_t = [::libc::c_char; 37u];
+pub type __darwin_uuid_t = [::libc::c_uchar; 16us];
+pub type __darwin_uuid_string_t = [::libc::c_char; 37us];
 pub type __darwin_nl_item = ::libc::c_int;
 pub type __darwin_wctrans_t = ::libc::c_int;
 pub type __darwin_wctype_t = __uint32_t;
@@ -170,8 +170,8 @@ pub struct Struct___sFILE {
     pub _ub: Struct___sbuf,
     pub _extra: *mut Struct___sFILEX,
     pub _ur: ::libc::c_int,
-    pub _ubuf: [::libc::c_uchar; 3u],
-    pub _nbuf: [::libc::c_uchar; 1u],
+    pub _ubuf: [::libc::c_uchar; 3us],
+    pub _nbuf: [::libc::c_uchar; 1us],
     pub _lb: Struct___sbuf,
     pub _blksize: ::libc::c_int,
     pub _offset: fpos_t,
@@ -216,13 +216,13 @@ pub struct _RuneRange {
 }
 #[repr(C)]
 pub struct _RuneCharClass {
-    pub __name: [::libc::c_char; 14u],
+    pub __name: [::libc::c_char; 14us],
     pub __mask: __uint32_t,
 }
 #[repr(C)]
 pub struct _RuneLocale {
-    pub __magic: [::libc::c_char; 8u],
-    pub __encoding: [::libc::c_char; 32u],
+    pub __magic: [::libc::c_char; 8us],
+    pub __encoding: [::libc::c_char; 32us],
     pub __sgetrune: ::std::option::Option<extern "C" fn
                                               (arg1: *const ::libc::c_char,
                                                arg2: __darwin_size_t,
@@ -236,9 +236,9 @@ pub struct _RuneLocale {
                                                arg4: *mut *mut ::libc::c_char)
                                               -> ::libc::c_int>,
     pub __invalid_rune: __darwin_rune_t,
-    pub __runetype: [__uint32_t; 256u],
-    pub __maplower: [__darwin_rune_t; 256u],
-    pub __mapupper: [__darwin_rune_t; 256u],
+    pub __runetype: [__uint32_t; 256us],
+    pub __maplower: [__darwin_rune_t; 256us],
+    pub __mapupper: [__darwin_rune_t; 256us],
     pub __runetype_ext: _RuneRange,
     pub __maplower_ext: _RuneRange,
     pub __mapupper_ext: _RuneRange,
@@ -300,7 +300,7 @@ pub type rsize_t = __darwin_size_t;
 pub type errno_t = ::libc::c_int;
 #[repr(C)]
 pub struct Struct_fd_set {
-    pub fds_bits: [__int32_t; 32u],
+    pub fds_bits: [__int32_t; 32us],
 }
 pub type fd_set = Struct_fd_set;
 pub type fd_mask = __int32_t;
@@ -375,16 +375,16 @@ pub struct Struct___darwin_fp_status {
 pub type __darwin_fp_status_t = Struct___darwin_fp_status;
 #[repr(C)]
 pub struct Struct___darwin_mmst_reg {
-    pub __mmst_reg: [::libc::c_char; 10u],
-    pub __mmst_rsrv: [::libc::c_char; 6u],
+    pub __mmst_reg: [::libc::c_char; 10us],
+    pub __mmst_rsrv: [::libc::c_char; 6us],
 }
 #[repr(C)]
 pub struct Struct___darwin_xmm_reg {
-    pub __xmm_reg: [::libc::c_char; 16u],
+    pub __xmm_reg: [::libc::c_char; 16us],
 }
 #[repr(C)]
 pub struct Struct___darwin_i386_float_state {
-    pub __fpu_reserved: [::libc::c_int; 2u],
+    pub __fpu_reserved: [::libc::c_int; 2us],
     pub __fpu_fcw: Struct___darwin_fp_control,
     pub __fpu_fsw: Struct___darwin_fp_status,
     pub __fpu_ftw: __uint8_t,
@@ -414,12 +414,12 @@ pub struct Struct___darwin_i386_float_state {
     pub __fpu_xmm5: Struct___darwin_xmm_reg,
     pub __fpu_xmm6: Struct___darwin_xmm_reg,
     pub __fpu_xmm7: Struct___darwin_xmm_reg,
-    pub __fpu_rsrv4: [::libc::c_char; 224u],
+    pub __fpu_rsrv4: [::libc::c_char; 224us],
     pub __fpu_reserved1: ::libc::c_int,
 }
 #[repr(C)]
 pub struct Struct___darwin_i386_avx_state {
-    pub __fpu_reserved: [::libc::c_int; 2u],
+    pub __fpu_reserved: [::libc::c_int; 2us],
     pub __fpu_fcw: Struct___darwin_fp_control,
     pub __fpu_fsw: Struct___darwin_fp_status,
     pub __fpu_ftw: __uint8_t,
@@ -449,9 +449,9 @@ pub struct Struct___darwin_i386_avx_state {
     pub __fpu_xmm5: Struct___darwin_xmm_reg,
     pub __fpu_xmm6: Struct___darwin_xmm_reg,
     pub __fpu_xmm7: Struct___darwin_xmm_reg,
-    pub __fpu_rsrv4: [::libc::c_char; 224u],
+    pub __fpu_rsrv4: [::libc::c_char; 224us],
     pub __fpu_reserved1: ::libc::c_int,
-    pub __avx_reserved1: [::libc::c_char; 64u],
+    pub __avx_reserved1: [::libc::c_char; 64us],
     pub __fpu_ymmh0: Struct___darwin_xmm_reg,
     pub __fpu_ymmh1: Struct___darwin_xmm_reg,
     pub __fpu_ymmh2: Struct___darwin_xmm_reg,
@@ -505,7 +505,7 @@ pub struct Struct___darwin_x86_thread_state64 {
 }
 #[repr(C)]
 pub struct Struct___darwin_x86_float_state64 {
-    pub __fpu_reserved: [::libc::c_int; 2u],
+    pub __fpu_reserved: [::libc::c_int; 2us],
     pub __fpu_fcw: Struct___darwin_fp_control,
     pub __fpu_fsw: Struct___darwin_fp_status,
     pub __fpu_ftw: __uint8_t,
@@ -543,12 +543,12 @@ pub struct Struct___darwin_x86_float_state64 {
     pub __fpu_xmm13: Struct___darwin_xmm_reg,
     pub __fpu_xmm14: Struct___darwin_xmm_reg,
     pub __fpu_xmm15: Struct___darwin_xmm_reg,
-    pub __fpu_rsrv4: [::libc::c_char; 96u],
+    pub __fpu_rsrv4: [::libc::c_char; 96us],
     pub __fpu_reserved1: ::libc::c_int,
 }
 #[repr(C)]
 pub struct Struct___darwin_x86_avx_state64 {
-    pub __fpu_reserved: [::libc::c_int; 2u],
+    pub __fpu_reserved: [::libc::c_int; 2us],
     pub __fpu_fcw: Struct___darwin_fp_control,
     pub __fpu_fsw: Struct___darwin_fp_status,
     pub __fpu_ftw: __uint8_t,
@@ -586,9 +586,9 @@ pub struct Struct___darwin_x86_avx_state64 {
     pub __fpu_xmm13: Struct___darwin_xmm_reg,
     pub __fpu_xmm14: Struct___darwin_xmm_reg,
     pub __fpu_xmm15: Struct___darwin_xmm_reg,
-    pub __fpu_rsrv4: [::libc::c_char; 96u],
+    pub __fpu_rsrv4: [::libc::c_char; 96us],
     pub __fpu_reserved1: ::libc::c_int,
-    pub __avx_reserved1: [::libc::c_char; 64u],
+    pub __avx_reserved1: [::libc::c_char; 64us],
     pub __fpu_ymmh0: Struct___darwin_xmm_reg,
     pub __fpu_ymmh1: Struct___darwin_xmm_reg,
     pub __fpu_ymmh2: Struct___darwin_xmm_reg,
@@ -669,7 +669,7 @@ pub type ucontext_t = Struct___darwin_ucontext;
 pub type sigset_t = __darwin_sigset_t;
 #[repr(C)]
 pub struct Union_sigval {
-    pub data: [u64; 1u],
+    pub data: [u64; 1us],
 }
 impl Union_sigval {
     pub fn sival_int(&mut self) -> *mut ::libc::c_int {
@@ -700,12 +700,12 @@ pub struct Struct___siginfo {
     pub si_addr: *mut ::libc::c_void,
     pub si_value: Union_sigval,
     pub si_band: ::libc::c_long,
-    pub __pad: [::libc::c_ulong; 7u],
+    pub __pad: [::libc::c_ulong; 7us],
 }
 pub type siginfo_t = Struct___siginfo;
 #[repr(C)]
 pub struct Union___sigaction_u {
-    pub data: [u64; 1u],
+    pub data: [u64; 1us],
 }
 impl Union___sigaction_u {
     pub fn __sa_handler(&mut self) ->
@@ -800,7 +800,7 @@ pub struct Struct_rusage {
 pub type rusage_info_t = *mut ::libc::c_void;
 #[repr(C)]
 pub struct Struct_rusage_info_v0 {
-    pub ri_uuid: [uint8_t; 16u],
+    pub ri_uuid: [uint8_t; 16us],
     pub ri_user_time: uint64_t,
     pub ri_system_time: uint64_t,
     pub ri_pkg_idle_wkups: uint64_t,
@@ -814,7 +814,7 @@ pub struct Struct_rusage_info_v0 {
 }
 #[repr(C)]
 pub struct Struct_rusage_info_v1 {
-    pub ri_uuid: [uint8_t; 16u],
+    pub ri_uuid: [uint8_t; 16us],
     pub ri_user_time: uint64_t,
     pub ri_system_time: uint64_t,
     pub ri_pkg_idle_wkups: uint64_t,
@@ -834,7 +834,7 @@ pub struct Struct_rusage_info_v1 {
 }
 #[repr(C)]
 pub struct Struct_rusage_info_v2 {
-    pub ri_uuid: [uint8_t; 16u],
+    pub ri_uuid: [uint8_t; 16us],
     pub ri_user_time: uint64_t,
     pub ri_system_time: uint64_t,
     pub ri_pkg_idle_wkups: uint64_t,
@@ -866,7 +866,7 @@ pub struct Struct_proc_rlimit_control_wakeupmon {
 }
 #[repr(C)]
 pub struct Union_wait {
-    pub data: [u32; 1u],
+    pub data: [u32; 1us],
 }
 impl Union_wait {
     pub fn w_status(&mut self) -> *mut ::libc::c_int {
@@ -924,17 +924,17 @@ pub type Sint32 = int32_t;
 pub type Uint32 = uint32_t;
 pub type Sint64 = int64_t;
 pub type Uint64 = uint64_t;
-pub type SDL_dummy_uint8 = [::libc::c_int; 1u];
-pub type SDL_dummy_sint8 = [::libc::c_int; 1u];
-pub type SDL_dummy_uint16 = [::libc::c_int; 1u];
-pub type SDL_dummy_sint16 = [::libc::c_int; 1u];
-pub type SDL_dummy_uint32 = [::libc::c_int; 1u];
-pub type SDL_dummy_sint32 = [::libc::c_int; 1u];
-pub type SDL_dummy_uint64 = [::libc::c_int; 1u];
-pub type SDL_dummy_sint64 = [::libc::c_int; 1u];
+pub type SDL_dummy_uint8 = [::libc::c_int; 1us];
+pub type SDL_dummy_sint8 = [::libc::c_int; 1us];
+pub type SDL_dummy_uint16 = [::libc::c_int; 1us];
+pub type SDL_dummy_sint16 = [::libc::c_int; 1us];
+pub type SDL_dummy_uint32 = [::libc::c_int; 1us];
+pub type SDL_dummy_sint32 = [::libc::c_int; 1us];
+pub type SDL_dummy_uint64 = [::libc::c_int; 1us];
+pub type SDL_dummy_sint64 = [::libc::c_int; 1us];
 pub type SDL_DUMMY_ENUM = ::libc::c_uint;
 pub static DUMMY_ENUM_VALUE: ::libc::c_uint = 0;
-pub type SDL_dummy_enum = [::libc::c_int; 1u];
+pub type SDL_dummy_enum = [::libc::c_int; 1us];
 pub enum Struct__SDL_iconv_t { }
 pub type SDL_iconv_t = *mut Struct__SDL_iconv_t;
 pub type SDL_errorcode = ::libc::c_uint;
@@ -979,7 +979,7 @@ pub struct Struct_SDL_RWops {
 }
 #[repr(C)]
 pub struct Union_Unnamed3 {
-    pub data: [u64; 3u],
+    pub data: [u64; 3us],
 }
 impl Union_Unnamed3 {
     pub fn stdio(&mut self) -> *mut Struct_Unnamed4 {
@@ -1037,7 +1037,7 @@ pub struct Struct_SDL_AudioCVT {
     pub len_ratio: ::libc::c_double,
     pub filters: [::std::option::Option<extern "C" fn
                                             (arg1: *mut Struct_SDL_AudioCVT,
-                                             arg2: Uint16)>; 10u],
+                                             arg2: Uint16)>; 10us],
     pub filter_index: ::libc::c_int,
 }
 pub type SDL_AudioCVT = Struct_SDL_AudioCVT;
@@ -1067,7 +1067,7 @@ pub struct Struct_SDL_CD {
     pub numtracks: ::libc::c_int,
     pub cur_track: ::libc::c_int,
     pub cur_frame: ::libc::c_int,
-    pub track: [SDL_CDtrack; 100u],
+    pub track: [SDL_CDtrack; 100us],
 }
 pub type SDL_CD = Struct_SDL_CD;
 pub type SDLKey = ::libc::c_uint;
@@ -1464,7 +1464,7 @@ pub struct Struct_SDL_Cursor {
     pub hot_y: Sint16,
     pub data: *mut Uint8,
     pub mask: *mut Uint8,
-    pub save: [*mut Uint8; 2u],
+    pub save: [*mut Uint8; 2us],
     pub wm_cursor: *mut WMcursor,
 }
 pub type SDL_Cursor = Struct_SDL_Cursor;
@@ -1620,7 +1620,7 @@ pub struct Struct_SDL_SysWMEvent {
 pub type SDL_SysWMEvent = Struct_SDL_SysWMEvent;
 #[repr(C)]
 pub struct Union_SDL_Event {
-    pub data: [u64; 3u],
+    pub data: [u64; 3us],
 }
 impl Union_SDL_Event {
     pub fn _type(&mut self) -> *mut Uint8 {
@@ -2057,8 +2057,8 @@ pub struct TCOD_lex_t {
     pub nb_symbols: ::libc::c_int,
     pub nb_keywords: ::libc::c_int,
     pub flags: ::libc::c_int,
-    pub symbols: [[::libc::c_char; 5u]; 100u],
-    pub keywords: [[::libc::c_char; 20u]; 100u],
+    pub symbols: [[::libc::c_char; 5us]; 100us],
+    pub keywords: [[::libc::c_char; 20us]; 100us],
     pub simpleCmt: *const ::libc::c_char,
     pub cmtStart: *const ::libc::c_char,
     pub cmtStop: *const ::libc::c_char,
@@ -2112,7 +2112,7 @@ pub const TCOD_TYPE_CUSTOM15: ::libc::c_uint = 39;
 pub const TCOD_TYPE_LIST: ::libc::c_uint = 1024;
 #[repr(C)]
 pub struct TCOD_value_t {
-    pub data: [u64; 2u],
+    pub data: [u64; 2us],
 }
 impl TCOD_value_t {
     pub fn b(&mut self) -> *mut _bool {
@@ -2183,7 +2183,7 @@ pub struct TCOD_struct_int_t {
 #[repr(C)]
 pub struct TCOD_parser_int_t {
     pub structs: TCOD_list_t,
-    pub customs: [TCOD_parser_custom_t; 16u],
+    pub customs: [TCOD_parser_custom_t; 16us],
     pub fatal: _bool,
     pub props: TCOD_list_t,
 }
@@ -2241,7 +2241,7 @@ extern "C" {
     pub static mut _CurrentRuneLocale: *mut _RuneLocale;
     pub static mut __mb_cur_max: ::libc::c_int;
     pub static mut suboptarg: *mut ::libc::c_char;
-    pub static mut TCOD_colors: [[TCOD_color_t; 8u]; 21u];
+    pub static mut TCOD_colors: [[TCOD_color_t; 8us]; 21us];
     pub static TCOD_black: TCOD_color_t;
     pub static TCOD_darkest_grey: TCOD_color_t;
     pub static TCOD_darker_grey: TCOD_color_t;
@@ -2891,7 +2891,7 @@ extern "C" {
     pub fn ecvt(arg1: ::libc::c_double, arg2: ::libc::c_int,
                 arg3: *mut ::libc::c_int, arg4: *mut ::libc::c_int) ->
      *mut ::libc::c_char;
-    pub fn erand48(arg1: [::libc::c_ushort; 3u]) -> ::libc::c_double;
+    pub fn erand48(arg1: [::libc::c_ushort; 3us]) -> ::libc::c_double;
     pub fn fcvt(arg1: ::libc::c_double, arg2: ::libc::c_int,
                 arg3: *mut ::libc::c_int, arg4: *mut ::libc::c_int) ->
      *mut ::libc::c_char;
@@ -2903,14 +2903,14 @@ extern "C" {
     pub fn grantpt(arg1: ::libc::c_int) -> ::libc::c_int;
     pub fn initstate(arg1: ::libc::c_uint, arg2: *mut ::libc::c_char,
                      arg3: size_t) -> *mut ::libc::c_char;
-    pub fn jrand48(arg1: [::libc::c_ushort; 3u]) -> ::libc::c_long;
+    pub fn jrand48(arg1: [::libc::c_ushort; 3us]) -> ::libc::c_long;
     pub fn l64a(arg1: ::libc::c_long) -> *mut ::libc::c_char;
-    pub fn lcong48(arg1: [::libc::c_ushort; 7u]);
+    pub fn lcong48(arg1: [::libc::c_ushort; 7us]);
     pub fn lrand48() -> ::libc::c_long;
     pub fn mktemp(arg1: *mut ::libc::c_char) -> *mut ::libc::c_char;
     pub fn mkstemp(arg1: *mut ::libc::c_char) -> ::libc::c_int;
     pub fn mrand48() -> ::libc::c_long;
-    pub fn nrand48(arg1: [::libc::c_ushort; 3u]) -> ::libc::c_long;
+    pub fn nrand48(arg1: [::libc::c_ushort; 3us]) -> ::libc::c_long;
     pub fn posix_openpt(arg1: ::libc::c_int) -> ::libc::c_int;
     pub fn ptsname(arg1: ::libc::c_int) -> *mut ::libc::c_char;
     pub fn putenv(arg1: *mut ::libc::c_char) -> ::libc::c_int;
@@ -2918,7 +2918,7 @@ extern "C" {
     pub fn rand_r(arg1: *mut ::libc::c_uint) -> ::libc::c_int;
     pub fn realpath(arg1: *const ::libc::c_char, arg2: *mut ::libc::c_char) ->
      *mut ::libc::c_char;
-    pub fn seed48(arg1: [::libc::c_ushort; 3u]) -> *mut ::libc::c_ushort;
+    pub fn seed48(arg1: [::libc::c_ushort; 3us]) -> *mut ::libc::c_ushort;
     pub fn setenv(arg1: *const ::libc::c_char, arg2: *const ::libc::c_char,
                   arg3: ::libc::c_int) -> ::libc::c_int;
     pub fn setkey(arg1: *const ::libc::c_char);
@@ -4166,7 +4166,7 @@ extern "C" {
      ::libc::c_float;
     pub fn TCOD_heightmap_get_normal(hm: *const TCOD_heightmap_t,
                                      x: ::libc::c_float, y: ::libc::c_float,
-                                     n: [::libc::c_float; 3u],
+                                     n: [::libc::c_float; 3us],
                                      waterLevel: ::libc::c_float);
     pub fn TCOD_heightmap_count_cells(hm: *const TCOD_heightmap_t,
                                       min: ::libc::c_float,
@@ -4208,8 +4208,8 @@ extern "C" {
                                    hradius: ::libc::c_float,
                                    hheight: ::libc::c_float);
     pub fn TCOD_heightmap_dig_bezier(hm: *mut TCOD_heightmap_t,
-                                     px: [::libc::c_int; 4u],
-                                     py: [::libc::c_int; 4u],
+                                     px: [::libc::c_int; 4us],
+                                     py: [::libc::c_int; 4us],
                                      startRadius: ::libc::c_float,
                                      startDepth: ::libc::c_float,
                                      endRadius: ::libc::c_float,
