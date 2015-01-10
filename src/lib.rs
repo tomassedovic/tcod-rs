@@ -1,5 +1,3 @@
-#![feature(unboxed_closures)]
-
 extern crate libc;
 extern crate "tcod-sys" as ffi;
 
@@ -26,9 +24,9 @@ pub fn mouse_is_cursor_visible() -> bool {
     }
 }
 
-pub fn mouse_move(x: isize, y: isize) {
+pub fn mouse_move(x: i32, y: i32) {
     unsafe {
-        ffi::TCOD_mouse_move(x as c_int, y as c_int);
+        ffi::TCOD_mouse_move(x, y);
     }
 }
 
@@ -48,14 +46,14 @@ pub fn sys_check_for_event(event_mask: EventFlags,
         };
 
         let mut c_mouse_state = ffi::TCOD_mouse_t {
-            x: 0 as c_int,
-            y: 0 as c_int,
-            dx: 0 as c_int,
-            dy: 0 as c_int,
-            cx: 0 as c_int,
-            cy: 0 as c_int,
-            dcx: 0 as c_int,
-            dcy: 0 as c_int,
+            x: 0,
+            y: 0,
+            dx: 0,
+            dy: 0,
+            cx: 0,
+            cy: 0,
+            dcx: 0,
+            dcy: 0,
             lbutton: false as c_bool,
             rbutton: false as c_bool,
             mbutton: false as c_bool,
@@ -67,7 +65,7 @@ pub fn sys_check_for_event(event_mask: EventFlags,
         };
 
         let event = ffi::TCOD_sys_check_for_event(
-            event_mask.bits() as c_int,
+            event_mask.bits() as i32,
             match key {
                 None => std::ptr::null_mut(),
                 Some(..) => &mut c_key_state
@@ -151,12 +149,12 @@ pub enum Console {
 }
 
 impl Console {
-    pub fn new(width: isize, height: isize) -> Console {
+    pub fn new(width: i32, height: i32) -> Console {
         assert!(width > 0 && height > 0);
         unsafe {
             Console::Offscreen(
                 LibtcodConsole{
-                    con: ffi::TCOD_console_new(width as c_int, height as c_int)
+                    con: ffi::TCOD_console_new(width, height)
                 }
             )
         }
@@ -170,11 +168,11 @@ impl Console {
         }
     }
 
-    pub fn init_root(width: isize, height: isize, title: &str, fullscreen: bool) -> Console {
+    pub fn init_root(width: i32, height: i32, title: &str, fullscreen: bool) -> Console {
         assert!(width > 0 && height > 0);
         unsafe {
             let c_title = CString::from_slice(title.as_bytes());
-            ffi::TCOD_console_init_root(width as c_int, height as c_int,
+            ffi::TCOD_console_init_root(width, height,
                                             c_title.as_ptr(), fullscreen as c_bool,
                                             ffi::TCOD_RENDERER_SDL);
         }
@@ -183,20 +181,20 @@ impl Console {
 
 
     pub fn blit(source_console: &Console,
-                source_x: isize, source_y: isize,
-                source_width: isize, source_height: isize,
+                source_x: i32, source_y: i32,
+                source_width: i32, source_height: i32,
                 destination_console: &mut Console,
-                destination_x: isize, destination_y: isize,
+                destination_x: i32, destination_y: i32,
                 foreground_alpha: f32, background_alpha: f32) {
         assert!(source_x >= 0 && source_y >= 0 &&
                 source_width > 0 && source_height > 0 &&
                 destination_x >= 0 && destination_y >= 0);
         unsafe {
             ffi::TCOD_console_blit(source_console.con(),
-                                   source_x as c_int, source_y as c_int,
-                                   source_width as c_int, source_height as c_int,
+                                   source_x, source_y,
+                                   source_width, source_height,
                                    destination_console.con(),
-                                   destination_x as c_int, destination_y as c_int,
+                                   destination_x, destination_y,
                                    foreground_alpha as c_float,
                                    background_alpha as c_float)
         }
@@ -208,15 +206,15 @@ impl Console {
         }
     }
 
-    pub fn width(&self) -> isize {
+    pub fn width(&self) -> i32 {
         unsafe {
-            ffi::TCOD_console_get_width(self.con()) as isize
+            ffi::TCOD_console_get_width(self.con())
         }
     }
 
-    pub fn height(&self) -> isize {
+    pub fn height(&self) -> i32 {
         unsafe {
-            ffi::TCOD_console_get_height(self.con()) as isize
+            ffi::TCOD_console_get_height(self.con())
         }
     }
 
@@ -238,36 +236,36 @@ impl Console {
         }
     }
 
-    pub fn set_char_background(&mut self, x: isize, y: isize,
+    pub fn set_char_background(&mut self, x: i32, y: i32,
                                color: Color,
                                background_flag: BackgroundFlag) {
         assert!(x >= 0 && y >= 0);
         unsafe {
             ffi::TCOD_console_set_char_background(self.con(),
-                                                  x as c_int, y as c_int,
+                                                  x, y,
                                                   color,
                                                   background_flag as u32)
         }
     }
 
     pub fn put_char(&mut self,
-                    x: isize, y: isize, glyph: char,
+                    x: i32, y: i32, glyph: char,
                     background_flag: BackgroundFlag) {
         assert!(x >= 0 && y >= 0);
         unsafe {
             ffi::TCOD_console_put_char(self.con(),
-                                       x as c_int, y as c_int, glyph as c_int,
+                                       x, y, glyph as i32,
                                        background_flag as u32);
         }
     }
 
     pub fn put_char_ex(&mut self,
-                       x: isize, y: isize, glyph: char,
+                       x: i32, y: i32, glyph: char,
                        foreground: Color, background: Color) {
         assert!(x >= 0 && y >= 0);
         unsafe {
             ffi::TCOD_console_put_char_ex(self.con(),
-                                          x as c_int, y as c_int, glyph as c_int,
+                                          x, y, glyph as i32,
                                           foreground, background);
         }
     }
@@ -279,7 +277,7 @@ impl Console {
     }
 
     pub fn print_ex(&mut self,
-                    x: isize, y: isize,
+                    x: i32, y: i32,
                     background_flag: BackgroundFlag,
                     alignment: TextAlignment,
                     text: &str) {
@@ -287,7 +285,7 @@ impl Console {
         unsafe {
             let c_text = CString::from_slice(text.as_bytes());
             ffi::TCOD_console_print_ex(self.con(),
-                                        x as c_int, y as c_int,
+                                        x, y,
                                         background_flag as u32,
                                         alignment as u32,
                                         c_text.as_ptr());
@@ -301,13 +299,13 @@ impl Console {
     }
 
     pub fn set_custom_font(font_path: ::std::path::Path, flags: FontFlags,
-                           nb_char_horizontal: isize,
-                           nb_char_vertical: isize) {
+                           nb_char_horizontal: i32,
+                           nb_char_vertical: i32) {
         unsafe {
             let path = CString::from_slice(font_path.as_vec());
             ffi::TCOD_console_set_custom_font(
-                path.as_ptr(), flags.bits() as c_int, nb_char_horizontal as c_int,
-                nb_char_vertical as c_int);
+                path.as_ptr(), flags.bits() as i32, nb_char_horizontal,
+                nb_char_vertical);
         }
     }
 
@@ -333,7 +331,7 @@ impl Console {
 
     pub fn check_for_keypress(status: KeyPressFlags) -> Option<KeyState> {
         let tcod_key = unsafe {
-            ffi::TCOD_console_check_for_keypress(status.bits() as c_int)
+            ffi::TCOD_console_check_for_keypress(status.bits() as i32)
         };
         if tcod_key.vk == ffi::TCODK_NONE {
             return None;
@@ -379,33 +377,33 @@ pub struct Map {
 }
 
 impl Map {
-    pub fn new(width: isize, height: isize) -> Map {
+    pub fn new(width: i32, height: i32) -> Map {
         assert!(width > 0 && height > 0);
         unsafe {
-            Map{tcod_map: ffi::TCOD_map_new(width as c_int, height as c_int)}
+            Map{tcod_map: ffi::TCOD_map_new(width, height)}
         }
     }
 
-    pub fn size(&self) -> (isize, isize) {
+    pub fn size(&self) -> (i32, i32) {
         unsafe {
-            (ffi::TCOD_map_get_width(self.tcod_map) as isize,
-             ffi::TCOD_map_get_height(self.tcod_map) as isize)
+            (ffi::TCOD_map_get_width(self.tcod_map),
+             ffi::TCOD_map_get_height(self.tcod_map))
         }
     }
 
-    pub fn set(&mut self, x: isize, y: isize, transparent: bool, walkable: bool) {
+    pub fn set(&mut self, x: i32, y: i32, transparent: bool, walkable: bool) {
         assert!(x >= 0 && y >= 0);
         unsafe {
-            ffi::TCOD_map_set_properties(self.tcod_map, x as c_int, y as c_int,
+            ffi::TCOD_map_set_properties(self.tcod_map, x, y,
                                          transparent as c_bool,
                                          walkable as c_bool);
         }
     }
 
-    pub fn is_walkable(&self, x: isize, y: isize) -> bool {
+    pub fn is_walkable(&self, x: i32, y: i32) -> bool {
         assert!(x >= 0 && y >= 0);
         unsafe {
-            ffi::TCOD_map_is_walkable(self.tcod_map, x as c_int, y as c_int) != 0
+            ffi::TCOD_map_is_walkable(self.tcod_map, x, y) != 0
         }
     }
 }
@@ -420,7 +418,7 @@ impl Drop for Map {
 
 enum PathInnerData<'a> {
     Map(Map),
-    Callback(Box<FnMut<((isize, isize), (isize, isize)), f32>+'a>, Box<(usize, usize)>),
+    Callback(Box<FnMut<((i32, i32), (i32, i32)), f32>+'a>, Box<(usize, usize)>),
 }
 
 // We need to wrap the pointer in a struct so that we can implement a
@@ -445,8 +443,8 @@ pub struct AStarPath<'a>{
     tcod_path: TCODPath,
     #[allow(dead_code)]
     inner: PathInnerData<'a>,
-    width: isize,
-    height: isize,
+    width: i32,
+    height: i32,
 }
 
 extern "C" fn c_path_callback(xf: c_int, yf: c_int,
@@ -454,19 +452,20 @@ extern "C" fn c_path_callback(xf: c_int, yf: c_int,
                           user_data: *mut c_void) -> c_float {
     unsafe {
         let ptr: &(usize, usize) = &*(user_data as *const (usize, usize));
-        let cb: &mut FnMut<((isize, isize), (isize, isize)), f32> = ::std::mem::transmute(*ptr);
-        cb.call_mut(((xf as isize, yf as isize), (xt as isize, yt as isize))) as c_float
+        let cb: &mut FnMut<((i32, i32), (i32, i32)), f32> = ::std::mem::transmute(*ptr);
+        //cb.call_mut(((xf, yf), (xt, yt))) as c_float
+        cb((xf, yf), (xt, yt)) as c_float
     }
 }
 
 type TcodPathCb = extern "C" fn(c_int, c_int, c_int, c_int, *mut c_void) -> c_float;
 
 impl<'a> AStarPath<'a> {
-    pub fn new_from_callback<T: 'a+FnMut((isize, isize), (isize, isize)) -> f32>(
-        width: isize, height: isize, path_callback: T,
+    pub fn new_from_callback<T: 'a+FnMut((i32, i32), (i32, i32)) -> f32>(
+        width: i32, height: i32, path_callback: T,
         diagonal_cost: f32) -> AStarPath<'a> {
-        // Convert the closure to a trait object. This will turn it isizeo a fat pointer:
-        let user_closure: Box<FnMut<((isize, isize), (isize, isize)), f32>> = Box::new(path_callback);
+        // Convert the closure to a trait object. This will turn it into a fat pointer:
+        let user_closure: Box<FnMut<((i32, i32), (i32, i32)), f32>> = Box::new(path_callback);
         unsafe {
             let fat_ptr: (usize, usize) = ::std::mem::transmute(&*user_closure);
             // Allocate the fat pointer on the heap:
@@ -474,7 +473,7 @@ impl<'a> AStarPath<'a> {
             // Create a pointer to the fat pointer. This well be passed as *void user_data:
             let user_data_ptr: *mut (usize, usize) = &mut *ptr;
 
-            let tcod_path = ffi::TCOD_path_new_using_function(width as c_int, height as c_int,
+            let tcod_path = ffi::TCOD_path_new_using_function(width, height,
                                                               Some(c_path_callback as TcodPathCb),
                                                               user_data_ptr as *mut c_void,
                                                               diagonal_cost as c_float);
@@ -504,16 +503,16 @@ impl<'a> AStarPath<'a> {
     }
 
     pub fn find(&mut self,
-                from: (isize, isize),
-                to: (isize, isize)) -> bool {
+                from: (i32, i32),
+                to: (i32, i32)) -> bool {
         let (from_x, from_y) = from;
         let (to_x, to_y) = to;
         assert!(from_x >= 0 && from_y >= 0 && to_x >= 0 && to_y >= 0);
         assert!(from_x < self.width && from_y < self.height && to_x < self.width && to_y < self.height);
         unsafe {
             ffi::TCOD_path_compute(self.tcod_path.ptr,
-                                   from_x as c_int, from_y as c_int,
-                                   to_x as c_int, to_y as c_int) != 0
+                                   from_x, from_y,
+                                   to_x, to_y) != 0
         }
     }
 
@@ -525,13 +524,13 @@ impl<'a> AStarPath<'a> {
         AStarPathIterator{tcod_path: self.tcod_path.ptr, recalculate: true}
     }
 
-    pub fn walk_one_step(&mut self, recalculate_when_needed: bool) -> Option<(isize, isize)> {
+    pub fn walk_one_step(&mut self, recalculate_when_needed: bool) -> Option<(i32, i32)> {
         unsafe {
             let mut x: c_int = 0;
             let mut y: c_int = 0;
             match ffi::TCOD_path_walk(self.tcod_path.ptr, &mut x, &mut y,
                                       recalculate_when_needed as c_bool) != 0 {
-                true => Some((x as isize, y as isize)),
+                true => Some((x, y)),
                 false => None,
             }
         }
@@ -561,15 +560,15 @@ impl<'a> AStarPath<'a> {
         }
     }
 
-    pub fn get(&self, index: isize) -> Option<(isize, isize)> {
+    pub fn get(&self, index: i32) -> Option<(i32, i32)> {
         if index < 0 || index >= self.len() {
             return None;
         }
         unsafe {
             let mut x: c_int = 0;
             let mut y: c_int = 0;
-            ffi::TCOD_path_get(self.tcod_path.ptr, index as c_int, &mut x, &mut y);
-            (Some((x as isize, y as isize)))
+            ffi::TCOD_path_get(self.tcod_path.ptr, index, &mut x, &mut y);
+            (Some((x, y)))
         }
     }
 
@@ -579,9 +578,9 @@ impl<'a> AStarPath<'a> {
         }
     }
 
-    pub fn len(&self) -> isize {
+    pub fn len(&self) -> i32 {
         unsafe {
-            ffi::TCOD_path_size(self.tcod_path.ptr) as isize
+            ffi::TCOD_path_size(self.tcod_path.ptr) as i32
         }
     }
 }
@@ -602,24 +601,24 @@ pub struct DijkstraPath<'a> {
     tcod_path: TCODDijkstraPath,
     #[allow(dead_code)]
     inner: PathInnerData<'a>,
-    width: isize,
-    height: isize,
+    width: i32,
+    height: i32,
 }
 
 impl<'a> DijkstraPath<'a> {
-    pub fn new_from_callback<T: 'a+FnMut((isize, isize), (isize, isize)) -> f32>(
-        width: isize, height: isize,
+    pub fn new_from_callback<T: 'a+FnMut((i32, i32), (i32, i32)) -> f32>(
+        width: i32, height: i32,
         path_callback: T,
         diagonal_cost: f32) -> DijkstraPath<'a> {
         // NOTE: this is might be a bit confusing. See the
         // AStarPath::new_from_callback implementation comments.
-        let user_closure: Box<FnMut<((isize, isize), (isize, isize)), f32>> = Box::new(path_callback);
+        let user_closure: Box<FnMut<((i32, i32), (i32, i32)), f32>> = Box::new(path_callback);
         unsafe {
             let fat_ptr: (usize, usize) = ::std::mem::transmute(&*user_closure);
             let mut ptr: Box<(usize, usize)> = Box::new(fat_ptr);
             let user_data_ptr: *mut (usize, usize) = &mut *ptr;
-            let tcod_path = ffi::TCOD_dijkstra_new_using_function(width as c_int,
-                                                                  height as c_int,
+            let tcod_path = ffi::TCOD_dijkstra_new_using_function(width,
+                                                                  height,
                                                                   Some(c_path_callback as TcodPathCb),
                                                                   user_data_ptr as *mut c_void,
                                                                   diagonal_cost as c_float);
@@ -645,19 +644,19 @@ impl<'a> DijkstraPath<'a> {
         }
     }
 
-    pub fn compute_grid(&mut self, root: (isize, isize)) {
+    pub fn compute_grid(&mut self, root: (i32, i32)) {
         let (x, y) = root;
         assert!(x >= 0 && y >= 0 && x < self.width && y < self.height);
         unsafe {
-            ffi::TCOD_dijkstra_compute(self.tcod_path.ptr, x as c_int, y as c_int);
+            ffi::TCOD_dijkstra_compute(self.tcod_path.ptr, x, y);
         }
     }
 
-    pub fn find(&mut self, destination: (isize, isize)) -> bool {
+    pub fn find(&mut self, destination: (i32, i32)) -> bool {
         let (x, y) = destination;
         if x >= 0 && y >= 0 && x < self.width && y < self.height {
             unsafe {
-                ffi::TCOD_dijkstra_path_set(self.tcod_path.ptr, x as c_int, y as c_int) != 0
+                ffi::TCOD_dijkstra_path_set(self.tcod_path.ptr, x, y) != 0
             }
         } else {
             false
@@ -668,22 +667,22 @@ impl<'a> DijkstraPath<'a> {
         DijkstraPathIterator{tcod_path: self.tcod_path.ptr}
     }
 
-    pub fn walk_one_step(&mut self) -> Option<(isize, isize)> {
+    pub fn walk_one_step(&mut self) -> Option<(i32, i32)> {
         unsafe {
             let mut x: c_int = 0;
             let mut y: c_int = 0;
             match ffi::TCOD_dijkstra_path_walk(self.tcod_path.ptr, &mut x, &mut y) != 0 {
-                true => Some((x as isize, y as isize)),
+                true => Some((x, y)),
                 false => None,
             }
         }
     }
 
 
-    pub fn distance_from_root(&self, point: (isize, isize)) -> Option<f32> {
+    pub fn distance_from_root(&self, point: (i32, i32)) -> Option<f32> {
         let (x, y) = point;
         let result = unsafe {
-            ffi::TCOD_dijkstra_get_distance(self.tcod_path.ptr, x as c_int, y as c_int)
+            ffi::TCOD_dijkstra_get_distance(self.tcod_path.ptr, x, y)
         };
         if result == -1.0 {
             None
@@ -698,15 +697,15 @@ impl<'a> DijkstraPath<'a> {
         }
     }
 
-    pub fn get(&self, index: isize) -> Option<(isize, isize)> {
+    pub fn get(&self, index: i32) -> Option<(i32, i32)> {
         if index < 0 || index >= self.len() {
             return None;
         }
         unsafe {
             let mut x: c_int = 0;
             let mut y: c_int = 0;
-            ffi::TCOD_dijkstra_get(self.tcod_path.ptr, index as c_int, &mut x, &mut y);
-            Some((x as isize, y as isize))
+            ffi::TCOD_dijkstra_get(self.tcod_path.ptr, index, &mut x, &mut y);
+            Some((x, y))
         }
     }
 
@@ -716,9 +715,9 @@ impl<'a> DijkstraPath<'a> {
         }
     }
 
-    pub fn len(&self) -> isize {
+    pub fn len(&self) -> i32 {
         unsafe {
-            ffi::TCOD_dijkstra_size(self.tcod_path.ptr) as isize
+            ffi::TCOD_dijkstra_size(self.tcod_path.ptr) as i32
         }
     }
 }
@@ -1123,23 +1122,22 @@ pub enum BackgroundFlag {
 
 
 pub mod system {
-    use libc::{c_int};
     use ffi;
 
-    pub fn set_fps(fps: isize) {
+    pub fn set_fps(fps: i32) {
         assert!(fps > 0);
         unsafe {
-            ffi::TCOD_sys_set_fps(fps as c_int)
+            ffi::TCOD_sys_set_fps(fps)
         }
     }
 
-    pub fn get_fps() -> isize {
+    pub fn get_fps() -> i32 {
         let mut result;
         unsafe {
             result = ffi::TCOD_sys_get_fps();
         }
         assert!(result >= 0);
-        return result as isize
+        return result
     }
 
     pub fn get_last_frame_length() -> f32 {
