@@ -1,11 +1,9 @@
-#![feature(unboxed_closures)]
-
 extern crate tcod;
 
 use tcod::DijkstraPath;
 
 fn create_path() -> DijkstraPath<'static> {
-    let chess_board: [[isize; 8]; 8] = [
+    let chess_board: [[i32; 8]; 8] = [
         [1, 0, 1, 0, 1, 0, 1, 0],
         [0, 1, 0, 1, 0, 1, 0, 1],
         [1, 0, 1, 0, 1, 0, 1, 0],
@@ -16,7 +14,7 @@ fn create_path() -> DijkstraPath<'static> {
         [0, 1, 0, 1, 0, 1, 0, 1],
     ];
     // Movement like in Checkers: you can only move to the square of the same colour
-    let can_move = move |&mut: from: (isize, isize), to: (isize, isize)| -> f32 {
+    let can_move = move |&mut: from: (i32, i32), to: (i32, i32)| -> f32 {
         let (fx, fy) = from;
         let (tx, ty) = to;
         if chess_board[fy as usize][fx as usize] == chess_board[ty as usize][tx as usize] {
@@ -28,7 +26,7 @@ fn create_path() -> DijkstraPath<'static> {
     DijkstraPath::new_from_callback(8, 8, can_move, 1.0)
 }
 
-fn walk_from(path: &mut DijkstraPath, origin: (isize, isize)) {
+fn walk_from(path: &mut DijkstraPath, origin: (i32, i32)) {
     path.find(origin);
     path.reverse();
     println!("Starting from: {:?}", origin);
