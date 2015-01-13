@@ -418,7 +418,7 @@ impl Drop for Map {
 
 enum PathInnerData<'a> {
     Map(Map),
-    Callback(Box<FnMut<((i32, i32), (i32, i32)), f32>+'a>, Box<(usize, usize)>),
+    Callback(Box<FnMut((i32, i32), (i32, i32)) -> f32+'a>, Box<(usize, usize)>),
 }
 
 // We need to wrap the pointer in a struct so that we can implement a
@@ -452,7 +452,7 @@ extern "C" fn c_path_callback(xf: c_int, yf: c_int,
                           user_data: *mut c_void) -> c_float {
     unsafe {
         let ptr: &(usize, usize) = &*(user_data as *const (usize, usize));
-        let cb: &mut FnMut<((i32, i32), (i32, i32)), f32> = ::std::mem::transmute(*ptr);
+        let cb: &mut FnMut((i32, i32), (i32, i32)) -> f32 = ::std::mem::transmute(*ptr);
         //cb.call_mut(((xf, yf), (xt, yt))) as c_float
         cb((xf, yf), (xt, yt)) as c_float
     }
@@ -465,7 +465,7 @@ impl<'a> AStarPath<'a> {
         width: i32, height: i32, path_callback: T,
         diagonal_cost: f32) -> AStarPath<'a> {
         // Convert the closure to a trait object. This will turn it into a fat pointer:
-        let user_closure: Box<FnMut<((i32, i32), (i32, i32)), f32>> = Box::new(path_callback);
+        let user_closure: Box<FnMut((i32, i32), (i32, i32)) -> f32> = Box::new(path_callback);
         unsafe {
             let fat_ptr: (usize, usize) = ::std::mem::transmute(&*user_closure);
             // Allocate the fat pointer on the heap:
@@ -612,7 +612,7 @@ impl<'a> DijkstraPath<'a> {
         diagonal_cost: f32) -> DijkstraPath<'a> {
         // NOTE: this is might be a bit confusing. See the
         // AStarPath::new_from_callback implementation comments.
-        let user_closure: Box<FnMut<((i32, i32), (i32, i32)), f32>> = Box::new(path_callback);
+        let user_closure: Box<FnMut((i32, i32), (i32, i32)) -> f32> = Box::new(path_callback);
         unsafe {
             let fat_ptr: (usize, usize) = ::std::mem::transmute(&*user_closure);
             let mut ptr: Box<(usize, usize)> = Box::new(fat_ptr);
