@@ -30,102 +30,105 @@ pub fn mouse_move(x: i32, y: i32) {
     }
 }
 
-pub fn sys_check_for_event(event_mask: EventFlags,
-                           mut key: Option<&mut KeyState>,
-                           mut mouse: Option<&mut MouseState>) -> EventFlags {
-    unsafe {
-        let mut c_key_state = ffi::TCOD_key_t {
-            vk: 0,
-            c: ' ' as libc::c_char,
-            pressed: false as c_bool,
-            lalt: false as c_bool,
-            lctrl: false as c_bool,
-            ralt: false as c_bool,
-            rctrl: false as c_bool,
-            shift: false as c_bool
-        };
+pub fn sys_check_for_event(event_mask: EventFlags) -> (EventFlags, Event) {
+    let mut c_key_state = ffi::TCOD_key_t {
+        vk: 0,
+        c: ' ' as libc::c_char,
+        pressed: false as c_bool,
+        lalt: false as c_bool,
+        lctrl: false as c_bool,
+        ralt: false as c_bool,
+        rctrl: false as c_bool,
+        shift: false as c_bool
+    };
 
-        let mut c_mouse_state = ffi::TCOD_mouse_t {
-            x: 0,
-            y: 0,
-            dx: 0,
-            dy: 0,
-            cx: 0,
-            cy: 0,
-            dcx: 0,
-            dcy: 0,
-            lbutton: false as c_bool,
-            rbutton: false as c_bool,
-            mbutton: false as c_bool,
-            lbutton_pressed: false as c_bool,
-            rbutton_pressed: false as c_bool,
-            mbutton_pressed: false as c_bool,
-            wheel_up: false as c_bool,
-            wheel_down: false as c_bool
-        };
+    let mut c_mouse_state = ffi::TCOD_mouse_t {
+        x: 0,
+        y: 0,
+        dx: 0,
+        dy: 0,
+        cx: 0,
+        cy: 0,
+        dcx: 0,
+        dcy: 0,
+        lbutton: false as c_bool,
+        rbutton: false as c_bool,
+        mbutton: false as c_bool,
+        lbutton_pressed: false as c_bool,
+        rbutton_pressed: false as c_bool,
+        mbutton_pressed: false as c_bool,
+        wheel_up: false as c_bool,
+        wheel_down: false as c_bool
+    };
 
-        let event = ffi::TCOD_sys_check_for_event(
+    let event = unsafe {
+        ffi::TCOD_sys_check_for_event(
             event_mask.bits() as i32,
-            match key {
-                None => std::ptr::null_mut(),
-                Some(..) => &mut c_key_state
+            if event_mask.intersects(KEY_PRESS|KEY_RELEASE|KEY|ANY) {
+                &mut c_key_state
+            } else {
+                std::ptr::null_mut()
             },
-            match mouse {
-                None => std::ptr::null_mut(),
-                Some(..) => &mut c_mouse_state
-            });
+            if event_mask.intersects(
+                MOUSE_MOVE|MOUSE_PRESS|MOUSE_RELEASE|MOUSE|ANY) {
+                &mut c_mouse_state
+            } else {
+                std::ptr::null_mut()
+            })
+    };
 
-        match key {
-            Some(ref mut key) => {
-                key.key = if c_key_state.vk == ffi::TCODK_CHAR {
-                    Key::Printable(c_key_state.c as u8 as char)
-                } else {
-                    Key::Special(FromPrimitive::from_u32(c_key_state.vk)
-                                 .unwrap())
-                };
-                key.pressed = c_key_state.pressed != 0;
-                key.left_alt = c_key_state.lalt != 0;
-                key.right_alt = c_key_state.ralt != 0;
-                key.left_ctrl = c_key_state.lctrl != 0;
-                key.right_ctrl = c_key_state.rctrl != 0;
-                key.shift = c_key_state.shift != 0;
+    let ret_flag = match event {
+        ffi::TCOD_EVENT_KEY_PRESS => KEY_PRESS,
+        ffi::TCOD_EVENT_KEY_RELEASE => KEY_RELEASE,
+        ffi::TCOD_EVENT_KEY => KEY,
+        ffi::TCOD_EVENT_MOUSE => MOUSE,
+        ffi::TCOD_EVENT_MOUSE_MOVE => MOUSE_MOVE,
+        ffi::TCOD_EVENT_MOUSE_PRESS => MOUSE_PRESS,
+        ffi::TCOD_EVENT_MOUSE_RELEASE => MOUSE_RELEASE,
+        _ => ANY
+    };
+
+    let ret_event = if ret_flag == ANY {
+        Event::None
+    } else if ret_flag.intersects(KEY_PRESS|KEY_RELEASE|KEY) {
+        Event::Key(KeyState {
+            key: if c_key_state.vk == ffi::TCODK_CHAR {
+                Key::Printable(c_key_state.c as u8 as char)
+            } else {
+                Key::Special(FromPrimitive::from_u32(c_key_state.vk)
+                             .unwrap())
             },
-            _ => ()
-        }
+            pressed: c_key_state.pressed != 0,
+            left_alt: c_key_state.lalt != 0,
+            left_ctrl: c_key_state.lctrl != 0,
+            right_alt: c_key_state.ralt != 0,
+            right_ctrl: c_key_state.rctrl != 0,
+            shift: c_key_state.shift != 0
+        })
+    } else if ret_flag.intersects(MOUSE_MOVE|MOUSE_PRESS|MOUSE_RELEASE|MOUSE) {
+        Event::Mouse(MouseState {
+            x: c_mouse_state.x as isize,
+            y: c_mouse_state.y as isize,
+            dx: c_mouse_state.dx as isize,
+            dy: c_mouse_state.dy as isize,
+            cx: c_mouse_state.cx as isize,
+            cy: c_mouse_state.cy as isize,
+            dcx: c_mouse_state.dcx as isize,
+            dcy: c_mouse_state.dcy as isize,
+            lbutton: c_mouse_state.lbutton != 0,
+            rbutton: c_mouse_state.rbutton != 0,
+            mbutton: c_mouse_state.mbutton != 0,
+            lbutton_pressed: c_mouse_state.lbutton_pressed != 0,
+            rbutton_pressed: c_mouse_state.rbutton_pressed != 0,
+            mbutton_pressed: c_mouse_state.mbutton_pressed != 0,
+            wheel_up: c_mouse_state.wheel_up != 0,
+            wheel_down: c_mouse_state.wheel_down != 0
+        })
+    } else {
+        Event::None
+    };
 
-        match mouse {
-            Some(ref mut mouse) => {
-                mouse.x = c_mouse_state.x as isize;
-                mouse.y = c_mouse_state.y as isize;
-                mouse.dx = c_mouse_state.dx as isize;
-                mouse.dy = c_mouse_state.dy as isize;
-                mouse.cx = c_mouse_state.cx as isize;
-                mouse.cy = c_mouse_state.cy as isize;
-                mouse.dcx = c_mouse_state.dcx as isize;
-                mouse.dcy = c_mouse_state.dcy as isize;
-                mouse.lbutton = c_mouse_state.lbutton != 0;
-                mouse.rbutton = c_mouse_state.rbutton != 0;
-                mouse.mbutton = c_mouse_state.mbutton != 0;
-                mouse.lbutton_pressed = c_mouse_state.lbutton_pressed != 0;
-                mouse.rbutton_pressed = c_mouse_state.rbutton_pressed != 0;
-                mouse.mbutton_pressed = c_mouse_state.mbutton_pressed != 0;
-                mouse.wheel_up = c_mouse_state.wheel_up != 0;
-                mouse.wheel_down = c_mouse_state.wheel_down != 0;
-            },
-            _ => {}
-        }
-
-        match event {
-            ffi::TCOD_EVENT_KEY_PRESS => KEY_PRESS,
-            ffi::TCOD_EVENT_KEY_RELEASE => KEY_RELEASE,
-            ffi::TCOD_EVENT_KEY => KEY,
-            ffi::TCOD_EVENT_MOUSE => MOUSE,
-            ffi::TCOD_EVENT_MOUSE_MOVE => MOUSE_MOVE,
-            ffi::TCOD_EVENT_MOUSE_PRESS => MOUSE_PRESS,
-            ffi::TCOD_EVENT_MOUSE_RELEASE => MOUSE_RELEASE,
-            _ => ANY
-        }
-    }
+    (ret_flag, ret_event)
 }
 
 // Private wrapper over TCOD_console_t. Ideally, we'd have it as a private field
@@ -1120,6 +1123,11 @@ pub enum BackgroundFlag {
     Default = ffi::TCOD_BKGND_DEFAULT as isize
 }
 
+pub enum Event {
+    Key(KeyState),
+    Mouse(MouseState),
+    None
+}
 
 pub mod system {
     use ffi;
