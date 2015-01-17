@@ -6,6 +6,7 @@ use libc::{c_int, c_uint, c_float, uint8_t, c_void};
 
 pub use Console::Root as RootConsole;
 pub use ffi::TCOD_color_t as Color;
+pub use ffi::TCOD_fov_algorithm_t as FovAlgorithm;
 
 use std::num::FromPrimitive;
 use std::ffi::CString;
@@ -282,6 +283,23 @@ impl Map {
             ffi::TCOD_map_set_properties(self.tcod_map, x, y,
                                          transparent as c_bool,
                                          walkable as c_bool);
+        }
+    }
+
+    pub fn compute_fov(&mut self, origin_x: i32, origin_y: i32, max_radius: i32,
+                       light_walls: bool, algo: FovAlgorithm) {
+        assert!(origin_x >= 0 && origin_y >= 0);
+        unsafe {
+            ffi::TCOD_map_compute_fov(self.tcod_map, origin_x, origin_y, max_radius,
+                                     light_walls as c_bool,
+                                     algo);
+        }
+    }
+
+    pub fn is_in_fov(&self, x: i32, y: i32) -> bool {
+        assert!(x >= 0 && y >= 0);
+        unsafe {
+            ffi::TCOD_map_is_in_fov(self.tcod_map, x, y) != 0
         }
     }
 
@@ -775,6 +793,22 @@ pub struct MouseState {
     pub mbutton_pressed: bool,
     pub wheel_up: bool,
     pub wheel_down: bool,
+}
+
+pub mod fov_algorithms {
+    pub use ffi::FOV_BASIC as Basic;
+    pub use ffi::FOV_DIAMOND as Diamond;
+    pub use ffi::FOV_SHADOW as Shadow;
+    pub use ffi::FOV_PERMISSIVE_0 as Permissive0;
+    pub use ffi::FOV_PERMISSIVE_1 as Permissive1;
+    pub use ffi::FOV_PERMISSIVE_2 as Permissive2;
+    pub use ffi::FOV_PERMISSIVE_3 as Permissive3;
+    pub use ffi::FOV_PERMISSIVE_4 as Permissive4;
+    pub use ffi::FOV_PERMISSIVE_5 as Permissive5;
+    pub use ffi::FOV_PERMISSIVE_6 as Permissive6;
+    pub use ffi::FOV_PERMISSIVE_7 as Permissive7;
+    pub use ffi::FOV_PERMISSIVE_8 as Permissive8;
+    pub use ffi::FOV_RESTRICTIVE as Restrictive;
 }
 
 pub mod colors {
