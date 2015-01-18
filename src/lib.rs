@@ -1,5 +1,6 @@
 extern crate libc;
 extern crate "tcod-sys" as ffi;
+#[macro_use] extern crate bitflags;
 
 use libc::{c_int, c_uint, c_float, uint8_t, c_void};
 

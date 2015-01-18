@@ -20,6 +20,9 @@ authors = ["Tomas Sedovic <tomas@sedovic.cz>",
 name = "tcod"
 path = "src/lib.rs"
 
+[dependencies]
+bitflags = "0.1"
+
 [dependencies.tcod-sys]
 path = "tcod-sys"
 version = "2.0.0"
