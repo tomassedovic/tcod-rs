@@ -6,7 +6,6 @@ use libc::{c_int, c_uint, c_float, uint8_t, c_void};
 
 pub use Console::Root as RootConsole;
 pub use ffi::TCOD_color_t as Color;
-pub use ffi::TCOD_fov_algorithm_t as FovAlgorithm;
 
 use std::num::FromPrimitive;
 use std::ffi::CString;
@@ -292,7 +291,7 @@ impl Map {
         unsafe {
             ffi::TCOD_map_compute_fov(self.tcod_map, origin_x, origin_y, max_radius,
                                      light_walls as c_bool,
-                                     algo);
+                                     algo as u32);
         }
     }
 
@@ -795,20 +794,21 @@ pub struct MouseState {
     pub wheel_down: bool,
 }
 
-pub mod fov_algorithms {
-    pub use ffi::FOV_BASIC as Basic;
-    pub use ffi::FOV_DIAMOND as Diamond;
-    pub use ffi::FOV_SHADOW as Shadow;
-    pub use ffi::FOV_PERMISSIVE_0 as Permissive0;
-    pub use ffi::FOV_PERMISSIVE_1 as Permissive1;
-    pub use ffi::FOV_PERMISSIVE_2 as Permissive2;
-    pub use ffi::FOV_PERMISSIVE_3 as Permissive3;
-    pub use ffi::FOV_PERMISSIVE_4 as Permissive4;
-    pub use ffi::FOV_PERMISSIVE_5 as Permissive5;
-    pub use ffi::FOV_PERMISSIVE_6 as Permissive6;
-    pub use ffi::FOV_PERMISSIVE_7 as Permissive7;
-    pub use ffi::FOV_PERMISSIVE_8 as Permissive8;
-    pub use ffi::FOV_RESTRICTIVE as Restrictive;
+#[repr(C)]
+pub enum FovAlgorithm {
+    Basic       = ffi::FOV_BASIC as isize,
+    Diamond     = ffi::FOV_DIAMOND as isize,
+    Shadow      = ffi::FOV_SHADOW as isize,
+    Permissive0 = ffi::FOV_PERMISSIVE_0 as isize,
+    Permissive1 = ffi::FOV_PERMISSIVE_1 as isize,
+    Permissive2 = ffi::FOV_PERMISSIVE_2 as isize,
+    Permissive3 = ffi::FOV_PERMISSIVE_3 as isize,
+    Permissive4 = ffi::FOV_PERMISSIVE_4 as isize,
+    Permissive5 = ffi::FOV_PERMISSIVE_5 as isize,
+    Permissive6 = ffi::FOV_PERMISSIVE_6 as isize,
+    Permissive7 = ffi::FOV_PERMISSIVE_7 as isize,
+    Permissive8 = ffi::FOV_PERMISSIVE_8 as isize,
+    Permissive9 = ffi::FOV_RESTRICTIVE as isize,
 }
 
 pub mod colors {
