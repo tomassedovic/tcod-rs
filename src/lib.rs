@@ -285,6 +285,23 @@ impl Map {
         }
     }
 
+    pub fn compute_fov(&mut self, origin_x: i32, origin_y: i32, max_radius: i32,
+                       light_walls: bool, algo: FovAlgorithm) {
+        assert!(origin_x >= 0 && origin_y >= 0);
+        unsafe {
+            ffi::TCOD_map_compute_fov(self.tcod_map, origin_x, origin_y, max_radius,
+                                     light_walls as c_bool,
+                                     algo as u32);
+        }
+    }
+
+    pub fn is_in_fov(&self, x: i32, y: i32) -> bool {
+        assert!(x >= 0 && y >= 0);
+        unsafe {
+            ffi::TCOD_map_is_in_fov(self.tcod_map, x, y) != 0
+        }
+    }
+
     pub fn is_walkable(&self, x: i32, y: i32) -> bool {
         assert!(x >= 0 && y >= 0);
         unsafe {
@@ -775,6 +792,23 @@ pub struct MouseState {
     pub mbutton_pressed: bool,
     pub wheel_up: bool,
     pub wheel_down: bool,
+}
+
+#[repr(C)]
+pub enum FovAlgorithm {
+    Basic       = ffi::FOV_BASIC as isize,
+    Diamond     = ffi::FOV_DIAMOND as isize,
+    Shadow      = ffi::FOV_SHADOW as isize,
+    Permissive0 = ffi::FOV_PERMISSIVE_0 as isize,
+    Permissive1 = ffi::FOV_PERMISSIVE_1 as isize,
+    Permissive2 = ffi::FOV_PERMISSIVE_2 as isize,
+    Permissive3 = ffi::FOV_PERMISSIVE_3 as isize,
+    Permissive4 = ffi::FOV_PERMISSIVE_4 as isize,
+    Permissive5 = ffi::FOV_PERMISSIVE_5 as isize,
+    Permissive6 = ffi::FOV_PERMISSIVE_6 as isize,
+    Permissive7 = ffi::FOV_PERMISSIVE_7 as isize,
+    Permissive8 = ffi::FOV_PERMISSIVE_8 as isize,
+    Permissive9 = ffi::FOV_RESTRICTIVE as isize,
 }
 
 pub mod colors {
