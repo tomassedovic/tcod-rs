@@ -795,6 +795,7 @@ pub struct MouseState {
 }
 
 #[repr(C)]
+#[derive(Copy, Show)]
 pub enum FovAlgorithm {
     Basic       = ffi::FOV_BASIC as isize,
     Diamond     = ffi::FOV_DIAMOND as isize,
@@ -1173,6 +1174,7 @@ pub mod system {
         (ret_flag, ret_event)
     }
 
+    #[derive(Copy, Show)]
     pub enum Event {
         Key(::KeyState),
         Mouse(::MouseState),
