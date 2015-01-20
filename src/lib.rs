@@ -1,3 +1,5 @@
+#![allow(unstable)]
+
 extern crate libc;
 extern crate "tcod-sys" as ffi;
 #[macro_use] extern crate bitflags;
