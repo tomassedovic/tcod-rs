@@ -808,7 +808,7 @@ pub enum FovAlgorithm {
     Permissive6 = ffi::FOV_PERMISSIVE_6 as isize,
     Permissive7 = ffi::FOV_PERMISSIVE_7 as isize,
     Permissive8 = ffi::FOV_PERMISSIVE_8 as isize,
-    Permissive9 = ffi::FOV_RESTRICTIVE as isize,
+    Restrictive = ffi::FOV_RESTRICTIVE as isize,
 }
 
 pub mod colors {
