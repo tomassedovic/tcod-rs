@@ -1,3 +1,5 @@
+#![allow(unstable)]
+
 extern crate tcod;
 
 use std::rand;
@@ -5,6 +7,7 @@ use std::rand;
 use tcod::{Console, BackgroundFlag, FovAlgorithm, Map};
 
 // We'll use a basic structure to define our tiles.
+#[derive(Copy)]
 pub struct Tile {
     ch: char,
     x: i32,

@@ -74,7 +74,7 @@ pub type uintptr = ::libc::c_ulong;
 pub type _bool = uint8;
 pub type TCOD_list_t = *mut ::libc::c_void;
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Show)]
 pub struct Struct_Unnamed3 {
     pub r: uint8,
     pub g: uint8,

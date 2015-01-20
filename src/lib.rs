@@ -1,3 +1,5 @@
+#![allow(unstable)]
+
 extern crate libc;
 extern crate "tcod-sys" as ffi;
 #[macro_use] extern crate bitflags;
@@ -795,6 +797,7 @@ pub struct MouseState {
 }
 
 #[repr(C)]
+#[derive(Copy, Show)]
 pub enum FovAlgorithm {
     Basic       = ffi::FOV_BASIC as isize,
     Diamond     = ffi::FOV_DIAMOND as isize,
@@ -1043,7 +1046,7 @@ pub mod system {
     use std;
     use std::num::FromPrimitive;
     use ffi;
-    use libc::{c_int, c_uint, c_float, uint8_t, c_void, c_char};
+    use libc::c_char;
     use ::{c_bool,
            Key, EventFlags,
            ANY,
@@ -1173,6 +1176,7 @@ pub mod system {
         (ret_flag, ret_event)
     }
 
+    #[derive(Copy, Show)]
     pub enum Event {
         Key(::KeyState),
         Mouse(::MouseState),
