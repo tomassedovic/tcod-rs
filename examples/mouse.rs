@@ -1,8 +1,6 @@
 extern crate tcod;
 
 use tcod::{Console, BackgroundFlag};
-use tcod::Key::Special;
-use tcod::KeyCode::{Up, Down, Left, Right, Escape};
 
 fn main() {
     let mut con = Console::init_root(
@@ -13,7 +11,7 @@ fn main() {
     while !Console::window_closed() {
 
         loop {
-            let (flags, event) = tcod::system::check_for_event(
+            let (_flags, event) = tcod::system::check_for_event(
                 tcod::KEY | tcod::MOUSE);
 
             match event {
