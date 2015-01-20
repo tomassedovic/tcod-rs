@@ -1044,7 +1044,7 @@ pub mod system {
     use std;
     use std::num::FromPrimitive;
     use ffi;
-    use libc::{c_int, c_uint, c_float, uint8_t, c_void, c_char};
+    use libc::c_char;
     use ::{c_bool,
            Key, EventFlags,
            ANY,
