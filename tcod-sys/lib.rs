@@ -1364,7 +1364,7 @@ extern "C" {
                                buf: *mut ::libc::c_uchar, size: uint32)
      -> _bool;
     pub fn TCOD_sys_clipboard_set(value: *const ::libc::c_char);
-    pub fn TCOD_sys_clipboard_get() -> *mut ::libc::c_char;
+    pub fn TCOD_sys_clipboard_get() -> *const ::libc::c_char;
     pub fn TCOD_thread_new(func:
                                ::std::option::Option<extern "C" fn
                                                          (arg1:
