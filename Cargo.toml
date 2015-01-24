@@ -1,7 +1,7 @@
 [package]
 name = "tcod"
 description = "The Rust bindings for the Doryen library (a.k.a. libtcod)."
-version = "0.4.4"
+version = "0.4.5"
 homepage = "https://github.com/tomassedovic/tcod-rs"
 repository = "https://github.com/tomassedovic/tcod-rs"
 readme = "README.md"
@@ -25,7 +25,7 @@ bitflags = "0.1"
 
 [dependencies.tcod-sys]
 path = "tcod-sys"
-version = "2.0.1"
+version = "2.0.2"
 
 # TODO: temporarily disabling debuginfo until this is fixed:
 # https://github.com/rust-lang/rust/issues/17257
