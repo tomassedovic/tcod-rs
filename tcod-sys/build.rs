@@ -2,7 +2,6 @@
 #![allow(unstable)]
 
 use std::io::{fs, Command};
-use std::io::process::InheritFd;
 use std::os;
 
 
@@ -29,11 +28,18 @@ fn main() {
         .arg("clean")
         .arg("all")
         .cwd(&libtcod_dir);
-    assert!(make.stdout(InheritFd(1))
-            .stdout(InheritFd(2))
-            .status()
-            .unwrap()
-            .success());
+    match make.output() {
+        Ok(output) => {
+            if output.status.success() {
+                println!("`make` succeeded.");
+            } else {
+                println!("STDOUT: {}", String::from_utf8_lossy(&output.output[]));
+                println!("STDERR: {}", String::from_utf8_lossy(&output.error[]));
+                panic!("`make` returned: {}", output.status);
+            }
+        }
+        Err(e) => panic!("`make` failed: {}", e),
+    }
 
     // TODO(shadower): there's a bunch of name special-casing I came across
     // testing this in my linux and windows setups. I have no idea why these are
