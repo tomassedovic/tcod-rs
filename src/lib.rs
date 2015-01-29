@@ -1045,7 +1045,7 @@ pub enum BackgroundFlag {
 pub mod system {
     use std;
     use std::num::FromPrimitive;
-    use std::io::fs::PathExtensions;
+    use std::old_io::fs::PathExtensions;
     use std::time::Duration;
     use ffi;
     use libc::c_char;
