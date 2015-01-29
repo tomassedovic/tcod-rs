@@ -1,7 +1,7 @@
 // TODO(shadower): remove this once the dust settles around path and IO:
 #![allow(unstable)]
 
-use std::io::{fs, Command};
+use std::old_io::{fs, Command};
 use std::os;
 
 
