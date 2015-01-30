@@ -1,8 +1,6 @@
 #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals,
          missing_copy_implementations, raw_pointer_derive)]
-
-
-#[allow(unstable)]
+#![feature(libc, core)]
 // This is not added by rust-bindgen even though it's used heavily in the
 // generated code:
 extern crate libc;
