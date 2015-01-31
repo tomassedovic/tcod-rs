@@ -685,7 +685,7 @@ bitflags! {
 }
 
 
-#[derive(Copy, PartialEq, FromPrimitive, Show)]
+#[derive(Copy, PartialEq, FromPrimitive, Debug)]
 #[repr(C)]
 pub enum KeyCode {
     NoKey,
@@ -759,13 +759,13 @@ pub enum KeyCode {
 }
 
 
-#[derive(Copy, PartialEq, Show)]
+#[derive(Copy, PartialEq, Debug)]
 pub enum Key {
     Printable(char),
     Special(KeyCode),
 }
 
-#[derive(Copy, PartialEq, Show)]
+#[derive(Copy, PartialEq, Debug)]
 pub struct KeyState {
     pub key: Key,
     pub pressed: bool,
@@ -776,7 +776,7 @@ pub struct KeyState {
     pub shift: bool,
 }
 
-#[derive(Copy, PartialEq, Show)]
+#[derive(Copy, PartialEq, Debug)]
 pub struct MouseState {
     pub x: isize,
     pub y: isize,
@@ -797,7 +797,7 @@ pub struct MouseState {
 }
 
 #[repr(C)]
-#[derive(Copy, Show)]
+#[derive(Copy, Debug)]
 pub enum FovAlgorithm {
     Basic       = ffi::FOV_BASIC as isize,
     Diamond     = ffi::FOV_DIAMOND as isize,
@@ -1254,7 +1254,7 @@ pub mod system {
         (ret_flag, ret_event)
     }
 
-    #[derive(Copy, Show)]
+    #[derive(Copy, Debug)]
     pub enum Event {
         Key(::KeyState),
         Mouse(::MouseState),
