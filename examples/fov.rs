@@ -1,4 +1,4 @@
-#![allow(unstable)]
+#![feature(rand)]
 
 extern crate tcod;
 
@@ -23,8 +23,8 @@ fn main() {
     root.clear();
 
     // Set the map.
-    for x in range(0,40) {
-        for y in range(0,40) {
+    for x in 0..40 {
+        for y in 0..40 {
             // Place some walls randomly.
             if rand::random() {
                 tiles.push(Tile{x:x, y:y, ch: '#' });
