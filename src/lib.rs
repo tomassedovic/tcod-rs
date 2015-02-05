@@ -185,7 +185,7 @@ impl Console {
         }
     }
 
-    pub fn set_custom_font(font_path: ::std::path::Path, flags: FontFlags,
+    pub fn set_custom_font(font_path: ::std::old_path::Path, flags: FontFlags,
                            nb_char_horizontal: i32,
                            nb_char_vertical: i32) {
         unsafe {
@@ -1090,7 +1090,7 @@ pub mod system {
         return Duration::milliseconds(ms as i64)
     }
 
-    pub fn save_screenshot(path: &std::path::Path) {
+    pub fn save_screenshot(path: &std::old_path::Path) {
         assert!(path.exists());
         let c_path = std::ffi::CString::from_slice(path.as_vec());
         unsafe {
