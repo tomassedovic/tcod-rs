@@ -1,8 +1,7 @@
-#![feature(rand)]
+#![feature(core)]
 
+extern crate rand;
 extern crate tcod;
-
-use std::rand;
 
 use tcod::{Console, BackgroundFlag, FovAlgorithm, Map};
 
