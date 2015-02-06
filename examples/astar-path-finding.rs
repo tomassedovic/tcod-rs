@@ -1,3 +1,5 @@
+#![feature(core)]
+
 extern crate tcod;
 
 use tcod::AStarPath;
@@ -14,7 +16,7 @@ fn create_path() -> AStarPath<'static> {
         [0, 1, 0, 1, 0, 1, 0, 1],
     ];
     // Movement like in Checkers: you can only move to the square of the same colour
-    let can_move = move |&mut: from: (i32, i32), to: (i32, i32)| -> f32 {
+    let can_move = move |from: (i32, i32), to: (i32, i32)| -> f32 {
         let (fx, fy) = from;
         let (tx, ty) = to;
         if chess_board[fy as usize][fx as usize] == chess_board[ty as usize][tx as usize] {
