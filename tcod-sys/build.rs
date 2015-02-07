@@ -1,15 +1,15 @@
 // TODO(shadower): remove this once the dust settles around path and IO:
-#![feature(os, path, io)]
+#![feature(env, path, io)]
 
 use std::old_io::{fs, Command};
-use std::os;
+use std::env;
 
 
 fn main() {
-    let src = Path::new(os::getenv("CARGO_MANIFEST_DIR").unwrap());
-    let dst = Path::new(os::getenv("OUT_DIR").unwrap());
+    let src = Path::new(env::var_string("CARGO_MANIFEST_DIR").unwrap());
+    let dst = Path::new(env::var_string("OUT_DIR").unwrap());
 
-    let target = os::getenv("TARGET").unwrap();
+    let target = env::var_string("TARGET").unwrap();
     let makefile = if target.contains("linux") {
         "makefile-linux"
     } else if target.contains("darwin") {
