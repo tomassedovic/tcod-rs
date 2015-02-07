@@ -1,5 +1,9 @@
 language: rust
 
+os:
+  - linux
+  - osx
+
 before_install:
   - sudo apt-get update -qq
 
