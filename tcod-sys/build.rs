@@ -6,10 +6,10 @@ use std::env;
 
 
 fn main() {
-    let src = Path::new(env::var_string("CARGO_MANIFEST_DIR").unwrap());
-    let dst = Path::new(env::var_string("OUT_DIR").unwrap());
+    let src = Path::new(env::var("CARGO_MANIFEST_DIR").unwrap());
+    let dst = Path::new(env::var("OUT_DIR").unwrap());
 
-    let target = env::var_string("TARGET").unwrap();
+    let target = env::var("TARGET").unwrap();
     let makefile = if target.contains("linux") {
         "makefile-linux"
     } else if target.contains("darwin") {
