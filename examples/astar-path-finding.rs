@@ -1,5 +1,3 @@
-#![feature(core)]
-
 extern crate tcod;
 
 use tcod::AStarPath;

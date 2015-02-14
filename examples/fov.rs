@@ -1,5 +1,3 @@
-#![feature(core)]
-
 extern crate rand;
 extern crate tcod;
 
