@@ -1,4 +1,4 @@
-#![feature(libc, std_misc, path, core, hash, io)]
+#![feature(libc, std_misc, old_path, core, hash, old_io)]
 
 extern crate libc;
 extern crate "tcod-sys" as ffi;

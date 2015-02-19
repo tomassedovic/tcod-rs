@@ -1,5 +1,5 @@
 // TODO(shadower): remove this once the dust settles around path and IO:
-#![feature(env, path, io)]
+#![feature(env, old_path, old_io)]
 
 use std::old_io::{fs, Command};
 use std::env;
