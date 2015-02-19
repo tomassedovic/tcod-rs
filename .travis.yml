@@ -1,26 +1,32 @@
 language: rust
-
 before_install:
-  - sudo apt-get update -qq
-
+- sudo apt-get update -qq
 install:
-  - sudo apt-get install -y upx electric-fence libsdl1.2-dev
-
+- sudo apt-get install -y upx electric-fence libsdl1.2-dev
 script:
-  - cargo build --verbose
-  - cargo test --verbose
+- cargo build --verbose
+- cargo test --verbose
+after_success: ! '[ $TRAVIS_BRANCH = master ] &&
 
-after_success: |
-    [ $TRAVIS_BRANCH = master ] &&
-    [ $TRAVIS_PULL_REQUEST = false ] &&
-    cargo doc &&
-    echo '<meta http-equiv=refresh content="0;url=tcod/index.html">' > target/doc/index.html &&
-    git config --global user.email "travis@travis-ci.org" &&
-    git config --global user.name "travis-ci" &&
-    sudo pip install ghp-import &&
-    ghp-import -n target/doc &&
-    git push -fq https://${TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git gh-pages
+  [ $TRAVIS_PULL_REQUEST = false ] &&
 
+  cargo doc &&
+
+  echo ''<meta http-equiv=refresh content="0;url=tcod/index.html">'' > target/doc/index.html
+  &&
+
+  git config --global user.email "travis@travis-ci.org" &&
+
+  git config --global user.name "travis-ci" &&
+
+  sudo pip install ghp-import &&
+
+  ghp-import -n target/doc &&
+
+  git push -fq https://${TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git gh-pages
+
+'
 env:
-    global:
-        secure: "U0ymc2BxM4Z5ECHeU77JqaCK+T2o/E9ZMp8c/21rvqu+Nsx6TUcssrdBvQ9yXLahPjxrtN2vuOSAzKRp4Ymoigq8BHahUmUBbNWmEjK6HvhWwi03V+vAYcEWLo5prMINv3RuhRv1n9bx/gQs3Ugmz3Cf0PJvXwzYQWu6n93gvVQ="
+  global:
+  - secure: U0ymc2BxM4Z5ECHeU77JqaCK+T2o/E9ZMp8c/21rvqu+Nsx6TUcssrdBvQ9yXLahPjxrtN2vuOSAzKRp4Ymoigq8BHahUmUBbNWmEjK6HvhWwi03V+vAYcEWLo5prMINv3RuhRv1n9bx/gQs3Ugmz3Cf0PJvXwzYQWu6n93gvVQ=
+  - secure: onXLoPhJ4eNGaDhQVZib2D/pg6CozqVpgbuFBFCnpu7BLI/ijqGWW0GspxeWIkHznZed/CLWaw1oXiOj8NctKwgYwkA5/BZghPU6IkN4iAfCSVZ8aRuGfkOhpWc6Fk873j/oPGsqYmpQjrPdaTzEUSFvi27ZU+afZVO3Ynmv/OM=
