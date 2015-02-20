@@ -10,7 +10,7 @@ extern crate libc;
 
 pub type __int128_t = ::libc::c_void;
 pub type __uint128_t = ::libc::c_void;
-pub type __builtin_va_list = [__va_list_tag; 1us];
+pub type __builtin_va_list = [__va_list_tag; 1usize];
 pub enum Struct__IO_FILE { }
 pub type FILE = Struct__IO_FILE;
 pub type __FILE = Struct__IO_FILE;
@@ -30,13 +30,13 @@ impl ::std::default::Default for Struct_Unnamed1 {
 #[repr(C)]
 #[derive(Copy)]
 pub struct Union_Unnamed2 {
-    pub _bindgen_data_: [u32; 1us],
+    pub _bindgen_data_: [u32; 1usize],
 }
 impl Union_Unnamed2 {
     pub unsafe fn __wch(&mut self) -> *mut ::libc::c_uint {
         ::std::mem::transmute(&self._bindgen_data_)
     }
-    pub unsafe fn __wchb(&mut self) -> *mut [::libc::c_char; 4us] {
+    pub unsafe fn __wchb(&mut self) -> *mut [::libc::c_char; 4usize] {
         ::std::mem::transmute(&self._bindgen_data_)
     }
 }
@@ -50,11 +50,11 @@ pub enum Struct___locale_data { }
 #[repr(C)]
 #[derive(Copy)]
 pub struct Struct___locale_struct {
-    pub __locales: [*mut Struct___locale_data; 13us],
+    pub __locales: [*mut Struct___locale_data; 13usize],
     pub __ctype_b: *const ::libc::c_ushort,
     pub __ctype_tolower: *const ::libc::c_int,
     pub __ctype_toupper: *const ::libc::c_int,
-    pub __names: [*const ::libc::c_char; 13us],
+    pub __names: [*const ::libc::c_char; 13usize],
 }
 impl ::std::default::Default for Struct___locale_struct {
     fn default() -> Struct___locale_struct { unsafe { ::std::mem::zeroed() } }
@@ -472,8 +472,8 @@ pub struct Struct_Unnamed23 {
     pub nb_symbols: ::libc::c_int,
     pub nb_keywords: ::libc::c_int,
     pub flags: ::libc::c_int,
-    pub symbols: [[::libc::c_char; 5us]; 100us],
-    pub keywords: [[::libc::c_char; 20us]; 100us],
+    pub symbols: [[::libc::c_char; 5usize]; 100usize],
+    pub keywords: [[::libc::c_char; 20usize]; 100usize],
     pub simpleCmt: *const ::libc::c_char,
     pub cmtStart: *const ::libc::c_char,
     pub cmtStop: *const ::libc::c_char,
@@ -533,7 +533,7 @@ pub type TCOD_value_type_t = Enum_Unnamed24;
 #[repr(C)]
 #[derive(Copy)]
 pub struct Union_Unnamed25 {
-    pub _bindgen_data_: [u64; 2us],
+    pub _bindgen_data_: [u64; 2usize],
 }
 impl Union_Unnamed25 {
     pub unsafe fn b(&mut self) -> *mut _bool {
@@ -621,7 +621,7 @@ pub type TCOD_struct_int_t = Struct_Unnamed27;
 #[derive(Copy)]
 pub struct Struct_Unnamed28 {
     pub structs: TCOD_list_t,
-    pub customs: [TCOD_parser_custom_t; 16us],
+    pub customs: [TCOD_parser_custom_t; 16usize],
     pub fatal: _bool,
     pub props: TCOD_list_t,
 }
@@ -688,7 +688,7 @@ impl ::std::default::Default for Struct___va_list_tag {
 }
 #[link(name = "tcod")]
 extern "C" {
-    pub static mut TCOD_colors: [[TCOD_color_t; 8us]; 21us];
+    pub static mut TCOD_colors: [[TCOD_color_t; 8usize]; 21usize];
     pub static TCOD_black: TCOD_color_t;
     pub static TCOD_darkest_grey: TCOD_color_t;
     pub static TCOD_darker_grey: TCOD_color_t;
