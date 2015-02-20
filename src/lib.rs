@@ -67,6 +67,47 @@ impl Console {
         Console::Root
     }
 
+    pub fn is_fullscreen() -> bool {
+        unsafe {
+            ffi::TCOD_console_is_fullscreen() != 0
+        }
+    }
+
+    pub fn set_fullscreen(fullscreen: bool) {
+        unsafe {
+            ffi::TCOD_console_set_fullscreen(fullscreen as u8);
+        }
+    }
+
+    pub fn disable_keyboard_repeat() {
+        unsafe {
+            ffi::TCOD_console_disable_keyboard_repeat()
+        }
+    }
+
+    pub fn is_active() -> bool {
+        unsafe {
+            ffi::TCOD_console_is_active() != 0
+        }
+    }
+
+    pub fn get_alignment(&self) -> TextAlignment {
+        let alignment = unsafe {
+            ffi::TCOD_console_get_alignment(self.con())
+        };
+        match alignment {
+            ffi::TCOD_LEFT => TextAlignment::Left,
+            ffi::TCOD_RIGHT => TextAlignment::Right,
+            ffi::TCOD_CENTER => TextAlignment::Center,
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn set_alignment(&mut self, alignment: TextAlignment) {
+        unsafe {
+            ffi::TCOD_console_set_alignment(self.con(), alignment as u32);
+        }
+    }
 
     pub fn blit(source_console: &Console,
                 source_x: i32, source_y: i32,
@@ -124,6 +165,65 @@ impl Console {
         }
     }
 
+    pub fn get_char_background(&self, x: i32, y: i32) -> Color {
+        unsafe {
+            Color::from_tcod_color_t(
+                ffi::TCOD_console_get_char_background(self.con(), x, y))
+        }
+    }
+
+    pub fn get_char_foreground(&self, x: i32, y: i32) -> Color {
+        unsafe {
+            Color::from_tcod_color_t(
+                ffi::TCOD_console_get_char_foreground(self.con(), x, y))
+        }
+    }
+
+    pub fn get_background_flag(&self) -> BackgroundFlag {
+        let flag = unsafe {
+            ffi::TCOD_console_get_background_flag(self.con())
+        };
+        match flag {
+            ffi::TCOD_BKGND_NONE => BackgroundFlag::None,
+            ffi::TCOD_BKGND_SET => BackgroundFlag::Set,
+            ffi::TCOD_BKGND_MULTIPLY => BackgroundFlag::Multiply,
+            ffi::TCOD_BKGND_LIGHTEN => BackgroundFlag::Lighten,
+            ffi::TCOD_BKGND_DARKEN => BackgroundFlag::Darken,
+            ffi::TCOD_BKGND_SCREEN => BackgroundFlag::Screen,
+            ffi::TCOD_BKGND_COLOR_DODGE => BackgroundFlag::ColorDodge,
+            ffi::TCOD_BKGND_COLOR_BURN => BackgroundFlag::ColorBurn,
+            ffi::TCOD_BKGND_ADD => BackgroundFlag::Add,
+            ffi::TCOD_BKGND_ADDA => BackgroundFlag::AddA,
+            ffi::TCOD_BKGND_BURN => BackgroundFlag::Burn,
+            ffi::TCOD_BKGND_OVERLAY => BackgroundFlag::Overlay,
+            ffi::TCOD_BKGND_ALPH => BackgroundFlag::Alph,
+            ffi::TCOD_BKGND_DEFAULT => BackgroundFlag::Default,
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn set_background_flag(&mut self, background_flag: BackgroundFlag) {
+        unsafe {
+            ffi::TCOD_console_set_background_flag(self.con(),
+                                                  background_flag as u32);
+        }
+    }
+
+    pub fn get_char(&self, x: i32, y: i32) -> char {
+        let ffi_char = unsafe {
+            ffi::TCOD_console_get_char(self.con(), x, y)
+        };
+        assert!(ffi_char >= 0 && ffi_char < 256);
+        ffi_char as u8 as char
+    }
+
+    pub fn set_char(&mut self, x: i32, y: i32, c: char) {
+        assert!(x >= 0 && y >= 0);
+        unsafe {
+            ffi::TCOD_console_set_char(self.con(), x, y, c as i32)
+        }
+    }
+
     pub fn set_char_background(&mut self, x: i32, y: i32,
                                color: Color,
                                background_flag: BackgroundFlag) {
@@ -133,6 +233,15 @@ impl Console {
                                                   x, y,
                                                   color.to_color_t(),
                                                   background_flag as u32)
+        }
+    }
+
+    pub fn set_char_foreground(&mut self, x: i32, y: i32, color: Color) {
+        assert!(x >= 0 && y >= 0);
+        unsafe {
+            ffi::TCOD_console_set_char_foreground(self.con(),
+                                                  x, y,
+                                                  color.to_color_t());
         }
     }
 
@@ -165,6 +274,14 @@ impl Console {
         }
     }
 
+    pub fn print(&mut self, x: i32, y: i32, text: &str) {
+        assert!(x >= 0 && y >= 0);
+        unsafe {
+            let c_text = CString::new(text.as_bytes()).unwrap();
+            ffi::TCOD_console_print(self.con(), x, y, c_text.as_ptr());
+        }
+    }
+
     pub fn print_ex(&mut self,
                     x: i32, y: i32,
                     background_flag: BackgroundFlag,
@@ -178,6 +295,19 @@ impl Console {
                                         background_flag as u32,
                                         alignment as u32,
                                         c_text.as_ptr());
+        }
+    }
+
+    pub fn get_fade() -> u8 {
+        unsafe {
+            ffi::TCOD_console_get_fade()
+        }
+    }
+
+    pub fn get_fading_color() -> Color {
+        unsafe {
+            Color::from_tcod_color_t(
+                ffi::TCOD_console_get_fading_color())
         }
     }
 
