@@ -87,7 +87,7 @@ git = "https://github.com/tomassedovic/tcod-rs.git"
 Run the equivalent of:
 
 ```sh
-$ sudo apt-get install gcc g++ make upx electric-fence libsdl1.2-dev mercurial
+$ sudo apt-get install gcc g++ make libsdl1.2-dev
 $ cd yourgame
 $ cargo build
 $ cargo run
