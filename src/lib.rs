@@ -1,4 +1,4 @@
-#![feature(libc, std_misc, old_path, core, hash, old_io)]
+#![feature(libc, std_misc, old_path, core, old_io)]
 
 extern crate libc;
 extern crate "tcod-sys" as ffi;
@@ -58,10 +58,11 @@ impl Console {
     pub fn init_root(width: i32, height: i32, title: &str, fullscreen: bool) -> Console {
         assert!(width > 0 && height > 0);
         unsafe {
-            let c_title = CString::from_slice(title.as_bytes());
+            let c_title = CString::new(title.as_bytes()).unwrap();
             ffi::TCOD_console_init_root(width, height,
-                                            c_title.as_ptr(), fullscreen as c_bool,
-                                            ffi::TCOD_RENDERER_SDL);
+                                        c_title.as_ptr(),
+                                        fullscreen as c_bool,
+                                        ffi::TCOD_RENDERER_SDL);
         }
         Console::Root
     }
@@ -170,7 +171,7 @@ impl Console {
                     text: &str) {
         assert!(x >= 0 && y >= 0);
         unsafe {
-            let c_text = CString::from_slice(text.as_bytes());
+            let c_text = CString::new(text.as_bytes()).unwrap();
             ffi::TCOD_console_print_ex(self.con(),
                                         x, y,
                                         background_flag as u32,
@@ -189,7 +190,7 @@ impl Console {
                            nb_char_horizontal: i32,
                            nb_char_vertical: i32) {
         unsafe {
-            let path = CString::from_slice(font_path.as_vec());
+            let path = CString::new(font_path.as_vec()).unwrap();
             ffi::TCOD_console_set_custom_font(
                 path.as_ptr(), flags.bits() as i32, nb_char_horizontal,
                 nb_char_vertical);
@@ -253,7 +254,7 @@ impl Console {
 
     pub fn set_window_title(title: &str) {
         unsafe {
-            let c_title = CString::from_slice(title.as_bytes());
+            let c_title = CString::new(title.as_bytes()).unwrap();
             ffi::TCOD_console_set_window_title(c_title.as_ptr());
         }
     }
@@ -1092,7 +1093,7 @@ pub mod system {
 
     pub fn save_screenshot(path: &std::old_path::Path) {
         assert!(path.exists());
-        let c_path = std::ffi::CString::from_slice(path.as_vec());
+        let c_path = std::ffi::CString::new(path.as_vec()).unwrap();
         unsafe {
             ffi::TCOD_sys_save_screenshot(c_path.as_ptr());
         }
@@ -1139,7 +1140,7 @@ pub mod system {
     }
 
     pub fn set_clipboard(value: &str) {
-        let c_str = std::ffi::CString::from_slice(value.as_bytes());
+        let c_str = std::ffi::CString::new(value.as_bytes()).unwrap();
         unsafe {
             ffi::TCOD_sys_clipboard_set(c_str.as_ptr());
         }
@@ -1148,7 +1149,7 @@ pub mod system {
     pub fn get_clipboard() -> String {
         unsafe {
             let c_ptr = ffi::TCOD_sys_clipboard_get();
-            let c_str = std::ffi::c_str_to_bytes(&c_ptr);
+            let c_str = std::ffi::CStr::from_ptr(c_ptr).to_bytes();
             std::str::from_utf8(c_str).unwrap().to_string()
         }
     }
