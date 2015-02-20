@@ -420,11 +420,11 @@ impl<'a> AStarPath<'a> {
         }
     }
 
-    pub fn walk<'b>(&'b mut self) -> AStarPathIterator<'b> {
+    pub fn walk(&mut self) -> AStarPathIterator {
         AStarPathIterator{tcod_path: self.tcod_path.ptr, recalculate: false}
     }
 
-    pub fn walk_recalculate<'b>(&'b mut self) -> AStarPathIterator<'b> {
+    pub fn walk_recalculate(&mut self) -> AStarPathIterator {
         AStarPathIterator{tcod_path: self.tcod_path.ptr, recalculate: true}
     }
 
@@ -567,7 +567,7 @@ impl<'a> DijkstraPath<'a> {
         }
     }
 
-    pub fn walk<'b>(&'b mut self) -> DijkstraPathIterator<'b> {
+    pub fn walk(&mut self) -> DijkstraPathIterator {
         DijkstraPathIterator{tcod_path: self.tcod_path.ptr}
     }
 
@@ -626,12 +626,12 @@ impl<'a> DijkstraPath<'a> {
     }
 }
 
-pub struct AStarPathIterator<'a> {
+pub struct AStarPathIterator {
     tcod_path: ffi::TCOD_path_t,
     recalculate: bool,
 }
 
-impl<'a> Iterator for AStarPathIterator<'a> {
+impl Iterator for AStarPathIterator {
     type Item = (isize, isize);
 
     fn next(&mut self) -> Option<(isize, isize)> {
@@ -647,11 +647,11 @@ impl<'a> Iterator for AStarPathIterator<'a> {
     }
 }
 
-pub struct DijkstraPathIterator<'a> {
+pub struct DijkstraPathIterator {
     tcod_path: ffi::TCOD_path_t,
 }
 
-impl<'a> Iterator for DijkstraPathIterator<'a> {
+impl Iterator for DijkstraPathIterator {
     type Item = (isize, isize);
 
     fn next(&mut self) -> Option<(isize, isize)> {
