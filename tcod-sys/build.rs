@@ -33,8 +33,8 @@ fn main() {
             if output.status.success() {
                 println!("`make` succeeded.");
             } else {
-                println!("STDOUT: {}", String::from_utf8_lossy(&output.output[]));
-                println!("STDERR: {}", String::from_utf8_lossy(&output.error[]));
+                println!("STDOUT: {}", String::from_utf8_lossy(&output.output));
+                println!("STDERR: {}", String::from_utf8_lossy(&output.error));
                 panic!("`make` returned: {}", output.status);
             }
         }
