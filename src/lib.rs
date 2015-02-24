@@ -1540,3 +1540,91 @@ bitflags! {
         const ANY = ffi::TCOD_EVENT_ANY,
     }
 }
+
+pub mod chars {
+    use ffi;
+
+    #[allow(non_camel_case_types)]
+    pub type TCOD_char_t = ::libc::c_uint;
+
+    pub const TCOD_CHAR_HLINE: TCOD_char_t = ffi::TCOD_CHAR_HLINE;
+    pub const TCOD_CHAR_VLINE: TCOD_char_t = ffi::TCOD_CHAR_VLINE;
+    pub const TCOD_CHAR_NE: TCOD_char_t = ffi::TCOD_CHAR_NE;
+    pub const TCOD_CHAR_NW: TCOD_char_t = ffi::TCOD_CHAR_NW;
+    pub const TCOD_CHAR_SE: TCOD_char_t = ffi::TCOD_CHAR_SE;
+    pub const TCOD_CHAR_SW: TCOD_char_t = ffi::TCOD_CHAR_SW;
+    pub const TCOD_CHAR_TEEW: TCOD_char_t = ffi::TCOD_CHAR_TEEW;
+    pub const TCOD_CHAR_TEEE: TCOD_char_t = ffi::TCOD_CHAR_TEEE;
+    pub const TCOD_CHAR_TEEN: TCOD_char_t = ffi::TCOD_CHAR_TEEN;
+    pub const TCOD_CHAR_TEES: TCOD_char_t = ffi::TCOD_CHAR_TEES;
+    pub const TCOD_CHAR_CROSS: TCOD_char_t = ffi::TCOD_CHAR_CROSS;
+    pub const TCOD_CHAR_DHLINE: TCOD_char_t = ffi::TCOD_CHAR_DHLINE;
+    pub const TCOD_CHAR_DVLINE: TCOD_char_t = ffi::TCOD_CHAR_DVLINE;
+    pub const TCOD_CHAR_DNE: TCOD_char_t = ffi::TCOD_CHAR_DNE;
+    pub const TCOD_CHAR_DNW: TCOD_char_t = ffi::TCOD_CHAR_DNW;
+    pub const TCOD_CHAR_DSE: TCOD_char_t = ffi::TCOD_CHAR_DSE;
+    pub const TCOD_CHAR_DSW: TCOD_char_t = ffi::TCOD_CHAR_DSW;
+    pub const TCOD_CHAR_DTEEW: TCOD_char_t = ffi::TCOD_CHAR_DTEEW;
+    pub const TCOD_CHAR_DTEEE: TCOD_char_t = ffi::TCOD_CHAR_DTEEE;
+    pub const TCOD_CHAR_DTEEN: TCOD_char_t = ffi::TCOD_CHAR_DTEEN;
+    pub const TCOD_CHAR_DTEES: TCOD_char_t = ffi::TCOD_CHAR_DTEES;
+    pub const TCOD_CHAR_DCROSS: TCOD_char_t = ffi::TCOD_CHAR_DCROSS;
+    pub const TCOD_CHAR_BLOCK1: TCOD_char_t = ffi::TCOD_CHAR_BLOCK1;
+    pub const TCOD_CHAR_BLOCK2: TCOD_char_t = ffi::TCOD_CHAR_BLOCK2;
+    pub const TCOD_CHAR_BLOCK3: TCOD_char_t = ffi::TCOD_CHAR_BLOCK3;
+    pub const TCOD_CHAR_ARROW_N: TCOD_char_t = ffi::TCOD_CHAR_ARROW_N;
+    pub const TCOD_CHAR_ARROW_S: TCOD_char_t = ffi::TCOD_CHAR_ARROW_S;
+    pub const TCOD_CHAR_ARROW_E: TCOD_char_t = ffi::TCOD_CHAR_ARROW_E;
+    pub const TCOD_CHAR_ARROW_W: TCOD_char_t = ffi::TCOD_CHAR_ARROW_W;
+    pub const TCOD_CHAR_ARROW2_N: TCOD_char_t = ffi::TCOD_CHAR_ARROW2_N;
+    pub const TCOD_CHAR_ARROW2_S: TCOD_char_t = ffi::TCOD_CHAR_ARROW2_S;
+    pub const TCOD_CHAR_ARROW2_E: TCOD_char_t = ffi::TCOD_CHAR_ARROW2_E;
+    pub const TCOD_CHAR_ARROW2_W: TCOD_char_t = ffi::TCOD_CHAR_ARROW2_W;
+    pub const TCOD_CHAR_DARROW_H: TCOD_char_t = ffi::TCOD_CHAR_DARROW_H;
+    pub const TCOD_CHAR_DARROW_V: TCOD_char_t = ffi::TCOD_CHAR_DARROW_V;
+    pub const TCOD_CHAR_CHECKBOX_UNSET: TCOD_char_t = ffi::TCOD_CHAR_CHECKBOX_UNSET;
+    pub const TCOD_CHAR_CHECKBOX_SET: TCOD_char_t = ffi::TCOD_CHAR_CHECKBOX_SET;
+    pub const TCOD_CHAR_RADIO_UNSET: TCOD_char_t = ffi::TCOD_CHAR_RADIO_UNSET;
+    pub const TCOD_CHAR_RADIO_SET: TCOD_char_t = ffi::TCOD_CHAR_RADIO_SET;
+    pub const TCOD_CHAR_SUBP_NW: TCOD_char_t = ffi::TCOD_CHAR_SUBP_NW;
+    pub const TCOD_CHAR_SUBP_NE: TCOD_char_t = ffi::TCOD_CHAR_SUBP_NE;
+    pub const TCOD_CHAR_SUBP_N: TCOD_char_t = ffi::TCOD_CHAR_SUBP_N;
+    pub const TCOD_CHAR_SUBP_SE: TCOD_char_t = ffi::TCOD_CHAR_SUBP_SE;
+    pub const TCOD_CHAR_SUBP_DIAG: TCOD_char_t = ffi::TCOD_CHAR_SUBP_DIAG;
+    pub const TCOD_CHAR_SUBP_E: TCOD_char_t = ffi::TCOD_CHAR_SUBP_E;
+    pub const TCOD_CHAR_SUBP_SW: TCOD_char_t = ffi::TCOD_CHAR_SUBP_SW;
+    pub const TCOD_CHAR_SMILIE: TCOD_char_t = ffi::TCOD_CHAR_SMILIE;
+    pub const TCOD_CHAR_SMILIE_INV: TCOD_char_t = ffi::TCOD_CHAR_SMILIE_INV;
+    pub const TCOD_CHAR_HEART: TCOD_char_t = ffi::TCOD_CHAR_HEART;
+    pub const TCOD_CHAR_DIAMOND: TCOD_char_t = ffi::TCOD_CHAR_DIAMOND;
+    pub const TCOD_CHAR_CLUB: TCOD_char_t = ffi::TCOD_CHAR_CLUB;
+    pub const TCOD_CHAR_SPADE: TCOD_char_t = ffi::TCOD_CHAR_SPADE;
+    pub const TCOD_CHAR_BULLET: TCOD_char_t = ffi::TCOD_CHAR_BULLET;
+    pub const TCOD_CHAR_BULLET_INV: TCOD_char_t = ffi::TCOD_CHAR_BULLET_INV;
+    pub const TCOD_CHAR_MALE: TCOD_char_t = ffi::TCOD_CHAR_MALE;
+    pub const TCOD_CHAR_FEMALE: TCOD_char_t = ffi::TCOD_CHAR_FEMALE;
+    pub const TCOD_CHAR_NOTE: TCOD_char_t = ffi::TCOD_CHAR_NOTE;
+    pub const TCOD_CHAR_NOTE_DOUBLE: TCOD_char_t = ffi::TCOD_CHAR_NOTE_DOUBLE;
+    pub const TCOD_CHAR_LIGHT: TCOD_char_t = ffi::TCOD_CHAR_LIGHT;
+    pub const TCOD_CHAR_EXCLAM_DOUBLE: TCOD_char_t = ffi::TCOD_CHAR_EXCLAM_DOUBLE;
+    pub const TCOD_CHAR_PILCROW: TCOD_char_t = ffi::TCOD_CHAR_PILCROW;
+    pub const TCOD_CHAR_SECTION: TCOD_char_t = ffi::TCOD_CHAR_SECTION;
+    pub const TCOD_CHAR_POUND: TCOD_char_t = ffi::TCOD_CHAR_POUND;
+    pub const TCOD_CHAR_MULTIPLICATION: TCOD_char_t = ffi::TCOD_CHAR_MULTIPLICATION;
+    pub const TCOD_CHAR_FUNCTION: TCOD_char_t = ffi::TCOD_CHAR_FUNCTION;
+    pub const TCOD_CHAR_RESERVED: TCOD_char_t = ffi::TCOD_CHAR_RESERVED;
+    pub const TCOD_CHAR_HALF: TCOD_char_t = ffi::TCOD_CHAR_HALF;
+    pub const TCOD_CHAR_ONE_QUARTER: TCOD_char_t = ffi::TCOD_CHAR_ONE_QUARTER;
+    pub const TCOD_CHAR_COPYRIGHT: TCOD_char_t = ffi::TCOD_CHAR_COPYRIGHT;
+    pub const TCOD_CHAR_CENT: TCOD_char_t = ffi::TCOD_CHAR_CENT;
+    pub const TCOD_CHAR_YEN: TCOD_char_t = ffi::TCOD_CHAR_YEN;
+    pub const TCOD_CHAR_CURRENCY: TCOD_char_t = ffi::TCOD_CHAR_CURRENCY;
+    pub const TCOD_CHAR_THREE_QUARTERS: TCOD_char_t = ffi::TCOD_CHAR_THREE_QUARTERS;
+    pub const TCOD_CHAR_DIVISION: TCOD_char_t = ffi::TCOD_CHAR_DIVISION;
+    pub const TCOD_CHAR_GRADE: TCOD_char_t = ffi::TCOD_CHAR_GRADE;
+    pub const TCOD_CHAR_UMLAUT: TCOD_char_t = ffi::TCOD_CHAR_UMLAUT;
+    pub const TCOD_CHAR_POW1: TCOD_char_t = ffi::TCOD_CHAR_POW1;
+    pub const TCOD_CHAR_POW3: TCOD_char_t = ffi::TCOD_CHAR_POW3;
+    pub const TCOD_CHAR_POW2: TCOD_char_t = ffi::TCOD_CHAR_POW2;
+    pub const TCOD_CHAR_BULLET_SQUARE: TCOD_char_t = ffi::TCOD_CHAR_BULLET_SQUARE;
+}
