@@ -29,10 +29,3 @@ version = "2.0.5"
 
 [dev-dependencies]
 rand = "0.1.2"
-
-# TODO: temporarily disabling debuginfo until this is fixed:
-# https://github.com/rust-lang/rust/issues/17257
-[profile.dev]
-debug = false
-[profile.test]
-debug = false
