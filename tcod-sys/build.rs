@@ -1,13 +1,15 @@
-// TODO(shadower): remove this once the dust settles around path and IO:
-#![feature(old_path, old_io)]
+#![feature(fs, path, process)]
 
-use std::old_io::{fs, Command};
-use std::env;
-
+use std::{env, fs};
+use std::path::Path;
+use std::process::Command;
 
 fn main() {
-    let src = Path::new(env::var("CARGO_MANIFEST_DIR").unwrap());
-    let dst = Path::new(env::var("OUT_DIR").unwrap());
+    let src_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let dst_dir = env::var("OUT_DIR").unwrap();
+
+    let src = Path::new(&src_dir);
+    let dst = Path::new(&dst_dir);
 
     let target = env::var("TARGET").unwrap();
     let makefile = if target.contains("linux") {
@@ -24,21 +26,21 @@ fn main() {
 
     let mut make = Command::new("make");
     make.arg("-f")
-        .arg(Path::new("makefiles").join(makefile))
+        .arg(&Path::new("makefiles").join(makefile))
         .arg("clean")
         .arg("all")
-        .cwd(&libtcod_dir);
+        .current_dir(&libtcod_dir);
+
     match make.output() {
-        Ok(output) => {
-            if output.status.success() {
-                println!("`make` succeeded.");
-            } else {
-                println!("STDOUT: {}", String::from_utf8_lossy(&output.output));
-                println!("STDERR: {}", String::from_utf8_lossy(&output.error));
-                panic!("`make` returned: {}", output.status);
-            }
+        Ok(ref output) if output.status.success() => {
+            println!("`make` succeeded.");
         }
-        Err(e) => panic!("`make` failed: {}", e),
+        Ok(ref output) => {
+            println!("STDOUT: {}", String::from_utf8_lossy(&output.stdout));
+            println!("STDERR: {}", String::from_utf8_lossy(&output.stderr));
+            panic!("`make` returned: {}", output.status);
+        }
+        Err(ref e) => panic!("`make` failed: {}", e),
     }
 
     // TODO(shadower): there's a bunch of name special-casing I came across
