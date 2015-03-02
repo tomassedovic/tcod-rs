@@ -1,4 +1,4 @@
-#![feature(libc, std_misc, old_path, core, old_io)]
+#![feature(libc, std_misc, core, fs, path)]
 
 extern crate libc;
 extern crate "tcod-sys" as ffi;
@@ -317,11 +317,12 @@ impl Console {
         }
     }
 
-    pub fn set_custom_font(font_path: ::std::old_path::Path, flags: FontFlags,
+    pub fn set_custom_font(font_path: &std::path::Path, flags: FontFlags,
                            nb_char_horizontal: i32,
                            nb_char_vertical: i32) {
         unsafe {
-            let path = CString::new(font_path.as_vec()).unwrap();
+            let filename = font_path.to_str().unwrap();
+            let path = CString::new(filename).unwrap();
             ffi::TCOD_console_set_custom_font(
                 path.as_ptr(), flags.bits() as i32, nb_char_horizontal,
                 nb_char_vertical);
@@ -1281,8 +1282,8 @@ pub enum BackgroundFlag {
 pub mod system {
     use std;
     use std::num::FromPrimitive;
-    use std::old_io::fs::PathExtensions;
     use std::time::Duration;
+    use std::fs::PathExt;
     use ffi;
     use libc::c_char;
     use ::{c_bool,
@@ -1326,9 +1327,10 @@ pub mod system {
         return Duration::milliseconds(ms as i64)
     }
 
-    pub fn save_screenshot(path: &std::old_path::Path) {
+    pub fn save_screenshot(path: &std::path::Path) {
         assert!(path.exists());
-        let c_path = std::ffi::CString::new(path.as_vec()).unwrap();
+        let filename = path.to_str().unwrap();
+        let c_path = std::ffi::CString::new(filename).unwrap();
         unsafe {
             ffi::TCOD_sys_save_screenshot(c_path.as_ptr());
         }
