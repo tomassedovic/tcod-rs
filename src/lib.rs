@@ -1492,7 +1492,7 @@ pub mod system {
         (ret_flag, ret_event)
     }
 
-    pub fn check_for_event_iter() -> EventIterator {
+    pub fn events() -> EventIterator {
         EventIterator::new()
     }
 
