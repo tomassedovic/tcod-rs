@@ -1492,11 +1492,49 @@ pub mod system {
         (ret_flag, ret_event)
     }
 
+    pub fn check_for_event_iter() -> EventIterator {
+        EventIterator::new()
+    }
+
     #[derive(Copy, Debug)]
     pub enum Event {
         Key(::KeyState),
         Mouse(::MouseState),
         None
+    }
+
+    #[derive(Copy, Debug)]
+    pub enum IteratedEvent {
+        Key(::KeyState),
+        Mouse(::MouseState)
+    }
+
+    pub struct EventIterator;
+
+    impl EventIterator {
+        pub fn new() -> Self {
+            EventIterator
+        }
+    }
+
+    impl Iterator for EventIterator {
+        type Item = (EventFlags, IteratedEvent);
+
+        fn next(&mut self) -> Option<(EventFlags, IteratedEvent)> {
+            let (flags, event) = check_for_event(KEY | MOUSE);
+
+            match event {
+                Event::None => {
+                    None
+                },
+                Event::Key(ref key_state) => {
+                    Some((flags, IteratedEvent::Key(*key_state)))
+                },
+                Event::Mouse(ref mouse_state) => {
+                    Some((flags, IteratedEvent::Mouse(*mouse_state)))
+                }
+            }
+        }
     }
 }
 
