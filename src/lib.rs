@@ -1391,7 +1391,7 @@ pub mod system {
         }
     }
 
-    pub fn check_for_event(event_mask: EventFlags) -> (EventFlags, Event) {
+    pub fn check_for_event(event_mask: EventFlags) -> Option<(EventFlags, Event)> {
         let mut c_key_state = ffi::TCOD_key_t {
             vk: 0,
             c: ' ' as c_char,
@@ -1449,10 +1449,12 @@ pub mod system {
             _ => ANY
         };
 
-        let ret_event = if ret_flag == ANY {
-            Event::None
-        } else if ret_flag.intersects(KEY_PRESS|KEY_RELEASE|KEY) {
-            Event::Key(::KeyState {
+        if ret_flag == ANY {
+            return None
+        }
+
+        let ret_event = if ret_flag.intersects(KEY_PRESS|KEY_RELEASE|KEY) {
+            Some(Event::Key(::KeyState {
                 key: if c_key_state.vk == ffi::TCODK_CHAR {
                     Key::Printable(c_key_state.c as u8 as char)
                 } else {
@@ -1465,9 +1467,9 @@ pub mod system {
                 right_alt: c_key_state.ralt != 0,
                 right_ctrl: c_key_state.rctrl != 0,
                 shift: c_key_state.shift != 0
-            })
+            }))
         } else if ret_flag.intersects(MOUSE_MOVE|MOUSE_PRESS|MOUSE_RELEASE|MOUSE) {
-            Event::Mouse(::MouseState {
+            Some(Event::Mouse(::MouseState {
                 x: c_mouse_state.x as isize,
                 y: c_mouse_state.y as isize,
                 dx: c_mouse_state.dx as isize,
@@ -1484,19 +1486,42 @@ pub mod system {
                 mbutton_pressed: c_mouse_state.mbutton_pressed != 0,
                 wheel_up: c_mouse_state.wheel_up != 0,
                 wheel_down: c_mouse_state.wheel_down != 0
-            })
+            }))
         } else {
-            Event::None
+            None
         };
 
-        (ret_flag, ret_event)
+        if ret_event.is_some() {
+            Some((ret_flag, ret_event.unwrap()))
+        } else {
+            None
+        }
+    }
+
+    pub fn events() -> EventIterator {
+        EventIterator::new()
     }
 
     #[derive(Copy, Debug)]
     pub enum Event {
         Key(::KeyState),
-        Mouse(::MouseState),
-        None
+        Mouse(::MouseState)
+    }
+
+    pub struct EventIterator;
+
+    impl EventIterator {
+        pub fn new() -> Self {
+            EventIterator
+        }
+    }
+
+    impl Iterator for EventIterator {
+        type Item = (EventFlags, Event);
+
+        fn next(&mut self) -> Option<(EventFlags, Event)> {
+            check_for_event(KEY | MOUSE)
+        }
     }
 }
 
