@@ -1,4 +1,4 @@
-#![feature(fs, path)]
+#![feature(path)]
 
 use std::{env, fs};
 use std::path::Path;
