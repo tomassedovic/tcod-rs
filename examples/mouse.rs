@@ -15,7 +15,7 @@ fn main() {
                 None => {
                     break;
                 }
-                Some((flags, event)) => {
+                Some((_, event)) => {
                     match event {
                         tcod::system::Event::Key(ref key_state) => {
                             println!("{:?}", key_state);
