@@ -12,3 +12,6 @@ build = "build.rs"
 [lib]
 name = "tcod-sys"
 path = "lib.rs"
+
+[dependencies]
+libc = "0.1.2"
