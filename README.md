@@ -10,27 +10,12 @@ useful functionality such as:
 * Keyboard and mouse input
 * Path finding
 * Field of view
-* Portable (works on linux and windows; mac too but requires some effort)
+* Portable (works on linux, windows and mac)
 * [Lots of other stuff](http://roguecentral.org/doryen/libtcod/features/)
 
 
 This project provides [Rust](http://www.rust-lang.org/) bindings for libtcod
-v1.5.1 (current stable).
-
-**The only version tested and known to work is `libtcod 1.5.1`.** Link to other
-versions (e.g. the `1.5.2` or `1.6.0` nightlies) at your own peril!
-
-Rust is a new-ish systems programming language that aims to be fast (on the C++
-level), memory and data-race safe, modern (first-class modules instead of a
-preprocessor text-include hack, type inference, pattern matching, closures).
-
-We track the nightly releases of Rust, usually lagging a few days behind. The
-latest version of rustc tested:
-
-```sh
-$ rustc --version
-rustc 0.11.0-pre-nightly (7ec7805 2014-06-16 08:16:49 +0000)
-```
+v1.5.2.
 
 This project follows [Semantic Versioning](http://semver.org/). Since we're
 under `1.0.0` anything goes. The API can change at any time.
@@ -39,30 +24,46 @@ Indeed, it probably should change! If you have better ideas on how it make it
 safer or more familiar to Rust developers, please let us know.
 
 
+Documentation
+---------------
+
+We run `rustdoc` on every new commit:
+
+http://tomassedovic.github.io/tcod-rs/tcod/index.html
+
+But that's mostly useful for types, function signatures, etc. We don't have much
+in term of actual docs, but you can always check the official ones:
+
+http://roguecentral.org/doryen/data/libtcod/doc/1.5.1/index2.html?c=true
+
+
 Current status
 --------------
 
-All raw tcod bindings are available via the `ffi` module. In addition we want to
-provide safe (and more in line with the Rust style) wrappers. These are far from
-complete however.
+All raw tcod bindings are available via the `tcod-sys` crate. In addition we
+want to provide safe (and more in line with the Rust style) wrappers -- if you
+can segfault outside of `unsafe` blocks, that's a bug. The safe bindings are not
+yet complete, however.
 
-### Implemented
+### Already Implemented
 
-* Most of the _Console_ features (new, init_root, blit, putting text on the
-  screen, reading key presses, etc.)
-* Most of _Map_ (new, size, set, is_walkable)
-* A\* and Dijkstra _Path_ finding
-* Some of the _System_ layer (get/set FPS, last frame length)
+* _Colors_
+* _Console_
+* Most of the _System_ layer (FPS, time, fullscreen, screenshots)
+* _Field of view_
+* _Map_
+* _Path finding_ (both A\* and Dijkstra)
 
 ### Probably Won't Ever Be Implemented Because Rust Provides This Already
 * Filesystem utilities
-* All purposes container
+* Containers
 * Pseudorandom generator (Rust has good RNGs, but maybe we want to provide this
   anyway for people porting existing code depending on tcod's RNG to Rust?)
 * Compression toolkit (there will probably be a better Rust library for this)
 
 ### Not Implemented Yet But Should Happen At Some Point In The Future
 * Everything else!
+
 
 
 How to use this
@@ -78,8 +79,8 @@ building process. [See below](#using-existing-binary-distribution).
 To use `tcod-rs`, add this to your game's `Cargo.toml`:
 
 ```toml
-[dependencies.tcod]
-git = "https://github.com/tomassedovic/tcod-rs.git"
+[dependencies]
+tcod = "*"
 ```
 
 ### Building on Linux
@@ -152,6 +153,10 @@ If you don't want to build libtcod yourself, you can
 [instruct Cargo to override the build script](http://doc.crates.io/build-script.html#overriding-build-scripts). See `.cargo/config`
 from the repository for an example.
 
+NOTE: The official MinGW pre-built libraries (for Windows)
+[don't seem to work with tcod-rs](https://github.com/tomassedovic/tcod-rs/issues/54).
+We're not sure exactly why this is so we'd appreciate anyone's help!
+
 
 Contributing
 ------------
@@ -167,8 +172,6 @@ typos) gets accepted, you'll get a commit access if you want it.
 
 We accept GitHub as well as regular pull requests (i.e. emailing or tweeting the
 URL of your feature branch works).
-
-Please make sure it builds against the latest `rustc`.
 
 You can regenerate the raw bindings by running:
 
