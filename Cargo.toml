@@ -1,7 +1,7 @@
 [package]
 name = "tcod"
 description = "The Rust bindings for the Doryen library (a.k.a. libtcod)."
-version = "0.5.0"
+version = "0.5.1"
 homepage = "https://github.com/tomassedovic/tcod-rs"
 repository = "https://github.com/tomassedovic/tcod-rs"
 documentation = "http://tomassedovic.github.io/tcod-rs/tcod/index.html"
@@ -27,7 +27,7 @@ libc = "0.1.2"
 
 [dependencies.tcod-sys]
 path = "tcod-sys"
-version = "2.0.5"
+version = "2.0.6"
 
 [dev-dependencies]
 rand = "0.2.1"
