@@ -26,7 +26,7 @@ bitflags = "0.1"
 libc = "0.1.2"
 
 [dependencies.tcod-sys]
-path = "tcod-sys"
+path = "tcod_sys"
 version = "2.0.6"
 
 [dev-dependencies]
