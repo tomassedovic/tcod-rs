@@ -1,7 +1,7 @@
 #![feature(std_misc, core, path_ext)]
 
 extern crate libc;
-extern crate "tcod-sys" as ffi;
+extern crate tcod_sys as ffi;
 #[macro_use] extern crate bitflags;
 
 use libc::{c_int, c_uint, c_float, uint8_t, c_void};

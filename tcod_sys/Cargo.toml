@@ -10,7 +10,7 @@ links = "tcod"
 build = "build.rs"
 
 [lib]
-name = "tcod-sys"
+name = "tcod_sys"
 path = "lib.rs"
 
 [dependencies]
