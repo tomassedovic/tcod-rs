@@ -124,8 +124,7 @@ impl Console {
                                    source_width, source_height,
                                    destination_console.con(),
                                    destination_x, destination_y,
-                                   foreground_alpha as c_float,
-                                   background_alpha as c_float)
+                                   foreground_alpha, background_alpha)
         }
     }
 
@@ -490,8 +489,7 @@ extern "C" fn c_path_callback(xf: c_int, yf: c_int,
     unsafe {
         let ptr: &(usize, usize) = &*(user_data as *const (usize, usize));
         let cb: &mut FnMut((i32, i32), (i32, i32)) -> f32 = ::std::mem::transmute(*ptr);
-        //cb.call_mut(((xf, yf), (xt, yt))) as c_float
-        cb((xf, yf), (xt, yt)) as c_float
+        cb((xf, yf), (xt, yt))
     }
 }
 
@@ -511,9 +509,9 @@ impl<'a> AStarPath<'a> {
             let user_data_ptr: *mut (usize, usize) = &mut *ptr;
 
             let tcod_path = ffi::TCOD_path_new_using_function(width, height,
-                                                              Some(c_path_callback as TcodPathCb),
+                                                              Some(c_path_callback),
                                                               user_data_ptr as *mut c_void,
-                                                              diagonal_cost as c_float);
+                                                              diagonal_cost);
             AStarPath {
                 tcod_path: TCODPath{ptr: tcod_path},
                 // Keep track of everything we've allocated on the heap. Both
@@ -528,7 +526,7 @@ impl<'a> AStarPath<'a> {
 
     pub fn new_from_map(map: Map, diagonal_cost: f32) -> AStarPath<'static> {
         let tcod_path = unsafe {
-            ffi::TCOD_path_new_using_map(map.tcod_map, diagonal_cost as c_float)
+            ffi::TCOD_path_new_using_map(map.tcod_map, diagonal_cost)
         };
         let (w, h) = map.size();
         AStarPath {
@@ -617,7 +615,7 @@ impl<'a> AStarPath<'a> {
 
     pub fn len(&self) -> i32 {
         unsafe {
-            ffi::TCOD_path_size(self.tcod_path.ptr) as i32
+            ffi::TCOD_path_size(self.tcod_path.ptr)
         }
     }
 }
@@ -656,9 +654,9 @@ impl<'a> DijkstraPath<'a> {
             let user_data_ptr: *mut (usize, usize) = &mut *ptr;
             let tcod_path = ffi::TCOD_dijkstra_new_using_function(width,
                                                                   height,
-                                                                  Some(c_path_callback as TcodPathCb),
+                                                                  Some(c_path_callback),
                                                                   user_data_ptr as *mut c_void,
-                                                                  diagonal_cost as c_float);
+                                                                  diagonal_cost);
             DijkstraPath {
                 tcod_path: TCODDijkstraPath{ptr: tcod_path},
                 inner: PathInnerData::Callback(user_closure, ptr),
@@ -670,7 +668,7 @@ impl<'a> DijkstraPath<'a> {
 
     pub fn new_from_map(map: Map, diagonal_cost: f32) -> DijkstraPath<'static> {
         let tcod_path = unsafe {
-            ffi::TCOD_dijkstra_new(map.tcod_map, diagonal_cost as c_float)
+            ffi::TCOD_dijkstra_new(map.tcod_map, diagonal_cost)
         };
         let (w, h) = map.size();
         DijkstraPath {
@@ -724,7 +722,7 @@ impl<'a> DijkstraPath<'a> {
         if result == -1.0 {
             None
         } else {
-            Some(result as f32)
+            Some(result)
         }
     }
 
@@ -754,7 +752,7 @@ impl<'a> DijkstraPath<'a> {
 
     pub fn len(&self) -> i32 {
         unsafe {
-            ffi::TCOD_dijkstra_size(self.tcod_path.ptr) as i32
+            ffi::TCOD_dijkstra_size(self.tcod_path.ptr)
         }
     }
 }
@@ -1310,7 +1308,7 @@ pub mod system {
 
     pub fn get_last_frame_length() -> f32 {
         unsafe {
-            ffi::TCOD_sys_get_last_frame_length() as f32
+            ffi::TCOD_sys_get_last_frame_length()
         }
     }
 
