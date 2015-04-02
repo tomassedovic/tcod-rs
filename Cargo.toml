@@ -30,4 +30,4 @@ path = "tcod_sys"
 version = "2.0.8"
 
 [dev-dependencies]
-rand = "0.2.1"
+rand = "0.3.5"
