@@ -1,6 +1,5 @@
-#![feature(std_misc, core, path_ext)]
-
 extern crate libc;
+extern crate time;
 extern crate tcod_sys as ffi;
 #[macro_use] extern crate bitflags;
 
@@ -9,7 +8,6 @@ use libc::{c_int, c_uint, c_float, uint8_t, c_void};
 pub use Console::Root as RootConsole;
 pub use colors::Color;
 
-use std::num::FromPrimitive;
 use std::ffi::CString;
 
 #[allow(non_camel_case_types)]
@@ -335,7 +333,7 @@ impl Console {
         let key = if tcod_key.vk == ffi::TCODK_CHAR {
             Key::Printable(tcod_key.c as u8 as char)
         } else {
-            Key::Special(FromPrimitive::from_u32(tcod_key.vk).unwrap())
+            Key::Special(keycode_from_u32(tcod_key.vk).unwrap())
         };
         KeyState{
             key: key,
@@ -358,7 +356,7 @@ impl Console {
         let key = if tcod_key.vk == ffi::TCODK_CHAR {
             Key::Printable(tcod_key.c as u8 as char)
         } else {
-            Key::Special(FromPrimitive::from_u32(tcod_key.vk).unwrap())
+            Key::Special(keycode_from_u32(tcod_key.vk).unwrap())
         };
         Some(KeyState{
             key: key,
@@ -889,6 +887,78 @@ pub enum KeyCode {
     Char,
 }
 
+fn keycode_from_u32(input: u32) -> Option<KeyCode> {
+    match input {
+        0 => Some(KeyCode::NoKey),
+        1 => Some(KeyCode::Escape),
+        2 => Some(KeyCode::Backspace),
+        3 => Some(KeyCode::Tab),
+        4 => Some(KeyCode::Enter),
+        5 => Some(KeyCode::Shift),
+        6 => Some(KeyCode::Control),
+        7 => Some(KeyCode::Alt),
+        8 => Some(KeyCode::Pause),
+        9 => Some(KeyCode::Capslock),
+        10 => Some(KeyCode::Pageup),
+        11 => Some(KeyCode::Pagedown),
+        12 => Some(KeyCode::End),
+        13 => Some(KeyCode::Home),
+        14 => Some(KeyCode::Up),
+        15 => Some(KeyCode::Left),
+        16 => Some(KeyCode::Right),
+        17 => Some(KeyCode::Down),
+        18 => Some(KeyCode::PrintScreen),
+        19 => Some(KeyCode::Insert),
+        20 => Some(KeyCode::Delete),
+        21 => Some(KeyCode::LeftWin),
+        22 => Some(KeyCode::RightWin),
+        23 => Some(KeyCode::Apps),
+        24 => Some(KeyCode::Number0),
+        25 => Some(KeyCode::Number1),
+        26 => Some(KeyCode::Number2),
+        27 => Some(KeyCode::Number3),
+        28 => Some(KeyCode::Number4),
+        29 => Some(KeyCode::Number5),
+        30 => Some(KeyCode::Number6),
+        31 => Some(KeyCode::Number7),
+        32 => Some(KeyCode::Number8),
+        33 => Some(KeyCode::Number9),
+        34 => Some(KeyCode::NumPad0),
+        35 => Some(KeyCode::NumPad1),
+        36 => Some(KeyCode::NumPad2),
+        37 => Some(KeyCode::NumPad3),
+        38 => Some(KeyCode::NumPad4),
+        39 => Some(KeyCode::NumPad5),
+        40 => Some(KeyCode::NumPad6),
+        41 => Some(KeyCode::NumPad7),
+        42 => Some(KeyCode::NumPad8),
+        43 => Some(KeyCode::NumPad9),
+        44 => Some(KeyCode::NumPadAdd),
+        45 => Some(KeyCode::NumPadSubtract),
+        46 => Some(KeyCode::NumPadDivide),
+        47 => Some(KeyCode::NumPadMultiply),
+        48 => Some(KeyCode::NumPadDecimal),
+        49 => Some(KeyCode::NumPadEnter),
+        50 => Some(KeyCode::F1),
+        51 => Some(KeyCode::F2),
+        52 => Some(KeyCode::F3),
+        53 => Some(KeyCode::F4),
+        54 => Some(KeyCode::F5),
+        55 => Some(KeyCode::F6),
+        56 => Some(KeyCode::F7),
+        57 => Some(KeyCode::F8),
+        58 => Some(KeyCode::F9),
+        59 => Some(KeyCode::F10),
+        60 => Some(KeyCode::F11),
+        61 => Some(KeyCode::F12),
+        62 => Some(KeyCode::NUMLOCK),
+        63 => Some(KeyCode::SCROLLLOCK),
+        64 => Some(KeyCode::Spacebar),
+        65 => Some(KeyCode::Char),
+        _ => None,
+    }
+}
+
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum Key {
@@ -1279,9 +1349,7 @@ pub enum BackgroundFlag {
 
 pub mod system {
     use std;
-    use std::num::FromPrimitive;
-    use std::time::Duration;
-    use std::fs::PathExt;
+    use time::Duration;
     use ffi;
     use libc::c_char;
     use ::{c_bool,
@@ -1326,7 +1394,6 @@ pub mod system {
     }
 
     pub fn save_screenshot(path: &std::path::Path) {
-        assert!(path.exists());
         let filename = path.to_str().unwrap();
         let c_path = std::ffi::CString::new(filename).unwrap();
         unsafe {
@@ -1456,7 +1523,7 @@ pub mod system {
                 key: if c_key_state.vk == ffi::TCODK_CHAR {
                     Key::Printable(c_key_state.c as u8 as char)
                 } else {
-                    Key::Special(FromPrimitive::from_u32(c_key_state.vk)
+                    Key::Special(::keycode_from_u32(c_key_state.vk)
                                  .unwrap())
                 },
                 pressed: c_key_state.pressed != 0,
