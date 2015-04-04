@@ -484,33 +484,7 @@ pub struct Struct_Unnamed23 {
 }
 impl ::std::clone::Clone for Struct_Unnamed23 {
     fn clone(&self) -> Struct_Unnamed23 {
-        Struct_Unnamed23 {
-            file_line: self.file_line.clone(),
-            token_type: self.token_type.clone(),
-            token_int_val: self.token_int_val.clone(),
-            token_idx: self.token_idx.clone(),
-            token_float_val: self.token_float_val.clone(),
-            tok: self.tok.clone(),
-            toklen: self.toklen.clone(),
-            lastStringDelim: self.lastStringDelim.clone(),
-            pos: self.pos.clone(),
-            buf: self.buf.clone(),
-            filename: self.filename.clone(),
-            last_javadoc_comment: self.last_javadoc_comment.clone(),
-            nb_symbols: self.nb_symbols.clone(),
-            nb_keywords: self.nb_keywords.clone(),
-            flags: self.flags.clone(),
-            symbols: self.symbols,
-            keywords: self.keywords,
-            simpleCmt: self.simpleCmt.clone(),
-            cmtStart: self.cmtStart.clone(),
-            cmtStop: self.cmtStop.clone(),
-            javadocCmtStart: self.javadocCmtStart.clone(),
-            stringDelim: self.stringDelim.clone(),
-            javadoc_read: self.javadoc_read.clone(),
-            allocBuf: self.allocBuf.clone(),
-            savept: self.savept.clone(),
-        }
+        *self 
     }
 }
 impl ::std::default::Default for Struct_Unnamed23 {
@@ -624,13 +598,7 @@ pub struct Struct_Unnamed26 {
 }
 impl Clone for Struct_Unnamed26 {
     fn clone(&self) -> Struct_Unnamed26 {
-        Struct_Unnamed26 {
-            new_struct: self.new_struct,
-            new_flag: self.new_flag,
-            new_property: self.new_property,
-            end_struct: self.end_struct,
-            error: self.error
-        }
+        *self 
     }
 }
 impl ::std::default::Default for Struct_Unnamed26 {
