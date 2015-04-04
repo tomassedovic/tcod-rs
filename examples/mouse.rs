@@ -11,16 +11,16 @@ fn main() {
     while !Console::window_closed() {
 
         loop {
-            match tcod::system::check_for_event(tcod::KEY | tcod::MOUSE) {
+            match tcod::input::check_for_event(tcod::KEY | tcod::MOUSE) {
                 None => {
                     break;
                 }
                 Some((_, event)) => {
                     match event {
-                        tcod::system::Event::Key(ref key_state) => {
+                        tcod::input::Event::Key(ref key_state) => {
                             println!("{:?}", key_state);
                         },
-                        tcod::system::Event::Mouse(ref mouse_state) => {
+                        tcod::input::Event::Mouse(ref mouse_state) => {
                             x = mouse_state.cx as i32;
                             y = mouse_state.cy as i32;
                             println!("{:?}", mouse_state);
