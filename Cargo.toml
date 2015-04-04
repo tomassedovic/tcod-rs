@@ -23,7 +23,7 @@ path = "src/lib.rs"
 
 [dependencies]
 bitflags = "0.1"
-libc = "0.1.2"
+libc = "0.1.5"
 
 [dependencies.tcod-sys]
 path = "tcod_sys"
