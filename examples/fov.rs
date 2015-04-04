@@ -4,7 +4,7 @@ extern crate tcod;
 use tcod::{Console, BackgroundFlag, FovAlgorithm, Map};
 
 // We'll use a basic structure to define our tiles.
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Tile {
     ch: char,
     x: i32,

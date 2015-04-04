@@ -18,7 +18,7 @@ pub type size_t = ::libc::c_ulong;
 pub type wchar_t = ::libc::c_int;
 pub type wint_t = ::libc::c_uint;
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_Unnamed1 {
     pub __count: ::libc::c_int,
     pub __value: Union_Unnamed2,
@@ -27,7 +27,7 @@ impl ::std::default::Default for Struct_Unnamed1 {
     fn default() -> Struct_Unnamed1 { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Union_Unnamed2 {
     pub _bindgen_data_: [u32; 1usize],
 }
@@ -47,7 +47,7 @@ pub type mbstate_t = __mbstate_t;
 pub enum Struct_tm { }
 pub enum Struct___locale_data { }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct___locale_struct {
     pub __locales: [*mut Struct___locale_data; 13usize],
     pub __ctype_b: *const ::libc::c_ushort,
@@ -71,7 +71,7 @@ pub type uintptr = ::libc::c_ulong;
 pub type _bool = uint8;
 pub type TCOD_list_t = *mut ::libc::c_void;
 #[repr(C)]
-#[derive(Copy, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct Struct_Unnamed3 {
     pub r: uint8,
     pub g: uint8,
@@ -183,7 +183,7 @@ pub const TCODK_SPACE: ::libc::c_uint = 64;
 pub const TCODK_CHAR: ::libc::c_uint = 65;
 pub type TCOD_keycode_t = Enum_Unnamed6;
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_Unnamed7 {
     pub vk: TCOD_keycode_t,
     pub c: ::libc::c_char,
@@ -332,7 +332,7 @@ pub type TCOD_alignment_t = Enum_Unnamed14;
 pub type TCOD_console_t = *mut ::libc::c_void;
 pub type TCOD_image_t = *mut ::libc::c_void;
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_Unnamed15 {
     pub x: ::libc::c_int,
     pub y: ::libc::c_int,
@@ -378,7 +378,7 @@ pub type TCOD_library_t = *mut ::libc::c_void;
 pub type SDL_renderer_t =
     ::std::option::Option<extern "C" fn(sdl_surface: *mut ::libc::c_void)>;
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_Unnamed17 {
     pub nb_rolls: ::libc::c_int,
     pub nb_faces: ::libc::c_int,
@@ -405,7 +405,7 @@ pub type TCOD_line_listener_t =
     ::std::option::Option<extern "C" fn(x: ::libc::c_int, y: ::libc::c_int)
                               -> _bool>;
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_Unnamed20 {
     pub stepx: ::libc::c_int,
     pub stepy: ::libc::c_int,
@@ -482,6 +482,37 @@ pub struct Struct_Unnamed23 {
     pub allocBuf: _bool,
     pub savept: _bool,
 }
+impl ::std::clone::Clone for Struct_Unnamed23 {
+    fn clone(&self) -> Struct_Unnamed23 {
+        Struct_Unnamed23 {
+            file_line: self.file_line.clone(),
+            token_type: self.token_type.clone(),
+            token_int_val: self.token_int_val.clone(),
+            token_idx: self.token_idx.clone(),
+            token_float_val: self.token_float_val.clone(),
+            tok: self.tok.clone(),
+            toklen: self.toklen.clone(),
+            lastStringDelim: self.lastStringDelim.clone(),
+            pos: self.pos.clone(),
+            buf: self.buf.clone(),
+            filename: self.filename.clone(),
+            last_javadoc_comment: self.last_javadoc_comment.clone(),
+            nb_symbols: self.nb_symbols.clone(),
+            nb_keywords: self.nb_keywords.clone(),
+            flags: self.flags.clone(),
+            symbols: self.symbols,
+            keywords: self.keywords,
+            simpleCmt: self.simpleCmt.clone(),
+            cmtStart: self.cmtStart.clone(),
+            cmtStop: self.cmtStop.clone(),
+            javadocCmtStart: self.javadocCmtStart.clone(),
+            stringDelim: self.stringDelim.clone(),
+            javadoc_read: self.javadoc_read.clone(),
+            allocBuf: self.allocBuf.clone(),
+            savept: self.savept.clone(),
+        }
+    }
+}
 impl ::std::default::Default for Struct_Unnamed23 {
     fn default() -> Struct_Unnamed23 { unsafe { ::std::mem::zeroed() } }
 }
@@ -530,7 +561,7 @@ pub const TCOD_TYPE_CUSTOM15: ::libc::c_uint = 39;
 pub const TCOD_TYPE_LIST: ::libc::c_uint = 1024;
 pub type TCOD_value_type_t = Enum_Unnamed24;
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Union_Unnamed25 {
     pub _bindgen_data_: [u64; 2usize],
 }
@@ -591,6 +622,17 @@ pub struct Struct_Unnamed26 {
     pub error: ::std::option::Option<extern "C" fn
                                          (msg: *const ::libc::c_char)>,
 }
+impl Clone for Struct_Unnamed26 {
+    fn clone(&self) -> Struct_Unnamed26 {
+        Struct_Unnamed26 {
+            new_struct: self.new_struct,
+            new_flag: self.new_flag,
+            new_property: self.new_property,
+            end_struct: self.end_struct,
+            error: self.error
+        }
+    }
+}
 impl ::std::default::Default for Struct_Unnamed26 {
     fn default() -> Struct_Unnamed26 { unsafe { ::std::mem::zeroed() } }
 }
@@ -604,7 +646,7 @@ pub type TCOD_parser_custom_t =
                               -> TCOD_value_t>;
 pub type TCOD_parser_t = *mut ::libc::c_void;
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_Unnamed27 {
     pub name: *mut ::libc::c_char,
     pub flags: TCOD_list_t,
@@ -617,7 +659,7 @@ impl ::std::default::Default for Struct_Unnamed27 {
 }
 pub type TCOD_struct_int_t = Struct_Unnamed27;
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_Unnamed28 {
     pub structs: TCOD_list_t,
     pub customs: [TCOD_parser_custom_t; 16usize],
@@ -629,7 +671,7 @@ impl ::std::default::Default for Struct_Unnamed28 {
 }
 pub type TCOD_parser_int_t = Struct_Unnamed28;
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct__TCOD_tree_t {
     pub next: *mut Struct__TCOD_tree_t,
     pub father: *mut Struct__TCOD_tree_t,
@@ -640,7 +682,7 @@ impl ::std::default::Default for Struct__TCOD_tree_t {
 }
 pub type TCOD_tree_t = Struct__TCOD_tree_t;
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_Unnamed29 {
     pub tree: TCOD_tree_t,
     pub x: ::libc::c_int,
@@ -660,7 +702,7 @@ pub type TCOD_bsp_callback_t =
                               (node: *mut TCOD_bsp_t,
                                userData: *mut ::libc::c_void) -> _bool>;
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_Unnamed30 {
     pub w: ::libc::c_int,
     pub h: ::libc::c_int,
@@ -675,7 +717,7 @@ pub type TCOD_namegen_t = *mut ::libc::c_void;
 pub type TCOD_text_t = *mut ::libc::c_void;
 pub type __va_list_tag = Struct___va_list_tag;
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct___va_list_tag {
     pub gp_offset: ::libc::c_uint,
     pub fp_offset: ::libc::c_uint,

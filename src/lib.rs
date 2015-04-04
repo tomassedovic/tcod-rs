@@ -799,7 +799,7 @@ impl Iterator for DijkstraPathIterator {
 
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub enum Renderer {
     GLSL = ffi::TCOD_RENDERER_GLSL as isize,
     OpenGL = ffi::TCOD_RENDERER_OPENGL as isize,
@@ -816,7 +816,7 @@ bitflags! {
 }
 
 
-#[derive(Copy, PartialEq, FromPrimitive, Debug)]
+#[derive(Copy, Clone, PartialEq, FromPrimitive, Debug)]
 #[repr(C)]
 pub enum KeyCode {
     NoKey,
@@ -890,13 +890,13 @@ pub enum KeyCode {
 }
 
 
-#[derive(Copy, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum Key {
     Printable(char),
     Special(KeyCode),
 }
 
-#[derive(Copy, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct KeyState {
     pub key: Key,
     pub pressed: bool,
@@ -907,7 +907,7 @@ pub struct KeyState {
     pub shift: bool,
 }
 
-#[derive(Copy, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct MouseState {
     pub x: isize,
     pub y: isize,
@@ -928,7 +928,7 @@ pub struct MouseState {
 }
 
 #[repr(C)]
-#[derive(Copy, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum FovAlgorithm {
     Basic       = ffi::FOV_BASIC as isize,
     Diamond     = ffi::FOV_DIAMOND as isize,
@@ -950,7 +950,7 @@ pub mod colors {
     use super::ffi;
 
     #[repr(C)]
-    #[derive(Copy, Debug, PartialEq)]
+    #[derive(Copy, Clone, Debug, PartialEq)]
     pub struct Color {
         pub r: u8,
         pub g: u8,
@@ -1250,7 +1250,7 @@ pub mod colors {
 }
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub enum TextAlignment {
     Left = ffi::TCOD_LEFT as isize,
     Right = ffi::TCOD_RIGHT as isize,
@@ -1259,7 +1259,7 @@ pub enum TextAlignment {
 
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub enum BackgroundFlag {
     None = ffi::TCOD_BKGND_NONE as isize,
     Set = ffi::TCOD_BKGND_SET as isize,
@@ -1500,7 +1500,7 @@ pub mod system {
         EventIterator::new()
     }
 
-    #[derive(Copy, Debug)]
+    #[derive(Copy, Clone, Debug)]
     pub enum Event {
         Key(::KeyState),
         Mouse(::MouseState)
