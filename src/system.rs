@@ -1,8 +1,9 @@
 extern crate std;
+extern crate time;
 
 use bindings::ffi;
 
-use std::time::Duration;
+use self::time::Duration;
 use std::fs::PathExt;
 
 

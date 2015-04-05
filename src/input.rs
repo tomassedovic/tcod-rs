@@ -1,11 +1,9 @@
 extern crate std;
 
-use std::num::FromPrimitive;
-
 use bindings::ffi;
-use bindings::{c_bool, c_char, c_uint};
+use bindings::{c_bool, c_char, c_uint, keycode_from_u32};
 
-#[derive(Copy, Clone, PartialEq, FromPrimitive, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(C)]
 pub enum KeyCode {
     NoKey,
@@ -226,7 +224,7 @@ pub fn check_for_event(event_mask: EventFlags) -> Option<(EventFlags, Event)> {
             key: if c_key_state.vk == ffi::TCODK_CHAR {
                 Key::Printable(c_key_state.c as u8 as char)
             } else {
-                Key::Special(FromPrimitive::from_u32(c_key_state.vk)
+                Key::Special(keycode_from_u32(c_key_state.vk)
                              .unwrap())
             },
             pressed: c_key_state.pressed != 0,

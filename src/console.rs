@@ -1,9 +1,7 @@
 extern crate std;
 
-use std::num::FromPrimitive;
-
 use bindings::ffi;
-use bindings::{c_bool, c_uint, CString};
+use bindings::{c_bool, c_uint, CString, keycode_from_u32};
 
 use colors::Color;
 use input::{Key, KeyPressFlags, KeyState};
@@ -327,7 +325,7 @@ impl Console {
         let key = if tcod_key.vk == ffi::TCODK_CHAR {
             Key::Printable(tcod_key.c as u8 as char)
         } else {
-            Key::Special(FromPrimitive::from_u32(tcod_key.vk).unwrap())
+            Key::Special(keycode_from_u32(tcod_key.vk).unwrap())
         };
         KeyState{
             key: key,
@@ -350,7 +348,7 @@ impl Console {
         let key = if tcod_key.vk == ffi::TCODK_CHAR {
             Key::Printable(tcod_key.c as u8 as char)
         } else {
-            Key::Special(FromPrimitive::from_u32(tcod_key.vk).unwrap())
+            Key::Special(keycode_from_u32(tcod_key.vk).unwrap())
         };
         Some(KeyState{
             key: key,
