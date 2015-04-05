@@ -4,7 +4,7 @@ use tcod::{Console, RootConsole};
 use tcod::chars;
 
 fn main() {
-    Console::init_root(80, 50, "Example of libtcod's special chars", false);
+    RootConsole::init(80, 50, "Example of libtcod's special chars", false);
     RootConsole.clear();
 
     // The top half of the box
@@ -22,7 +22,7 @@ fn main() {
     RootConsole.set_char(39, 26, chars::VLINE);
     RootConsole.set_char(39, 25, chars::NW);
 
-    Console::flush();
-    Console::wait_for_keypress(true);
+    RootConsole::flush();
+    RootConsole::wait_for_keypress(true);
 }
 

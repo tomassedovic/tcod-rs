@@ -1,10 +1,8 @@
 #[macro_use] extern crate bitflags;
 
 pub use colors::Color;
-pub use console::{Console, BackgroundFlag, Renderer, FontFlags, TextAlignment};
+pub use console::{Console, RootConsole, OffscreenConsole, BackgroundFlag, Renderer, FontFlags, TextAlignment};
 pub use map::Map;
-
-pub use Console::Root as RootConsole;
 
 pub mod chars;
 pub mod colors;

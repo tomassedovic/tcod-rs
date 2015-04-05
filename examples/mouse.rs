@@ -1,15 +1,15 @@
 extern crate tcod;
 
 use tcod::input as input;
-use tcod::{Console, BackgroundFlag};
+use tcod::{Console, RootConsole, BackgroundFlag};
 
 fn main() {
-    let mut con = Console::init_root(
+    let mut con = RootConsole::init(
         80, 50, "Move the cursor inside the window", false);
     let mut x = 40;
     let mut y = 25;
 
-    while !Console::window_closed() {
+    while !RootConsole::window_closed() {
 
         loop {
             match input::check_for_event(input::KEY | input::MOUSE) {
@@ -33,6 +33,6 @@ fn main() {
 
         con.clear();
         con.put_char(x, y, '@', BackgroundFlag::Set);
-        Console::flush();
+        RootConsole::flush();
     }
 }

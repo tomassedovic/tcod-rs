@@ -1,12 +1,12 @@
 extern crate tcod;
 
-use tcod::Console;
+use tcod::RootConsole;
 
 fn main() {
-    Console::init_root(80, 50, "Minimal libtcod loop", false);
-    while !Console::window_closed() {
-        Console::flush();
-        let key = Console::wait_for_keypress(true);
+    RootConsole::init(80, 50, "Minimal libtcod loop", false);
+    while !RootConsole::window_closed() {
+        RootConsole::flush();
+        let key = RootConsole::wait_for_keypress(true);
         println!("Pressed key: {:?}", key);
     }
 }
