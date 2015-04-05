@@ -14,12 +14,12 @@ fn main() {
     let mut boxed_trait: Box<Console> = Box::new(OffscreenConsole::new(20, 20));
 
 
-    root.set_default_background(colors::darkest_green);
+    root.set_default_background(colors::DARKEST_GREEN);
     
-    direct.set_default_background(colors::red);
-    boxed_direct.set_default_background(colors::white);
-    trait_object.set_default_background(colors::black);
-    boxed_trait.set_default_background(colors::blue);
+    direct.set_default_background(colors::RED);
+    boxed_direct.set_default_background(colors::WHITE);
+    trait_object.set_default_background(colors::BLACK);
+    boxed_trait.set_default_background(colors::BLUE);
 
     root.clear();
 
