@@ -7,11 +7,11 @@ use colors::Color;
 use input::{Key, KeyPressFlags, KeyState};
 
 
-pub struct OffscreenConsole {
+pub struct Offscreen {
     con: ffi::TCOD_console_t,
 }
 
-impl Drop for OffscreenConsole {
+impl Drop for Offscreen {
     fn drop(&mut self) {
         unsafe {
             ffi::TCOD_console_delete(self.con);
@@ -19,20 +19,20 @@ impl Drop for OffscreenConsole {
     }
 }
 
-impl OffscreenConsole {
-    pub fn new(width: i32, height: i32) -> OffscreenConsole {
+impl Offscreen {
+    pub fn new(width: i32, height: i32) -> Offscreen {
         assert!(width > 0 && height > 0);
         unsafe {
-            OffscreenConsole { con: ffi::TCOD_console_new(width, height) }
+            Offscreen { con: ffi::TCOD_console_new(width, height) }
         }
     }
 
 }
 
-pub struct RootConsole;
+pub struct Root;
 
-impl RootConsole {
-    pub fn init(width: i32, height: i32, title: &str, fullscreen: bool) -> RootConsole {
+impl Root {
+    pub fn init(width: i32, height: i32, title: &str, fullscreen: bool) -> Root {
         assert!(width > 0 && height > 0);
         unsafe {
             let c_title = CString::new(title.as_bytes()).unwrap();
@@ -41,7 +41,7 @@ impl RootConsole {
                                         fullscreen as c_bool,
                                         ffi::TCOD_RENDERER_SDL);
         }
-        RootConsole
+        Root
     }
     
     pub fn is_fullscreen(&self) -> bool {
@@ -385,25 +385,25 @@ impl Console for Box<Console> {
     }
 }
 
-impl Console for RootConsole {
+impl Console for Root {
     unsafe fn con(&self) -> ffi::TCOD_console_t {
         0 as ffi::TCOD_console_t
     }
 }
 
-impl Console for Box<RootConsole> {
+impl Console for Box<Root> {
     unsafe fn con(&self) -> ffi::TCOD_console_t {
         (**self).con()
     }
 }
 
-impl Console for OffscreenConsole {
+impl Console for Offscreen {
     unsafe fn con(&self) -> ffi::TCOD_console_t {
         self.con
     }
 }
 
-impl Console for Box<OffscreenConsole> {
+impl Console for Box<Offscreen> {
     unsafe fn con(&self) -> ffi::TCOD_console_t {
         (**self).con()
     }
