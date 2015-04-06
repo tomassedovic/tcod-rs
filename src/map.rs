@@ -1,22 +1,15 @@
 use bindings::ffi;
-use bindings::c_bool;
-
-pub trait TcodMap {
-    fn as_tcod_map(&self) -> &ffi::TCOD_map_t;
-    fn as_mut_tcod_map(&mut self) -> &mut ffi::TCOD_map_t;
-}
+use bindings::{AsNative, c_bool};
 
 pub struct Map {
     tcod_map: ffi::TCOD_map_t,
 }
 
-impl TcodMap for Map {
-    fn as_tcod_map(&self) -> &ffi::TCOD_map_t {
+impl<'a> AsNative for Map {
+    type Output = &'a ffi::TCOD_map_t; 
+    
+    unsafe fn as_native(&self) -> &ffi::TCOD_map_t {
         &self.tcod_map
-    }
-
-    fn as_mut_tcod_map(&mut self) -> &mut ffi::TCOD_map_t {
-        &mut self.tcod_map
     }
 }
 

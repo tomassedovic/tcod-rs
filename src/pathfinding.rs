@@ -1,7 +1,7 @@
 use bindings::ffi;
-use bindings::{c_bool, c_float, c_int, c_void};
+use bindings::{AsNative, c_bool, c_float, c_int, c_void};
 
-use map::{Map, TcodMap};
+use map::Map;
 
 enum PathInnerData<'a> {
     Map(Map),
@@ -77,7 +77,7 @@ impl<'a> AStar<'a> {
 
     pub fn new_from_map(map: Map, diagonal_cost: f32) -> AStar<'static> {
         let tcod_path = unsafe {
-            ffi::TCOD_path_new_using_map(*map.as_tcod_map(), diagonal_cost)
+            ffi::TCOD_path_new_using_map(*map.as_native(), diagonal_cost)
         };
         let (w, h) = map.size();
         AStar {
@@ -219,7 +219,7 @@ impl<'a> Dijkstra<'a> {
 
     pub fn new_from_map(map: Map, diagonal_cost: f32) -> Dijkstra<'static> {
         let tcod_path = unsafe {
-            ffi::TCOD_dijkstra_new(*map.as_tcod_map(), diagonal_cost)
+            ffi::TCOD_dijkstra_new(*map.as_native(), diagonal_cost)
         };
         let (w, h) = map.size();
         Dijkstra {

@@ -10,6 +10,12 @@ use super::input::KeyCode;
 #[allow(non_camel_case_types)]
 pub type c_bool = uint8_t;
 
+pub trait AsNative {
+    type Output;
+
+    unsafe fn as_native(&self) -> <Self as AsNative>::Output;
+}
+
 pub fn keycode_from_u32(input: u32) -> Option<KeyCode> {
     match input {
         0 => Some(KeyCode::NoKey),
