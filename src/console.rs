@@ -166,7 +166,7 @@ impl RootConsole {
 
 
 pub trait Console {
-    fn con(&self) -> ffi::TCOD_console_t;
+    unsafe fn con(&self) -> ffi::TCOD_console_t;
 
     fn get_alignment(&self) -> TextAlignment {
         let alignment = unsafe {
@@ -374,37 +374,37 @@ pub fn blit<T, U>(source_console: &T,
 }
 
 impl<'a> Console for &'a Console {
-    fn con(&self) -> ffi::TCOD_console_t {
+    unsafe fn con(&self) -> ffi::TCOD_console_t {
         (*self).con()
     }
 }
 
 impl Console for Box<Console> {
-    fn con(&self) -> ffi::TCOD_console_t {
+    unsafe fn con(&self) -> ffi::TCOD_console_t {
         (**self).con()
     }
 }
 
 impl Console for RootConsole {
-    fn con(&self) -> ffi::TCOD_console_t {
+    unsafe fn con(&self) -> ffi::TCOD_console_t {
         0 as ffi::TCOD_console_t
     }
 }
 
 impl Console for Box<RootConsole> {
-    fn con(&self) -> ffi::TCOD_console_t {
+    unsafe fn con(&self) -> ffi::TCOD_console_t {
         (**self).con()
     }
 }
 
 impl Console for OffscreenConsole {
-    fn con(&self) -> ffi::TCOD_console_t {
+    unsafe fn con(&self) -> ffi::TCOD_console_t {
         self.con
     }
 }
 
 impl Console for Box<OffscreenConsole> {
-    fn con(&self) -> ffi::TCOD_console_t {
+    unsafe fn con(&self) -> ffi::TCOD_console_t {
         (**self).con()
     }
 }
