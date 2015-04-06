@@ -1,8 +1,8 @@
 extern crate tcod;
 
-use tcod::AStarPath;
+use tcod::pathfinding::AStar;
 
-fn create_path() -> AStarPath<'static> {
+fn create_path() -> AStar<'static> {
     let chess_board: [[i32; 8]; 8] = [
         [1, 0, 1, 0, 1, 0, 1, 0],
         [0, 1, 0, 1, 0, 1, 0, 1],
@@ -23,7 +23,7 @@ fn create_path() -> AStarPath<'static> {
             0.0
         }
     };
-    AStarPath::new_from_callback(8, 8, can_move, 1.0)
+    AStar::new_from_callback(8, 8, can_move, 1.0)
 }
 
 fn main() {

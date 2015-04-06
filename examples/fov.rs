@@ -1,7 +1,8 @@
 extern crate rand;
 extern crate tcod;
 
-use tcod::{Console, BackgroundFlag, FovAlgorithm, Map};
+use tcod::{Console, BackgroundFlag, Map};
+use tcod::map::FovAlgorithm;
 
 // We'll use a basic structure to define our tiles.
 #[derive(Copy, Clone)]

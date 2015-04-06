@@ -1,27 +1,20 @@
 #[macro_use] extern crate bitflags;
 
-pub use console::*;
-pub use input::{EventFlags, Key, KeyCode, KeyPressFlags, KeyState, MouseState};
-pub use map::{Map, FovAlgorithm};
-pub use pathfinding::*;
-pub use system::*;
+pub use colors::Color;
+pub use console::{Console, BackgroundFlag, Renderer, FontFlags, TextAlignment};
+pub use map::Map;
 
 pub use Console::Root as RootConsole;
-pub use colors::Color;
-pub use input::{ANY,
-                KEY, KEY_RELEASE, KEY_PRESS,
-                MOUSE, MOUSE_RELEASE, MOUSE_PRESS, MOUSE_MOVE};
-
 
 pub mod chars;
 pub mod colors;
+pub mod console;
 pub mod input;
+pub mod map;
+pub mod pathfinding;
 pub mod system;
 
 mod bindings;
-mod console;
-mod map;
-mod pathfinding;
 
 
 

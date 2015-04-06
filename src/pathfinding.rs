@@ -9,7 +9,7 @@ enum PathInnerData<'a> {
 }
 
 // We need to wrap the pointer in a struct so that we can implement a
-// destructor. But we can't put ffi::TCOD_path_t directly inside AStarPath
+// destructor. But we can't put ffi::TCOD_path_t directly inside AStar
 // because it includes the boxed closure which has a 'static lifetime so we
 // can't attach a destructor to it.
 //
@@ -26,7 +26,7 @@ impl Drop for TCODPath {
     }
 }
 
-pub struct AStarPath<'a>{
+pub struct AStar<'a>{
     tcod_path: TCODPath,
     #[allow(dead_code)]
     inner: PathInnerData<'a>,
@@ -46,10 +46,10 @@ extern "C" fn c_path_callback(xf: c_int, yf: c_int,
 
 type TcodPathCb = extern "C" fn(c_int, c_int, c_int, c_int, *mut c_void) -> c_float;
 
-impl<'a> AStarPath<'a> {
+impl<'a> AStar<'a> {
     pub fn new_from_callback<T: 'a+FnMut((i32, i32), (i32, i32)) -> f32>(
         width: i32, height: i32, path_callback: T,
-        diagonal_cost: f32) -> AStarPath<'a> {
+        diagonal_cost: f32) -> AStar<'a> {
         // Convert the closure to a trait object. This will turn it into a fat pointer:
         let user_closure: Box<FnMut((i32, i32), (i32, i32)) -> f32> = Box::new(path_callback);
         unsafe {
@@ -63,10 +63,10 @@ impl<'a> AStarPath<'a> {
                                                               Some(c_path_callback),
                                                               user_data_ptr as *mut c_void,
                                                               diagonal_cost);
-            AStarPath {
+            AStar {
                 tcod_path: TCODPath{ptr: tcod_path},
                 // Keep track of everything we've allocated on the heap. Both
-                // `user_closure` and `ptr` will be deallocated when AStarPath
+                // `user_closure` and `ptr` will be deallocated when AStar
                 // is dropped:
                 inner: PathInnerData::Callback(user_closure, ptr),
                 width: width,
@@ -75,12 +75,12 @@ impl<'a> AStarPath<'a> {
         }
     }
 
-    pub fn new_from_map(map: Map, diagonal_cost: f32) -> AStarPath<'static> {
+    pub fn new_from_map(map: Map, diagonal_cost: f32) -> AStar<'static> {
         let tcod_path = unsafe {
             ffi::TCOD_path_new_using_map(*map.as_tcod_map(), diagonal_cost)
         };
         let (w, h) = map.size();
-        AStarPath {
+        AStar {
             tcod_path: TCODPath{ptr: tcod_path},
             inner: PathInnerData::Map(map),
             width: w,
@@ -102,12 +102,12 @@ impl<'a> AStarPath<'a> {
         }
     }
 
-    pub fn walk(&mut self) -> AStarPathIterator {
-        AStarPathIterator{tcod_path: self.tcod_path.ptr, recalculate: false}
+    pub fn walk(&mut self) -> AStarIterator {
+        AStarIterator{tcod_path: self.tcod_path.ptr, recalculate: false}
     }
 
-    pub fn walk_recalculate(&mut self) -> AStarPathIterator {
-        AStarPathIterator{tcod_path: self.tcod_path.ptr, recalculate: true}
+    pub fn walk_recalculate(&mut self) -> AStarIterator {
+        AStarIterator{tcod_path: self.tcod_path.ptr, recalculate: true}
     }
 
     pub fn walk_one_step(&mut self, recalculate_when_needed: bool) -> Option<(i32, i32)> {
@@ -171,11 +171,11 @@ impl<'a> AStarPath<'a> {
     }
 }
 
-struct TCODDijkstraPath {
+struct TCODDijkstra {
     ptr: ffi::TCOD_dijkstra_t,
 }
 
-impl Drop for TCODDijkstraPath {
+impl Drop for TCODDijkstra {
     fn drop(&mut self) {
         unsafe {
             ffi::TCOD_dijkstra_delete(self.ptr);
@@ -183,21 +183,21 @@ impl Drop for TCODDijkstraPath {
     }
 }
 
-pub struct DijkstraPath<'a> {
-    tcod_path: TCODDijkstraPath,
+pub struct Dijkstra<'a> {
+    tcod_path: TCODDijkstra,
     #[allow(dead_code)]
     inner: PathInnerData<'a>,
     width: i32,
     height: i32,
 }
 
-impl<'a> DijkstraPath<'a> {
+impl<'a> Dijkstra<'a> {
     pub fn new_from_callback<T: 'a+FnMut((i32, i32), (i32, i32)) -> f32>(
         width: i32, height: i32,
         path_callback: T,
-        diagonal_cost: f32) -> DijkstraPath<'a> {
+        diagonal_cost: f32) -> Dijkstra<'a> {
         // NOTE: this is might be a bit confusing. See the
-        // AStarPath::new_from_callback implementation comments.
+        // AStar::new_from_callback implementation comments.
         let user_closure: Box<FnMut((i32, i32), (i32, i32)) -> f32> = Box::new(path_callback);
         unsafe {
             let fat_ptr: (usize, usize) = ::std::mem::transmute(&*user_closure);
@@ -208,8 +208,8 @@ impl<'a> DijkstraPath<'a> {
                                                                   Some(c_path_callback),
                                                                   user_data_ptr as *mut c_void,
                                                                   diagonal_cost);
-            DijkstraPath {
-                tcod_path: TCODDijkstraPath{ptr: tcod_path},
+            Dijkstra {
+                tcod_path: TCODDijkstra{ptr: tcod_path},
                 inner: PathInnerData::Callback(user_closure, ptr),
                 width: width,
                 height: height,
@@ -217,13 +217,13 @@ impl<'a> DijkstraPath<'a> {
         }
     }
 
-    pub fn new_from_map(map: Map, diagonal_cost: f32) -> DijkstraPath<'static> {
+    pub fn new_from_map(map: Map, diagonal_cost: f32) -> Dijkstra<'static> {
         let tcod_path = unsafe {
             ffi::TCOD_dijkstra_new(*map.as_tcod_map(), diagonal_cost)
         };
         let (w, h) = map.size();
-        DijkstraPath {
-            tcod_path: TCODDijkstraPath{ptr: tcod_path},
+        Dijkstra {
+            tcod_path: TCODDijkstra{ptr: tcod_path},
             inner: PathInnerData::Map(map),
             width: w,
             height: h,
@@ -249,8 +249,8 @@ impl<'a> DijkstraPath<'a> {
         }
     }
 
-    pub fn walk(&mut self) -> DijkstraPathIterator {
-        DijkstraPathIterator{tcod_path: self.tcod_path.ptr}
+    pub fn walk(&mut self) -> DijkstraIterator {
+        DijkstraIterator{tcod_path: self.tcod_path.ptr}
     }
 
     pub fn walk_one_step(&mut self) -> Option<(i32, i32)> {
@@ -308,12 +308,12 @@ impl<'a> DijkstraPath<'a> {
     }
 }
 
-pub struct AStarPathIterator {
+pub struct AStarIterator {
     tcod_path: ffi::TCOD_path_t,
     recalculate: bool,
 }
 
-impl Iterator for AStarPathIterator {
+impl Iterator for AStarIterator {
     type Item = (isize, isize);
 
     fn next(&mut self) -> Option<(isize, isize)> {
@@ -329,11 +329,11 @@ impl Iterator for AStarPathIterator {
     }
 }
 
-pub struct DijkstraPathIterator {
+pub struct DijkstraIterator {
     tcod_path: ffi::TCOD_path_t,
 }
 
-impl Iterator for DijkstraPathIterator {
+impl Iterator for DijkstraIterator {
     type Item = (isize, isize);
 
     fn next(&mut self) -> Option<(isize, isize)> {

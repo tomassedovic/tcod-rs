@@ -114,26 +114,22 @@ pub struct MouseState {
     pub wheel_down: bool,
 }
 
-pub mod mouse {
-    use bindings::ffi;
-    use bindings::c_bool;
 
-    pub fn show_cursor(visible: bool) {
-        unsafe {
-            ffi::TCOD_mouse_show_cursor(visible as c_bool);
-        }
+pub fn show_cursor(visible: bool) {
+    unsafe {
+        ffi::TCOD_mouse_show_cursor(visible as c_bool);
     }
-   
-    pub fn is_cursor_visible() -> bool {
-        unsafe {
-            ffi::TCOD_mouse_is_cursor_visible() != 0
-        }
+}
+
+pub fn is_cursor_visible() -> bool {
+    unsafe {
+        ffi::TCOD_mouse_is_cursor_visible() != 0
     }
-   
-    pub fn move_cursor(x: i32, y: i32) {
-        unsafe {
-            ffi::TCOD_mouse_move(x, y);
-        }
+}
+
+pub fn move_cursor(x: i32, y: i32) {
+    unsafe {
+        ffi::TCOD_mouse_move(x, y);
     }
 }
 

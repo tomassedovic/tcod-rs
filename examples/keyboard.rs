@@ -1,8 +1,8 @@
 extern crate tcod;
 
 use tcod::{Console, BackgroundFlag};
-use tcod::Key::Special;
-use tcod::KeyCode::{Up, Down, Left, Right, Escape};
+use tcod::input::Key::Special;
+use tcod::input::KeyCode::{Up, Down, Left, Right, Escape};
 
 fn main() {
     let mut con = Console::init_root(80, 50, "libtcod Rust tutorial", false);
