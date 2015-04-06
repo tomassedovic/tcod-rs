@@ -1,8 +1,8 @@
 extern crate tcod;
 
-use tcod::DijkstraPath;
+use tcod::pathfinding::Dijkstra;
 
-fn create_path() -> DijkstraPath<'static> {
+fn create_path() -> Dijkstra<'static> {
     let chess_board: [[i32; 8]; 8] = [
         [1, 0, 1, 0, 1, 0, 1, 0],
         [0, 1, 0, 1, 0, 1, 0, 1],
@@ -23,10 +23,10 @@ fn create_path() -> DijkstraPath<'static> {
             0.0
         }
     };
-    DijkstraPath::new_from_callback(8, 8, can_move, 1.0)
+    Dijkstra::new_from_callback(8, 8, can_move, 1.0)
 }
 
-fn walk_from(path: &mut DijkstraPath, origin: (i32, i32)) {
+fn walk_from(path: &mut Dijkstra, origin: (i32, i32)) {
     path.find(origin);
     path.reverse();
     println!("Starting from: {:?}", origin);
