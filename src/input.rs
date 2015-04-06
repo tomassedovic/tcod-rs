@@ -118,7 +118,7 @@ pub mod mouse {
     use bindings::ffi;
     use bindings::c_bool;
 
-    fn show_cursor(visible: bool) {
+    pub fn show_cursor(visible: bool) {
         unsafe {
             ffi::TCOD_mouse_show_cursor(visible as c_bool);
         }

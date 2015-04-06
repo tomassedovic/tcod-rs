@@ -4,8 +4,6 @@ extern crate time;
 use bindings::ffi;
 
 use self::time::Duration;
-use std::fs::PathExt;
-
 
 pub fn set_fps(fps: i32) {
     assert!(fps > 0);
@@ -43,7 +41,6 @@ pub fn get_elapsed_time() -> Duration {
 }
 
 pub fn save_screenshot(path: &std::path::Path) {
-    assert!(path.exists());
     let filename = path.to_str().unwrap();
     let c_path = std::ffi::CString::new(filename).unwrap();
     unsafe {

@@ -1,6 +1,3 @@
-#![feature(path_ext)]
-#![allow(dead_code)]
-
 #[macro_use] extern crate bitflags;
 
 pub use console::*;
