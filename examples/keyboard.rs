@@ -1,18 +1,18 @@
 extern crate tcod;
 
-use tcod::{Console, BackgroundFlag};
+use tcod::{Console, RootConsole, BackgroundFlag};
 use tcod::input::Key::Special;
 use tcod::input::KeyCode::{Up, Down, Left, Right, Escape};
 
 fn main() {
-    let mut con = Console::init_root(80, 50, "libtcod Rust tutorial", false);
+    let mut con = RootConsole::init(80, 50, "libtcod Rust tutorial", false);
     let mut x = 40;
     let mut y = 25;
-    while !Console::window_closed() {
+    while !con.window_closed() {
         con.clear();
         con.put_char(x, y, '@', BackgroundFlag::Set);
-        Console::flush();
-        let keypress = Console::wait_for_keypress(true);
+        con.flush();
+        let keypress = con.wait_for_keypress(true);
         // libtcod 1.5.1 has a bug where `wait_for_keypress` emits two events:
         // one for key down and one for key up. So we ignore the "key up" ones.
         if keypress.pressed {

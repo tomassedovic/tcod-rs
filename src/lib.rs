@@ -4,8 +4,6 @@ pub use colors::Color;
 pub use console::{Console, BackgroundFlag, Renderer, FontFlags, TextAlignment};
 pub use map::Map;
 
-pub use Console::Root as RootConsole;
-
 pub mod chars;
 pub mod colors;
 pub mod console;
@@ -17,10 +15,6 @@ pub mod system;
 mod bindings;
 
 
-
-
-
-
-
-
+pub type RootConsole = console::Root; 
+pub type OffscreenConsole = console::Offscreen;
 
