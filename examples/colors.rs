@@ -28,8 +28,8 @@ fn main() {
     let (h, s, v) = red.hsv();
     println!("Red colour's hue: {}, saturation: {}, value: {}", h, s, v);
 
-    RootConsole::flush();
+    con.flush();
 
     // Press any key to exit:
-    RootConsole::wait_for_keypress(true);
+    con.wait_for_keypress(true);
 }

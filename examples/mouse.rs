@@ -9,7 +9,7 @@ fn main() {
     let mut x = 40;
     let mut y = 25;
 
-    while !RootConsole::window_closed() {
+    while !con.window_closed() {
 
         loop {
             match input::check_for_event(input::KEY | input::MOUSE) {
@@ -33,6 +33,6 @@ fn main() {
 
         con.clear();
         con.put_char(x, y, '@', BackgroundFlag::Set);
-        RootConsole::flush();
+        con.flush();
     }
 }

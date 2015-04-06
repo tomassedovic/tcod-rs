@@ -48,7 +48,7 @@ fn main() {
 
     root.put_char(20,20, '@', BackgroundFlag::Set);
 
-    RootConsole::flush();
+    root.flush();
     //Press any key to exit.
-    RootConsole::wait_for_keypress(true);
+    root.wait_for_keypress(true);
 }

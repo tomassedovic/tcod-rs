@@ -4,25 +4,25 @@ use tcod::{Console, RootConsole};
 use tcod::chars;
 
 fn main() {
-    RootConsole::init(80, 50, "Example of libtcod's special chars", false);
-    RootConsole.clear();
+    let mut root = RootConsole::init(80, 50, "Example of libtcod's special chars", false);
+    root.clear();
 
     // The top half of the box
-    RootConsole.set_char(40, 25, chars::HLINE);
-    RootConsole.set_char(41, 25, chars::NE);
-    RootConsole.set_char(41, 26, chars::VLINE);
-    RootConsole.set_char(41, 27, chars::SE);
+    root.set_char(40, 25, chars::HLINE);
+    root.set_char(41, 25, chars::NE);
+    root.set_char(41, 26, chars::VLINE);
+    root.set_char(41, 27, chars::SE);
 
     // Draw the heart:
-    RootConsole.set_char(40, 26, chars::HEART);
+    root.set_char(40, 26, chars::HEART);
 
     // The bottom half of the box
-    RootConsole.set_char(40, 27, chars::HLINE);
-    RootConsole.set_char(39, 27, chars::SW);
-    RootConsole.set_char(39, 26, chars::VLINE);
-    RootConsole.set_char(39, 25, chars::NW);
+    root.set_char(40, 27, chars::HLINE);
+    root.set_char(39, 27, chars::SW);
+    root.set_char(39, 26, chars::VLINE);
+    root.set_char(39, 25, chars::NW);
 
-    RootConsole::flush();
-    RootConsole::wait_for_keypress(true);
+    root.flush();
+    root.wait_for_keypress(true);
 }
 

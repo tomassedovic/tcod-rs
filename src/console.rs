@@ -44,51 +44,52 @@ impl RootConsole {
         RootConsole
     }
     
-    pub fn is_fullscreen() -> bool {
+    pub fn is_fullscreen(&self) -> bool {
         unsafe {
             ffi::TCOD_console_is_fullscreen() != 0
         }
     }
 
-    pub fn set_fullscreen(fullscreen: bool) {
+    pub fn set_fullscreen(&mut self, fullscreen: bool) {
         unsafe {
             ffi::TCOD_console_set_fullscreen(fullscreen as u8);
         }
     }
 
-    pub fn disable_keyboard_repeat() {
+    pub fn disable_keyboard_repeat(&mut self) {
         unsafe {
             ffi::TCOD_console_disable_keyboard_repeat()
         }
     }
 
-    pub fn is_active() -> bool {
+    pub fn is_active(&self) -> bool {
         unsafe {
             ffi::TCOD_console_is_active() != 0
         }
     }
 
 
-    pub fn get_fade() -> u8 {
+    pub fn get_fade(&self) -> u8 {
         unsafe {
             ffi::TCOD_console_get_fade()
         }
     }
 
-    pub fn get_fading_color() -> Color {
+    pub fn get_fading_color(&self) -> Color {
         unsafe {
             Color::from_tcod_color_t(
                 ffi::TCOD_console_get_fading_color())
         }
     }
 
-    pub fn set_fade(fade: u8, fading_color: Color) {
+    pub fn set_fade(&mut self, fade: u8, fading_color: Color) {
         unsafe {
             ffi::TCOD_console_set_fade(fade, fading_color.to_color_t());
         }
     }
 
-    pub fn set_custom_font(font_path: &std::path::Path, flags: FontFlags,
+    pub fn set_custom_font(&mut self, 
+                           font_path: &std::path::Path, flags: FontFlags,
                            nb_char_horizontal: i32,
                            nb_char_vertical: i32) {
         unsafe {
@@ -100,7 +101,7 @@ impl RootConsole {
         }
     }
 
-    pub fn wait_for_keypress(flush: bool) -> KeyState {
+    pub fn wait_for_keypress(&mut self, flush: bool) -> KeyState {
         let tcod_key = unsafe {
             ffi::TCOD_console_wait_for_keypress(flush as c_bool)
         };
@@ -120,7 +121,7 @@ impl RootConsole {
         }
     }
 
-    pub fn check_for_keypress(status: KeyPressFlags) -> Option<KeyState> {
+    pub fn check_for_keypress(&self, status: KeyPressFlags) -> Option<KeyState> {
         let tcod_key = unsafe {
             ffi::TCOD_console_check_for_keypress(status.bits() as i32)
         };
@@ -143,19 +144,19 @@ impl RootConsole {
         })
     }
 
-    pub fn window_closed() -> bool {
+    pub fn window_closed(&self) -> bool {
         unsafe {
             ffi::TCOD_console_is_window_closed() != 0
         }
     }
 
-    pub fn flush() {
+    pub fn flush(&mut self) {
         unsafe {
             ffi::TCOD_console_flush();
         }
     }
 
-    pub fn set_window_title(title: &str) {
+    pub fn set_window_title(&mut self, title: &str) {
         unsafe {
             let c_title = CString::new(title.as_bytes()).unwrap();
             ffi::TCOD_console_set_window_title(c_title.as_ptr());

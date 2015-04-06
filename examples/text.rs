@@ -3,15 +3,15 @@ extern crate tcod;
 use tcod::{Console, RootConsole, BackgroundFlag, TextAlignment};
 
 fn main() {
-    RootConsole::init(80, 50, "Displaying text", false);
-    RootConsole.print_ex(1, 1, BackgroundFlag::None, TextAlignment::Left,
-                         "Text aligned to left.");
-    RootConsole.print_ex(78, 1, BackgroundFlag::None, TextAlignment::Right,
-                         "Text aligned to right.");
-    RootConsole.print_ex(40, 15, BackgroundFlag::None, TextAlignment::Center,
-                         "And this bit of text is centered.");
-    RootConsole.print_ex(40, 19, BackgroundFlag::None, TextAlignment::Center,
-                         "Press any key to quit.");
-    RootConsole::flush();
-    RootConsole::wait_for_keypress(true);
+    let mut root = RootConsole::init(80, 50, "Displaying text", false);
+    root.print_ex(1, 1, BackgroundFlag::None, TextAlignment::Left,
+                  "Text aligned to left.");
+    root.print_ex(78, 1, BackgroundFlag::None, TextAlignment::Right,
+                  "Text aligned to right.");
+    root.print_ex(40, 15, BackgroundFlag::None, TextAlignment::Center,
+                  "And this bit of text is centered.");
+    root.print_ex(40, 19, BackgroundFlag::None, TextAlignment::Center,
+                  "Press any key to quit.");
+    root.flush();
+    root.wait_for_keypress(true);
 }

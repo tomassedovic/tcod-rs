@@ -34,6 +34,6 @@ fn main() {
     console::blit(&trait_object, 0, 0, 20, 20, &mut root, 0, 20, 1.0, 1.0); 
     console::blit(&boxed_trait, 0, 0, 20, 20, &mut root, 20, 20, 1.0, 1.0); 
 
-    RootConsole::flush();
-    RootConsole::wait_for_keypress(true);
+    root.flush();
+    root.wait_for_keypress(true);
 }
