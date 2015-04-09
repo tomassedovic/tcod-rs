@@ -4,8 +4,11 @@ use tcod::input as input;
 use tcod::{Console, RootConsole, BackgroundFlag};
 
 fn main() {
-    let mut con = RootConsole::init(
-        80, 50, "Move the cursor inside the window", false);
+    let mut con = RootConsole::initializer()
+        .size(80, 50)
+        .title("Move the cursor inside the window")
+        .init();
+
     let mut x = 40;
     let mut y = 25;
 
