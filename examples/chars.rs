@@ -4,7 +4,11 @@ use tcod::{Console, RootConsole};
 use tcod::chars;
 
 fn main() {
-    let mut root = RootConsole::init(80, 50, "Example of libtcod's special chars", false);
+    let mut root = RootConsole::initializer()
+        .size(80, 50)
+        .title("Example of libtcod's special chars")
+        .init();
+
     root.clear();
 
     // The top half of the box

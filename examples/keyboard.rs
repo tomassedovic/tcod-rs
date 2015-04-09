@@ -5,7 +5,11 @@ use tcod::input::Key::Special;
 use tcod::input::KeyCode::{Up, Down, Left, Right, Escape};
 
 fn main() {
-    let mut con = RootConsole::init(80, 50, "libtcod Rust tutorial", false);
+    let mut con = RootConsole::initializer()
+        .size(80, 50)
+        .title("libtcod Rust tutorial")
+        .init();
+
     let mut x = 40;
     let mut y = 25;
     while !con.window_closed() {

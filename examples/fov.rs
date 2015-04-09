@@ -13,9 +13,9 @@ pub struct Tile {
 }
 
 fn main() {
-    let mut root = RootConsole::init(40,40, "FOV example", false);
-    let mut map = Map::new(40,40);
+    let mut root = RootConsole::initializer().size(40, 40) .title("FOV example").init();
 
+    let mut map = Map::new(40,40);
     let mut tiles = Vec::new();
 
     root.clear();

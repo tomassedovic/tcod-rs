@@ -1,11 +1,25 @@
 extern crate std;
 
+pub use self::WindowType::Windowed as Windowed;
+pub use self::WindowType::Fullscreen as Fullscreen;
+
 use bindings::ffi;
 use bindings::{c_bool, c_uint, CString, keycode_from_u32};
 
 use colors::Color;
 use input::{Key, KeyPressFlags, KeyState};
 
+#[derive(Copy, Clone)]
+pub enum WindowType {
+    Windowed,
+    Fullscreen
+}
+
+#[derive(Copy, Clone)]
+pub struct FontDimensions(i32, i32);
+
+#[derive(Copy, Clone)]
+pub struct FontPath<'a>(&'a str);
 
 pub struct Offscreen {
     con: ffi::TCOD_console_t,
@@ -32,8 +46,26 @@ impl Offscreen {
 pub struct Root;
 
 impl Root {
-    pub fn init(width: i32, height: i32, title: &str, fullscreen: bool) -> Root {
+    pub fn initializer<'a>() -> RootInitializer<'a> {
+        RootInitializer::new()
+    }
+    
+    fn init(width: i32, height: i32, title: &str, window_type: WindowType, 
+            font_path: FontPath, flags: FontFlags, font_dimensions: FontDimensions) -> Root {
         assert!(width > 0 && height > 0);
+        
+        match (font_path, font_dimensions) {
+            (FontPath(path), FontDimensions(horizontal, vertical)) => {
+                Root::set_custom_font(&std::path::Path::new(path), flags, horizontal, vertical)
+            }
+        }
+
+        let fullscreen = match window_type {
+            Fullscreen => true,
+            Windowed => false
+        };
+        
+        println!("{} {}", width, height);
         unsafe {
             let c_title = CString::new(title.as_bytes()).unwrap();
             ffi::TCOD_console_init_root(width, height,
@@ -43,6 +75,7 @@ impl Root {
         }
         Root
     }
+    
     
     pub fn is_fullscreen(&self) -> bool {
         unsafe {
@@ -85,19 +118,6 @@ impl Root {
     pub fn set_fade(&mut self, fade: u8, fading_color: Color) {
         unsafe {
             ffi::TCOD_console_set_fade(fade, fading_color.to_color_t());
-        }
-    }
-
-    pub fn set_custom_font(&mut self, 
-                           font_path: &std::path::Path, flags: FontFlags,
-                           nb_char_horizontal: i32,
-                           nb_char_vertical: i32) {
-        unsafe {
-            let filename = font_path.to_str().unwrap();
-            let path = CString::new(filename).unwrap();
-            ffi::TCOD_console_set_custom_font(
-                path.as_ptr(), flags.bits() as i32, nb_char_horizontal,
-                nb_char_vertical);
         }
     }
 
@@ -162,8 +182,76 @@ impl Root {
             ffi::TCOD_console_set_window_title(c_title.as_ptr());
         }
     }
+    
+    fn set_custom_font(font_path: &std::path::Path, flags: FontFlags,
+                       nb_char_horizontal: i32,
+                       nb_char_vertical: i32) {
+        unsafe {
+            let filename = font_path.to_str().unwrap();
+            let path = CString::new(filename).unwrap();
+            ffi::TCOD_console_set_custom_font(
+                path.as_ptr(), flags.bits() as i32, nb_char_horizontal,
+                nb_char_vertical);
+        }
+    }
+
 }
 
+pub struct RootInitializer<'a> {
+    width: i32,
+    height: i32,
+    title: &'a str,
+    window_type: WindowType,
+    font_path: FontPath<'a>,
+    font_flags: FontFlags,
+    font_dimension: FontDimensions
+}
+
+impl<'a> RootInitializer<'a> {
+    pub fn new() -> RootInitializer<'a> {
+        RootInitializer {
+            width: 80,
+            height: 25,
+            title: "Main Window",
+            window_type: Windowed,
+            font_path: FontPath("terminal.png"),
+            font_flags: FONT_LAYOUT_ASCII_INCOL,
+            font_dimension: FontDimensions(0, 0)
+        }
+    }
+
+    pub fn size(&mut self, width: i32, height: i32) -> &mut RootInitializer<'a> {
+        self.width = width;
+        self.height = height;
+        self
+    }
+
+    pub fn title(&mut self, title: &'a str) -> &mut RootInitializer<'a> {
+        self.title = title;
+        self
+    }
+
+    pub fn fullscreen(&mut self) -> &mut RootInitializer<'a> {
+        self.window_type = Fullscreen;
+        self
+    }
+
+    pub fn font(&mut self, path: &'a str, font_flags: FontFlags) -> &mut RootInitializer<'a> {
+        self.font_path = FontPath(path);
+        self.font_flags = font_flags;
+        self
+    }
+
+    pub fn font_dimensions(&mut self, horizontal: i32, vertical: i32) -> &mut RootInitializer<'a> {
+        self.font_dimension = FontDimensions(horizontal, vertical); 
+        self
+    }
+
+    pub fn init(&self) -> Root {
+        Root::init(self.width, self.height, self.title, self.window_type, 
+                   self.font_path, self.font_flags, self.font_dimension)
+    }
+}
 
 pub trait Console {
     unsafe fn con(&self) -> ffi::TCOD_console_t;
