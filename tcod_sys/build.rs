@@ -62,6 +62,6 @@ fn main() {
 
     // TODO: can we (optionally?) produce a static copy? It'd probably be more
     // work, but would be easier for the end users.
-    println!("cargo:rustc-link-search=native={}", dst.display());
+    println!("cargo:rustc-link-search={}", dst.display());
     println!("cargo:rustc-link-lib=dylib=tcod");
 }
