@@ -3,7 +3,8 @@ extern crate tcod;
 use tcod::{Console, RootConsole, BackgroundFlag, TextAlignment};
 
 fn main() {
-    let mut root = RootConsole::init(80, 50, "Displaying text", false);
+    let mut root = RootConsole::initializer().size(80, 50).title("Displaying text").init();
+
     root.print_ex(1, 1, BackgroundFlag::None, TextAlignment::Left,
                   "Text aligned to left.");
     root.print_ex(78, 1, BackgroundFlag::None, TextAlignment::Right,

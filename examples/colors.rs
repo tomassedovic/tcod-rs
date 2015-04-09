@@ -5,7 +5,10 @@ use tcod::colors;
 
 
 fn main() {
-    let mut con = RootConsole::init(80, 50, "Using colours with libtcod", false);
+    let mut con = RootConsole::initializer()
+        .size(80, 50)
+        .title("Using colours with libtcod")
+        .init();
     con.set_default_background(colors::DARKEST_GREEN);
     con.set_default_foreground(colors::LIGHTER_AZURE);
 
