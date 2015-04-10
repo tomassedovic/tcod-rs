@@ -6,8 +6,8 @@ use tcod::colors;
 
 fn main() {
     let mut con = RootConsole::init(80, 50, "Using colours with libtcod", false);
-    con.set_default_background(colors::darkest_green);
-    con.set_default_foreground(colors::lighter_azure);
+    con.set_default_background(colors::DARKEST_GREEN);
+    con.set_default_foreground(colors::LIGHTER_AZURE);
 
     con.clear();
     // Uses the default foreground and background:
