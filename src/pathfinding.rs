@@ -8,30 +8,20 @@ enum PathInnerData<'a> {
     Callback(Box<FnMut((i32, i32), (i32, i32)) -> f32+'a>, Box<(usize, usize)>),
 }
 
-// We need to wrap the pointer in a struct so that we can implement a
-// destructor. But we can't put ffi::TCOD_path_t directly inside AStar
-// because it includes the boxed closure which has a 'static lifetime so we
-// can't attach a destructor to it.
-//
-// Unless we use #[unsafe_destructor] and I've no idea what could go wrong there.
-struct TCODPath {
-    ptr: ffi::TCOD_path_t,
-}
-
-impl Drop for TCODPath {
-    fn drop(&mut self) {
-        unsafe {
-            ffi::TCOD_path_delete(self.ptr);
-        }
-    }
-}
-
 pub struct AStar<'a>{
-    tcod_path: TCODPath,
+    tcod_path: ffi::TCOD_path_t,
     #[allow(dead_code)]
     inner: PathInnerData<'a>,
     width: i32,
     height: i32,
+}
+
+impl<'a> Drop for AStar<'a> {
+    fn drop(&mut self) {
+        unsafe {
+            ffi::TCOD_path_delete(self.tcod_path);
+        }
+    }
 }
 
 extern "C" fn c_path_callback(xf: c_int, yf: c_int,
@@ -64,7 +54,7 @@ impl<'a> AStar<'a> {
                                                               user_data_ptr as *mut c_void,
                                                               diagonal_cost);
             AStar {
-                tcod_path: TCODPath{ptr: tcod_path},
+                tcod_path: tcod_path,
                 // Keep track of everything we've allocated on the heap. Both
                 // `user_closure` and `ptr` will be deallocated when AStar
                 // is dropped:
@@ -81,7 +71,7 @@ impl<'a> AStar<'a> {
         };
         let (w, h) = map.size();
         AStar {
-            tcod_path: TCODPath{ptr: tcod_path},
+            tcod_path: tcod_path,
             inner: PathInnerData::Map(map),
             width: w,
             height: h,
@@ -96,25 +86,25 @@ impl<'a> AStar<'a> {
         assert!(from_x >= 0 && from_y >= 0 && to_x >= 0 && to_y >= 0);
         assert!(from_x < self.width && from_y < self.height && to_x < self.width && to_y < self.height);
         unsafe {
-            ffi::TCOD_path_compute(self.tcod_path.ptr,
+            ffi::TCOD_path_compute(self.tcod_path,
                                    from_x, from_y,
                                    to_x, to_y) != 0
         }
     }
 
     pub fn walk(&mut self) -> AStarIterator {
-        AStarIterator{tcod_path: self.tcod_path.ptr, recalculate: false}
+        AStarIterator{tcod_path: self.tcod_path, recalculate: false}
     }
 
     pub fn walk_recalculate(&mut self) -> AStarIterator {
-        AStarIterator{tcod_path: self.tcod_path.ptr, recalculate: true}
+        AStarIterator{tcod_path: self.tcod_path, recalculate: true}
     }
 
     pub fn walk_one_step(&mut self, recalculate_when_needed: bool) -> Option<(i32, i32)> {
         unsafe {
             let mut x: c_int = 0;
             let mut y: c_int = 0;
-            match ffi::TCOD_path_walk(self.tcod_path.ptr, &mut x, &mut y,
+            match ffi::TCOD_path_walk(self.tcod_path, &mut x, &mut y,
                                       recalculate_when_needed as c_bool) != 0 {
                 true => Some((x, y)),
                 false => None,
@@ -124,7 +114,7 @@ impl<'a> AStar<'a> {
 
     pub fn reverse(&mut self) {
         unsafe {
-            ffi::TCOD_path_reverse(self.tcod_path.ptr)
+            ffi::TCOD_path_reverse(self.tcod_path)
         }
     }
 
@@ -132,7 +122,7 @@ impl<'a> AStar<'a> {
         unsafe {
             let mut x: c_int = 0;
             let mut y: c_int = 0;
-            ffi::TCOD_path_get_origin(self.tcod_path.ptr, &mut x, &mut y);
+            ffi::TCOD_path_get_origin(self.tcod_path, &mut x, &mut y);
             (x as isize, y as isize)
         }
     }
@@ -141,7 +131,7 @@ impl<'a> AStar<'a> {
         unsafe {
             let mut x: c_int = 0;
             let mut y: c_int = 0;
-            ffi::TCOD_path_get_destination(self.tcod_path.ptr, &mut x, &mut y);
+            ffi::TCOD_path_get_destination(self.tcod_path, &mut x, &mut y);
             (x as isize, y as isize)
         }
     }
@@ -153,42 +143,38 @@ impl<'a> AStar<'a> {
         unsafe {
             let mut x: c_int = 0;
             let mut y: c_int = 0;
-            ffi::TCOD_path_get(self.tcod_path.ptr, index, &mut x, &mut y);
+            ffi::TCOD_path_get(self.tcod_path, index, &mut x, &mut y);
             (Some((x, y)))
         }
     }
 
     pub fn is_empty(&self) -> bool {
         unsafe {
-            ffi::TCOD_path_is_empty(self.tcod_path.ptr) != 0
+            ffi::TCOD_path_is_empty(self.tcod_path) != 0
         }
     }
 
     pub fn len(&self) -> i32 {
         unsafe {
-            ffi::TCOD_path_size(self.tcod_path.ptr)
-        }
-    }
-}
-
-struct TCODDijkstra {
-    ptr: ffi::TCOD_dijkstra_t,
-}
-
-impl Drop for TCODDijkstra {
-    fn drop(&mut self) {
-        unsafe {
-            ffi::TCOD_dijkstra_delete(self.ptr);
+            ffi::TCOD_path_size(self.tcod_path)
         }
     }
 }
 
 pub struct Dijkstra<'a> {
-    tcod_path: TCODDijkstra,
+    tcod_path: ffi::TCOD_dijkstra_t,
     #[allow(dead_code)]
     inner: PathInnerData<'a>,
     width: i32,
     height: i32,
+}
+
+impl<'a> Drop for Dijkstra<'a> {
+    fn drop(&mut self) {
+        unsafe {
+            ffi::TCOD_dijkstra_delete(self.tcod_path);
+        }
+    }
 }
 
 impl<'a> Dijkstra<'a> {
@@ -209,7 +195,7 @@ impl<'a> Dijkstra<'a> {
                                                                   user_data_ptr as *mut c_void,
                                                                   diagonal_cost);
             Dijkstra {
-                tcod_path: TCODDijkstra{ptr: tcod_path},
+                tcod_path: tcod_path,
                 inner: PathInnerData::Callback(user_closure, ptr),
                 width: width,
                 height: height,
@@ -223,7 +209,7 @@ impl<'a> Dijkstra<'a> {
         };
         let (w, h) = map.size();
         Dijkstra {
-            tcod_path: TCODDijkstra{ptr: tcod_path},
+            tcod_path: tcod_path,
             inner: PathInnerData::Map(map),
             width: w,
             height: h,
@@ -234,7 +220,7 @@ impl<'a> Dijkstra<'a> {
         let (x, y) = root;
         assert!(x >= 0 && y >= 0 && x < self.width && y < self.height);
         unsafe {
-            ffi::TCOD_dijkstra_compute(self.tcod_path.ptr, x, y);
+            ffi::TCOD_dijkstra_compute(self.tcod_path, x, y);
         }
     }
 
@@ -242,7 +228,7 @@ impl<'a> Dijkstra<'a> {
         let (x, y) = destination;
         if x >= 0 && y >= 0 && x < self.width && y < self.height {
             unsafe {
-                ffi::TCOD_dijkstra_path_set(self.tcod_path.ptr, x, y) != 0
+                ffi::TCOD_dijkstra_path_set(self.tcod_path, x, y) != 0
             }
         } else {
             false
@@ -250,14 +236,14 @@ impl<'a> Dijkstra<'a> {
     }
 
     pub fn walk(&mut self) -> DijkstraIterator {
-        DijkstraIterator{tcod_path: self.tcod_path.ptr}
+        DijkstraIterator{tcod_path: self.tcod_path}
     }
 
     pub fn walk_one_step(&mut self) -> Option<(i32, i32)> {
         unsafe {
             let mut x: c_int = 0;
             let mut y: c_int = 0;
-            match ffi::TCOD_dijkstra_path_walk(self.tcod_path.ptr, &mut x, &mut y) != 0 {
+            match ffi::TCOD_dijkstra_path_walk(self.tcod_path, &mut x, &mut y) != 0 {
                 true => Some((x, y)),
                 false => None,
             }
@@ -268,7 +254,7 @@ impl<'a> Dijkstra<'a> {
     pub fn distance_from_root(&self, point: (i32, i32)) -> Option<f32> {
         let (x, y) = point;
         let result = unsafe {
-            ffi::TCOD_dijkstra_get_distance(self.tcod_path.ptr, x, y)
+            ffi::TCOD_dijkstra_get_distance(self.tcod_path, x, y)
         };
         if result == -1.0 {
             None
@@ -279,7 +265,7 @@ impl<'a> Dijkstra<'a> {
 
     pub fn reverse(&mut self) {
         unsafe {
-            ffi::TCOD_dijkstra_reverse(self.tcod_path.ptr);
+            ffi::TCOD_dijkstra_reverse(self.tcod_path);
         }
     }
 
@@ -290,20 +276,20 @@ impl<'a> Dijkstra<'a> {
         unsafe {
             let mut x: c_int = 0;
             let mut y: c_int = 0;
-            ffi::TCOD_dijkstra_get(self.tcod_path.ptr, index, &mut x, &mut y);
+            ffi::TCOD_dijkstra_get(self.tcod_path, index, &mut x, &mut y);
             Some((x, y))
         }
     }
 
     pub fn is_empty(&self) -> bool {
         unsafe {
-            ffi::TCOD_dijkstra_is_empty(self.tcod_path.ptr) != 0
+            ffi::TCOD_dijkstra_is_empty(self.tcod_path) != 0
         }
     }
 
     pub fn len(&self) -> i32 {
         unsafe {
-            ffi::TCOD_dijkstra_size(self.tcod_path.ptr)
+            ffi::TCOD_dijkstra_size(self.tcod_path)
         }
     }
 }
