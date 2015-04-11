@@ -1,25 +1,10 @@
 extern crate std;
 
-pub use self::WindowType::Windowed as Windowed;
-pub use self::WindowType::Fullscreen as Fullscreen;
-
 use bindings::ffi;
-use bindings::{c_bool, c_uint, CString, keycode_from_u32};
+use bindings::{c_bool, CString, keycode_from_u32};
 
 use colors::Color;
 use input::{Key, KeyPressFlags, KeyState};
-
-#[derive(Copy, Clone)]
-pub enum WindowType {
-    Windowed,
-    Fullscreen
-}
-
-#[derive(Copy, Clone)]
-pub struct FontDimensions(i32, i32);
-
-#[derive(Copy, Clone)]
-pub struct FontPath<'a>(&'a str);
 
 pub struct Offscreen {
     con: ffi::TCOD_console_t,
@@ -49,33 +34,6 @@ impl Root {
     pub fn initializer<'a>() -> RootInitializer<'a> {
         RootInitializer::new()
     }
-    
-    fn init(width: i32, height: i32, title: &str, window_type: WindowType, 
-            font_path: FontPath, flags: FontFlags, font_dimensions: FontDimensions,
-            renderer: Renderer) -> Root {
-        assert!(width > 0 && height > 0);
-        
-        match (font_path, font_dimensions) {
-            (FontPath(path), FontDimensions(horizontal, vertical)) => {
-                Root::set_custom_font(&std::path::Path::new(path), flags, horizontal, vertical)
-            }
-        }
-
-        let fullscreen = match window_type {
-            Fullscreen => true,
-            Windowed => false
-        };
-        
-        unsafe {
-            let c_title = CString::new(title.as_bytes()).unwrap();
-            ffi::TCOD_console_init_root(width, height,
-                                        c_title.as_ptr(),
-                                        fullscreen as c_bool,
-                                        renderer as u32);
-        }
-        Root
-    }
-    
     
     pub fn is_fullscreen(&self) -> bool {
         unsafe {
@@ -183,27 +141,32 @@ impl Root {
         }
     }
     
-    fn set_custom_font(font_path: &std::path::Path, flags: FontFlags,
+    fn set_custom_font(font_path: &std::path::Path,
+                       font_layout: FontLayout,
+                       font_type: FontType,
                        nb_char_horizontal: i32,
                        nb_char_vertical: i32) {
         unsafe {
             let filename = font_path.to_str().unwrap();
             let path = CString::new(filename).unwrap();
             ffi::TCOD_console_set_custom_font(
-                path.as_ptr(), flags.bits() as i32, nb_char_horizontal,
-                nb_char_vertical);
+                path.as_ptr(), (font_layout as i32) | (font_type as i32), 
+                nb_char_horizontal, nb_char_vertical);
         }
     }
 
 }
 
+struct FontDimensions(i32, i32);
+
 pub struct RootInitializer<'a> {
     width: i32,
     height: i32,
     title: &'a str,
-    window_type: WindowType,
-    font_path: FontPath<'a>,
-    font_flags: FontFlags,
+    is_fullscreen: bool,
+    font_path: &'a str,
+    font_layout: FontLayout,
+    font_type: FontType,
     font_dimension: FontDimensions,
     console_renderer: Renderer
 }
@@ -214,9 +177,10 @@ impl<'a> RootInitializer<'a> {
             width: 80,
             height: 25,
             title: "Main Window",
-            window_type: Windowed,
-            font_path: FontPath("terminal.png"),
-            font_flags: FONT_LAYOUT_ASCII_INCOL,
+            is_fullscreen: false,
+            font_path: "terminal.png",
+            font_layout: FontLayout::AsciiInCol,
+            font_type: FontType::Default,
             font_dimension: FontDimensions(0, 0),
             console_renderer: Renderer::SDL
         }
@@ -233,14 +197,19 @@ impl<'a> RootInitializer<'a> {
         self
     }
 
-    pub fn fullscreen(&mut self) -> &mut RootInitializer<'a> {
-        self.window_type = Fullscreen;
+    pub fn fullscreen(&mut self, is_fullscreen: bool) -> &mut RootInitializer<'a> {
+        self.is_fullscreen = is_fullscreen;
         self
     }
 
-    pub fn font(&mut self, path: &'a str, font_flags: FontFlags) -> &mut RootInitializer<'a> {
-        self.font_path = FontPath(path);
-        self.font_flags = font_flags;
+    pub fn font(&mut self, path: &'a str, font_layout: FontLayout) -> &mut RootInitializer<'a> {
+        self.font_path = path;
+        self.font_layout = font_layout;
+        self
+    }
+    
+    pub fn font_type(&mut self, font_type: FontType) -> &mut RootInitializer<'a> {
+        self.font_type = font_type;
         self
     }
 
@@ -255,9 +224,24 @@ impl<'a> RootInitializer<'a> {
     }
 
     pub fn init(&self) -> Root {
-        Root::init(self.width, self.height, self.title, self.window_type, 
-                   self.font_path, self.font_flags, self.font_dimension, 
-                   self.console_renderer)
+        assert!(self.width > 0 && self.height > 0);
+        
+        match self.font_dimension {
+            FontDimensions(horizontal, vertical) => {
+                Root::set_custom_font(&std::path::Path::new(self.font_path), 
+                                      self.font_layout, self.font_type, 
+                                      horizontal, vertical)
+            }
+        }
+
+        unsafe {
+            let c_title = CString::new(self.title.as_bytes()).unwrap();
+            ffi::TCOD_console_init_root(self.width, self.height,
+                                        c_title.as_ptr(),
+                                        self.is_fullscreen as c_bool,
+                                        self.console_renderer as u32);
+        }
+        Root
     }
 }
 
@@ -542,11 +526,18 @@ pub enum Renderer {
     SDL = ffi::TCOD_RENDERER_SDL as isize,
 }
 
-bitflags! {
-    flags FontFlags: c_uint {
-        const FONT_LAYOUT_ASCII_INCOL = ffi::TCOD_FONT_LAYOUT_ASCII_INCOL,
-        const FONT_LAYOUT_ASCII_INROW = ffi::TCOD_FONT_LAYOUT_ASCII_INROW,
-        const FONT_TYPE_GREYSCALE = ffi::TCOD_FONT_TYPE_GREYSCALE,
-        const FONT_LAYOUT_TCOD = ffi::TCOD_FONT_LAYOUT_TCOD,
-    }
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub enum FontLayout {
+    AsciiInCol = ffi::TCOD_FONT_LAYOUT_ASCII_INCOL as isize,
+    AsciiInRow = ffi::TCOD_FONT_LAYOUT_ASCII_INROW as isize,
+    Tcod = ffi::TCOD_FONT_LAYOUT_TCOD as isize,
 }
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub enum FontType {
+    Default = 0,
+    Greyscale = ffi::TCOD_FONT_TYPE_GREYSCALE as isize,
+}
+
