@@ -51,7 +51,8 @@ impl Root {
     }
     
     fn init(width: i32, height: i32, title: &str, window_type: WindowType, 
-            font_path: FontPath, flags: FontFlags, font_dimensions: FontDimensions) -> Root {
+            font_path: FontPath, flags: FontFlags, font_dimensions: FontDimensions,
+            renderer: Renderer) -> Root {
         assert!(width > 0 && height > 0);
         
         match (font_path, font_dimensions) {
@@ -71,7 +72,7 @@ impl Root {
             ffi::TCOD_console_init_root(width, height,
                                         c_title.as_ptr(),
                                         fullscreen as c_bool,
-                                        ffi::TCOD_RENDERER_SDL);
+                                        renderer as u32);
         }
         Root
     }
@@ -204,7 +205,8 @@ pub struct RootInitializer<'a> {
     window_type: WindowType,
     font_path: FontPath<'a>,
     font_flags: FontFlags,
-    font_dimension: FontDimensions
+    font_dimension: FontDimensions,
+    console_renderer: Renderer
 }
 
 impl<'a> RootInitializer<'a> {
@@ -216,7 +218,8 @@ impl<'a> RootInitializer<'a> {
             window_type: Windowed,
             font_path: FontPath("terminal.png"),
             font_flags: FONT_LAYOUT_ASCII_INCOL,
-            font_dimension: FontDimensions(0, 0)
+            font_dimension: FontDimensions(0, 0),
+            console_renderer: Renderer::SDL
         }
     }
 
@@ -247,9 +250,15 @@ impl<'a> RootInitializer<'a> {
         self
     }
 
+    pub fn renderer(&mut self, renderer: Renderer) -> &mut RootInitializer<'a> {
+        self.console_renderer = renderer;
+        self
+    }
+
     pub fn init(&self) -> Root {
         Root::init(self.width, self.height, self.title, self.window_type, 
-                   self.font_path, self.font_flags, self.font_dimension)
+                   self.font_path, self.font_flags, self.font_dimension, 
+                   self.console_renderer)
     }
 }
 
