@@ -66,7 +66,6 @@ impl Root {
             Windowed => false
         };
         
-        println!("{} {}", width, height);
         unsafe {
             let c_title = CString::new(title.as_bytes()).unwrap();
             ffi::TCOD_console_init_root(width, height,
