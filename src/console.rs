@@ -1,7 +1,7 @@
 extern crate std;
 
 use bindings::ffi;
-use bindings::{c_bool, CString, keycode_from_u32};
+use bindings::{AsNative, FromNative, c_bool, CString, keycode_from_u32};
 
 use colors::Color;
 use input::{Key, KeyPressFlags, KeyState};
@@ -68,14 +68,14 @@ impl Root {
 
     pub fn get_fading_color(&self) -> Color {
         unsafe {
-            Color::from_tcod_color_t(
+            FromNative::from_native(
                 ffi::TCOD_console_get_fading_color())
         }
     }
 
     pub fn set_fade(&mut self, fade: u8, fading_color: Color) {
         unsafe {
-            ffi::TCOD_console_set_fade(fade, fading_color.to_color_t());
+            ffi::TCOD_console_set_fade(fade, fading_color.as_native());
         }
     }
 
@@ -268,7 +268,7 @@ pub trait Console {
      
     fn set_key_color(&mut self, color: Color) {
         unsafe {
-            ffi::TCOD_console_set_key_color(self.con(), color.to_color_t());
+            ffi::TCOD_console_set_key_color(self.con(), color.as_native());
         }
     }
 
@@ -286,32 +286,32 @@ pub trait Console {
 
     fn set_default_background(&mut self, color: Color) {
         unsafe {
-            ffi::TCOD_console_set_default_background(self.con(), color.to_color_t());
+            ffi::TCOD_console_set_default_background(self.con(), color.as_native());
         }
     }
 
     fn set_default_foreground(&mut self, color: Color) {
         unsafe {
-            ffi::TCOD_console_set_default_foreground(self.con(), color.to_color_t());
+            ffi::TCOD_console_set_default_foreground(self.con(), color.as_native());
         }
     }
 
     fn console_set_key_color(&mut self, color: Color) {
         unsafe {
-            ffi::TCOD_console_set_key_color(self.con(), color.to_color_t());
+            ffi::TCOD_console_set_key_color(self.con(), color.as_native());
         }
     }
 
     fn get_char_background(&self, x: i32, y: i32) -> Color {
         unsafe {
-            Color::from_tcod_color_t(
+            FromNative::from_native(
                 ffi::TCOD_console_get_char_background(self.con(), x, y))
         }
     }
 
     fn get_char_foreground(&self, x: i32, y: i32) -> Color {
         unsafe {
-            Color::from_tcod_color_t(
+            FromNative::from_native(
                 ffi::TCOD_console_get_char_foreground(self.con(), x, y))
         }
     }
@@ -368,7 +368,7 @@ pub trait Console {
         unsafe {
             ffi::TCOD_console_set_char_background(self.con(),
                                                   x, y,
-                                                  color.to_color_t(),
+                                                  color.as_native(),
                                                   background_flag as u32)
         }
     }
@@ -378,7 +378,7 @@ pub trait Console {
         unsafe {
             ffi::TCOD_console_set_char_foreground(self.con(),
                                                   x, y,
-                                                  color.to_color_t());
+                                                  color.as_native());
         }
     }
 
@@ -400,8 +400,8 @@ pub trait Console {
         unsafe {
             ffi::TCOD_console_put_char_ex(self.con(),
                                           x, y, glyph as i32,
-                                          foreground.to_color_t(),
-                                          background.to_color_t());
+                                          foreground.as_native(),
+                                          background.as_native());
         }
     }
 
@@ -540,4 +540,3 @@ pub enum FontType {
     Default = 0,
     Greyscale = ffi::TCOD_FONT_TYPE_GREYSCALE as isize,
 }
-

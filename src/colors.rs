@@ -1,4 +1,4 @@
-use bindings::ffi;
+use bindings::{AsNative, FromNative, ffi};
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -8,19 +8,23 @@ pub struct Color {
     pub b: u8,
 }
 
+impl AsNative for Color {
+    type Output = ffi::TCOD_color_t;
+
+    unsafe fn as_native(&self) -> ffi::TCOD_color_t {
+        ::std::mem::transmute(*self)
+    }
+}
+
+impl FromNative for Color {
+    type Input = ffi::TCOD_color_t;
+
+    unsafe fn from_native(input: ffi::TCOD_color_t) -> Color {
+        ::std::mem::transmute(input)
+    }
+}
+
 impl Color {
-    pub fn from_tcod_color_t(tcod_color_t: ffi::TCOD_color_t) -> Color {
-        unsafe {
-            ::std::mem::transmute(tcod_color_t)
-        }
-    }
-
-    pub fn to_color_t(self) -> ffi::TCOD_color_t {
-        unsafe {
-            ::std::mem::transmute(self)
-        }
-    }
-
     pub fn new(r: u8, g: u8, b: u8) -> Color {
         Color {
             r: r,
@@ -30,46 +34,46 @@ impl Color {
     }
 
     pub fn new_from_hsv(h: f32, s: f32, v: f32) -> Color {
-        let mut tcod_c = Color{r: 0, g: 0, b: 0}.to_color_t();
         unsafe {
-            ffi::TCOD_color_set_HSV(&mut tcod_c, h, s, v)
+            let mut tcod_c = Color{r: 0, g: 0, b: 0}.as_native();
+            ffi::TCOD_color_set_HSV(&mut tcod_c, h, s, v);
+            FromNative::from_native(tcod_c)
         }
-        Color::from_tcod_color_t(tcod_c)
     }
 
     pub fn multiply(self, other: Color) -> Color {
         unsafe {
-            Color::from_tcod_color_t(
-                ffi::TCOD_color_multiply(self.to_color_t(), other.to_color_t()))
+            FromNative::from_native(
+                ffi::TCOD_color_multiply(self.as_native(), other.as_native()))
         }
     }
 
     pub fn multiply_scalar(self, val: f32) -> Color {
         unsafe {
-            Color::from_tcod_color_t(
-                ffi::TCOD_color_multiply_scalar(self.to_color_t(), val))
+            FromNative::from_native(
+                ffi::TCOD_color_multiply_scalar(self.as_native(), val))
         }
     }
 
     pub fn add(self, other: Color) -> Color {
         unsafe {
-            Color::from_tcod_color_t(
-                ffi::TCOD_color_add(self.to_color_t(), other.to_color_t()))
+            FromNative::from_native(
+                ffi::TCOD_color_add(self.as_native(), other.as_native()))
         }
     }
 
     pub fn subtract(self, other: Color) -> Color {
         unsafe {
-            Color::from_tcod_color_t(
-                ffi::TCOD_color_subtract(self.to_color_t(), other.to_color_t()))
+            FromNative::from_native(
+                ffi::TCOD_color_subtract(self.as_native(), other.as_native()))
         }
     }
 
     pub fn lerp(self, to: Color, coefficient: f32) -> Color {
         unsafe {
-            Color::from_tcod_color_t(ffi::TCOD_color_lerp(self.to_color_t(),
-                                                          to.to_color_t(),
-                                                          coefficient))
+            FromNative::from_native(ffi::TCOD_color_lerp(self.as_native(),
+                                                         to.as_native(),
+                                                         coefficient))
         }
     }
 
@@ -78,25 +82,25 @@ impl Color {
         let mut s: f32 = 0.0;
         let mut v: f32 = 0.0;
         unsafe {
-            ffi::TCOD_color_get_HSV(self.to_color_t(), &mut h, &mut s, &mut v)
+            ffi::TCOD_color_get_HSV(self.as_native(), &mut h, &mut s, &mut v)
         }
         (h, s, v)
     }
 
     pub fn shift_hue(self, shift: f32) -> Color {
-        let mut c = self.to_color_t();
         unsafe {
+            let mut c = self.as_native();
             ffi::TCOD_color_shift_hue(&mut c, shift);
+            FromNative::from_native(c)
         }
-        Color::from_tcod_color_t(c)
     }
 
     pub fn scale_hsv(self, scale: f32, value: f32) -> Color {
-        let mut c = self.to_color_t();
         unsafe {
+            let mut c = self.as_native();
             ffi::TCOD_color_scale_HSV(&mut c, scale, value);
+            FromNative::from_native(c)
         }
-        Color::from_tcod_color_t(c)
     }
 }
 
