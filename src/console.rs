@@ -1,5 +1,7 @@
 extern crate std;
 
+use std::marker::PhantomData;
+
 use bindings::ffi;
 use bindings::{AsNative, FromNative, c_bool, CString, keycode_from_u32};
 
@@ -28,7 +30,10 @@ impl Offscreen {
 
 }
 
-pub struct Root;
+pub struct Root {
+    // This is here to prevent the explicit creation of Root consoles.
+    _blocker: PhantomData<Root>
+}
 
 impl Root {
     pub fn initializer<'a>() -> RootInitializer<'a> {
@@ -241,7 +246,7 @@ impl<'a> RootInitializer<'a> {
                                         self.is_fullscreen as c_bool,
                                         self.console_renderer as u32);
         }
-        Root
+        Root { _blocker: PhantomData }
     }
 }
 
