@@ -6,7 +6,10 @@ use tcod::colors;
 
 
 fn main() {
-    let mut root = RootConsole::init(80, 50, "Using blit with libtcod", false);
+    let mut root = RootConsole::initializer()
+        .size(80, 50)
+        .title("Using blit with libtcod")
+        .init();
     
     let mut direct: OffscreenConsole = OffscreenConsole::new(20, 20);
     let mut boxed_direct: Box<OffscreenConsole> = Box::new(OffscreenConsole::new(20, 20));
