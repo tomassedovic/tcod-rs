@@ -16,6 +16,12 @@ pub trait AsNative {
     unsafe fn as_native(&self) -> <Self as AsNative>::Output;
 }
 
+pub trait FromNative {
+    type Input;
+
+    unsafe fn from_native(input: <Self as FromNative>::Input) -> Self;
+}
+
 pub fn keycode_from_u32(input: u32) -> Option<KeyCode> {
     match input {
         0 => Some(KeyCode::NoKey),

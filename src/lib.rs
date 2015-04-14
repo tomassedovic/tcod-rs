@@ -1,5 +1,6 @@
 #[macro_use] extern crate bitflags;
 
+pub use bindings::{AsNative, FromNative};
 pub use colors::Color;
 pub use console::{Console, RootInitializer, BackgroundFlag, Renderer, FontLayout, FontType, TextAlignment};
 pub use map::Map;
