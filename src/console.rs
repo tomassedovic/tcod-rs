@@ -1,3 +1,59 @@
+//! The console emulator handles the rendering of the game screen and the keyboard input
+//!
+//! It provides the necessary traits and types for working with the different console types in
+//! `tcod-rs`, which include the [Console](./trait.Console.html) trait and the
+//! [Root](./struct.Root.html) and [Offscreen](./struct.Offscreen) console types.
+//! It's worth mentioning, that only one `Root` console may exist at any given time, and it has to
+//! be initialized at the start of the program.
+//!
+//! # Examples
+//!
+//! Initializing the `Root` console and creating an `Offscreen` console:
+//!
+//! ```rust
+//! use tcod::console::{Root, Offscreen};
+//!
+//! let mut root = Root::initializer().init();
+//! let (width, height) = (80, 30);
+//! let mut offscreen = Offscren::new(width, height);
+//! ```
+//!
+//! A typical `tcod-rs` program's basic structure would look something like this:
+//!
+//! ```rust
+//! use tcod::console::Root;
+//!
+//! fn main() {
+//!     let mut root = Root::initializer().init(); // Replace with custom initialization code
+//!
+//!     while !root.window_closed() {
+//!         // Handling user input
+//!         // Updating the gamestate
+//!         // Rendering the results
+//!     }
+//! }
+//! ```
+//!
+//! For detailed examples on the user input handling and rendering see the
+//! [Root](./struct.Root.html) struct's documentation.
+//!
+//!
+//! ## Additional Information
+//!
+//! The `Root` and `Console` types are also reexported in the root module (`tcod`) under the names
+//! `RootConsole` and `OffscreenConsole`, making the following code sample equivalent to the
+//! previous one:
+//!
+//! ```rust
+//! use tcod::{RootConsole, OffscreenConsole};
+//!
+//! let mut root = RootConsole::initializer().init();
+//! let (width, height) = (80, 30);
+//! let mut offscreen = OffscrenConsole::new(width, height);
+//! ```
+//! This applies to all the examples in the rest of the modules documentation.
+
+
 extern crate std;
 
 use std::marker::PhantomData;
@@ -8,6 +64,45 @@ use bindings::{AsNative, FromNative, c_bool, CString, keycode_from_u32};
 use colors::Color;
 use input::{Key, KeyPressFlags, KeyState};
 
+/// A type representing secondary consoles
+///
+/// `Offscreen` consoles allow you draw on secondary consoles as you would on `Root` consoles, and then
+/// `blit` their contents onto other consoles (including `Root`). There are some limitations when
+/// compared to `Root` consoles, however:
+///
+/// * Functions manipulating the main window or handling user input are limited to the `Root`
+/// console
+/// * `Offscreen` consoles may not be `flush`ed to the screen directly
+///
+/// # Examples
+///
+/// Creating an `Offscreen` console
+///
+/// ```rust
+/// use tcod::console::Offscreen;
+///
+/// let width = 80;
+/// let height = 20;
+/// let offscreen = Offscreen::new(width, height);
+/// ```
+///
+/// Blitting an `Offscreen` console to the `Root` console:
+///
+/// ```rust
+/// use tcod::console as console;
+/// use tcod::console::{Root, Offscreen};
+///
+/// fn main() {
+///     let mut root = Root::initializer().init();
+///
+///     let mut direct = Offscreen::new(20, 20);
+///     console::blit(&direct, 0, 0, 20, 20, &mut root, 0, 0, 1.0, 1.0);
+/// }
+///
+/// ```
+///
+/// See the documentation for [blit](./fn.blit.html) for a detailed description of the function parameters
+/// and a more in-depth example.
 pub struct Offscreen {
     con: ffi::TCOD_console_t,
 }
@@ -21,6 +116,7 @@ impl Drop for Offscreen {
 }
 
 impl Offscreen {
+    /// Creates a new `Offscreen` console instance
     pub fn new(width: i32, height: i32) -> Offscreen {
         assert!(width > 0 && height > 0);
         unsafe {
@@ -30,16 +126,87 @@ impl Offscreen {
 
 }
 
+/// The console representing the main window of the application
+///
+/// This is the only console type capable of handling user input and flushing its contents onto the screen.
+/// There may only be one Root console at any given time, and it should be initialized at the start of the program.
+///
+/// # Examples
+///
+/// ## Handling user input
+/// `tcod-rs` provides two ways of handling user input: blocking or non-blocking. The following
+/// exaple will show the blocking method
+///
+/// ```rust
+/// use tcod::console::Root;
+/// use tcod::input::Key::Special;
+/// use tcod::input::KeyCode::{Up, Down, Left, Right};
+///
+/// fn main() {
+///     let mut root = Root::initializer().init();
+///
+///     let keypress = root.wait_for_keypress(true);
+///     match keypress.key {
+///         Special(Up) => {}, // Handle arrow key up
+///         Special(Down) => {}, // Arrow key down
+///         Special(Left) => {},
+///         Special(Right) => {},
+///         _ => {}
+///     }
+/// }
+/// ```
+///
+/// For a detailed description of possible values of `keypress.key` values see the
+/// [Key](../input/enum.Key.html) and [KeyCode](../input/enum.KeyCode.html) enums.
+///
+/// ## Rendering
+/// `libtcod` provides a wide variety of functions for changing how the console output looks like,
+/// including: changing the text and background colors, text alignment, etc. It also has
+/// several functions that are used to output text on consoles. For a complete list of both,
+/// see the [Console](./trait.Console.html) trait's documentation. The basic structure of the
+/// rendering code:
+///
+/// ```rust
+/// use tcod::console::Root;
+///
+/// fn main() {
+///     let mut root = Root::initializer().init();
+///
+///     root.clear();
+///     // Output style manipulation
+///     // Calling the output functions on root
+///     root.flush();
+/// }
+/// ```
+
 pub struct Root {
     // This is here to prevent the explicit creation of Root consoles.
     _blocker: PhantomData<Root>
 }
 
 impl Root {
-    pub fn initializer<'a>() -> RootInitializer<'a> {
+    /// Returns an instance of a RootInitializer object, which can be used to
+    /// customize the initialization of the Root console. Note that only
+    /// `RootInitializer::init` will return the actual `Root` console instance.
+    /// For a full list of initialization options, see the
+    /// [RootInitializer](./struct.RootInitializer.html) documentation.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use tcod::console::Root;
+    ///
+    /// let mut root = Root::initializer()
+    ///     .size(80, 20)
+    ///     .title("Example")
+    ///     .fullscreen(true)
+    ///     .init();
+    /// ```
+    ///
+     pub fn initializer<'a>() -> RootInitializer<'a> {
         RootInitializer::new()
     }
-    
+
     pub fn is_fullscreen(&self) -> bool {
         unsafe {
             ffi::TCOD_console_is_fullscreen() != 0
@@ -64,7 +231,6 @@ impl Root {
         }
     }
 
-
     pub fn get_fade(&self) -> u8 {
         unsafe {
             ffi::TCOD_console_get_fade()
@@ -78,12 +244,18 @@ impl Root {
         }
     }
 
+    /// This function defines the fading parameters, allowing to easily fade the game screen to/from a color.
+    /// Once they are defined, the fading parameters are valid for ever.
+    /// You don't have to call setFade for each rendered frame (unless you change the fading parameters).
     pub fn set_fade(&mut self, fade: u8, fading_color: Color) {
         unsafe {
             ffi::TCOD_console_set_fade(fade, fading_color.as_native());
         }
     }
 
+    /// This function will wait for a keypress event from the user, returning the KeyState that
+    /// represents the event. If `flush` is true, then all pending keypresses are flushed from the
+    /// keyboard buffer. If false, it returns the first element from it.
     pub fn wait_for_keypress(&mut self, flush: bool) -> KeyState {
         let tcod_key = unsafe {
             ffi::TCOD_console_wait_for_keypress(flush as c_bool)
@@ -145,7 +317,7 @@ impl Root {
             ffi::TCOD_console_set_window_title(c_title.as_ptr());
         }
     }
-    
+
     fn set_custom_font(font_path: &std::path::Path,
                        font_layout: FontLayout,
                        font_type: FontType,
@@ -155,7 +327,7 @@ impl Root {
             let filename = font_path.to_str().unwrap();
             let path = CString::new(filename).unwrap();
             ffi::TCOD_console_set_custom_font(
-                path.as_ptr(), (font_layout as i32) | (font_type as i32), 
+                path.as_ptr(), (font_layout as i32) | (font_type as i32),
                 nb_char_horizontal, nb_char_vertical);
         }
     }
@@ -164,6 +336,46 @@ impl Root {
 
 struct FontDimensions(i32, i32);
 
+/// Helper struct for the `Root` console initialization
+///
+/// This is the type that should be used to initialize the `Root` console (either directly, or
+/// indirectly, by calling `Root::initializer`). It uses method chaining to provide an easy-to-use
+/// interface. It exposes the following configuration options for the `Root` console:
+///
+/// * `size`: this determines the size of the console window in columns and rows
+/// * `title`: the main window's title
+/// * `fullscreen`: determines if the main window will start in fullscreen mode
+/// * `font`: selects a bitmap font and sets its layout. See [FontLayout](./enum.FontLayout.html)
+/// for the possible layouts.
+/// * `font_type`: only use this if you want to use a greyscale font. See
+/// [FontType](./enum.FontType.html) for the possible values.
+/// * `font_dimensions`: the dimensions for the given bitmap font. This is automatically
+/// deduced from the font layout, only use this if you really need it (providing wrong values will
+/// ruin the font display).
+/// * `renderer`: sets the console renderer. See the [Renderer](./enum.Renderer) enum for the
+/// valid options.
+///
+/// The initializer provides sane defaults even there are no options explicitly specified, but it
+/// is recommended to at least set the size and the window title.
+///
+/// # Examples
+///
+/// Initializing the `Root` console using `Root::initializer` instead of explicitly creating a
+/// `RootInitializer` instance:
+///
+/// ```rust
+/// use tcod::console::Root;
+///
+/// fn main() {
+///     let mut root = Root::initializer()
+///         .size(80, 20)
+///         .title("Example")
+///         .fullscreen(true)
+///         .font("terminal.png", FontLayout::AsciiInCol)
+///         .renderer(Renderer::GLSL)
+///         .init();
+/// }
+/// ```
 pub struct RootInitializer<'a> {
     width: i32,
     height: i32,
@@ -212,14 +424,14 @@ impl<'a> RootInitializer<'a> {
         self.font_layout = font_layout;
         self
     }
-    
+
     pub fn font_type(&mut self, font_type: FontType) -> &mut RootInitializer<'a> {
         self.font_type = font_type;
         self
     }
 
     pub fn font_dimensions(&mut self, horizontal: i32, vertical: i32) -> &mut RootInitializer<'a> {
-        self.font_dimension = FontDimensions(horizontal, vertical); 
+        self.font_dimension = FontDimensions(horizontal, vertical);
         self
     }
 
@@ -230,11 +442,11 @@ impl<'a> RootInitializer<'a> {
 
     pub fn init(&self) -> Root {
         assert!(self.width > 0 && self.height > 0);
-        
+
         match self.font_dimension {
             FontDimensions(horizontal, vertical) => {
-                Root::set_custom_font(&std::path::Path::new(self.font_path), 
-                                      self.font_layout, self.font_type, 
+                Root::set_custom_font(&std::path::Path::new(self.font_path),
+                                      self.font_layout, self.font_type,
                                       horizontal, vertical)
             }
         }
@@ -250,6 +462,7 @@ impl<'a> RootInitializer<'a> {
     }
 }
 
+/// Defines the common functionality between `Root` and `Offscreen` consoles
 pub trait Console {
     unsafe fn con(&self) -> ffi::TCOD_console_t;
 
@@ -264,13 +477,13 @@ pub trait Console {
             _ => unreachable!(),
         }
     }
-    
+
     fn set_alignment(&mut self, alignment: TextAlignment) {
         unsafe {
             ffi::TCOD_console_set_alignment(self.con(), alignment as u32);
         }
     }
-     
+
     fn set_key_color(&mut self, color: Color) {
         unsafe {
             ffi::TCOD_console_set_key_color(self.con(), color.as_native());
@@ -441,6 +654,50 @@ pub trait Console {
     }
 }
 
+/// Blits the contents of one console onto an other
+///
+/// The function's basic concept is the following: the function takes a region from a given console (with an arbitrary
+/// location, width and height) superimposes it on the destination console (at the given
+/// location). Note that the destination console's contents may be completely overwritten, if an
+/// opacity value of 1.0 is given.
+///
+/// # Arguments
+///
+/// * `source_console`: the type implementing the [Console](./trait.Console.html) trait we want to
+/// take the blitted region from
+/// * `source_x`, `source_y`: the position of the top left corner we want to take from the source
+/// console
+/// * `source_width`, `source_height`: The dimensions of the region we want to take from the source
+/// console
+/// * `destination_console`: the type implementing the [Console](./trait.Console.html) trait we want
+/// to blit to
+/// * `destination_x`, `destination_y`: the position of the top left corner we want to blit to on
+/// the destination console
+/// * `foreground_alpha`, `background_alpha`: the foreground and background opacity
+///
+/// # Examples
+///
+/// Using `blit` with concrete types and `Console` trait objects:
+///
+/// ```rust
+/// use tcod::console as console;
+/// use tcod::console::{Root, Offscreen};
+///
+/// fn main() {
+///     let mut root = Root::initializer().init();
+///
+///     let mut direct = Offscreen::new(20, 20);
+///     let mut boxed_direct = Box::new(OffscreenConsole::new(20, 20));
+///     let mut trait_object: &Console = &OffscreenConsole::new(20, 20);
+///     let mut boxed_trait: Box<Console> = Box::new(OffscreenConsole::new(20, 20));
+///
+///     console::blit(&direct, 0, 0, 20, 20, &mut root, 0, 0, 1.0, 1.0);
+///     console::blit(&boxed_direct, 0, 0, 20, 20, &mut root, 20, 0, 1.0, 1.0);
+///     console::blit(&trait_object, 0, 0, 20, 20, &mut root, 0, 20, 1.0, 1.0);
+///     console::blit(&boxed_trait, 0, 0, 20, 20, &mut root, 20, 20, 1.0, 1.0);
+/// }
+///
+/// ```
 pub fn blit<T, U>(source_console: &T,
                   source_x: i32, source_y: i32,
                   source_width: i32, source_height: i32,
@@ -452,7 +709,7 @@ pub fn blit<T, U>(source_console: &T,
     unsafe {
         ffi::TCOD_console_blit(source_console.con(),
                                source_x, source_y, source_width, source_height,
-                               destination_console.con(), 
+                               destination_console.con(),
                                destination_x, destination_y,
                                foreground_alpha, background_alpha);
     }
