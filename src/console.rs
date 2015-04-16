@@ -491,7 +491,9 @@ impl<'a> RootInitializer<'a> {
 /// Printing text with explicit alignment:
 ///
 /// ```rust
-/// let mut root = RootConsole::initializer().size(80, 50).init();
+/// use tcod::console::{Root, BackgroundFlag, TextAlignment};
+///
+/// let mut root = Root::initializer().size(80, 50).init();
 /// 
 /// root.print_ex(1, 1, BackgroundFlag::None, TextAlignment::Left,
 ///               "Text aligned to left.");
@@ -759,15 +761,15 @@ pub trait Console {
 ///
 /// ```rust
 /// use tcod::console as console;
-/// use tcod::console::{Root, Offscreen};
+/// use tcod::console::{Console, Root, Offscreen};
 ///
 /// fn main() {
 ///     let mut root = Root::initializer().init();
 ///
 ///     let mut direct = Offscreen::new(20, 20);
-///     let mut boxed_direct = Box::new(OffscreenConsole::new(20, 20));
-///     let mut trait_object: &Console = &OffscreenConsole::new(20, 20);
-///     let mut boxed_trait: Box<Console> = Box::new(OffscreenConsole::new(20, 20));
+///     let mut boxed_direct = Box::new(Offscreen::new(20, 20));
+///     let mut trait_object: &Console = &Offscreen::new(20, 20);
+///     let mut boxed_trait: Box<Console> = Box::new(Offscreen::new(20, 20));
 ///
 ///     console::blit(&direct, 0, 0, 20, 20, &mut root, 0, 0, 1.0, 1.0);
 ///     console::blit(&boxed_direct, 0, 0, 20, 20, &mut root, 20, 0, 1.0, 1.0);
