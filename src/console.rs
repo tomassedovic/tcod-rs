@@ -96,7 +96,7 @@ use input::{Key, KeyPressFlags, KeyState};
 ///     let mut root = Root::initializer().init();
 ///
 ///     let mut direct = Offscreen::new(20, 20);
-///     console::blit(&direct, 0, 0, 20, 20, &mut root, 0, 0, 1.0, 1.0);
+///     console::blit(&direct, (0, 0), (20, 20), &mut root, (0, 0), 1.0, 1.0);
 /// }
 ///
 /// ```
@@ -771,10 +771,10 @@ pub trait Console {
 ///     let mut trait_object: &Console = &Offscreen::new(20, 20);
 ///     let mut boxed_trait: Box<Console> = Box::new(Offscreen::new(20, 20));
 ///
-///     console::blit(&direct, 0, 0, 20, 20, &mut root, 0, 0, 1.0, 1.0);
-///     console::blit(&boxed_direct, 0, 0, 20, 20, &mut root, 20, 0, 1.0, 1.0);
-///     console::blit(&trait_object, 0, 0, 20, 20, &mut root, 0, 20, 1.0, 1.0);
-///     console::blit(&boxed_trait, 0, 0, 20, 20, &mut root, 20, 20, 1.0, 1.0);
+///     console::blit(&direct, (0, 0), (20, 20), &mut root, (0, 0), 1.0, 1.0);
+///     console::blit(&boxed_direct, (0, 0), (20, 20), &mut root, (20, 0), 1.0, 1.0);
+///     console::blit(&trait_object, (0, 0), (20, 20), &mut root, (0, 20), 1.0, 1.0);
+///     console::blit(&boxed_trait, (0, 0), (20, 20), &mut root, (20, 20), 1.0, 1.0);
 /// }
 ///
 /// ```
