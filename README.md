@@ -185,11 +185,15 @@ bindgen -builtins -l tcod include/libtcod.h -o src/ffi.rs
 
 * Bastien Léonard, @bastienleonard, <bastien.leonard@gmail.com>
 * Edu Garcia, @Arcnor, <arcnorj@gmail.com>
-* @Moredread
+* Guillermo Galizzi <galizzi.guillermo@gmail.com>
+* Gustorn <gustorn@gmail.com>
 * Jared McFarland, @jaredonline, <jared.online@gmail.com>
 * Jonny Gilchrist, @jgilchrist
+* LaylConway <laylconway@live.com>
+* Moredread <code@andre-bubel.de>
+* Nikita Pekin <contact@nikitapek.in>
 * Paul Sanford, @pmsanford, <me@paulsanford.net>
-* @Pranz, <jesper.fridefors@gmail.com>
+* Pranz, <jesper.fridefors@gmail.com>
 * Tomas Sedovic, @tomassedovic, <tomas@sedovic.cz>
 
 
