@@ -2,7 +2,7 @@
 //!
 //! It provides the necessary traits and types for working with the different console types, 
 //! including the [Console](./trait.Console.html) trait and the
-//! [Root](./struct.Root.html) and [Offscreen](./struct.Offscreen) console types.
+//! [Root](./struct.Root.html) and [Offscreen](./struct.Offscreen.html) console types.
 //! It's worth mentioning that only one `Root` console may exist at any given time, and it has to
 //! be initialized at the start of the program.
 //!
@@ -270,7 +270,7 @@ impl Root {
         }
     }
 
-    /// This function will wait for a keypress event from the user, returning the [KeyState](../input/enum.KeyState.html) 
+    /// This function will wait for a keypress event from the user, returning the [KeyState](../input/struct.KeyState.html) 
     /// that represents the event. If `flush` is true, all pending keypresses are flushed from the
     /// keyboard buffer. If false, it returns the first element from it.
     pub fn wait_for_keypress(&mut self, flush: bool) -> KeyState {
@@ -294,7 +294,7 @@ impl Root {
     }
 
     /// This function checks if the user pressed a key. It returns the
-    /// [KeyState](../input/enum.KeyState.html) representing the
+    /// [KeyState](../input/struct.KeyState.html) representing the
     /// event if they have, or `None` if they have not. 
     pub fn check_for_keypress(&self, status: KeyPressFlags) -> Option<KeyState> {
         let tcod_key = unsafe {
@@ -375,7 +375,7 @@ struct FontDimensions(i32, i32);
 /// * `font_dimensions`: the dimensions for the given bitmap font. This is automatically
 /// deduced from the font layout, only use this if you really need it (providing wrong values will
 /// ruin the font display).
-/// * `renderer`: sets the console renderer. See the [Renderer](./enum.Renderer) enum for the
+/// * `renderer`: sets the console renderer. See the [Renderer](./enum.Renderer.html) enum for the
 /// valid options.
 ///
 /// The initializer provides sane defaults even there are no options explicitly specified, but it
@@ -699,7 +699,7 @@ pub trait Console {
     }
 
     /// Prints the text at the specified location. The position of the `x` and `y` 
-    /// coordinates depend on the [TextAlignment](./enum.TextAlignment) set in the console:
+    /// coordinates depend on the [TextAlignment](./enum.TextAlignment.html) set in the console:
     ///
     /// * `TextAlignment::Left`: leftmost character of the string
     /// * `TextAlignment::Center`: center character of the sting
