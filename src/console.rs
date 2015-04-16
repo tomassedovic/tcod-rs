@@ -1,9 +1,9 @@
 //! The console emulator handles the rendering of the game screen and the keyboard input
 //!
-//! It provides the necessary traits and types for working with the different console types in
-//! `tcod-rs`, which include the [Console](./trait.Console.html) trait and the
+//! It provides the necessary traits and types for working with the different console types, 
+//! including the [Console](./trait.Console.html) trait and the
 //! [Root](./struct.Root.html) and [Offscreen](./struct.Offscreen) console types.
-//! It's worth mentioning, that only one `Root` console may exist at any given time, and it has to
+//! It's worth mentioning that only one `Root` console may exist at any given time, and it has to
 //! be initialized at the start of the program.
 //!
 //! # Examples
@@ -67,12 +67,12 @@ use input::{Key, KeyPressFlags, KeyState};
 /// A type representing secondary consoles
 ///
 /// `Offscreen` consoles allow you draw on secondary consoles as you would on `Root` consoles, and then
-/// `blit` their contents onto other consoles (including `Root`). There are some limitations when
+/// `blit` their contents onto other consoles (including `Root`). There are some limitations
 /// compared to `Root` consoles, however:
 ///
 /// * Functions manipulating the main window or handling user input are limited to the `Root`
 /// console
-/// * `Offscreen` consoles may not be `flush`ed to the screen directly
+/// * `Offscreen` consoles may not be `flushed` to the screen directly
 ///
 /// # Examples
 ///
@@ -174,7 +174,7 @@ impl Offscreen {
 ///
 ///     root.clear();
 ///     // Output style manipulation
-///     // Calling the output functions on root
+///     // Calling the output functions
 ///     root.flush();
 /// }
 /// ```
@@ -207,36 +207,53 @@ impl Root {
         RootInitializer::new()
     }
 
+    /// Returns with true when the `Root` console is in fullscreen mode.
     pub fn is_fullscreen(&self) -> bool {
         unsafe {
             ffi::TCOD_console_is_fullscreen() != 0
         }
     }
 
+    /// Toggles between windowed and fullscreen mode.
     pub fn set_fullscreen(&mut self, fullscreen: bool) {
         unsafe {
             ffi::TCOD_console_set_fullscreen(fullscreen as u8);
         }
     }
 
+    /// This function changes the keyboard repeat times. The initial delay determines the
+    /// number of milliseconds between the keypress and the time the keyboard repeat begins.
+    /// The interval sets the time between the keyboard repeat events. 
+    /// With an initial delay of 0, the keyboard repeat feature is completely disabled.
+    pub fn set_keyboard_repeat(&mut self, initial_delay: i32, interval: i32) {
+        unsafe {
+            ffi::TCOD_console_set_keyboard_repeat(initial_delay, interval);
+        }
+    }
+
+    /// Disables the keyboard repeat feature. Equivalent to `set_keyboard_repeat` with an
+    /// initial delay of 0.
     pub fn disable_keyboard_repeat(&mut self) {
         unsafe {
             ffi::TCOD_console_disable_keyboard_repeat()
         }
     }
 
+    /// Returns true if the `Root` console is currently active.
     pub fn is_active(&self) -> bool {
         unsafe {
             ffi::TCOD_console_is_active() != 0
         }
     }
 
+    /// Returns the current fade amount (previously set by `set_fade`).
     pub fn get_fade(&self) -> u8 {
         unsafe {
             ffi::TCOD_console_get_fade()
         }
     }
 
+    /// Returns the current fade color (previously set by `set_fade`).
     pub fn get_fading_color(&self) -> Color {
         unsafe {
             FromNative::from_native(
@@ -253,8 +270,8 @@ impl Root {
         }
     }
 
-    /// This function will wait for a keypress event from the user, returning the KeyState that
-    /// represents the event. If `flush` is true, then all pending keypresses are flushed from the
+    /// This function will wait for a keypress event from the user, returning the [KeyState](../input/enum.KeyState.html) 
+    /// that represents the event. If `flush` is true, all pending keypresses are flushed from the
     /// keyboard buffer. If false, it returns the first element from it.
     pub fn wait_for_keypress(&mut self, flush: bool) -> KeyState {
         let tcod_key = unsafe {
@@ -276,6 +293,9 @@ impl Root {
         }
     }
 
+    /// This function checks if the user pressed a key. It returns the
+    /// [KeyState](../input/enum.KeyState.html) representing the
+    /// event if they have, or `None` if they have not. 
     pub fn check_for_keypress(&self, status: KeyPressFlags) -> Option<KeyState> {
         let tcod_key = unsafe {
             ffi::TCOD_console_check_for_keypress(status.bits() as i32)
@@ -299,18 +319,21 @@ impl Root {
         })
     }
 
+    /// Returns with true if the `Root` console has been closed.
     pub fn window_closed(&self) -> bool {
         unsafe {
             ffi::TCOD_console_is_window_closed() != 0
         }
     }
 
+    /// Flushes the contents of the `Root` console onto the screen.
     pub fn flush(&mut self) {
         unsafe {
             ffi::TCOD_console_flush();
         }
     }
 
+    /// Sets the main window's title to the string specified in the argument.
     pub fn set_window_title(&mut self, title: &str) {
         unsafe {
             let c_title = CString::new(title.as_bytes()).unwrap();
@@ -338,11 +361,11 @@ struct FontDimensions(i32, i32);
 
 /// Helper struct for the `Root` console initialization
 ///
-/// This is the type that should be used to initialize the `Root` console (either directly, or
+/// This is the type that should be used to initialize the `Root` console (either directly or
 /// indirectly, by calling `Root::initializer`). It uses method chaining to provide an easy-to-use
 /// interface. It exposes the following configuration options for the `Root` console:
 ///
-/// * `size`: this determines the size of the console window in columns and rows
+/// * `size`: this determines the size of the console window in characters
 /// * `title`: the main window's title
 /// * `fullscreen`: determines if the main window will start in fullscreen mode
 /// * `font`: selects a bitmap font and sets its layout. See [FontLayout](./enum.FontLayout.html)
@@ -463,9 +486,32 @@ impl<'a> RootInitializer<'a> {
 }
 
 /// Defines the common functionality between `Root` and `Offscreen` consoles
+///
+/// # Examples
+/// Printing text with explicit alignment:
+///
+/// ```rust
+/// let mut root = RootConsole::initializer().size(80, 50).init();
+/// 
+/// root.print_ex(1, 1, BackgroundFlag::None, TextAlignment::Left,
+///               "Text aligned to left.");
+///
+/// root.print_ex(78, 1, BackgroundFlag::None, TextAlignment::Right,
+///               "Text aligned to right.");
+///
+/// root.print_ex(40, 15, BackgroundFlag::None, TextAlignment::Center,
+///               "And this bit of text is centered.");
+///
+/// root.print_ex(40, 19, BackgroundFlag::None, TextAlignment::Center,
+///               "Press any key to quit.");
+/// ```
 pub trait Console {
+    /// Returns the underlying native `libtcod` representation of the current console.
     unsafe fn con(&self) -> ffi::TCOD_console_t;
 
+    /// Returns the default text alignment for the `Console` instance. For all the possible 
+    /// text alignment options, see the documentation for
+    /// [TextAlignment](./enum.TextAlignment.html).
     fn get_alignment(&self) -> TextAlignment {
         let alignment = unsafe {
             ffi::TCOD_console_get_alignment(self.con())
@@ -478,48 +524,53 @@ pub trait Console {
         }
     }
 
+    /// Sets the default text alignment for the console. For all the possible 
+    /// text alignment options, see the documentation for
+    /// [TextAlignment](./enum.TextAlignment.html).
     fn set_alignment(&mut self, alignment: TextAlignment) {
         unsafe {
             ffi::TCOD_console_set_alignment(self.con(), alignment as u32);
         }
     }
 
+    /// Sets a key color that will be ignored when [blitting](./fn.blit.html) the contents
+    /// of this console onto an other (essentially a transparent background color).
     fn set_key_color(&mut self, color: Color) {
         unsafe {
             ffi::TCOD_console_set_key_color(self.con(), color.as_native());
         }
     }
 
+    /// Returns the width of the console in characters.
     fn width(&self) -> i32 {
         unsafe {
             ffi::TCOD_console_get_width(self.con())
         }
     }
 
+    /// Returns the height of the console in characters.
     fn height(&self) -> i32 {
         unsafe {
             ffi::TCOD_console_get_height(self.con())
         }
     }
 
+    /// Sets the console's default background color. This is used in several other methods,
+    /// like: `clear`, `put_char`, etc.
     fn set_default_background(&mut self, color: Color) {
         unsafe {
             ffi::TCOD_console_set_default_background(self.con(), color.as_native());
         }
     }
 
+    /// Sets the console's default foreground color. This is used in several printing functions. 
     fn set_default_foreground(&mut self, color: Color) {
         unsafe {
             ffi::TCOD_console_set_default_foreground(self.con(), color.as_native());
         }
     }
 
-    fn console_set_key_color(&mut self, color: Color) {
-        unsafe {
-            ffi::TCOD_console_set_key_color(self.con(), color.as_native());
-        }
-    }
-
+    /// Returns the background color of the cell at the specified coordinates.
     fn get_char_background(&self, x: i32, y: i32) -> Color {
         unsafe {
             FromNative::from_native(
@@ -527,6 +578,7 @@ pub trait Console {
         }
     }
 
+    /// Returns the foreground color of the cell at the specified coordinates.
     fn get_char_foreground(&self, x: i32, y: i32) -> Color {
         unsafe {
             FromNative::from_native(
@@ -534,6 +586,8 @@ pub trait Console {
         }
     }
 
+    /// Returns the console's current background flag. For a detailed explanation
+    /// of the possible values, see [BackgroundFlag](./enum.BackgroundFlag.html).
     fn get_background_flag(&self) -> BackgroundFlag {
         let flag = unsafe {
             ffi::TCOD_console_get_background_flag(self.con())
@@ -557,6 +611,8 @@ pub trait Console {
         }
     }
 
+    /// Sets the console's current background flag. For a detailed explanation
+    /// of the possible values, see [BackgroundFlag](./enum.BackgroundFlag.html).
     fn set_background_flag(&mut self, background_flag: BackgroundFlag) {
         unsafe {
             ffi::TCOD_console_set_background_flag(self.con(),
@@ -564,6 +620,7 @@ pub trait Console {
         }
     }
 
+    /// Returns the ASCII value of the cell located at `x, y`
     fn get_char(&self, x: i32, y: i32) -> char {
         let ffi_char = unsafe {
             ffi::TCOD_console_get_char(self.con(), x, y)
@@ -572,6 +629,7 @@ pub trait Console {
         ffi_char as u8 as char
     }
 
+    /// Modifies the ASCII value of the cell located at `x, y`.
     fn set_char(&mut self, x: i32, y: i32, c: char) {
         assert!(x >= 0 && y >= 0);
         unsafe {
@@ -579,6 +637,7 @@ pub trait Console {
         }
     }
 
+    /// Changes the background color of the specified cell
     fn set_char_background(&mut self, x: i32, y: i32,
                            color: Color,
                            background_flag: BackgroundFlag) {
@@ -591,6 +650,7 @@ pub trait Console {
         }
     }
 
+    /// Changes the foreground color of the specified cell
     fn set_char_foreground(&mut self, x: i32, y: i32, color: Color) {
         assert!(x >= 0 && y >= 0);
         unsafe {
@@ -599,7 +659,13 @@ pub trait Console {
                                                   color.as_native());
         }
     }
-
+    
+    /// This function modifies every property of the given cell:
+    ///
+    /// 1. Updates its background color according to the console's default and `background_flag`, 
+    /// see [BackgroundFlag](./enum.BackgroundFlag.html).
+    /// 2. Updates its foreground color based on the default color set in the console
+    /// 3. Sets its ASCII value to `glyph`
     fn put_char(&mut self,
                 x: i32, y: i32, glyph: char,
                 background_flag: BackgroundFlag) {
@@ -611,6 +677,8 @@ pub trait Console {
         }
     }
 
+    /// Updates every propert of the given cell using explicit colors for the
+    /// background and foreground.
     fn put_char_ex(&mut self,
                    x: i32, y: i32, glyph: char,
                    foreground: Color, background: Color) {
@@ -623,12 +691,19 @@ pub trait Console {
         }
     }
 
+    /// Clears the console with its default background color
     fn clear(&mut self) {
         unsafe {
             ffi::TCOD_console_clear(self.con());
         }
     }
 
+    /// Prints the text at the specified location. The position of the `x` and `y` 
+    /// coordinates depend on the [TextAlignment](./enum.TextAlignment) set in the console:
+    ///
+    /// * `TextAlignment::Left`: leftmost character of the string
+    /// * `TextAlignment::Center`: center character of the sting
+    /// * `TextAlignment::Right`: rightmost character of the string
     fn print(&mut self, x: i32, y: i32, text: &str) {
         assert!(x >= 0 && y >= 0);
         unsafe {
@@ -637,6 +712,9 @@ pub trait Console {
         }
     }
 
+    /// Prints the text at the specified location with an explicit
+    /// [BackgroundFlag](./enum.BackgroundFlag.html) and
+    /// [TextAlignment](./enum.TextAlignment.html).
     fn print_ex(&mut self,
                 x: i32, y: i32,
                 background_flag: BackgroundFlag,
@@ -656,22 +734,22 @@ pub trait Console {
 
 /// Blits the contents of one console onto an other
 ///
-/// The function's basic concept is the following: the function takes a region from a given console (with an arbitrary
-/// location, width and height) superimposes it on the destination console (at the given
-/// location). Note that the destination console's contents may be completely overwritten, if an
-/// opacity value of 1.0 is given.
+/// It takes a region from a given console (with an arbitrary location, width and height) and superimposes 
+/// it on the destination console (at the given location). 
+/// Note that when blitting, the source console's key color (set by `set_key_color`) will
+/// be ignored, making it possible to blit non-rectangular regions.
 ///
 /// # Arguments
 ///
 /// * `source_console`: the type implementing the [Console](./trait.Console.html) trait we want to
 /// take the blitted region from
-/// * `source_x`, `source_y`: the position of the top left corner we want to take from the source
+/// * `source_x`, `source_y`: the coordinates of the blitted region's top left corner on the source
 /// console
-/// * `source_width`, `source_height`: The dimensions of the region we want to take from the source
-/// console
+/// * `source_width`, `source_height`: the width and height of the blitted region. With a value of
+/// 0, the width and height of the source console will be used.
 /// * `destination_console`: the type implementing the [Console](./trait.Console.html) trait we want
 /// to blit to
-/// * `destination_x`, `destination_y`: the position of the top left corner we want to blit to on
+/// * `destination_x`, `destination_y`: the coordinated of the blitted region's top left corner on
 /// the destination console
 /// * `foreground_alpha`, `background_alpha`: the foreground and background opacity
 ///
@@ -751,7 +829,7 @@ impl Console for Box<Offscreen> {
     }
 }
 
-
+/// Represents the text alignment in console instances. 
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub enum TextAlignment {
@@ -760,7 +838,10 @@ pub enum TextAlignment {
     Center = ffi::TCOD_CENTER as isize,
 }
 
-
+/// This flag determines how a cell's existing background color will be modified by a new one
+///
+/// See [libtcod's documentation](http://doryen.eptalys.net/data/libtcod/doc/1.5.2/html2/console_bkgnd_flag_t.html)
+/// for a detailed description of the different values.
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub enum BackgroundFlag {
@@ -780,6 +861,7 @@ pub enum BackgroundFlag {
     Default = ffi::TCOD_BKGND_DEFAULT as isize
 }
 
+/// All the possible renderers used by the `Root` console
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub enum Renderer {
@@ -788,6 +870,7 @@ pub enum Renderer {
     SDL = ffi::TCOD_RENDERER_SDL as isize,
 }
 
+/// All the possible font layouts that can be used for custom bitmap fonts
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub enum FontLayout {
