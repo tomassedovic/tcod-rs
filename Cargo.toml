@@ -21,6 +21,9 @@ authors = ["Tomas Sedovic <tomas@sedovic.cz>",
 name = "tcod"
 path = "src/lib.rs"
 
+# Workaround for cargo test giving linker errors for doctests
+doctest = false
+
 [dependencies]
 bitflags = "0.1"
 libc = "0.1.5"
