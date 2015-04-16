@@ -39,7 +39,7 @@ impl Root {
     pub fn initializer<'a>() -> RootInitializer<'a> {
         RootInitializer::new()
     }
-    
+
     pub fn is_fullscreen(&self) -> bool {
         unsafe {
             ffi::TCOD_console_is_fullscreen() != 0
@@ -145,7 +145,7 @@ impl Root {
             ffi::TCOD_console_set_window_title(c_title.as_ptr());
         }
     }
-    
+
     fn set_custom_font(font_path: &std::path::Path,
                        font_layout: FontLayout,
                        font_type: FontType,
@@ -155,7 +155,7 @@ impl Root {
             let filename = font_path.to_str().unwrap();
             let path = CString::new(filename).unwrap();
             ffi::TCOD_console_set_custom_font(
-                path.as_ptr(), (font_layout as i32) | (font_type as i32), 
+                path.as_ptr(), (font_layout as i32) | (font_type as i32),
                 nb_char_horizontal, nb_char_vertical);
         }
     }
@@ -212,14 +212,14 @@ impl<'a> RootInitializer<'a> {
         self.font_layout = font_layout;
         self
     }
-    
+
     pub fn font_type(&mut self, font_type: FontType) -> &mut RootInitializer<'a> {
         self.font_type = font_type;
         self
     }
 
     pub fn font_dimensions(&mut self, horizontal: i32, vertical: i32) -> &mut RootInitializer<'a> {
-        self.font_dimension = FontDimensions(horizontal, vertical); 
+        self.font_dimension = FontDimensions(horizontal, vertical);
         self
     }
 
@@ -230,11 +230,11 @@ impl<'a> RootInitializer<'a> {
 
     pub fn init(&self) -> Root {
         assert!(self.width > 0 && self.height > 0);
-        
+
         match self.font_dimension {
             FontDimensions(horizontal, vertical) => {
-                Root::set_custom_font(&std::path::Path::new(self.font_path), 
-                                      self.font_layout, self.font_type, 
+                Root::set_custom_font(&std::path::Path::new(self.font_path),
+                                      self.font_layout, self.font_type,
                                       horizontal, vertical)
             }
         }
@@ -264,13 +264,13 @@ pub trait Console {
             _ => unreachable!(),
         }
     }
-    
+
     fn set_alignment(&mut self, alignment: TextAlignment) {
         unsafe {
             ffi::TCOD_console_set_alignment(self.con(), alignment as u32);
         }
     }
-     
+
     fn set_key_color(&mut self, color: Color) {
         unsafe {
             ffi::TCOD_console_set_key_color(self.con(), color.as_native());
@@ -442,17 +442,21 @@ pub trait Console {
 }
 
 pub fn blit<T, U>(source_console: &T,
-                  source_x: i32, source_y: i32,
-                  source_width: i32, source_height: i32,
+                  (source_x, source_y): (i32, i32),
+                  (source_width, source_height): (i32, i32),
                   destination_console: &mut U,
-                  destination_x: i32, destination_y: i32,
+                  (destination_x, destination_y): (i32, i32),
                   foreground_alpha: f32, background_alpha: f32)
     where T: Console,
           U: Console {
+    assert!(source_x >= 0 && source_y >= 0 &&
+            source_width >= 0 && source_height >= 0 && // If width or height is 0, the source width/height is used.
+            destination_x >= 0 && destination_y >= 0);
+
     unsafe {
         ffi::TCOD_console_blit(source_console.con(),
                                source_x, source_y, source_width, source_height,
-                               destination_console.con(), 
+                               destination_console.con(),
                                destination_x, destination_y,
                                foreground_alpha, background_alpha);
     }
