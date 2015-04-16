@@ -15,7 +15,7 @@
 //!
 //! let mut root = Root::initializer().init();
 //! let (width, height) = (80, 30);
-//! let mut offscreen = Offscren::new(width, height);
+//! let mut offscreen = Offscreen::new(width, height);
 //! ```
 //!
 //! A typical `tcod-rs` program's basic structure would look something like this:
@@ -49,7 +49,7 @@
 //!
 //! let mut root = RootConsole::initializer().init();
 //! let (width, height) = (80, 30);
-//! let mut offscreen = OffscrenConsole::new(width, height);
+//! let mut offscreen = OffscreenConsole::new(width, height);
 //! ```
 //! This applies to all the examples in the rest of the modules documentation.
 
@@ -167,7 +167,7 @@ impl Offscreen {
 /// rendering code:
 ///
 /// ```rust
-/// use tcod::console::Root;
+/// use tcod::console::{Console, Root};
 ///
 /// fn main() {
 ///     let mut root = Root::initializer().init();
@@ -387,7 +387,7 @@ struct FontDimensions(i32, i32);
 /// `RootInitializer` instance:
 ///
 /// ```rust
-/// use tcod::console::Root;
+/// use tcod::console::{Root, FontLayout, Renderer};
 ///
 /// fn main() {
 ///     let mut root = Root::initializer()
@@ -491,7 +491,7 @@ impl<'a> RootInitializer<'a> {
 /// Printing text with explicit alignment:
 ///
 /// ```rust
-/// use tcod::console::{Root, BackgroundFlag, TextAlignment};
+/// use tcod::console::{Console, Root, BackgroundFlag, TextAlignment};
 ///
 /// let mut root = Root::initializer().size(80, 50).init();
 /// 
