@@ -341,6 +341,8 @@ impl Root {
         }
     }
 
+
+
     fn set_custom_font(font_path: &std::path::Path,
                        font_layout: FontLayout,
                        font_type: FontType,
@@ -714,6 +716,20 @@ pub trait Console {
         }
     }
 
+    /// Prints the text at the specified location in a rectangular area with
+    /// the dimensions: (width; height). If the text is longer than the width the
+    /// newlines will be inserted.
+    fn print_rect(&mut self, 
+                  x: i32, y: i32, 
+                  width: i32, height: i32,
+                  text: &str) {
+        assert!(x >= 0 && y >= 0);
+        unsafe {
+            let c_text = CString::new(text.as_bytes()).unwrap();
+            ffi::TCOD_console_print_rect(self.con(), x, y, width, height, c_text.as_ptr());
+        }
+    }
+
     /// Prints the text at the specified location with an explicit
     /// [BackgroundFlag](./enum.BackgroundFlag.html) and
     /// [TextAlignment](./enum.TextAlignment.html).
@@ -732,6 +748,23 @@ pub trait Console {
                                        c_text.as_ptr());
         }
     }
+
+    /// Combines the functions of `print_ex` and `print_rect`
+    fn print_rect_ex(&mut self, 
+                     x: i32, y: i32, 
+                     width: i32, height: i32,
+                     background_flag: BackgroundFlag,
+                     alignment: TextAlignment,
+                     text: &str) {
+        assert!(x >= 0 && y >= 0);
+        unsafe {
+            let c_text = CString::new(text.as_bytes()).unwrap();
+            ffi::TCOD_console_print_rect_ex(self.con(), x, y, width, height,
+                                            background_flag as u32, alignment as u32, 
+                                            c_text.as_ptr());
+        }
+    }
+
 }
 
 /// Blits the contents of one console onto an other
