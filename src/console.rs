@@ -341,8 +341,6 @@ impl Root {
         }
     }
 
-
-
     fn set_custom_font(font_path: &std::path::Path,
                        font_layout: FontLayout,
                        font_type: FontType,
@@ -764,7 +762,6 @@ pub trait Console {
                                             c_text.as_ptr());
         }
     }
-
 }
 
 /// Blits the contents of one console onto an other
