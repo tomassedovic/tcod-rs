@@ -5,9 +5,7 @@ pub struct Map {
     tcod_map: ffi::TCOD_map_t,
 }
 
-impl<'a> AsNative for Map {
-    type Output = &'a ffi::TCOD_map_t; 
-    
+impl AsNative<ffi::TCOD_map_t> for Map {
     unsafe fn as_native(&self) -> &ffi::TCOD_map_t {
         &self.tcod_map
     }
