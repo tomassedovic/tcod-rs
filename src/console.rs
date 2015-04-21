@@ -266,7 +266,7 @@ impl Root {
     /// You don't have to call setFade for each rendered frame (unless you change the fading parameters).
     pub fn set_fade(&mut self, fade: u8, fading_color: Color) {
         unsafe {
-            ffi::TCOD_console_set_fade(fade, fading_color.as_native());
+            ffi::TCOD_console_set_fade(fade, *fading_color.as_native());
         }
     }
 
@@ -539,7 +539,7 @@ pub trait Console {
     /// of this console onto an other (essentially a transparent background color).
     fn set_key_color(&mut self, color: Color) {
         unsafe {
-            ffi::TCOD_console_set_key_color(self.con(), color.as_native());
+            ffi::TCOD_console_set_key_color(self.con(), *color.as_native());
         }
     }
 
@@ -561,14 +561,14 @@ pub trait Console {
     /// like: `clear`, `put_char`, etc.
     fn set_default_background(&mut self, color: Color) {
         unsafe {
-            ffi::TCOD_console_set_default_background(self.con(), color.as_native());
+            ffi::TCOD_console_set_default_background(self.con(), *color.as_native());
         }
     }
 
     /// Sets the console's default foreground color. This is used in several printing functions. 
     fn set_default_foreground(&mut self, color: Color) {
         unsafe {
-            ffi::TCOD_console_set_default_foreground(self.con(), color.as_native());
+            ffi::TCOD_console_set_default_foreground(self.con(), *color.as_native());
         }
     }
 
@@ -647,7 +647,7 @@ pub trait Console {
         unsafe {
             ffi::TCOD_console_set_char_background(self.con(),
                                                   x, y,
-                                                  color.as_native(),
+                                                  *color.as_native(),
                                                   background_flag as u32)
         }
     }
@@ -658,7 +658,7 @@ pub trait Console {
         unsafe {
             ffi::TCOD_console_set_char_foreground(self.con(),
                                                   x, y,
-                                                  color.as_native());
+                                                  *color.as_native());
         }
     }
     
@@ -688,8 +688,8 @@ pub trait Console {
         unsafe {
             ffi::TCOD_console_put_char_ex(self.con(),
                                           x, y, glyph as i32,
-                                          foreground.as_native(),
-                                          background.as_native());
+                                          *foreground.as_native(),
+                                          *background.as_native());
         }
     }
 

@@ -8,17 +8,13 @@ pub struct Color {
     pub b: u8,
 }
 
-impl AsNative for Color {
-    type Output = ffi::TCOD_color_t;
-
-    unsafe fn as_native(&self) -> ffi::TCOD_color_t {
-        ::std::mem::transmute(*self)
+impl AsNative<ffi::TCOD_color_t> for Color {
+    unsafe fn as_native(&self) -> &ffi::TCOD_color_t {
+        ::std::mem::transmute(self)
     }
 }
 
-impl FromNative for Color {
-    type Input = ffi::TCOD_color_t;
-
+impl FromNative<ffi::TCOD_color_t> for Color {
     unsafe fn from_native(input: ffi::TCOD_color_t) -> Color {
         ::std::mem::transmute(input)
     }
@@ -35,7 +31,7 @@ impl Color {
 
     pub fn new_from_hsv(h: f32, s: f32, v: f32) -> Color {
         unsafe {
-            let mut tcod_c = Color{r: 0, g: 0, b: 0}.as_native();
+            let mut tcod_c = *Color{r: 0, g: 0, b: 0}.as_native();
             ffi::TCOD_color_set_HSV(&mut tcod_c, h, s, v);
             FromNative::from_native(tcod_c)
         }
@@ -44,35 +40,35 @@ impl Color {
     pub fn multiply(self, other: Color) -> Color {
         unsafe {
             FromNative::from_native(
-                ffi::TCOD_color_multiply(self.as_native(), other.as_native()))
+                ffi::TCOD_color_multiply(*self.as_native(), *other.as_native()))
         }
     }
 
     pub fn multiply_scalar(self, val: f32) -> Color {
         unsafe {
             FromNative::from_native(
-                ffi::TCOD_color_multiply_scalar(self.as_native(), val))
+                ffi::TCOD_color_multiply_scalar(*self.as_native(), val))
         }
     }
 
     pub fn add(self, other: Color) -> Color {
         unsafe {
             FromNative::from_native(
-                ffi::TCOD_color_add(self.as_native(), other.as_native()))
+                ffi::TCOD_color_add(*self.as_native(), *other.as_native()))
         }
     }
 
     pub fn subtract(self, other: Color) -> Color {
         unsafe {
             FromNative::from_native(
-                ffi::TCOD_color_subtract(self.as_native(), other.as_native()))
+                ffi::TCOD_color_subtract(*self.as_native(), *other.as_native()))
         }
     }
 
     pub fn lerp(self, to: Color, coefficient: f32) -> Color {
         unsafe {
-            FromNative::from_native(ffi::TCOD_color_lerp(self.as_native(),
-                                                         to.as_native(),
+            FromNative::from_native(ffi::TCOD_color_lerp(*self.as_native(),
+                                                         *to.as_native(),
                                                          coefficient))
         }
     }
@@ -82,14 +78,14 @@ impl Color {
         let mut s: f32 = 0.0;
         let mut v: f32 = 0.0;
         unsafe {
-            ffi::TCOD_color_get_HSV(self.as_native(), &mut h, &mut s, &mut v)
+            ffi::TCOD_color_get_HSV(*self.as_native(), &mut h, &mut s, &mut v)
         }
         (h, s, v)
     }
 
     pub fn shift_hue(self, shift: f32) -> Color {
         unsafe {
-            let mut c = self.as_native();
+            let mut c = *self.as_native();
             ffi::TCOD_color_shift_hue(&mut c, shift);
             FromNative::from_native(c)
         }
@@ -97,7 +93,7 @@ impl Color {
 
     pub fn scale_hsv(self, scale: f32, value: f32) -> Color {
         unsafe {
-            let mut c = self.as_native();
+            let mut c = *self.as_native();
             ffi::TCOD_color_scale_HSV(&mut c, scale, value);
             FromNative::from_native(c)
         }
