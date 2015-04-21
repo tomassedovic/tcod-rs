@@ -1,4 +1,7 @@
 language: rust
+rust:
+- nightly
+- beta
 before_install:
 - sudo apt-get update -qq
 install:
