@@ -53,7 +53,7 @@ pub mod pathfinding;
 pub mod system;
 
 mod bindings;
-
+mod console_macros;
 
 pub type RootConsole = console::Root; 
 pub type OffscreenConsole = console::Offscreen;
