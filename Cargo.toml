@@ -32,11 +32,11 @@ doctest = false
 [dependencies]
 bitflags = "0.1"
 libc = "0.1.5"
-time = "0.1.24"
+time = "0.1.25"
 
 [dependencies.tcod-sys]
 path = "tcod_sys"
 version = "2.0.11"
 
 [dev-dependencies]
-rand = "0.3.5"
+rand = "0.3.8"
