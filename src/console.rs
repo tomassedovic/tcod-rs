@@ -1,6 +1,6 @@
 //! The console emulator handles the rendering of the game screen and the keyboard input
 //!
-//! It provides the necessary traits and types for working with the different console types, 
+//! It provides the necessary traits and types for working with the different console types,
 //! including the [Console](./trait.Console.html) trait and the
 //! [Root](./struct.Root.html) and [Offscreen](./struct.Offscreen.html) console types.
 //! It's worth mentioning that only one `Root` console may exist at any given time, and it has to
@@ -223,7 +223,7 @@ impl Root {
 
     /// This function changes the keyboard repeat times. The initial delay determines the
     /// number of milliseconds between the keypress and the time the keyboard repeat begins.
-    /// The interval sets the time between the keyboard repeat events. 
+    /// The interval sets the time between the keyboard repeat events.
     /// With an initial delay of 0, the keyboard repeat feature is completely disabled.
     pub fn set_keyboard_repeat(&mut self, initial_delay: i32, interval: i32) {
         unsafe {
@@ -270,7 +270,7 @@ impl Root {
         }
     }
 
-    /// This function will wait for a keypress event from the user, returning the [KeyState](../input/struct.KeyState.html) 
+    /// This function will wait for a keypress event from the user, returning the [KeyState](../input/struct.KeyState.html)
     /// that represents the event. If `flush` is true, all pending keypresses are flushed from the
     /// keyboard buffer. If false, it returns the first element from it.
     pub fn wait_for_keypress(&mut self, flush: bool) -> KeyState {
@@ -295,7 +295,7 @@ impl Root {
 
     /// This function checks if the user pressed a key. It returns the
     /// [KeyState](../input/struct.KeyState.html) representing the
-    /// event if they have, or `None` if they have not. 
+    /// event if they have, or `None` if they have not.
     pub fn check_for_keypress(&self, status: KeyPressFlags) -> Option<KeyState> {
         let tcod_key = unsafe {
             ffi::TCOD_console_check_for_keypress(status.bits() as i32)
@@ -494,7 +494,7 @@ impl<'a> RootInitializer<'a> {
 /// use tcod::console::{Console, Root, BackgroundFlag, TextAlignment};
 ///
 /// let mut root = Root::initializer().size(80, 50).init();
-/// 
+///
 /// root.print_ex(1, 1, BackgroundFlag::None, TextAlignment::Left,
 ///               "Text aligned to left.");
 ///
@@ -511,7 +511,7 @@ pub trait Console {
     /// Returns the underlying native `libtcod` representation of the current console.
     unsafe fn con(&self) -> ffi::TCOD_console_t;
 
-    /// Returns the default text alignment for the `Console` instance. For all the possible 
+    /// Returns the default text alignment for the `Console` instance. For all the possible
     /// text alignment options, see the documentation for
     /// [TextAlignment](./enum.TextAlignment.html).
     fn get_alignment(&self) -> TextAlignment {
@@ -526,7 +526,7 @@ pub trait Console {
         }
     }
 
-    /// Sets the default text alignment for the console. For all the possible 
+    /// Sets the default text alignment for the console. For all the possible
     /// text alignment options, see the documentation for
     /// [TextAlignment](./enum.TextAlignment.html).
     fn set_alignment(&mut self, alignment: TextAlignment) {
@@ -565,7 +565,7 @@ pub trait Console {
         }
     }
 
-    /// Sets the console's default foreground color. This is used in several printing functions. 
+    /// Sets the console's default foreground color. This is used in several printing functions.
     fn set_default_foreground(&mut self, color: Color) {
         unsafe {
             ffi::TCOD_console_set_default_foreground(self.con(), *color.as_native());
@@ -661,10 +661,10 @@ pub trait Console {
                                                   *color.as_native());
         }
     }
-    
+
     /// This function modifies every property of the given cell:
     ///
-    /// 1. Updates its background color according to the console's default and `background_flag`, 
+    /// 1. Updates its background color according to the console's default and `background_flag`,
     /// see [BackgroundFlag](./enum.BackgroundFlag.html).
     /// 2. Updates its foreground color based on the default color set in the console
     /// 3. Sets its ASCII value to `glyph`
@@ -700,7 +700,7 @@ pub trait Console {
         }
     }
 
-    /// Prints the text at the specified location. The position of the `x` and `y` 
+    /// Prints the text at the specified location. The position of the `x` and `y`
     /// coordinates depend on the [TextAlignment](./enum.TextAlignment.html) set in the console:
     ///
     /// * `TextAlignment::Left`: leftmost character of the string
@@ -717,8 +717,8 @@ pub trait Console {
     /// Prints the text at the specified location in a rectangular area with
     /// the dimensions: (width; height). If the text is longer than the width the
     /// newlines will be inserted.
-    fn print_rect(&mut self, 
-                  x: i32, y: i32, 
+    fn print_rect(&mut self,
+                  x: i32, y: i32,
                   width: i32, height: i32,
                   text: &str) {
         assert!(x >= 0 && y >= 0);
@@ -748,8 +748,8 @@ pub trait Console {
     }
 
     /// Combines the functions of `print_ex` and `print_rect`
-    fn print_rect_ex(&mut self, 
-                     x: i32, y: i32, 
+    fn print_rect_ex(&mut self,
+                     x: i32, y: i32,
                      width: i32, height: i32,
                      background_flag: BackgroundFlag,
                      alignment: TextAlignment,
@@ -758,7 +758,7 @@ pub trait Console {
         unsafe {
             let c_text = CString::new(text.as_bytes()).unwrap();
             ffi::TCOD_console_print_rect_ex(self.con(), x, y, width, height,
-                                            background_flag as u32, alignment as u32, 
+                                            background_flag as u32, alignment as u32,
                                             c_text.as_ptr());
         }
     }
@@ -766,8 +766,8 @@ pub trait Console {
 
 /// Blits the contents of one console onto an other
 ///
-/// It takes a region from a given console (with an arbitrary location, width and height) and superimposes 
-/// it on the destination console (at the given location). 
+/// It takes a region from a given console (with an arbitrary location, width and height) and superimposes
+/// it on the destination console (at the given location).
 /// Note that when blitting, the source console's key color (set by `set_key_color`) will
 /// be ignored, making it possible to blit non-rectangular regions.
 ///
@@ -865,7 +865,7 @@ impl Console for Box<Offscreen> {
     }
 }
 
-/// Represents the text alignment in console instances. 
+/// Represents the text alignment in console instances.
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub enum TextAlignment {

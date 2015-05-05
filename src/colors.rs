@@ -297,5 +297,3 @@ pub const GOLD: Color = Color{r: 229, g: 191, b: 0};
 pub const SILVER: Color = Color{r: 203, g: 203, b: 203};
 pub const CELADON: Color = Color{r: 172, g: 255, b: 175};
 pub const PEACH: Color = Color{r: 255, g: 159, b: 127};
-
-
