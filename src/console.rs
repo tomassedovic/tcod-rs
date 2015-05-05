@@ -57,6 +57,7 @@
 extern crate std;
 
 use std::marker::PhantomData;
+use std::path::Path;
 
 use bindings::ffi;
 use bindings::{AsNative, FromNative, c_bool, CString, keycode_from_u32};
@@ -341,7 +342,7 @@ impl Root {
         }
     }
 
-    fn set_custom_font(font_path: &std::path::Path,
+    fn set_custom_font(font_path: &Path,
                        font_layout: FontLayout,
                        font_type: FontType,
                        nb_char_horizontal: i32,
@@ -387,6 +388,7 @@ struct FontDimensions(i32, i32);
 /// `RootInitializer` instance:
 ///
 /// ```rust
+/// use std::path::Path;
 /// use tcod::console::{Root, FontLayout, Renderer};
 ///
 /// fn main() {
@@ -394,7 +396,7 @@ struct FontDimensions(i32, i32);
 ///         .size(80, 20)
 ///         .title("Example")
 ///         .fullscreen(true)
-///         .font("terminal.png", FontLayout::AsciiInCol)
+///         .font(&Path::new("terminal.png"), FontLayout::AsciiInCol)
 ///         .renderer(Renderer::GLSL)
 ///         .init();
 /// }
@@ -404,7 +406,7 @@ pub struct RootInitializer<'a> {
     height: i32,
     title: &'a str,
     is_fullscreen: bool,
-    font_path: &'a str,
+    font_path: &'a Path,
     font_layout: FontLayout,
     font_type: FontType,
     font_dimension: FontDimensions,
@@ -418,7 +420,7 @@ impl<'a> RootInitializer<'a> {
             height: 25,
             title: "Main Window",
             is_fullscreen: false,
-            font_path: "terminal.png",
+            font_path: &Path::new("terminal.png"),
             font_layout: FontLayout::AsciiInCol,
             font_type: FontType::Default,
             font_dimension: FontDimensions(0, 0),
@@ -442,7 +444,7 @@ impl<'a> RootInitializer<'a> {
         self
     }
 
-    pub fn font(&mut self, path: &'a str, font_layout: FontLayout) -> &mut RootInitializer<'a> {
+    pub fn font(&mut self, path: &'a Path, font_layout: FontLayout) -> &mut RootInitializer<'a> {
         self.font_path = path;
         self.font_layout = font_layout;
         self
@@ -468,7 +470,7 @@ impl<'a> RootInitializer<'a> {
 
         match self.font_dimension {
             FontDimensions(horizontal, vertical) => {
-                Root::set_custom_font(&std::path::Path::new(self.font_path),
+                Root::set_custom_font(self.font_path,
                                       self.font_layout, self.font_type,
                                       horizontal, vertical)
             }
