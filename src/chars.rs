@@ -78,4 +78,3 @@ pub const POW1: char = '\u{fb}';
 pub const POW3: char = '\u{fc}';
 pub const POW2: char = '\u{fd}';
 pub const BULLET_SQUARE: char = '\u{fe}';
-

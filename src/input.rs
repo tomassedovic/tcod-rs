@@ -285,4 +285,3 @@ impl Iterator for EventIterator {
         check_for_event(KEY | MOUSE)
     }
 }
-

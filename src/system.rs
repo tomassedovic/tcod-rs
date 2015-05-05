@@ -102,4 +102,3 @@ pub fn get_clipboard() -> String {
         std::str::from_utf8(c_str).unwrap().to_string()
     }
 }
-
