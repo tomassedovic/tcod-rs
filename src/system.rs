@@ -1,6 +1,7 @@
 extern crate std;
 extern crate time;
 
+use std::path::Path;
 use bindings::ffi;
 
 use self::time::Duration;
@@ -40,8 +41,8 @@ pub fn get_elapsed_time() -> Duration {
     return Duration::milliseconds(ms as i64)
 }
 
-pub fn save_screenshot(path: &std::path::Path) {
-    let filename = path.to_str().unwrap();
+pub fn save_screenshot<P: AsRef<Path>>(path: P) {
+    let filename = path.as_ref().to_str().unwrap();
     let c_path = std::ffi::CString::new(filename).unwrap();
     unsafe {
         ffi::TCOD_sys_save_screenshot(c_path.as_ptr());

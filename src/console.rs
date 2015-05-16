@@ -370,7 +370,11 @@ struct FontDimensions(i32, i32);
 /// * `title`: the main window's title
 /// * `fullscreen`: determines if the main window will start in fullscreen mode
 /// * `font`: selects a bitmap font and sets its layout. See [FontLayout](./enum.FontLayout.html)
-/// for the possible layouts.
+/// for the possible layouts. The `path` argument can be a
+/// [`str`](http://doc.rust-lang.org/std/primitive.str.html),
+/// [`Path`](http://doc.rust-lang.org/std/path/struct.Path.html),
+/// [`String`](http://doc.rust-lang.org/std/string/struct.String.html) or anything else that
+/// implements [`AsRef<Path>`](http://doc.rust-lang.org/std/convert/trait.AsRef.html).
 /// * `font_type`: only use this if you want to use a greyscale font. See
 /// [FontType](./enum.FontType.html) for the possible values.
 /// * `font_dimensions`: the dimensions for the given bitmap font. This is automatically
@@ -388,7 +392,6 @@ struct FontDimensions(i32, i32);
 /// `RootInitializer` instance:
 ///
 /// ```rust
-/// use std::path::Path;
 /// use tcod::console::{Root, FontLayout, Renderer};
 ///
 /// fn main() {
@@ -396,7 +399,7 @@ struct FontDimensions(i32, i32);
 ///         .size(80, 20)
 ///         .title("Example")
 ///         .fullscreen(true)
-///         .font(&Path::new("terminal.png"), FontLayout::AsciiInCol)
+///         .font("terminal.png", FontLayout::AsciiInCol)
 ///         .renderer(Renderer::GLSL)
 ///         .init();
 /// }
@@ -406,7 +409,7 @@ pub struct RootInitializer<'a> {
     height: i32,
     title: &'a str,
     is_fullscreen: bool,
-    font_path: &'a Path,
+    font_path: Box<AsRef<Path>+'a>,
     font_layout: FontLayout,
     font_type: FontType,
     font_dimension: FontDimensions,
@@ -420,7 +423,7 @@ impl<'a> RootInitializer<'a> {
             height: 25,
             title: "Main Window",
             is_fullscreen: false,
-            font_path: &Path::new("terminal.png"),
+            font_path: Box::new("terminal.png"),
             font_layout: FontLayout::AsciiInCol,
             font_type: FontType::Default,
             font_dimension: FontDimensions(0, 0),
@@ -444,8 +447,8 @@ impl<'a> RootInitializer<'a> {
         self
     }
 
-    pub fn font(&mut self, path: &'a Path, font_layout: FontLayout) -> &mut RootInitializer<'a> {
-        self.font_path = path;
+    pub fn font<P: AsRef<Path>+'a>(&mut self, path: P, font_layout: FontLayout) -> &mut RootInitializer<'a> {
+        self.font_path = Box::new(path);
         self.font_layout = font_layout;
         self
     }
@@ -470,7 +473,7 @@ impl<'a> RootInitializer<'a> {
 
         match self.font_dimension {
             FontDimensions(horizontal, vertical) => {
-                Root::set_custom_font(self.font_path,
+                Root::set_custom_font(self.font_path.as_ref(),
                                       self.font_layout, self.font_type,
                                       horizontal, vertical)
             }
