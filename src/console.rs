@@ -926,3 +926,35 @@ pub enum FontType {
     Default = 0,
     Greyscale = ffi::TCOD_FONT_TYPE_GREYSCALE as isize,
 }
+
+
+
+#[cfg(test)]
+mod test {
+    use std::path::Path;
+    use super::Root;
+    use super::FontLayout::AsciiInCol;
+
+    #[test]
+    fn test_custom_font_as_static_str() {
+        Root::initializer().font("terminal.png", AsciiInCol);
+    }
+
+    #[test]
+    fn test_custom_font_as_path() {
+        Root::initializer().font(Path::new("terminal.png"), AsciiInCol);
+
+    }
+
+    #[test]
+    fn test_custom_font_as_string() {
+        Root::initializer().font("terminal.png".to_owned(), AsciiInCol);
+    }
+
+    #[test]
+    fn test_custom_font_as_str() {
+        let string = "terminal.png".to_owned();
+        let s: &str = &string;
+        Root::initializer().font(s, AsciiInCol);
+    }
+}
