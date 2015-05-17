@@ -6,7 +6,6 @@
 
 extern crate tcod;
 
-use std::path::Path;
 use tcod::console::{Root, Console, FontLayout, FontType, BackgroundFlag};
 use tcod::colors;
 use tcod::input::Key::Special;
@@ -43,7 +42,7 @@ fn handle_keys(root: &mut Root, player_x: &mut i32, player_y: &mut i32) -> bool 
 
 fn main() {
     let mut root = Root::initializer()
-        .font(&Path::new("arial10x10.png"), FontLayout::Tcod)
+        .font("arial10x10.png", FontLayout::Tcod)
         .font_type(FontType::Greyscale)
         .size(SCREEN_WIDTH, SCREEN_HEIGHT)
         .title("Rust/libtcod tutorial")
