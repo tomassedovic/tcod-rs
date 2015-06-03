@@ -60,7 +60,7 @@ use std::marker::PhantomData;
 use std::path::Path;
 
 use bindings::ffi;
-use bindings::{AsNative, FromNative, c_bool, CString, keycode_from_u32};
+use bindings::{AsNative, FromNative, c_bool, c_char, CString, keycode_from_u32};
 
 use colors::Color;
 use input::{Key, KeyPressFlags, KeyState};
@@ -765,6 +765,67 @@ pub trait Console {
             ffi::TCOD_console_print_rect_ex(self.con(), x, y, width, height,
                                             background_flag as u32, alignment as u32,
                                             c_text.as_ptr());
+        }
+    }
+
+    /// Fill a rectangle with the default background colour.
+    ///
+    /// If `clear` is true, set each cell's character to space (ASCII 32).
+    fn rect(&mut self,
+            x: i32, y: i32,
+            width: i32, height: i32,
+            clear: bool,
+            background_flag: BackgroundFlag) {
+        assert!(x >= 0 && y >= 0 && width >= 0 && height >= 0);
+        assert!(x + width < self.width() && y + height < self.height());
+        unsafe {
+            ffi::TCOD_console_rect(self.con(), x, y, width, height, clear as c_bool, background_flag as u32);
+        }
+    }
+
+    /// Draw a horizontal line.
+    ///
+    /// Uses `tcod::chars::HLINE` (ASCII 196) as the line character and
+    /// console's default background and foreground colours.
+    fn horizontal_line(&mut self, x: i32, y: i32, length: i32, background_flag: BackgroundFlag) {
+        assert!(x >= 0 && y >= 0 && y < self.height());
+        assert!(length >= 1 && length + x < self.width());
+        unsafe {
+            ffi::TCOD_console_hline(self.con(), x, y, length, background_flag as u32);
+        }
+    }
+
+    /// Draw a vertical line.
+    ///
+    /// Uses `tcod::chars::VLINE` (ASCII 179) as the line character and
+    /// console's default background and foreground colours.
+    fn vertical_line(&mut self, x: i32, y: i32, length: i32, background_flag: BackgroundFlag) {
+        assert!(x >= 0, y >= 0 && x < self.width());
+        assert!(length >= 1 && length + y < self.height());
+        unsafe {
+            ffi::TCOD_console_vline(self.con(), x, y, length, background_flag as u32);
+        }
+    }
+
+    /// Draw a window frame with an optional title.
+    ///
+    /// Draws a rectangle (using the rect method) using the suplied background
+    /// flag, then draws a rectangle with the console's default foreground
+    /// colour.
+    ///
+    /// If the `title` is specified, it will be printed on top of the rectangle
+    /// using inverted colours.
+    fn print_frame(&mut self, x: i32, y: i32, width: i32, height: i32,
+                   clear: bool, background_flag: BackgroundFlag, title: Option<&str>) {
+        assert!(x >= 0 && y >= 0 && width >= 0 && height >= 0);
+        assert!(x + width < self.width() && y + height < self.height());
+        let c_title: *const c_char = match title {
+            Some(s) => CString::new(s).unwrap().as_ptr(),
+            None => std::ptr::null(),
+        };
+        unsafe {
+            ffi::TCOD_console_print_frame(self.con(), x, y, width, height,
+                                          clear as c_bool, background_flag as u32, c_title);
         }
     }
 }
