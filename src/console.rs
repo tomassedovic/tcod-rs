@@ -828,6 +828,10 @@ pub trait Console {
                                           clear as c_bool, background_flag as u32, c_title);
         }
     }
+
+    fn obj_unsafe<T>(&mut self, _: &T) where Self: Sized {
+
+    }
 }
 
 /// Blits the contents of one console onto an other
@@ -895,13 +899,13 @@ pub fn blit<T, U>(source_console: &T,
     }
 }
 
-impl<'a> Console for &'a Console {
-    unsafe fn con(&self) -> ffi::TCOD_console_t {
-        (*self).con()
-    }
+impl<'a, T: Console + ?Sized> Console for &'a T  {
+   unsafe fn con(&self) -> ffi::TCOD_console_t {
+       (*self).con()
+   }
 }
 
-impl Console for Box<Console> {
+impl<T: Console + ?Sized> Console for Box<T> {
     unsafe fn con(&self) -> ffi::TCOD_console_t {
         (**self).con()
     }
@@ -913,21 +917,9 @@ impl Console for Root {
     }
 }
 
-impl Console for Box<Root> {
-    unsafe fn con(&self) -> ffi::TCOD_console_t {
-        (**self).con()
-    }
-}
-
 impl Console for Offscreen {
     unsafe fn con(&self) -> ffi::TCOD_console_t {
         self.con
-    }
-}
-
-impl Console for Box<Offscreen> {
-    unsafe fn con(&self) -> ffi::TCOD_console_t {
-        (**self).con()
     }
 }
 
