@@ -14,19 +14,19 @@ fn main() {
 
     con.clear();
     // Uses the default foreground and background:
-    con.put_char(40, 25, '@', BackgroundFlag::Set);
+    con.put_char(40, 25, b'@', BackgroundFlag::Set);
     // Custom foreground and background:
-    con.put_char_ex(42, 25, '!', Color{r: 240, g: 13, b: 20}, Color{r: 0, g: 0, b: 0});
+    con.put_char_ex(42, 25, b'!', Color{r: 240, g: 13, b: 20}, Color{r: 0, g: 0, b: 0});
 
     let black = Color::new(0, 0, 0);
     let red = Color::new(200, 0, 0);
 
-    con.put_char_ex(30, 30, '.', black, red);
-    con.put_char_ex(32, 30, '.', black, red.multiply(Color::new(200, 0, 0)));
-    con.put_char_ex(34, 30, '.', black, red.multiply_scalar(0.3));
-    con.put_char_ex(36, 30, '.', black, red.add(Color::new(25, 60, 0)));
-    con.put_char_ex(36, 30, '.', black, red.subtract(Color::new(25, 60, 0)));
-    con.put_char_ex(38, 30, '.', black, red.lerp(black, 0.8));
+    con.put_char_ex(30, 30, b'.', black, red);
+    con.put_char_ex(32, 30, b'.', black, red.multiply(Color::new(200, 0, 0)));
+    con.put_char_ex(34, 30, b'.', black, red.multiply_scalar(0.3));
+    con.put_char_ex(36, 30, b'.', black, red.add(Color::new(25, 60, 0)));
+    con.put_char_ex(36, 30, b'.', black, red.subtract(Color::new(25, 60, 0)));
+    con.put_char_ex(38, 30, b'.', black, red.lerp(black, 0.8));
 
     let (h, s, v) = red.hsv();
     println!("Red colour's hue: {}, saturation: {}, value: {}", h, s, v);

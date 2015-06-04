@@ -35,7 +35,7 @@ fn main() {
         }
 
         con.clear();
-        con.put_char(x, y, '@', BackgroundFlag::Set);
+        con.put_char(x, y, b'@', BackgroundFlag::Set);
         con.flush();
     }
 }

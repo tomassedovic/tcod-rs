@@ -55,11 +55,11 @@ fn main() {
 
     while !root.window_closed() {
         root.set_default_foreground(colors::WHITE);
-        root.put_char(player_x, player_y, '@', BackgroundFlag::None);
+        root.put_char(player_x, player_y, b'@', BackgroundFlag::None);
 
         root.flush();
 
-        root.put_char(player_x, player_y, ' ', BackgroundFlag::None);
+        root.put_char(player_x, player_y, b' ', BackgroundFlag::None);
 
         // handle keys and exit game if needed
         let exit = handle_keys(&mut root, &mut player_x, &mut player_y);

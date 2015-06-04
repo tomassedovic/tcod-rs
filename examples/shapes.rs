@@ -19,7 +19,7 @@ fn main() {
     root.horizontal_line(30, 14, 15, BackgroundFlag::Set);
     root.vertical_line(46, 4, 9, BackgroundFlag::Set);
 
-    root.print_frame(15, 25, 35, 10, false, BackgroundFlag::Set, Some("Hello World!"));
+    root.print_frame(15, 25, 35, 10, false, BackgroundFlag::Set, Some(b"Hello World!"));
 
     root.flush();
     root.wait_for_keypress(true);
