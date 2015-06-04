@@ -29,12 +29,12 @@ type Map = Vec<Vec<Tile>>;
 struct Object {
     x: i32,
     y: i32,
-    char: char,
+    char: u8,
     color: Color,
 }
 
 impl Object {
-    pub fn new(x: i32, y: i32, char: char, color: Color) -> Object {
+    pub fn new(x: i32, y: i32, char: u8, color: Color) -> Object {
         Object {
             x: x,
             y: y,
@@ -57,7 +57,7 @@ impl Object {
     }
 
     pub fn clear(&self, con: &mut Console) {
-        con.put_char(self.x, self.y, ' ', BackgroundFlag::None);
+        con.put_char(self.x, self.y, b' ', BackgroundFlag::None);
     }
 }
 
@@ -143,10 +143,10 @@ fn main() {
     tcod::system::set_fps(LIMIT_FPS);
 
     // create object representing the player
-    let player = Object::new(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, '@', colors::WHITE);
+    let player = Object::new(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, b'@', colors::WHITE);
 
     // create an NPC
-    let npc = Object::new(SCREEN_WIDTH / 2 - 5, SCREEN_HEIGHT / 2, '@', colors::YELLOW);
+    let npc = Object::new(SCREEN_WIDTH / 2 - 5, SCREEN_HEIGHT / 2, b'@', colors::YELLOW);
 
     // the list of objects with those two
     let mut objects = [player, npc];

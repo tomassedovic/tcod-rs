@@ -628,16 +628,16 @@ pub trait Console {
     }
 
     /// Returns the ASCII value of the cell located at `x, y`
-    fn get_char(&self, x: i32, y: i32) -> char {
+    fn get_char(&self, x: i32, y: i32) -> u8 {
         let ffi_char = unsafe {
             ffi::TCOD_console_get_char(self.con(), x, y)
         };
         assert!(ffi_char >= 0 && ffi_char < 256);
-        ffi_char as u8 as char
+        ffi_char as u8
     }
 
     /// Modifies the ASCII value of the cell located at `x, y`.
-    fn set_char(&mut self, x: i32, y: i32, c: char) {
+    fn set_char(&mut self, x: i32, y: i32, c: u8) {
         assert!(x >= 0 && y >= 0);
         unsafe {
             ffi::TCOD_console_set_char(self.con(), x, y, c as i32)
@@ -674,7 +674,7 @@ pub trait Console {
     /// 2. Updates its foreground color based on the default color set in the console
     /// 3. Sets its ASCII value to `glyph`
     fn put_char(&mut self,
-                x: i32, y: i32, glyph: char,
+                x: i32, y: i32, glyph: u8,
                 background_flag: BackgroundFlag) {
         assert!(x >= 0 && y >= 0);
         unsafe {
@@ -687,7 +687,7 @@ pub trait Console {
     /// Updates every propert of the given cell using explicit colors for the
     /// background and foreground.
     fn put_char_ex(&mut self,
-                   x: i32, y: i32, glyph: char,
+                   x: i32, y: i32, glyph: u8,
                    foreground: Color, background: Color) {
         assert!(x >= 0 && y >= 0);
         unsafe {
@@ -711,10 +711,10 @@ pub trait Console {
     /// * `TextAlignment::Left`: leftmost character of the string
     /// * `TextAlignment::Center`: center character of the sting
     /// * `TextAlignment::Right`: rightmost character of the string
-    fn print(&mut self, x: i32, y: i32, text: &str) {
+    fn print(&mut self, x: i32, y: i32, text: &[u8]) {
         assert!(x >= 0 && y >= 0);
         unsafe {
-            let c_text = CString::new(text.as_bytes()).unwrap();
+            let c_text = CString::new(text).unwrap();
             ffi::TCOD_console_print(self.con(), x, y, c_text.as_ptr());
         }
     }
@@ -725,10 +725,10 @@ pub trait Console {
     fn print_rect(&mut self,
                   x: i32, y: i32,
                   width: i32, height: i32,
-                  text: &str) {
+                  text: &[u8]) {
         assert!(x >= 0 && y >= 0);
         unsafe {
-            let c_text = CString::new(text.as_bytes()).unwrap();
+            let c_text = CString::new(text).unwrap();
             ffi::TCOD_console_print_rect(self.con(), x, y, width, height, c_text.as_ptr());
         }
     }
@@ -740,10 +740,10 @@ pub trait Console {
                 x: i32, y: i32,
                 background_flag: BackgroundFlag,
                 alignment: TextAlignment,
-                text: &str) {
+                text: &[u8]) {
         assert!(x >= 0 && y >= 0);
         unsafe {
-            let c_text = CString::new(text.as_bytes()).unwrap();
+            let c_text = CString::new(text).unwrap();
             ffi::TCOD_console_print_ex(self.con(),
                                        x, y,
                                        background_flag as u32,
@@ -758,10 +758,10 @@ pub trait Console {
                      width: i32, height: i32,
                      background_flag: BackgroundFlag,
                      alignment: TextAlignment,
-                     text: &str) {
+                     text: &[u8]) {
         assert!(x >= 0 && y >= 0);
         unsafe {
-            let c_text = CString::new(text.as_bytes()).unwrap();
+            let c_text = CString::new(text).unwrap();
             ffi::TCOD_console_print_rect_ex(self.con(), x, y, width, height,
                                             background_flag as u32, alignment as u32,
                                             c_text.as_ptr());
@@ -816,7 +816,7 @@ pub trait Console {
     /// If the `title` is specified, it will be printed on top of the rectangle
     /// using inverted colours.
     fn print_frame(&mut self, x: i32, y: i32, width: i32, height: i32,
-                   clear: bool, background_flag: BackgroundFlag, title: Option<&str>) {
+                   clear: bool, background_flag: BackgroundFlag, title: Option<&[u8]>) {
         assert!(x >= 0 && y >= 0 && width >= 0 && height >= 0);
         assert!(x + width < self.width() && y + height < self.height());
         let c_title: *const c_char = match title {

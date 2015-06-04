@@ -7,7 +7,7 @@ use tcod::map::FovAlgorithm;
 // We'll use a basic structure to define our tiles.
 #[derive(Copy, Clone)]
 pub struct Tile {
-    ch: char,
+    ch: u8,
     x: i32,
     y: i32,
 }
@@ -25,11 +25,11 @@ fn main() {
         for y in 0..40 {
             // Place some walls randomly.
             if rand::random() {
-                tiles.push(Tile{x:x, y:y, ch: '#' });
+                tiles.push(Tile{x:x, y:y, ch: b'#' });
                 // Mark this place as non transparent, and non walkable.
                 map.set(x,y,false,false);
             } else {
-                tiles.push(Tile{x:x, y:y, ch: '.'});
+                tiles.push(Tile{x:x, y:y, ch: b'.'});
                 // Mark this place as transparent and walkable.
                 map.set(x,y,true,true);
             }
@@ -46,7 +46,7 @@ fn main() {
         }
     }
 
-    root.put_char(20,20, '@', BackgroundFlag::Set);
+    root.put_char(20,20, b'@', BackgroundFlag::Set);
 
     root.flush();
     //Press any key to exit.
