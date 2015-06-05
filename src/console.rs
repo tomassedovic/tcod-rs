@@ -490,6 +490,13 @@ impl<'a> RootInitializer<'a> {
     }
 }
 
+pub trait UnicodeString {}
+pub trait AsciiString {}
+
+impl UnicodeString for String {}
+impl<'a> UnicodeString for &'a str {}
+impl<'a> AsciiString for &'a [u8] {}
+
 pub trait TcodString {
     fn print(&self, con: &mut Console, x: i32, y: i32);
     fn print_rect(&self, con: &mut Console, x: i32, y: i32, width: i32, height: i32);
@@ -498,24 +505,24 @@ pub trait TcodString {
                      background_flag: BackgroundFlag, alignment: TextAlignment);
 }
 
-impl<'a> TcodString for &'a str { 
+impl<T> TcodString for T where T: AsRef<str> + UnicodeString { 
     fn print(&self, con: &mut Console, x: i32, y: i32) {
         unsafe {
-            let c_text = self.chars().collect::<Vec<_>>();
+            let c_text = self.as_ref().chars().collect::<Vec<_>>();
             ffi::TCOD_console_print_utf(con.con(), x, y, c_text.as_ptr() as *const i32);
         }
     }
 
     fn print_rect(&self, con: &mut Console, x: i32, y: i32, width: i32, height: i32) {
         unsafe {
-            let c_text = self.chars().collect::<Vec<_>>();
+            let c_text = self.as_ref().chars().collect::<Vec<_>>();
             ffi::TCOD_console_print_rect_utf(con.con(), x, y, width, height, c_text.as_ptr() as *const i32);
         }
     }
 
     fn print_ex(&self, con: &mut Console, x: i32, y: i32, background_flag: BackgroundFlag, alignment: TextAlignment) {
         unsafe {
-            let c_text = self.chars().collect::<Vec<_>>();
+            let c_text = self.as_ref().chars().collect::<Vec<_>>();
             ffi::TCOD_console_print_ex_utf(con.con(),
                                            x, y,
                                            background_flag as u32,
@@ -527,30 +534,11 @@ impl<'a> TcodString for &'a str {
     fn print_rect_ex(&self, con: &mut Console, x: i32, y: i32, width: i32, height: i32, 
                      background_flag: BackgroundFlag, alignment: TextAlignment) {
         unsafe {
-            let c_text = self.chars().collect::<Vec<_>>();
+            let c_text = self.as_ref().chars().collect::<Vec<_>>();
             ffi::TCOD_console_print_rect_ex_utf(con.con(), x, y, width, height,
                                                 background_flag as u32, alignment as u32,
                                                 c_text.as_ptr() as *const i32);
         }
-    }
-}
-
-impl TcodString for String {
-    fn print(&self, con: &mut Console, x: i32, y: i32) {
-        AsRef::<str>::as_ref(self).print(con, x, y);
-    }
-
-    fn print_rect(&self, con: &mut Console, x: i32, y: i32, width: i32, height: i32) {
-        AsRef::<str>::as_ref(self).print_rect(con, x, y, width, height);
-    }
-
-    fn print_ex(&self, con: &mut Console, x: i32, y: i32, background_flag: BackgroundFlag, alignment: TextAlignment) {
-        AsRef::<str>::as_ref(self).print_ex(con, x, y, background_flag, alignment);
-    }
-
-    fn print_rect_ex(&self, con: &mut Console, x: i32, y: i32, width: i32, height: i32,
-                     background_flag: BackgroundFlag, alignment: TextAlignment) {
-        AsRef::<str>::as_ref(self).print_rect_ex(con, x, y, width, height, background_flag, alignment);
     }
 }
 
