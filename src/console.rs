@@ -490,6 +490,107 @@ impl<'a> RootInitializer<'a> {
     }
 }
 
+pub trait TcodString {
+    fn print(&self, con: &mut Console, x: i32, y: i32);
+    fn print_rect(&self, con: &mut Console, x: i32, y: i32, width: i32, height: i32);
+    fn print_ex(&self, con: &mut Console, x: i32, y: i32, background_flag: BackgroundFlag, alignment: TextAlignment);
+    fn print_rect_ex(&self, con: &mut Console, x: i32, y: i32, width: i32, height: i32,
+                     background_flag: BackgroundFlag, alignment: TextAlignment);
+}
+
+impl<'a> TcodString for &'a str { 
+    fn print(&self, con: &mut Console, x: i32, y: i32) {
+        unsafe {
+            let c_text = self.chars().collect::<Vec<_>>();
+            ffi::TCOD_console_print_utf(con.con(), x, y, c_text.as_ptr() as *const i32);
+        }
+    }
+
+    fn print_rect(&self, con: &mut Console, x: i32, y: i32, width: i32, height: i32) {
+        unsafe {
+            let c_text = self.chars().collect::<Vec<_>>();
+            ffi::TCOD_console_print_rect_utf(con.con(), x, y, width, height, c_text.as_ptr() as *const i32);
+        }
+    }
+
+    fn print_ex(&self, con: &mut Console, x: i32, y: i32, background_flag: BackgroundFlag, alignment: TextAlignment) {
+        unsafe {
+            let c_text = self.chars().collect::<Vec<_>>();
+            ffi::TCOD_console_print_ex_utf(con.con(),
+                                           x, y,
+                                           background_flag as u32,
+                                           alignment as u32,
+                                           c_text.as_ptr() as *const i32);
+        }
+    }
+
+    fn print_rect_ex(&self, con: &mut Console, x: i32, y: i32, width: i32, height: i32, 
+                     background_flag: BackgroundFlag, alignment: TextAlignment) {
+        unsafe {
+            let c_text = self.chars().collect::<Vec<_>>();
+            ffi::TCOD_console_print_rect_ex_utf(con.con(), x, y, width, height,
+                                                background_flag as u32, alignment as u32,
+                                                c_text.as_ptr() as *const i32);
+        }
+    }
+}
+
+impl TcodString for String {
+    fn print(&self, con: &mut Console, x: i32, y: i32) {
+        AsRef::<str>::as_ref(self).print(con, x, y);
+    }
+
+    fn print_rect(&self, con: &mut Console, x: i32, y: i32, width: i32, height: i32) {
+        AsRef::<str>::as_ref(self).print_rect(con, x, y, width, height);
+    }
+
+    fn print_ex(&self, con: &mut Console, x: i32, y: i32, background_flag: BackgroundFlag, alignment: TextAlignment) {
+        AsRef::<str>::as_ref(self).print_ex(con, x, y, background_flag, alignment);
+    }
+
+    fn print_rect_ex(&self, con: &mut Console, x: i32, y: i32, width: i32, height: i32,
+                     background_flag: BackgroundFlag, alignment: TextAlignment) {
+        AsRef::<str>::as_ref(self).print_rect_ex(con, x, y, width, height, background_flag, alignment);
+    }
+}
+
+impl<'a> TcodString for &'a [u8] {
+    fn print(&self, con: &mut Console, x: i32, y: i32) {
+        unsafe {
+            let c_text : CString = CString::new(*self).unwrap();
+            ffi::TCOD_console_print(con.con(), x, y, c_text.as_ptr());
+        }
+    }
+
+    fn print_rect(&self, con: &mut Console, x: i32, y: i32, width: i32, height: i32) {
+        unsafe {
+            let c_text  : CString = CString::new(*self).unwrap();
+            ffi::TCOD_console_print_rect(con.con(), x, y, width, height, c_text.as_ptr());
+        }
+    }
+
+    fn print_ex(&self, con: &mut Console, x: i32, y: i32, background_flag: BackgroundFlag, alignment: TextAlignment) {
+        unsafe {
+            let c_text : CString = CString::new(*self).unwrap();
+            ffi::TCOD_console_print_ex(con.con(),
+                                       x, y,
+                                       background_flag as u32,
+                                       alignment as u32,
+                                       c_text.as_ptr());
+        }
+    }
+
+    fn print_rect_ex(&self, con: &mut Console, x: i32, y: i32, width: i32, height: i32, 
+                     background_flag: BackgroundFlag, alignment: TextAlignment) {
+        unsafe {
+            let c_text : CString = CString::new(*self).unwrap();
+            ffi::TCOD_console_print_rect_ex(con.con(), x, y, width, height,
+                                            background_flag as u32, alignment as u32,
+                                            c_text.as_ptr());
+        }
+    } 
+}
+
 /// Defines the common functionality between `Root` and `Offscreen` consoles
 ///
 /// # Examples
@@ -711,61 +812,43 @@ pub trait Console {
     /// * `TextAlignment::Left`: leftmost character of the string
     /// * `TextAlignment::Center`: center character of the sting
     /// * `TextAlignment::Right`: rightmost character of the string
-    fn print(&mut self, x: i32, y: i32, text: &str) {
+    fn print<T>(&mut self, x: i32, y: i32, text: T) where Self: Sized, T: TcodString {
         assert!(x >= 0 && y >= 0);
-        unsafe {
-            let c_text = CString::new(text.as_bytes()).unwrap();
-            ffi::TCOD_console_print(self.con(), x, y, c_text.as_ptr());
-        }
+        text.print(self, x, y);
     }
 
     /// Prints the text at the specified location in a rectangular area with
     /// the dimensions: (width; height). If the text is longer than the width the
     /// newlines will be inserted.
-    fn print_rect(&mut self,
-                  x: i32, y: i32,
-                  width: i32, height: i32,
-                  text: &str) {
+    fn print_rect<T>(&mut self,
+                     x: i32, y: i32,
+                     width: i32, height: i32,
+                     text: T) where Self: Sized, T: TcodString {
         assert!(x >= 0 && y >= 0);
-        unsafe {
-            let c_text = CString::new(text.as_bytes()).unwrap();
-            ffi::TCOD_console_print_rect(self.con(), x, y, width, height, c_text.as_ptr());
-        }
+        text.print_rect(self, x, y, width, height);
     }
 
     /// Prints the text at the specified location with an explicit
     /// [BackgroundFlag](./enum.BackgroundFlag.html) and
     /// [TextAlignment](./enum.TextAlignment.html).
-    fn print_ex(&mut self,
-                x: i32, y: i32,
-                background_flag: BackgroundFlag,
-                alignment: TextAlignment,
-                text: &str) {
+    fn print_ex<T>(&mut self,
+                   x: i32, y: i32,
+                   background_flag: BackgroundFlag,
+                   alignment: TextAlignment,
+                   text: T) where Self: Sized, T: TcodString {
         assert!(x >= 0 && y >= 0);
-        unsafe {
-            let c_text = CString::new(text.as_bytes()).unwrap();
-            ffi::TCOD_console_print_ex(self.con(),
-                                       x, y,
-                                       background_flag as u32,
-                                       alignment as u32,
-                                       c_text.as_ptr());
-        }
+        text.print_ex(self, x, y, background_flag, alignment);
     }
 
     /// Combines the functions of `print_ex` and `print_rect`
-    fn print_rect_ex(&mut self,
-                     x: i32, y: i32,
-                     width: i32, height: i32,
-                     background_flag: BackgroundFlag,
-                     alignment: TextAlignment,
-                     text: &str) {
+    fn print_rect_ex<T>(&mut self,
+                        x: i32, y: i32,
+                        width: i32, height: i32,
+                        background_flag: BackgroundFlag,
+                        alignment: TextAlignment,
+                        text: T) where Self: Sized, T: TcodString {
         assert!(x >= 0 && y >= 0);
-        unsafe {
-            let c_text = CString::new(text.as_bytes()).unwrap();
-            ffi::TCOD_console_print_rect_ex(self.con(), x, y, width, height,
-                                            background_flag as u32, alignment as u32,
-                                            c_text.as_ptr());
-        }
+        text.print_rect_ex(self, x, y, width, height, background_flag, alignment);
     }
 
     /// Fill a rectangle with the default background colour.
@@ -827,10 +910,6 @@ pub trait Console {
             ffi::TCOD_console_print_frame(self.con(), x, y, width, height,
                                           clear as c_bool, background_flag as u32, c_title);
         }
-    }
-
-    fn obj_unsafe<T>(&mut self, _: &T) where Self: Sized {
-
     }
 }
 
