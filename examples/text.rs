@@ -9,10 +9,13 @@ fn main() {
                   "Text aligned to left.");
     root.print_ex(78, 1, BackgroundFlag::None, TextAlignment::Right,
                   "Text aligned to right.");
+    root.print_ex(40, 10, BackgroundFlag::None, TextAlignment::Center,
+                  b"ASCII text!" as &[u8]);
     root.print_ex(40, 15, BackgroundFlag::None, TextAlignment::Center,
                   "And this bit of text is centered.");
     root.print_ex(40, 19, BackgroundFlag::None, TextAlignment::Center,
                   "Press any key to quit.");
+
     root.flush();
     root.wait_for_keypress(true);
 }

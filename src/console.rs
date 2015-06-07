@@ -490,12 +490,11 @@ impl<'a> RootInitializer<'a> {
     }
 }
 
-pub trait UnicodeString {}
-pub trait AsciiString {}
+pub trait Unicode {}
 
-impl UnicodeString for String {}
-impl<'a> UnicodeString for &'a str {}
-impl<'a> AsciiString for &'a [u8] {}
+impl Unicode for char {}
+impl Unicode for String {}
+impl<'a> Unicode for &'a str {}
 
 pub trait TcodString {
     fn print(&self, con: &mut Console, x: i32, y: i32);
@@ -505,7 +504,13 @@ pub trait TcodString {
                      background_flag: BackgroundFlag, alignment: TextAlignment);
 }
 
-impl<T> TcodString for T where T: AsRef<str> + UnicodeString { 
+pub trait TcodChar {
+    fn set(&self, con: &mut Console, x: i32, y: i32);
+    fn put(&self, con: &mut Console, x: i32, y: i32, background_flag: BackgroundFlag);
+    fn put_ex(&self, con: &mut Console, x: i32, y: i32, foreground: Color, background: Color);
+}
+
+impl<T> TcodString for T where T: AsRef<str> + Unicode {
     fn print(&self, con: &mut Console, x: i32, y: i32) {
         unsafe {
             let c_text = self.as_ref().chars().collect::<Vec<_>>();
@@ -531,7 +536,7 @@ impl<T> TcodString for T where T: AsRef<str> + UnicodeString {
         }
     }
 
-    fn print_rect_ex(&self, con: &mut Console, x: i32, y: i32, width: i32, height: i32, 
+    fn print_rect_ex(&self, con: &mut Console, x: i32, y: i32, width: i32, height: i32,
                      background_flag: BackgroundFlag, alignment: TextAlignment) {
         unsafe {
             let c_text = self.as_ref().chars().collect::<Vec<_>>();
@@ -568,7 +573,7 @@ impl<'a> TcodString for &'a [u8] {
         }
     }
 
-    fn print_rect_ex(&self, con: &mut Console, x: i32, y: i32, width: i32, height: i32, 
+    fn print_rect_ex(&self, con: &mut Console, x: i32, y: i32, width: i32, height: i32,
                      background_flag: BackgroundFlag, alignment: TextAlignment) {
         unsafe {
             let c_text : CString = CString::new(*self).unwrap();
@@ -576,8 +581,59 @@ impl<'a> TcodString for &'a [u8] {
                                             background_flag as u32, alignment as u32,
                                             c_text.as_ptr());
         }
-    } 
+    }
 }
+
+impl TcodChar for char {
+    fn set(&self, con: &mut Console, x: i32, y: i32) {
+        unsafe {
+            ffi::TCOD_console_set_char(con.con(), x, y, *self as i32)
+        }
+    }
+
+    fn put(&self, con: &mut Console, x: i32, y: i32, background_flag: BackgroundFlag) {
+        unsafe {
+            ffi::TCOD_console_put_char(con.con(),
+                                       x, y, *self as i32,
+                                       background_flag as u32);
+        }
+    }
+
+    fn put_ex(&self, con: &mut Console, x: i32, y: i32, foreground: Color, background: Color) {
+        unsafe {
+            ffi::TCOD_console_put_char_ex(con.con(),
+                                          x, y, *self as i32,
+                                          *foreground.as_native(),
+                                          *background.as_native());
+        }
+    }
+}
+
+impl TcodChar for u8 {
+    fn set(&self, con: &mut Console, x: i32, y: i32) {
+        unsafe {
+            ffi::TCOD_console_set_char(con.con(), x, y, *self as i32)
+        }
+    }
+
+    fn put(&self, con: &mut Console, x: i32, y: i32, background_flag: BackgroundFlag) {
+        unsafe {
+            ffi::TCOD_console_put_char(con.con(),
+                                       x, y, *self as i32,
+                                       background_flag as u32);
+        }
+    }
+
+    fn put_ex(&self, con: &mut Console, x: i32, y: i32, foreground: Color, background: Color) {
+        unsafe {
+            ffi::TCOD_console_put_char_ex(con.con(),
+                                          x, y, *self as i32,
+                                          *foreground.as_native(),
+                                          *background.as_native());
+        }
+    }
+}
+
 
 /// Defines the common functionality between `Root` and `Offscreen` consoles
 ///
@@ -726,11 +782,9 @@ pub trait Console {
     }
 
     /// Modifies the ASCII value of the cell located at `x, y`.
-    fn set_char(&mut self, x: i32, y: i32, c: char) {
+    fn set_char<T>(&mut self, x: i32, y: i32, c: T) where Self: Sized, T: TcodChar {
         assert!(x >= 0 && y >= 0);
-        unsafe {
-            ffi::TCOD_console_set_char(self.con(), x, y, c as i32)
-        }
+        c.set(self, x, y);
     }
 
     /// Changes the background color of the specified cell
@@ -762,29 +816,20 @@ pub trait Console {
     /// see [BackgroundFlag](./enum.BackgroundFlag.html).
     /// 2. Updates its foreground color based on the default color set in the console
     /// 3. Sets its ASCII value to `glyph`
-    fn put_char(&mut self,
-                x: i32, y: i32, glyph: char,
-                background_flag: BackgroundFlag) {
+    fn put_char<T>(&mut self,
+                   x: i32, y: i32, glyph: T,
+                   background_flag: BackgroundFlag) where Self: Sized, T: TcodChar {
         assert!(x >= 0 && y >= 0);
-        unsafe {
-            ffi::TCOD_console_put_char(self.con(),
-                                       x, y, glyph as i32,
-                                       background_flag as u32);
-        }
+        glyph.put(self, x, y, background_flag);
     }
 
     /// Updates every propert of the given cell using explicit colors for the
     /// background and foreground.
-    fn put_char_ex(&mut self,
-                   x: i32, y: i32, glyph: char,
-                   foreground: Color, background: Color) {
+    fn put_char_ex<T>(&mut self,
+                      x: i32, y: i32, glyph: char,
+                      foreground: Color, background: Color) where Self: Sized, T: TcodChar {
         assert!(x >= 0 && y >= 0);
-        unsafe {
-            ffi::TCOD_console_put_char_ex(self.con(),
-                                          x, y, glyph as i32,
-                                          *foreground.as_native(),
-                                          *background.as_native());
-        }
+        glyph.put_ex(self, x, y, foreground, background);
     }
 
     /// Clears the console with its default background color
