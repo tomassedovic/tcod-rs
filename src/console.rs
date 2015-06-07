@@ -826,7 +826,7 @@ pub trait Console {
     /// Updates every propert of the given cell using explicit colors for the
     /// background and foreground.
     fn put_char_ex<T>(&mut self,
-                      x: i32, y: i32, glyph: char,
+                      x: i32, y: i32, glyph: T,
                       foreground: Color, background: Color) where Self: Sized, T: TcodChar {
         assert!(x >= 0 && y >= 0);
         glyph.put_ex(self, x, y, foreground, background);
@@ -1013,7 +1013,7 @@ pub fn blit<T, U>(source_console: &T,
 
 impl<'a, T: Console + ?Sized> Console for &'a T  {
    unsafe fn con(&self) -> ffi::TCOD_console_t {
-       (*self).con()
+       (**self).con()
    }
 }
 

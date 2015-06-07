@@ -51,12 +51,12 @@ impl Object {
         }
     }
 
-    pub fn draw(&self, con: &mut Console) {
+    pub fn draw(&self, mut con: &Console) {
         con.set_default_foreground(self.color);
         con.put_char(self.x, self.y, self.char, BackgroundFlag::None);
     }
 
-    pub fn clear(&self, con: &mut Console) {
+    pub fn clear(&self, mut con: &Console) {
         con.put_char(self.x, self.y, ' ', BackgroundFlag::None);
     }
 }
