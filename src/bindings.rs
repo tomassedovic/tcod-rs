@@ -18,6 +18,18 @@ pub trait FromNative<T> {
     unsafe fn from_native(input: T) -> Self;
 }
 
+impl<'a, T, U: AsNative<T> + ?Sized> AsNative<T> for &'a U {
+    unsafe fn as_native(&self) -> &T {
+        (**self).as_native()
+    }
+}
+
+impl <T, U: AsNative<T> + ?Sized> AsNative<T> for Box<U> {
+    unsafe fn as_native(&self) -> &T {
+        (**self).as_native()
+    }
+}
+
 pub fn keycode_from_u32(input: u32) -> Option<KeyCode> {
     match input {
         0 => Some(KeyCode::NoKey),
