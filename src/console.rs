@@ -447,6 +447,7 @@ impl<'a> RootInitializer<'a> {
     }
 
     pub fn title<T>(&mut self, title: T) -> &mut RootInitializer<'a> where T: AsRef<str> + 'a {
+        assert!(title.as_ref().is_ascii());
         self.title = Box::new(title);
         self
     }
@@ -862,7 +863,10 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
         assert!(x >= 0 && y >= 0 && width >= 0 && height >= 0);
         assert!(x + width < self.width() && y + height < self.height());
         let c_title: *const c_char = match title {
-            Some(s) => CString::new(s.as_ref()).unwrap().as_ptr(),
+            Some(s) => {
+                assert!(s.as_ref().is_ascii());
+                CString::new(s.as_ref()).unwrap().as_ptr()
+            },
             None => std::ptr::null(),
         };
         unsafe {
