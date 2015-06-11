@@ -56,6 +56,7 @@
 
 extern crate std;
 
+use std::ascii::AsciiExt;
 use std::marker::PhantomData;
 use std::path::Path;
 
@@ -335,9 +336,9 @@ impl Root {
     }
 
     /// Sets the main window's title to the string specified in the argument.
-    pub fn set_window_title(&mut self, title: &str) {
+    pub fn set_window_title<T>(&mut self, title: T) where T: AsRef<str> {
         unsafe {
-            let c_title = CString::new(title.as_bytes()).unwrap();
+            let c_title = CString::new(title.as_ref().as_bytes()).unwrap();
             ffi::TCOD_console_set_window_title(c_title.as_ptr());
         }
     }
@@ -407,9 +408,9 @@ struct FontDimensions(i32, i32);
 pub struct RootInitializer<'a> {
     width: i32,
     height: i32,
-    title: &'a str,
+    title: Box<AsRef<str> + 'a>,
     is_fullscreen: bool,
-    font_path: Box<AsRef<Path>+'a>,
+    font_path: Box<AsRef<Path> + 'a>,
     font_layout: FontLayout,
     font_type: FontType,
     font_dimension: FontDimensions,
@@ -421,7 +422,7 @@ impl<'a> RootInitializer<'a> {
         RootInitializer {
             width: 80,
             height: 25,
-            title: "Main Window",
+            title: Box::new("Main Window"),
             is_fullscreen: false,
             font_path: Box::new("terminal.png"),
             font_layout: FontLayout::AsciiInCol,
@@ -437,8 +438,8 @@ impl<'a> RootInitializer<'a> {
         self
     }
 
-    pub fn title(&mut self, title: &'a str) -> &mut RootInitializer<'a> {
-        self.title = title;
+    pub fn title<T>(&mut self, title: T) -> &mut RootInitializer<'a> where T: AsRef<str> + 'a {
+        self.title = Box::new(title);
         self
     }
 
@@ -447,7 +448,7 @@ impl<'a> RootInitializer<'a> {
         self
     }
 
-    pub fn font<P: AsRef<Path>+'a>(&mut self, path: P, font_layout: FontLayout) -> &mut RootInitializer<'a> {
+    pub fn font<P>(&mut self, path: P, font_layout: FontLayout) -> &mut RootInitializer<'a> where P: AsRef<Path> + 'a {
         self.font_path = Box::new(path);
         self.font_layout = font_layout;
         self
@@ -480,7 +481,7 @@ impl<'a> RootInitializer<'a> {
         }
 
         unsafe {
-            let c_title = CString::new(self.title.as_bytes()).unwrap();
+            let c_title = CString::new(self.title.as_ref().as_bytes()).unwrap();
             ffi::TCOD_console_init_root(self.width, self.height,
                                         c_title.as_ptr(),
                                         self.is_fullscreen as c_bool,
@@ -711,60 +712,96 @@ pub trait Console {
     /// * `TextAlignment::Left`: leftmost character of the string
     /// * `TextAlignment::Center`: center character of the sting
     /// * `TextAlignment::Right`: rightmost character of the string
-    fn print(&mut self, x: i32, y: i32, text: &str) {
+    fn print<T>(&mut self, x: i32, y: i32, text: T) where Self: Sized, T: AsRef<str> {
         assert!(x >= 0 && y >= 0);
-        unsafe {
+        let text = text.as_ref();
+        if text.is_ascii() {
             let c_text = CString::new(text.as_bytes()).unwrap();
-            ffi::TCOD_console_print(self.con(), x, y, c_text.as_ptr());
+            unsafe {
+                ffi::TCOD_console_print(self.con(), x, y, c_text.as_ptr());
+            }
+        } else {
+            let c_text = text.chars().collect::<Vec<_>>();
+            unsafe {
+                ffi::TCOD_console_print_utf(self.con(), x, y, c_text.as_ptr() as *const i32);
+            }
         }
     }
 
     /// Prints the text at the specified location in a rectangular area with
     /// the dimensions: (width; height). If the text is longer than the width the
     /// newlines will be inserted.
-    fn print_rect(&mut self,
+    fn print_rect<T>(&mut self,
                   x: i32, y: i32,
                   width: i32, height: i32,
-                  text: &str) {
+                  text: T) where Self: Sized, T: AsRef<str> {
         assert!(x >= 0 && y >= 0);
-        unsafe {
+        let text = text.as_ref();
+        if text.is_ascii() {
             let c_text = CString::new(text.as_bytes()).unwrap();
-            ffi::TCOD_console_print_rect(self.con(), x, y, width, height, c_text.as_ptr());
+            unsafe {
+                ffi::TCOD_console_print_rect(self.con(), x, y, width, height, c_text.as_ptr());
+            }
+        } else {
+            let c_text = text.chars().collect::<Vec<_>>();
+            unsafe {
+                ffi::TCOD_console_print_utf(self.con(), x, y, c_text.as_ptr() as *const i32);
+            }
         }
     }
 
     /// Prints the text at the specified location with an explicit
     /// [BackgroundFlag](./enum.BackgroundFlag.html) and
     /// [TextAlignment](./enum.TextAlignment.html).
-    fn print_ex(&mut self,
+    fn print_ex<T>(&mut self,
                 x: i32, y: i32,
                 background_flag: BackgroundFlag,
                 alignment: TextAlignment,
-                text: &str) {
+                text: T) where Self: Sized, T: AsRef<str> {
         assert!(x >= 0 && y >= 0);
-        unsafe {
+        let text = text.as_ref();
+        if text.is_ascii() {
             let c_text = CString::new(text.as_bytes()).unwrap();
-            ffi::TCOD_console_print_ex(self.con(),
-                                       x, y,
-                                       background_flag as u32,
-                                       alignment as u32,
-                                       c_text.as_ptr());
+            unsafe {
+                ffi::TCOD_console_print_ex(self.con(), x, y,
+                                           background_flag as u32,
+                                           alignment as u32,
+                                           c_text.as_ptr());
+            }
+        } else {
+            let c_text = text.chars().collect::<Vec<_>>();
+            unsafe {
+                ffi::TCOD_console_print_ex_utf(self.con(), x, y,
+                                               background_flag as u32,
+                                               alignment as u32,
+                                               c_text.as_ptr() as *const i32);
+            }
         }
     }
 
     /// Combines the functions of `print_ex` and `print_rect`
-    fn print_rect_ex(&mut self,
-                     x: i32, y: i32,
-                     width: i32, height: i32,
-                     background_flag: BackgroundFlag,
-                     alignment: TextAlignment,
-                     text: &str) {
+    fn print_rect_ex<T>(&mut self,
+                        x: i32, y: i32,
+                        width: i32, height: i32,
+                        background_flag: BackgroundFlag,
+                        alignment: TextAlignment,
+                        text: T) where Self: Sized, T: AsRef<str> {
         assert!(x >= 0 && y >= 0);
-        unsafe {
+        let text = text.as_ref();
+        if text.is_ascii() {
             let c_text = CString::new(text.as_bytes()).unwrap();
-            ffi::TCOD_console_print_rect_ex(self.con(), x, y, width, height,
-                                            background_flag as u32, alignment as u32,
-                                            c_text.as_ptr());
+            unsafe {
+                ffi::TCOD_console_print_rect_ex(self.con(), x, y, width, height,
+                                                background_flag as u32, alignment as u32,
+                                                c_text.as_ptr());
+            }
+        } else {
+            let c_text = text.chars().collect::<Vec<_>>();
+            unsafe {
+                ffi::TCOD_console_print_rect_ex_utf(self.con(), x, y, width, height,
+                                                    background_flag as u32, alignment as u32,
+                                                    c_text.as_ptr() as *const i32);
+            }
         }
     }
 
@@ -815,12 +852,12 @@ pub trait Console {
     ///
     /// If the `title` is specified, it will be printed on top of the rectangle
     /// using inverted colours.
-    fn print_frame(&mut self, x: i32, y: i32, width: i32, height: i32,
-                   clear: bool, background_flag: BackgroundFlag, title: Option<&str>) {
+    fn print_frame<T>(&mut self, x: i32, y: i32, width: i32, height: i32,
+                     clear: bool, background_flag: BackgroundFlag, title: Option<T>) where Self: Sized, T: AsRef<str> {
         assert!(x >= 0 && y >= 0 && width >= 0 && height >= 0);
         assert!(x + width < self.width() && y + height < self.height());
         let c_title: *const c_char = match title {
-            Some(s) => CString::new(s).unwrap().as_ptr(),
+            Some(s) => CString::new(s.as_ref()).unwrap().as_ptr(),
             None => std::ptr::null(),
         };
         unsafe {
@@ -895,13 +932,13 @@ pub fn blit<T, U>(source_console: &T,
     }
 }
 
-impl<'a> Console for &'a Console {
+impl<'a, T: Console + ?Sized> Console for &'a T {
     unsafe fn con(&self) -> ffi::TCOD_console_t {
-        (*self).con()
+        (**self).con()
     }
 }
 
-impl Console for Box<Console> {
+impl<T: Console + ?Sized> Console for Box<T> {
     unsafe fn con(&self) -> ffi::TCOD_console_t {
         (**self).con()
     }
@@ -913,21 +950,9 @@ impl Console for Root {
     }
 }
 
-impl Console for Box<Root> {
-    unsafe fn con(&self) -> ffi::TCOD_console_t {
-        (**self).con()
-    }
-}
-
 impl Console for Offscreen {
     unsafe fn con(&self) -> ffi::TCOD_console_t {
         self.con
-    }
-}
-
-impl Console for Box<Offscreen> {
-    unsafe fn con(&self) -> ffi::TCOD_console_t {
-        (**self).con()
     }
 }
 
