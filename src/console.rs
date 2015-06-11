@@ -750,7 +750,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
         } else {
             let c_text = text.chars().collect::<Vec<_>>();
             unsafe {
-                ffi::TCOD_console_print_utf(*self.as_native(), x, y, c_text.as_ptr() as *const i32);
+                ffi::TCOD_console_print_rect_utf(*self.as_native(), x, y, width, height, c_text.as_ptr() as *const i32);
             }
         }
     }
