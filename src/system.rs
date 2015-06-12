@@ -41,7 +41,7 @@ pub fn get_elapsed_time() -> Duration {
     return Duration::milliseconds(ms as i64)
 }
 
-pub fn save_screenshot<P: AsRef<Path>>(path: P) {
+pub fn save_screenshot<P>(path: P) where P: AsRef<Path> {
     let filename = path.as_ref().to_str().unwrap();
     let c_path = std::ffi::CString::new(filename).unwrap();
     unsafe {
@@ -89,8 +89,8 @@ pub fn get_char_size() -> (i32, i32) {
     (width, height)
 }
 
-pub fn set_clipboard(value: &str) {
-    let c_str = std::ffi::CString::new(value.as_bytes()).unwrap();
+pub fn set_clipboard<T>(value: T) where T: AsRef<str> {
+    let c_str = std::ffi::CString::new(value.as_ref().as_bytes()).unwrap();
     unsafe {
         ffi::TCOD_sys_clipboard_set(c_str.as_ptr());
     }
