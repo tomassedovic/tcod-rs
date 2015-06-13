@@ -59,6 +59,7 @@ extern crate std;
 use std::ascii::AsciiExt;
 use std::marker::PhantomData;
 use std::path::Path;
+use std::str;
 
 use bindings::ffi;
 use bindings::{AsNative, FromNative, c_bool, c_char, CString, keycode_from_u32};
@@ -500,6 +501,78 @@ impl<'a> RootInitializer<'a> {
     }
 }
 
+pub trait TcodString {
+    fn as_ascii(&self) -> Option<&[u8]>;
+}
+
+impl TcodString for str {
+    fn as_ascii(&self) -> Option<&[u8]> {
+        match self.is_ascii() {
+            true => Some(self.as_ref()),
+            false => None,
+        }
+    }
+}
+
+impl<'a> TcodString for &'a str {
+    fn as_ascii(&self) -> Option<&[u8]> {
+        (*self).as_ascii()
+    }
+}
+
+impl TcodString for String {
+    fn as_ascii(&self) -> Option<&[u8]> {
+        AsRef::<str>::as_ref(self).as_ascii()
+    }
+}
+
+trait AsciiLiteral {}
+impl AsciiLiteral for [u8] {}
+
+// AsciiLiteral is implemented for fixed-size arrays up to length 32, same as the current
+// Rust standard library trait implementation for fixed-size arrays (13 June 2015)
+impl AsciiLiteral for [u8; 0] {}
+impl AsciiLiteral for [u8; 1] {}
+impl AsciiLiteral for [u8; 2] {}
+impl AsciiLiteral for [u8; 3] {}
+impl AsciiLiteral for [u8; 4] {}
+impl AsciiLiteral for [u8; 5] {}
+impl AsciiLiteral for [u8; 6] {}
+impl AsciiLiteral for [u8; 7] {}
+impl AsciiLiteral for [u8; 8] {}
+impl AsciiLiteral for [u8; 9] {}
+impl AsciiLiteral for [u8; 10] {}
+impl AsciiLiteral for [u8; 11] {}
+impl AsciiLiteral for [u8; 12] {}
+impl AsciiLiteral for [u8; 13] {}
+impl AsciiLiteral for [u8; 14] {}
+impl AsciiLiteral for [u8; 15] {}
+impl AsciiLiteral for [u8; 16] {}
+impl AsciiLiteral for [u8; 17] {}
+impl AsciiLiteral for [u8; 18] {}
+impl AsciiLiteral for [u8; 19] {}
+impl AsciiLiteral for [u8; 20] {}
+impl AsciiLiteral for [u8; 21] {}
+impl AsciiLiteral for [u8; 22] {}
+impl AsciiLiteral for [u8; 23] {}
+impl AsciiLiteral for [u8; 24] {}
+impl AsciiLiteral for [u8; 25] {}
+impl AsciiLiteral for [u8; 26] {}
+impl AsciiLiteral for [u8; 27] {}
+impl AsciiLiteral for [u8; 28] {}
+impl AsciiLiteral for [u8; 29] {}
+impl AsciiLiteral for [u8; 30] {}
+impl AsciiLiteral for [u8; 31] {}
+impl AsciiLiteral for [u8; 32] {}
+
+impl<'a, T> AsciiLiteral for &'a T where T: AsciiLiteral {}
+
+impl<T> TcodString for T where T: AsRef<[u8]> + AsciiLiteral {
+    fn as_ascii(&self) -> Option<&[u8]> {
+        Some(self.as_ref())
+    }
+}
+
 /// Defines the common functionality between `Root` and `Offscreen` consoles
 ///
 /// # Examples
@@ -718,18 +791,20 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
     /// * `TextAlignment::Left`: leftmost character of the string
     /// * `TextAlignment::Center`: center character of the sting
     /// * `TextAlignment::Right`: rightmost character of the string
-    fn print<T>(&mut self, x: i32, y: i32, text: T) where Self: Sized, T: AsRef<str> {
+    fn print<T>(&mut self, x: i32, y: i32, text: T) where Self: Sized, T: AsRef<[u8]> + TcodString {
         assert!(x >= 0 && y >= 0);
-        let text = text.as_ref();
-        if text.is_ascii() {
-            let c_text = CString::new(text.as_bytes()).unwrap();
-            unsafe {
-                ffi::TCOD_console_print(*self.as_native(), x, y, c_text.as_ptr());
-            }
-        } else {
-            let c_text = text.chars().collect::<Vec<_>>();
-            unsafe {
-                ffi::TCOD_console_print_utf(*self.as_native(), x, y, c_text.as_ptr() as *const i32);
+        match text.as_ascii() {
+            Some(text) => {
+                let c_text = CString::new(text).unwrap();
+                unsafe {
+                    ffi::TCOD_console_print(*self.as_native(), x, y, c_text.as_ptr());
+                }
+            },
+            None => {
+                let c_text = str::from_utf8(text.as_ref()).unwrap().chars().collect::<Vec<_>>();
+                unsafe {
+                    ffi::TCOD_console_print_utf(*self.as_native(), x, y, c_text.as_ptr() as *const i32);
+                }
             }
         }
     }
@@ -740,18 +815,20 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
     fn print_rect<T>(&mut self,
                   x: i32, y: i32,
                   width: i32, height: i32,
-                  text: T) where Self: Sized, T: AsRef<str> {
+                  text: T) where Self: Sized, T: AsRef<[u8]> + TcodString {
         assert!(x >= 0 && y >= 0);
-        let text = text.as_ref();
-        if text.is_ascii() {
-            let c_text = CString::new(text.as_bytes()).unwrap();
-            unsafe {
-                ffi::TCOD_console_print_rect(*self.as_native(), x, y, width, height, c_text.as_ptr());
-            }
-        } else {
-            let c_text = text.chars().collect::<Vec<_>>();
-            unsafe {
-                ffi::TCOD_console_print_rect_utf(*self.as_native(), x, y, width, height, c_text.as_ptr() as *const i32);
+        match text.as_ascii() {
+            Some(text) => {
+                let c_text = CString::new(text).unwrap();
+                unsafe {
+                    ffi::TCOD_console_print_rect(*self.as_native(), x, y, width, height, c_text.as_ptr());
+                }
+            },
+            None => {
+                let c_text = str::from_utf8(text.as_ref()).unwrap().chars().collect::<Vec<_>>();
+                unsafe {
+                    ffi::TCOD_console_print_rect_utf(*self.as_native(), x, y, width, height, c_text.as_ptr() as *const i32);
+                }
             }
         }
     }
@@ -763,24 +840,26 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                 x: i32, y: i32,
                 background_flag: BackgroundFlag,
                 alignment: TextAlignment,
-                text: T) where Self: Sized, T: AsRef<str> {
+                text: T) where Self: Sized, T: AsRef<[u8]> + TcodString {
         assert!(x >= 0 && y >= 0);
-        let text = text.as_ref();
-        if text.is_ascii() {
-            let c_text = CString::new(text.as_bytes()).unwrap();
-            unsafe {
-                ffi::TCOD_console_print_ex(*self.as_native(), x, y,
-                                           background_flag as u32,
-                                           alignment as u32,
-                                           c_text.as_ptr());
-            }
-        } else {
-            let c_text = text.chars().collect::<Vec<_>>();
-            unsafe {
-                ffi::TCOD_console_print_ex_utf(*self.as_native(), x, y,
+        match text.as_ascii() {
+            Some(text) => {
+                let c_text = CString::new(text).unwrap();
+                unsafe {
+                    ffi::TCOD_console_print_ex(*self.as_native(), x, y,
                                                background_flag as u32,
                                                alignment as u32,
-                                               c_text.as_ptr() as *const i32);
+                                               c_text.as_ptr());
+                }
+            },
+            None => {
+                let c_text = str::from_utf8(text.as_ref()).unwrap().chars().collect::<Vec<_>>();
+                unsafe {
+                    ffi::TCOD_console_print_ex_utf(*self.as_native(), x, y,
+                                                   background_flag as u32,
+                                                   alignment as u32,
+                                                   c_text.as_ptr() as *const i32);
+                }
             }
         }
     }
@@ -791,22 +870,24 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                         width: i32, height: i32,
                         background_flag: BackgroundFlag,
                         alignment: TextAlignment,
-                        text: T) where Self: Sized, T: AsRef<str> {
+                        text: T) where Self: Sized, T: AsRef<[u8]> + TcodString {
         assert!(x >= 0 && y >= 0);
-        let text = text.as_ref();
-        if text.is_ascii() {
-            let c_text = CString::new(text.as_bytes()).unwrap();
-            unsafe {
-                ffi::TCOD_console_print_rect_ex(*self.as_native(), x, y, width, height,
-                                                background_flag as u32, alignment as u32,
-                                                c_text.as_ptr());
-            }
-        } else {
-            let c_text = text.chars().collect::<Vec<_>>();
-            unsafe {
-                ffi::TCOD_console_print_rect_ex_utf(*self.as_native(), x, y, width, height,
+        match text.as_ascii() {
+            Some(text) => {
+                let c_text = CString::new(text).unwrap();
+                unsafe {
+                    ffi::TCOD_console_print_rect_ex(*self.as_native(), x, y, width, height,
                                                     background_flag as u32, alignment as u32,
-                                                    c_text.as_ptr() as *const i32);
+                                                    c_text.as_ptr());
+                }
+            },
+            None => {
+                let c_text = str::from_utf8(text.as_ref()).unwrap().chars().collect::<Vec<_>>();
+                unsafe {
+                    ffi::TCOD_console_print_rect_ex_utf(*self.as_native(), x, y, width, height,
+                                                        background_flag as u32, alignment as u32,
+                                                        c_text.as_ptr() as *const i32);
+                }
             }
         }
     }
