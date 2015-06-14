@@ -526,6 +526,12 @@ impl TcodString for String {
     }
 }
 
+impl<'a> TcodString for &'a String {
+    fn as_ascii(&self) -> Option<&[u8]> {
+        AsRef::<str>::as_ref(self).as_ascii()
+    }
+}
+
 trait AsciiLiteral {}
 impl AsciiLiteral for [u8] {}
 
