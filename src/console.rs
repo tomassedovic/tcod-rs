@@ -581,7 +581,7 @@ impl<T> TcodString for T where T: AsRef<[u8]> + AsciiLiteral {
 
 #[inline]
 fn to_wstring(text: &[u8]) -> Vec<char> {
-    let mut ret = str::from_utf8(text.as_ref()).unwrap().chars().collect::<Vec<_>>(); (text.as_ref());
+    let mut ret = str::from_utf8(text).unwrap().chars().collect::<Vec<_>>();
     ret.push('\0');
     ret
 }
