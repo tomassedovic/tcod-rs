@@ -579,6 +579,13 @@ impl<T> TcodString for T where T: AsRef<[u8]> + AsciiLiteral {
     }
 }
 
+#[inline]
+fn to_wstring(text: &[u8]) -> Vec<char> {
+    let mut ret = str::from_utf8(text).unwrap().chars().collect::<Vec<_>>();
+    ret.push('\0');
+    ret
+}
+
 /// Defines the common functionality between `Root` and `Offscreen` consoles
 ///
 /// # Examples
@@ -807,7 +814,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                 }
             },
             None => {
-                let c_text = str::from_utf8(text.as_ref()).unwrap().chars().collect::<Vec<_>>();
+                let c_text = to_wstring(text.as_ref());
                 unsafe {
                     ffi::TCOD_console_print_utf(*self.as_native(), x, y, c_text.as_ptr() as *const i32);
                 }
@@ -831,7 +838,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                 }
             },
             None => {
-                let c_text = str::from_utf8(text.as_ref()).unwrap().chars().collect::<Vec<_>>();
+                let c_text = to_wstring(text.as_ref());
                 unsafe {
                     ffi::TCOD_console_print_rect_utf(*self.as_native(), x, y, width, height, c_text.as_ptr() as *const i32);
                 }
@@ -859,7 +866,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                 }
             },
             None => {
-                let c_text = str::from_utf8(text.as_ref()).unwrap().chars().collect::<Vec<_>>();
+                let c_text = to_wstring(text.as_ref());
                 unsafe {
                     ffi::TCOD_console_print_ex_utf(*self.as_native(), x, y,
                                                    background_flag as u32,
@@ -888,7 +895,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                 }
             },
             None => {
-                let c_text = str::from_utf8(text.as_ref()).unwrap().chars().collect::<Vec<_>>();
+                let c_text = to_wstring(text.as_ref());
                 unsafe {
                     ffi::TCOD_console_print_rect_ex_utf(*self.as_native(), x, y, width, height,
                                                         background_flag as u32, alignment as u32,
@@ -914,7 +921,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                 }
             }
             None => {
-                let c_text = str::from_utf8(text.as_ref()).unwrap().chars().collect::<Vec<_>>();
+                let c_text = to_wstring(text.as_ref());
                 unsafe {
                     ffi::TCOD_console_get_height_rect_utf(*self.as_native(), x, y, width, height,
                                                           c_text.as_ptr() as *const i32)
