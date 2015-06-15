@@ -910,8 +910,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                           x: i32, y: i32,
                           width: i32, height: i32,
                           text: T) -> i32 where Self: Sized, T: AsRef<[u8]> + TcodString {
-        assert!(x >= 0 && y >= 0 && width >= 0 && height >= 0);
-        assert!(x + width < self.width() && y + height < self.height());
+        assert!(x >= 0 && y >= 0);
         match text.as_ascii() {
             Some(text) => {
                 let c_text = CString::new(text).unwrap();
