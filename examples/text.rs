@@ -6,9 +6,9 @@ fn main() {
     let mut root = RootConsole::initializer().size(80, 50).title("Displaying text").init();
 
     root.print_ex(1, 1, BackgroundFlag::None, TextAlignment::Left,
-                  "Text aligned to left.");
+                  b"Ascii text aligned to left.\xf8");
     root.print_ex(78, 1, BackgroundFlag::None, TextAlignment::Right,
-                  "Text aligned to right.");
+                  "Unicode text aligned to right.\u{f8}");
     root.print_ex(40, 15, BackgroundFlag::None, TextAlignment::Center,
                   "And this bit of text is centered.");
     root.print_ex(40, 19, BackgroundFlag::None, TextAlignment::Center,
