@@ -13,6 +13,10 @@ fn main() {
                   "And this bit of text is centered.");
     root.print_ex(40, 19, BackgroundFlag::None, TextAlignment::Center,
                   "Press any key to quit.");
+
+    let wrapped_text = "This text is wrapped to form X lines: https://xkcd.com/688/";
+    let lines = root.get_height_rect(10, 25, 22, 10, wrapped_text);
+    root.print_rect(10, 25, 22, 10, wrapped_text.replace("X", &lines.to_string()));
     root.flush();
     root.wait_for_keypress(true);
 }

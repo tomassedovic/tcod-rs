@@ -898,6 +898,27 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
         }
     }
 
+    /// Compute the height of a wrapped text printed using `print_rect` or `print_rect_ex`.
+    ///
+    /// While the print functions accept strings with non-ASCII characters,
+    /// there is no unicode equivalent for this function in libtcod. You must
+    /// pass a text with ASCII characters only.
+    fn get_height_rect<T>(&self,
+                          x: i32, y: i32,
+                          width: i32, height: i32,
+                          text: T) -> i32 where Self: Sized, T: AsRef<[u8]> + TcodString {
+        assert!(x >= 0 && y >= 0 && width >= 0 && height >= 0);
+        assert!(x + width < self.width() && y + height < self.height());
+        let ascii_text = text.as_ascii().expect(
+            "libtcod doesn't have a unicode version of `TCOD_console_get_height_rect`.");
+        let c_text = CString::new(ascii_text).unwrap();
+        unsafe {
+            ffi::TCOD_console_get_height_rect(*self.as_native(), x, y, width, height,
+                                              c_text.as_ptr())
+        }
+    }
+
+
     /// Fill a rectangle with the default background colour.
     ///
     /// If `clear` is true, set each cell's character to space (ASCII 32).
