@@ -49,6 +49,7 @@ pub mod colors;
 pub mod console;
 pub mod input;
 pub mod map;
+pub mod namegen;
 pub mod pathfinding;
 pub mod system;
 

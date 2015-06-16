@@ -1,4 +1,4 @@
-extern crate std;
+use std::ptr;
 
 use bindings::ffi;
 use bindings::{c_bool, c_char, c_uint, keycode_from_u32};
@@ -190,13 +190,13 @@ pub fn check_for_event(event_mask: EventFlags) -> Option<(EventFlags, Event)> {
             if event_mask.intersects(KEY_PRESS|KEY_RELEASE|KEY|ANY) {
                 &mut c_key_state
             } else {
-                std::ptr::null_mut()
+                ptr::null_mut()
             },
             if event_mask.intersects(
                 MOUSE_MOVE|MOUSE_PRESS|MOUSE_RELEASE|MOUSE|ANY) {
                 &mut c_mouse_state
             } else {
-                std::ptr::null_mut()
+                ptr::null_mut()
             })
     };
 

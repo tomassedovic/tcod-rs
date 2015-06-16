@@ -1,6 +1,9 @@
-extern crate std;
 extern crate time;
 
+use std::str;
+use std::ptr;
+
+use std::ffi::{CStr, CString};
 use std::path::Path;
 use bindings::ffi;
 
@@ -43,7 +46,7 @@ pub fn get_elapsed_time() -> Duration {
 
 pub fn save_screenshot<P>(path: P) where P: AsRef<Path> {
     let filename = path.as_ref().to_str().unwrap();
-    let c_path = std::ffi::CString::new(filename).unwrap();
+    let c_path = CString::new(filename).unwrap();
     unsafe {
         ffi::TCOD_sys_save_screenshot(c_path.as_ptr());
     }
@@ -51,7 +54,7 @@ pub fn save_screenshot<P>(path: P) where P: AsRef<Path> {
 
 pub fn save_screenshot_auto() {
     unsafe {
-        ffi::TCOD_sys_save_screenshot(std::ptr::null());
+        ffi::TCOD_sys_save_screenshot(ptr::null());
     }
 }
 
@@ -90,7 +93,7 @@ pub fn get_char_size() -> (i32, i32) {
 }
 
 pub fn set_clipboard<T>(value: T) where T: AsRef<str> {
-    let c_str = std::ffi::CString::new(value.as_ref().as_bytes()).unwrap();
+    let c_str = CString::new(value.as_ref().as_bytes()).unwrap();
     unsafe {
         ffi::TCOD_sys_clipboard_set(c_str.as_ptr());
     }
@@ -99,7 +102,7 @@ pub fn set_clipboard<T>(value: T) where T: AsRef<str> {
 pub fn get_clipboard() -> String {
     unsafe {
         let c_ptr = ffi::TCOD_sys_clipboard_get();
-        let c_str = std::ffi::CStr::from_ptr(c_ptr).to_bytes();
-        std::str::from_utf8(c_str).unwrap().to_string()
+        let c_str = CStr::from_ptr(c_ptr).to_bytes();
+        str::from_utf8(c_str).unwrap().to_string()
     }
 }
