@@ -189,35 +189,30 @@ impl Image {
     }
 }
 
-//TODO: Unify blit in the wrapper?
-// console::blit: (source, source_coords, dest, dest_coords)
-// image::blit_rect: (source, dest, source_coords, dest_dimensions, flag)
-// image_blit: (source, dest, source_coords, flag, source_scale, source_angle)
-//
-// Worst offender compared to console::blit
-// image::blit_2x(source, dest, dest_coords, source_coords, dest_dimensions)
-
-pub fn blit_rect<T>(src: &Image, dest: &T, (x, y): (i32, i32), (width, height): (i32, i32), flag: BackgroundFlag) where T: Console {
-    assert!(x >= 0 && y >= 0 && x < src.width && y < src.height);
-    assert!(width >= -1 && height >= -1);
+pub fn blit_rect<T>(src: &Image, (width, height): (i32, i32),
+                    dst: &mut T, (x, y): (i32, i32), flag: BackgroundFlag) where T: Console {
+    assert!(width >= -1 && height >= -1 && width <= src.width && height <= src.height);
+    assert!(x >= 0 && y >= 0 && x < dst.width() && y < dst.height());
     unsafe {
-        ffi::TCOD_image_blit_rect(src.tcod_image, *dest.as_native(), x, y, width, height, flag as u32);
+        ffi::TCOD_image_blit_rect(src.tcod_image, *dst.as_native(), x, y, width, height, flag as u32);
     }
 }
 
-pub fn blit<T>(src: &Image, dest: &T, (x, y): (i32, i32), flag: BackgroundFlag, (scale_x, scale_y): (f32, f32), angle: f32) where T: Console {
-    assert!(x >= 0 && y >= 0 && x < src.width && y < src.height);
+pub fn blit<T>(src: &Image, (scale_x, scale_y): (f32, f32), angle: f32,
+               dst: &mut T, (x, y): (f32, f32),  flag: BackgroundFlag) where T: Console {
+    assert!(scale_x > 0.0 && scale_y > 0.0);
+    assert!(x >= 0.0 && y >= 0.0 && x < dst.width() as f32 && y < dst.height() as f32);
     unsafe {
-        //TODO: libtcod docs say that (x, y) are ints, but the FFI expects floats. Mirror the docs
-        //or the FFI?
-        ffi::TCOD_image_blit(src.tcod_image, *dest.as_native(), x as f32, y as f32, flag as u32, scale_x, scale_y, angle);
+        ffi::TCOD_image_blit(src.tcod_image, *dst.as_native(), x, y, flag as u32, scale_x, scale_y, angle);
     }
 }
 
-pub fn blit_2x<T>(src: &Image, dest: &T,  (dest_x, dest_y): (i32, i32), (src_x, src_y): (i32, i32), (width, height): (i32, i32)) where T: Console {
+pub fn blit_2x<T>(src: &Image, (src_x, src_y): (i32, i32), (width, height): (i32, i32),
+                  dst: &mut T,  (dst_x, dst_y): (i32, i32)) where T: Console {
+    assert!(width >= -1 && height >= -1 && width <= src.width && height <= src.height);
     assert!(src_x >= 0 && src_y >= 0 && src_x < src.width && src_y < src.height);
-    assert!(width >= -1 && height >= -1);
+    assert!(dst_x >= 0 && dst_y >= 0 && dst_x < dst.width() && dst_y < dst.height());
     unsafe {
-        ffi::TCOD_image_blit_2x(src.tcod_image, *dest.as_native(), dest_x, dest_y, src_x, src_y, width, height);
+        ffi::TCOD_image_blit_2x(src.tcod_image, *dst.as_native(), dst_x, dst_y, src_x, src_y, width, height);
     }
 }
