@@ -53,13 +53,12 @@
 //! ```
 //! This applies to all the examples in the rest of the modules documentation.
 
-
-extern crate std;
+use std::ptr;
+use std::str;
 
 use std::ascii::AsciiExt;
 use std::marker::PhantomData;
 use std::path::Path;
-use std::str;
 
 use bindings::ffi;
 use bindings::{AsNative, FromNative, c_bool, c_char, CString, keycode_from_u32};
@@ -986,7 +985,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                 assert!(s.as_ref().is_ascii());
                 CString::new(s.as_ref()).unwrap().as_ptr()
             },
-            None => std::ptr::null(),
+            None => ptr::null(),
         };
         unsafe {
             ffi::TCOD_console_print_frame(*self.as_native(), x, y, width, height,
