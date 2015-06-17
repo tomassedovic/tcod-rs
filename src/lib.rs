@@ -51,6 +51,7 @@ pub mod input;
 pub mod map;
 pub mod namegen;
 pub mod pathfinding;
+pub mod random;
 pub mod system;
 
 mod bindings;
