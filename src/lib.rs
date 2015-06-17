@@ -38,6 +38,7 @@
 //!
 
 #[macro_use] extern crate bitflags;
+#[macro_use] extern crate lazy_static;
 
 pub use bindings::{AsNative, FromNative};
 pub use colors::Color;
