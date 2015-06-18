@@ -48,6 +48,7 @@ pub use map::Map;
 pub mod chars;
 pub mod colors;
 pub mod console;
+pub mod image;
 pub mod input;
 pub mod map;
 pub mod namegen;
