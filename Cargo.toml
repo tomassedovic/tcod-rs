@@ -31,12 +31,13 @@ doctest = false
 
 [dependencies]
 bitflags = "0.1"
-libc = "0.1.5"
-time = "0.1.25"
+libc = "0.1"
+time = "0.1"
+lazy_static = "0.1"
 
 [dependencies.tcod-sys]
 path = "tcod_sys"
-version = "2.0.12"
+version = "2.0"
 
 [dev-dependencies]
-rand = "0.3.8"
+rand = "0.3"

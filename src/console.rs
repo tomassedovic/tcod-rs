@@ -53,14 +53,13 @@
 //! ```
 //! This applies to all the examples in the rest of the modules documentation.
 
-
-extern crate std;
+use std::ptr;
+use std::str;
 
 use std::ascii::AsciiExt;
 use std::marker::PhantomData;
 use std::mem::transmute;
 use std::path::Path;
-use std::str;
 
 use bindings::ffi;
 use bindings::{AsNative, FromNative, c_bool, c_char, CString, keycode_from_u32};
@@ -478,7 +477,7 @@ impl<'a> RootInitializer<'a> {
         self
     }
 
-    pub fn init(self) -> Root {
+    pub fn init(&self) -> Root {
         assert!(self.width > 0 && self.height > 0);
 
         match self.font_dimensions {
@@ -615,12 +614,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
         let alignment = unsafe {
             ffi::TCOD_console_get_alignment(*self.as_native())
         };
-        match alignment {
-            ffi::TCOD_LEFT => TextAlignment::Left,
-            ffi::TCOD_RIGHT => TextAlignment::Right,
-            ffi::TCOD_CENTER => TextAlignment::Center,
-            _ => unreachable!(),
-        }
+        unsafe { transmute(alignment) }
     }
 
     /// Sets the default text alignment for the console. For all the possible
@@ -691,23 +685,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
         let flag = unsafe {
             ffi::TCOD_console_get_background_flag(*self.as_native())
         };
-        match flag {
-            ffi::TCOD_BKGND_NONE => BackgroundFlag::None,
-            ffi::TCOD_BKGND_SET => BackgroundFlag::Set,
-            ffi::TCOD_BKGND_MULTIPLY => BackgroundFlag::Multiply,
-            ffi::TCOD_BKGND_LIGHTEN => BackgroundFlag::Lighten,
-            ffi::TCOD_BKGND_DARKEN => BackgroundFlag::Darken,
-            ffi::TCOD_BKGND_SCREEN => BackgroundFlag::Screen,
-            ffi::TCOD_BKGND_COLOR_DODGE => BackgroundFlag::ColorDodge,
-            ffi::TCOD_BKGND_COLOR_BURN => BackgroundFlag::ColorBurn,
-            ffi::TCOD_BKGND_ADD => BackgroundFlag::Add,
-            ffi::TCOD_BKGND_ADDA => BackgroundFlag::AddA,
-            ffi::TCOD_BKGND_BURN => BackgroundFlag::Burn,
-            ffi::TCOD_BKGND_OVERLAY => BackgroundFlag::Overlay,
-            ffi::TCOD_BKGND_ALPH => BackgroundFlag::Alph,
-            ffi::TCOD_BKGND_DEFAULT => BackgroundFlag::Default,
-            _ => unreachable!(),
-        }
+        unsafe { transmute(flag) }
     }
 
     /// Sets the console's current background flag. For a detailed explanation
@@ -805,18 +783,15 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
     /// * `TextAlignment::Right`: rightmost character of the string
     fn print<T>(&mut self, x: i32, y: i32, text: T) where Self: Sized, T: AsRef<[u8]> + TcodString {
         assert!(x >= 0 && y >= 0);
-        match text.as_ascii() {
-            Some(text) => {
-                let c_text = CString::new(text).unwrap();
-                unsafe {
-                    ffi::TCOD_console_print(*self.as_native(), x, y, c_text.as_ptr());
-                }
-            },
-            None => {
-                let c_text = to_wstring(text.as_ref());
-                unsafe {
-                    ffi::TCOD_console_print_utf(*self.as_native(), x, y, c_text.as_ptr() as *const i32);
-                }
+        if let Some(text) = text.as_ascii() {
+            let c_text = CString::new(text).unwrap();
+            unsafe {
+                ffi::TCOD_console_print(*self.as_native(), x, y, c_text.as_ptr());
+            }
+        } else {
+            let c_text = to_wstring(text.as_ref());
+            unsafe {
+                ffi::TCOD_console_print_utf(*self.as_native(), x, y, c_text.as_ptr() as *const i32);
             }
         }
     }
@@ -829,18 +804,15 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                   width: i32, height: i32,
                   text: T) where Self: Sized, T: AsRef<[u8]> + TcodString {
         assert!(x >= 0 && y >= 0);
-        match text.as_ascii() {
-            Some(text) => {
-                let c_text = CString::new(text).unwrap();
-                unsafe {
-                    ffi::TCOD_console_print_rect(*self.as_native(), x, y, width, height, c_text.as_ptr());
-                }
-            },
-            None => {
-                let c_text = to_wstring(text.as_ref());
-                unsafe {
-                    ffi::TCOD_console_print_rect_utf(*self.as_native(), x, y, width, height, c_text.as_ptr() as *const i32);
-                }
+        if let Some(text) = text.as_ascii() {
+            let c_text = CString::new(text).unwrap();
+            unsafe {
+                ffi::TCOD_console_print_rect(*self.as_native(), x, y, width, height, c_text.as_ptr());
+            }
+        } else {
+            let c_text = to_wstring(text.as_ref());
+            unsafe {
+                ffi::TCOD_console_print_rect_utf(*self.as_native(), x, y, width, height, c_text.as_ptr() as *const i32);
             }
         }
     }
@@ -854,24 +826,21 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                 alignment: TextAlignment,
                 text: T) where Self: Sized, T: AsRef<[u8]> + TcodString {
         assert!(x >= 0 && y >= 0);
-        match text.as_ascii() {
-            Some(text) => {
-                let c_text = CString::new(text).unwrap();
-                unsafe {
-                    ffi::TCOD_console_print_ex(*self.as_native(), x, y,
+        if let Some(text) = text.as_ascii() {
+            let c_text = CString::new(text).unwrap();
+            unsafe {
+                ffi::TCOD_console_print_ex(*self.as_native(), x, y,
+                                           background_flag as u32,
+                                           alignment as u32,
+                                           c_text.as_ptr());
+            }
+        } else {
+            let c_text = to_wstring(text.as_ref());
+            unsafe {
+                ffi::TCOD_console_print_ex_utf(*self.as_native(), x, y,
                                                background_flag as u32,
                                                alignment as u32,
-                                               c_text.as_ptr());
-                }
-            },
-            None => {
-                let c_text = to_wstring(text.as_ref());
-                unsafe {
-                    ffi::TCOD_console_print_ex_utf(*self.as_native(), x, y,
-                                                   background_flag as u32,
-                                                   alignment as u32,
-                                                   c_text.as_ptr() as *const i32);
-                }
+                                               c_text.as_ptr() as *const i32);
             }
         }
     }
@@ -884,22 +853,19 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                         alignment: TextAlignment,
                         text: T) where Self: Sized, T: AsRef<[u8]> + TcodString {
         assert!(x >= 0 && y >= 0);
-        match text.as_ascii() {
-            Some(text) => {
-                let c_text = CString::new(text).unwrap();
-                unsafe {
-                    ffi::TCOD_console_print_rect_ex(*self.as_native(), x, y, width, height,
+        if let Some(text) = text.as_ascii() {
+            let c_text = CString::new(text).unwrap();
+            unsafe {
+                ffi::TCOD_console_print_rect_ex(*self.as_native(), x, y, width, height,
+                                                background_flag as u32, alignment as u32,
+                                                c_text.as_ptr());
+            }
+        } else {
+            let c_text = to_wstring(text.as_ref());
+            unsafe {
+                ffi::TCOD_console_print_rect_ex_utf(*self.as_native(), x, y, width, height,
                                                     background_flag as u32, alignment as u32,
-                                                    c_text.as_ptr());
-                }
-            },
-            None => {
-                let c_text = to_wstring(text.as_ref());
-                unsafe {
-                    ffi::TCOD_console_print_rect_ex_utf(*self.as_native(), x, y, width, height,
-                                                        background_flag as u32, alignment as u32,
-                                                        c_text.as_ptr() as *const i32);
-                }
+                                                    c_text.as_ptr() as *const i32);
             }
         }
     }
@@ -910,20 +876,17 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                           width: i32, height: i32,
                           text: T) -> i32 where Self: Sized, T: AsRef<[u8]> + TcodString {
         assert!(x >= 0 && y >= 0);
-        match text.as_ascii() {
-            Some(text) => {
-                let c_text = CString::new(text).unwrap();
-                unsafe {
-                    ffi::TCOD_console_get_height_rect(*self.as_native(), x, y, width, height,
-                                                      c_text.as_ptr())
-                }
+        if let Some(text) = text.as_ascii() {
+            let c_text = CString::new(text).unwrap();
+            unsafe {
+                ffi::TCOD_console_get_height_rect(*self.as_native(), x, y, width, height,
+                                                  c_text.as_ptr())
             }
-            None => {
-                let c_text = to_wstring(text.as_ref());
-                unsafe {
-                    ffi::TCOD_console_get_height_rect_utf(*self.as_native(), x, y, width, height,
-                                                          c_text.as_ptr() as *const i32)
-                }
+        } else {
+            let c_text = to_wstring(text.as_ref());
+            unsafe {
+                ffi::TCOD_console_get_height_rect_utf(*self.as_native(), x, y, width, height,
+                                                      c_text.as_ptr() as *const i32)
             }
         }
     }
@@ -985,7 +948,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                 assert!(s.as_ref().is_ascii());
                 CString::new(s.as_ref()).unwrap().as_ptr()
             },
-            None => std::ptr::null(),
+            None => ptr::null(),
         };
         unsafe {
             ffi::TCOD_console_print_frame(*self.as_native(), x, y, width, height,

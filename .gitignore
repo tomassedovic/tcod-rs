@@ -23,6 +23,7 @@ rusti.sh
 watch.sh
 /examples/**
 !/examples/*.rs
+!/examples/*.txt
 !/examples/assets/
 *Cargo.lock
 /tcod_sys/target/

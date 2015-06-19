@@ -38,6 +38,7 @@
 //!
 
 #[macro_use] extern crate bitflags;
+#[macro_use] extern crate lazy_static;
 
 pub use bindings::{AsNative, FromNative};
 pub use colors::Color;
@@ -47,9 +48,12 @@ pub use map::Map;
 pub mod chars;
 pub mod colors;
 pub mod console;
+pub mod image;
 pub mod input;
 pub mod map;
+pub mod namegen;
 pub mod pathfinding;
+pub mod random;
 pub mod system;
 
 mod bindings;
