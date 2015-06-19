@@ -58,6 +58,7 @@ extern crate std;
 
 use std::ascii::AsciiExt;
 use std::marker::PhantomData;
+use std::mem::transmute;
 use std::path::Path;
 use std::str;
 
@@ -368,8 +369,6 @@ impl Root {
 
 }
 
-struct FontDimensions(i32, i32);
-
 /// Helper struct for the `Root` console initialization
 ///
 /// This is the type that should be used to initialize the `Root` console (either directly or
@@ -422,7 +421,7 @@ pub struct RootInitializer<'a> {
     font_path: Box<AsRef<Path> + 'a>,
     font_layout: FontLayout,
     font_type: FontType,
-    font_dimension: FontDimensions,
+    font_dimensions: (i32, i32),
     console_renderer: Renderer
 }
 
@@ -436,7 +435,7 @@ impl<'a> RootInitializer<'a> {
             font_path: Box::new("terminal.png"),
             font_layout: FontLayout::AsciiInCol,
             font_type: FontType::Default,
-            font_dimension: FontDimensions(0, 0),
+            font_dimensions: (0, 0),
             console_renderer: Renderer::SDL
         }
     }
@@ -470,7 +469,7 @@ impl<'a> RootInitializer<'a> {
     }
 
     pub fn font_dimensions(&mut self, horizontal: i32, vertical: i32) -> &mut RootInitializer<'a> {
-        self.font_dimension = FontDimensions(horizontal, vertical);
+        self.font_dimensions = (horizontal, vertical);
         self
     }
 
@@ -479,11 +478,11 @@ impl<'a> RootInitializer<'a> {
         self
     }
 
-    pub fn init(&self) -> Root {
+    pub fn init(self) -> Root {
         assert!(self.width > 0 && self.height > 0);
 
-        match self.font_dimension {
-            FontDimensions(horizontal, vertical) => {
+        match self.font_dimensions {
+            (horizontal, vertical) => {
                 Root::set_custom_font(self.font_path.as_ref(),
                                       self.font_layout, self.font_type,
                                       horizontal, vertical)

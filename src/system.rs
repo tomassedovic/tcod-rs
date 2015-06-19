@@ -100,6 +100,6 @@ pub fn get_clipboard() -> String {
     unsafe {
         let c_ptr = ffi::TCOD_sys_clipboard_get();
         let c_str = std::ffi::CStr::from_ptr(c_ptr).to_bytes();
-        std::str::from_utf8(c_str).unwrap().to_string()
+        std::str::from_utf8(c_str).unwrap().to_owned()
     }
 }

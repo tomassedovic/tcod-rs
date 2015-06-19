@@ -300,15 +300,15 @@ pub struct AStarIterator {
 }
 
 impl Iterator for AStarIterator {
-    type Item = (isize, isize);
+    type Item = (i32, i32);
 
-    fn next(&mut self) -> Option<(isize, isize)> {
+    fn next(&mut self) -> Option<(i32, i32)> {
         unsafe {
             let mut x: c_int = 0;
             let mut y: c_int = 0;
             match ffi::TCOD_path_walk(self.tcod_path, &mut x, &mut y,
                                       self.recalculate as c_bool) != 0 {
-                true => Some((x as isize, y as isize)),
+                true => Some((x, y)),
                 false => None,
             }
         }
@@ -320,14 +320,14 @@ pub struct DijkstraIterator {
 }
 
 impl Iterator for DijkstraIterator {
-    type Item = (isize, isize);
+    type Item = (i32, i32);
 
-    fn next(&mut self) -> Option<(isize, isize)> {
+    fn next(&mut self) -> Option<(i32, i32)> {
         unsafe {
             let mut x: c_int = 0;
             let mut y: c_int = 0;
             match ffi::TCOD_dijkstra_path_walk(self.tcod_path, &mut x, &mut y) != 0 {
-                true => Some((x as isize, y as isize)),
+                true => Some((x, y)),
                 false => None,
             }
         }

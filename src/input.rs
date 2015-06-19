@@ -1,10 +1,10 @@
-extern crate std;
+use std::mem;
 
 use bindings::ffi;
-use bindings::{c_bool, c_char, c_uint, keycode_from_u32};
+use bindings::{c_bool, c_uint, keycode_from_u32};
 
-#[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(C)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum KeyCode {
     NoKey,
     Escape,
@@ -70,8 +70,8 @@ pub enum KeyCode {
     F10,
     F11,
     F12,
-    NUMLOCK,
-    SCROLLLOCK,
+    NumLock,
+    ScrollLock,
     Spacebar,
     Char,
 }
@@ -154,50 +154,12 @@ bitflags! {
 }
 
 pub fn check_for_event(event_mask: EventFlags) -> Option<(EventFlags, Event)> {
-    let mut c_key_state = ffi::TCOD_key_t {
-        vk: 0,
-        c: ' ' as c_char,
-        pressed: false as c_bool,
-        lalt: false as c_bool,
-        lctrl: false as c_bool,
-        ralt: false as c_bool,
-        rctrl: false as c_bool,
-        shift: false as c_bool
-    };
-
-    let mut c_mouse_state = ffi::TCOD_mouse_t {
-        x: 0,
-        y: 0,
-        dx: 0,
-        dy: 0,
-        cx: 0,
-        cy: 0,
-        dcx: 0,
-        dcy: 0,
-        lbutton: false as c_bool,
-        rbutton: false as c_bool,
-        mbutton: false as c_bool,
-        lbutton_pressed: false as c_bool,
-        rbutton_pressed: false as c_bool,
-        mbutton_pressed: false as c_bool,
-        wheel_up: false as c_bool,
-        wheel_down: false as c_bool
-    };
+    let mut c_key_state: ffi::TCOD_key_t = unsafe { mem::uninitialized() };
+    let mut c_mouse_state: ffi::TCOD_mouse_t = unsafe { mem::uninitialized() };
 
     let event = unsafe {
-        ffi::TCOD_sys_check_for_event(
-            event_mask.bits() as i32,
-            if event_mask.intersects(KEY_PRESS|KEY_RELEASE|KEY|ANY) {
-                &mut c_key_state
-            } else {
-                std::ptr::null_mut()
-            },
-            if event_mask.intersects(
-                MOUSE_MOVE|MOUSE_PRESS|MOUSE_RELEASE|MOUSE|ANY) {
-                &mut c_mouse_state
-            } else {
-                std::ptr::null_mut()
-            })
+        ffi::TCOD_sys_check_for_event(event_mask.bits() as i32,
+                                      &mut c_key_state, &mut c_mouse_state)
     };
 
     let ret_flag = match event {
@@ -220,8 +182,7 @@ pub fn check_for_event(event_mask: EventFlags) -> Option<(EventFlags, Event)> {
             key: if c_key_state.vk == ffi::TCODK_CHAR {
                 Key::Printable(c_key_state.c as u8 as char)
             } else {
-                Key::Special(keycode_from_u32(c_key_state.vk)
-                             .unwrap())
+                Key::Special(keycode_from_u32(c_key_state.vk).unwrap())
             },
             pressed: c_key_state.pressed != 0,
             left_alt: c_key_state.lalt != 0,
@@ -253,11 +214,7 @@ pub fn check_for_event(event_mask: EventFlags) -> Option<(EventFlags, Event)> {
         None
     };
 
-    if ret_event.is_some() {
-        Some((ret_flag, ret_event.unwrap()))
-    } else {
-        None
-    }
+    ret_event.map(|event| (ret_flag, event))
 }
 
 pub fn events() -> EventIterator {
