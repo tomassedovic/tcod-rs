@@ -58,6 +58,7 @@ use std::str;
 
 use std::ascii::AsciiExt;
 use std::marker::PhantomData;
+use std::mem::transmute;
 use std::path::Path;
 
 use bindings::ffi;
@@ -367,8 +368,6 @@ impl Root {
 
 }
 
-struct FontDimensions(i32, i32);
-
 /// Helper struct for the `Root` console initialization
 ///
 /// This is the type that should be used to initialize the `Root` console (either directly or
@@ -421,7 +420,7 @@ pub struct RootInitializer<'a> {
     font_path: Box<AsRef<Path> + 'a>,
     font_layout: FontLayout,
     font_type: FontType,
-    font_dimension: FontDimensions,
+    font_dimensions: (i32, i32),
     console_renderer: Renderer
 }
 
@@ -435,7 +434,7 @@ impl<'a> RootInitializer<'a> {
             font_path: Box::new("terminal.png"),
             font_layout: FontLayout::AsciiInCol,
             font_type: FontType::Default,
-            font_dimension: FontDimensions(0, 0),
+            font_dimensions: (0, 0),
             console_renderer: Renderer::SDL
         }
     }
@@ -469,7 +468,7 @@ impl<'a> RootInitializer<'a> {
     }
 
     pub fn font_dimensions(&mut self, horizontal: i32, vertical: i32) -> &mut RootInitializer<'a> {
-        self.font_dimension = FontDimensions(horizontal, vertical);
+        self.font_dimensions = (horizontal, vertical);
         self
     }
 
@@ -481,8 +480,8 @@ impl<'a> RootInitializer<'a> {
     pub fn init(&self) -> Root {
         assert!(self.width > 0 && self.height > 0);
 
-        match self.font_dimension {
-            FontDimensions(horizontal, vertical) => {
+        match self.font_dimensions {
+            (horizontal, vertical) => {
                 Root::set_custom_font(self.font_path.as_ref(),
                                       self.font_layout, self.font_type,
                                       horizontal, vertical)
@@ -615,12 +614,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
         let alignment = unsafe {
             ffi::TCOD_console_get_alignment(*self.as_native())
         };
-        match alignment {
-            ffi::TCOD_LEFT => TextAlignment::Left,
-            ffi::TCOD_RIGHT => TextAlignment::Right,
-            ffi::TCOD_CENTER => TextAlignment::Center,
-            _ => unreachable!(),
-        }
+        unsafe { transmute(alignment) }
     }
 
     /// Sets the default text alignment for the console. For all the possible
@@ -691,23 +685,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
         let flag = unsafe {
             ffi::TCOD_console_get_background_flag(*self.as_native())
         };
-        match flag {
-            ffi::TCOD_BKGND_NONE => BackgroundFlag::None,
-            ffi::TCOD_BKGND_SET => BackgroundFlag::Set,
-            ffi::TCOD_BKGND_MULTIPLY => BackgroundFlag::Multiply,
-            ffi::TCOD_BKGND_LIGHTEN => BackgroundFlag::Lighten,
-            ffi::TCOD_BKGND_DARKEN => BackgroundFlag::Darken,
-            ffi::TCOD_BKGND_SCREEN => BackgroundFlag::Screen,
-            ffi::TCOD_BKGND_COLOR_DODGE => BackgroundFlag::ColorDodge,
-            ffi::TCOD_BKGND_COLOR_BURN => BackgroundFlag::ColorBurn,
-            ffi::TCOD_BKGND_ADD => BackgroundFlag::Add,
-            ffi::TCOD_BKGND_ADDA => BackgroundFlag::AddA,
-            ffi::TCOD_BKGND_BURN => BackgroundFlag::Burn,
-            ffi::TCOD_BKGND_OVERLAY => BackgroundFlag::Overlay,
-            ffi::TCOD_BKGND_ALPH => BackgroundFlag::Alph,
-            ffi::TCOD_BKGND_DEFAULT => BackgroundFlag::Default,
-            _ => unreachable!(),
-        }
+        unsafe { transmute(flag) }
     }
 
     /// Sets the console's current background flag. For a detailed explanation
@@ -805,18 +783,15 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
     /// * `TextAlignment::Right`: rightmost character of the string
     fn print<T>(&mut self, x: i32, y: i32, text: T) where Self: Sized, T: AsRef<[u8]> + TcodString {
         assert!(x >= 0 && y >= 0);
-        match text.as_ascii() {
-            Some(text) => {
-                let c_text = CString::new(text).unwrap();
-                unsafe {
-                    ffi::TCOD_console_print(*self.as_native(), x, y, c_text.as_ptr());
-                }
-            },
-            None => {
-                let c_text = to_wstring(text.as_ref());
-                unsafe {
-                    ffi::TCOD_console_print_utf(*self.as_native(), x, y, c_text.as_ptr() as *const i32);
-                }
+        if let Some(text) = text.as_ascii() {
+            let c_text = CString::new(text).unwrap();
+            unsafe {
+                ffi::TCOD_console_print(*self.as_native(), x, y, c_text.as_ptr());
+            }
+        } else {
+            let c_text = to_wstring(text.as_ref());
+            unsafe {
+                ffi::TCOD_console_print_utf(*self.as_native(), x, y, c_text.as_ptr() as *const i32);
             }
         }
     }
@@ -829,18 +804,15 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                   width: i32, height: i32,
                   text: T) where Self: Sized, T: AsRef<[u8]> + TcodString {
         assert!(x >= 0 && y >= 0);
-        match text.as_ascii() {
-            Some(text) => {
-                let c_text = CString::new(text).unwrap();
-                unsafe {
-                    ffi::TCOD_console_print_rect(*self.as_native(), x, y, width, height, c_text.as_ptr());
-                }
-            },
-            None => {
-                let c_text = to_wstring(text.as_ref());
-                unsafe {
-                    ffi::TCOD_console_print_rect_utf(*self.as_native(), x, y, width, height, c_text.as_ptr() as *const i32);
-                }
+        if let Some(text) = text.as_ascii() {
+            let c_text = CString::new(text).unwrap();
+            unsafe {
+                ffi::TCOD_console_print_rect(*self.as_native(), x, y, width, height, c_text.as_ptr());
+            }
+        } else {
+            let c_text = to_wstring(text.as_ref());
+            unsafe {
+                ffi::TCOD_console_print_rect_utf(*self.as_native(), x, y, width, height, c_text.as_ptr() as *const i32);
             }
         }
     }
@@ -854,24 +826,21 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                 alignment: TextAlignment,
                 text: T) where Self: Sized, T: AsRef<[u8]> + TcodString {
         assert!(x >= 0 && y >= 0);
-        match text.as_ascii() {
-            Some(text) => {
-                let c_text = CString::new(text).unwrap();
-                unsafe {
-                    ffi::TCOD_console_print_ex(*self.as_native(), x, y,
+        if let Some(text) = text.as_ascii() {
+            let c_text = CString::new(text).unwrap();
+            unsafe {
+                ffi::TCOD_console_print_ex(*self.as_native(), x, y,
+                                           background_flag as u32,
+                                           alignment as u32,
+                                           c_text.as_ptr());
+            }
+        } else {
+            let c_text = to_wstring(text.as_ref());
+            unsafe {
+                ffi::TCOD_console_print_ex_utf(*self.as_native(), x, y,
                                                background_flag as u32,
                                                alignment as u32,
-                                               c_text.as_ptr());
-                }
-            },
-            None => {
-                let c_text = to_wstring(text.as_ref());
-                unsafe {
-                    ffi::TCOD_console_print_ex_utf(*self.as_native(), x, y,
-                                                   background_flag as u32,
-                                                   alignment as u32,
-                                                   c_text.as_ptr() as *const i32);
-                }
+                                               c_text.as_ptr() as *const i32);
             }
         }
     }
@@ -884,22 +853,19 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                         alignment: TextAlignment,
                         text: T) where Self: Sized, T: AsRef<[u8]> + TcodString {
         assert!(x >= 0 && y >= 0);
-        match text.as_ascii() {
-            Some(text) => {
-                let c_text = CString::new(text).unwrap();
-                unsafe {
-                    ffi::TCOD_console_print_rect_ex(*self.as_native(), x, y, width, height,
+        if let Some(text) = text.as_ascii() {
+            let c_text = CString::new(text).unwrap();
+            unsafe {
+                ffi::TCOD_console_print_rect_ex(*self.as_native(), x, y, width, height,
+                                                background_flag as u32, alignment as u32,
+                                                c_text.as_ptr());
+            }
+        } else {
+            let c_text = to_wstring(text.as_ref());
+            unsafe {
+                ffi::TCOD_console_print_rect_ex_utf(*self.as_native(), x, y, width, height,
                                                     background_flag as u32, alignment as u32,
-                                                    c_text.as_ptr());
-                }
-            },
-            None => {
-                let c_text = to_wstring(text.as_ref());
-                unsafe {
-                    ffi::TCOD_console_print_rect_ex_utf(*self.as_native(), x, y, width, height,
-                                                        background_flag as u32, alignment as u32,
-                                                        c_text.as_ptr() as *const i32);
-                }
+                                                    c_text.as_ptr() as *const i32);
             }
         }
     }
@@ -910,20 +876,17 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                           width: i32, height: i32,
                           text: T) -> i32 where Self: Sized, T: AsRef<[u8]> + TcodString {
         assert!(x >= 0 && y >= 0);
-        match text.as_ascii() {
-            Some(text) => {
-                let c_text = CString::new(text).unwrap();
-                unsafe {
-                    ffi::TCOD_console_get_height_rect(*self.as_native(), x, y, width, height,
-                                                      c_text.as_ptr())
-                }
+        if let Some(text) = text.as_ascii() {
+            let c_text = CString::new(text).unwrap();
+            unsafe {
+                ffi::TCOD_console_get_height_rect(*self.as_native(), x, y, width, height,
+                                                  c_text.as_ptr())
             }
-            None => {
-                let c_text = to_wstring(text.as_ref());
-                unsafe {
-                    ffi::TCOD_console_get_height_rect_utf(*self.as_native(), x, y, width, height,
-                                                          c_text.as_ptr() as *const i32)
-                }
+        } else {
+            let c_text = to_wstring(text.as_ref());
+            unsafe {
+                ffi::TCOD_console_get_height_rect_utf(*self.as_native(), x, y, width, height,
+                                                      c_text.as_ptr() as *const i32)
             }
         }
     }

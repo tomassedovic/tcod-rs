@@ -29,7 +29,7 @@ impl FromNative<ffi::TCOD_image_t> for Image {
 #[inline]
 unsafe fn get_image_size(tcod_image: ffi::TCOD_image_t) -> (i32, i32) {
     let (mut width, mut height) = (0, 0);
-    ffi::TCOD_image_get_size(tcod_image, &mut width as *mut i32, &mut height as *mut i32);
+    ffi::TCOD_image_get_size(tcod_image, &mut width, &mut height);
     (width, height)
 }
 
