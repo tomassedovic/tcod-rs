@@ -1,3 +1,4 @@
+use std::ops::{Add, Sub, Div, Mul};
 use bindings::{AsNative, FromNative, ffi};
 
 #[repr(C)]
@@ -37,42 +38,6 @@ impl Color {
         }
     }
 
-    pub fn multiply(self, other: Color) -> Color {
-        unsafe {
-            FromNative::from_native(
-                ffi::TCOD_color_multiply(*self.as_native(), *other.as_native()))
-        }
-    }
-
-    pub fn multiply_scalar(self, val: f32) -> Color {
-        unsafe {
-            FromNative::from_native(
-                ffi::TCOD_color_multiply_scalar(*self.as_native(), val))
-        }
-    }
-
-    pub fn add(self, other: Color) -> Color {
-        unsafe {
-            FromNative::from_native(
-                ffi::TCOD_color_add(*self.as_native(), *other.as_native()))
-        }
-    }
-
-    pub fn subtract(self, other: Color) -> Color {
-        unsafe {
-            FromNative::from_native(
-                ffi::TCOD_color_subtract(*self.as_native(), *other.as_native()))
-        }
-    }
-
-    pub fn lerp(self, to: Color, coefficient: f32) -> Color {
-        unsafe {
-            FromNative::from_native(ffi::TCOD_color_lerp(*self.as_native(),
-                                                         *to.as_native(),
-                                                         coefficient))
-        }
-    }
-
     pub fn hsv(self) -> (f32, f32, f32) {
         let mut h: f32 = 0.0;
         let mut s: f32 = 0.0;
@@ -100,6 +65,79 @@ impl Color {
     }
 }
 
+pub fn lerp(from: Color, to: Color, coefficient: f32) -> Color {
+    unsafe {
+        FromNative::from_native(ffi::TCOD_color_lerp(*from.as_native(),
+                                                     *to.as_native(),
+                                                     coefficient))
+    }
+}
+
+impl Add<Color> for Color {
+    type Output = Color;
+
+    #[inline]
+    fn add(self, rhs: Color) -> Color {
+        unsafe {
+            FromNative::from_native(
+                ffi::TCOD_color_add(*self.as_native(), *rhs.as_native()))
+        }
+    }
+}
+
+impl Sub<Color> for Color {
+    type Output = Color;
+
+    #[inline]
+    fn sub(self, rhs: Color) -> Color {
+        unsafe {
+            FromNative::from_native(
+                ffi::TCOD_color_subtract(*self.as_native(), *rhs.as_native()))
+        }
+    }
+}
+
+impl Mul<Color> for Color {
+    type Output = Color;
+
+    #[inline]
+    fn mul(self, rhs: Color) -> Color {
+        unsafe {
+            FromNative::from_native(
+                ffi::TCOD_color_multiply(*self.as_native(), *rhs.as_native()))
+        }
+    }
+}
+
+impl Mul<f32> for Color {
+    type Output = Color;
+
+    #[inline]
+    fn mul(self, rhs: f32) -> Color {
+        unsafe {
+            FromNative::from_native(
+                ffi::TCOD_color_multiply_scalar(*self.as_native(), rhs))
+        }
+    }
+}
+
+impl Mul<Color> for f32 {
+    type Output = Color;
+
+    #[inline]
+    fn mul(self, rhs: Color) -> Color {
+        rhs * self
+    }
+}
+
+impl Div<f32> for Color {
+    type Output = Color;
+
+    #[inline]
+    fn div(self, rhs: f32) -> Color {
+        self * (1.0 / rhs)
+    }
+}
 
 // NOTE; colour names and values copied from:
 // tcod-sys/libtcod/include/libtcod_int.h

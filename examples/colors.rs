@@ -22,11 +22,11 @@ fn main() {
     let red = Color::new(200, 0, 0);
 
     con.put_char_ex(30, 30, '.', black, red);
-    con.put_char_ex(32, 30, '.', black, red.multiply(Color::new(200, 0, 0)));
-    con.put_char_ex(34, 30, '.', black, red.multiply_scalar(0.3));
-    con.put_char_ex(36, 30, '.', black, red.add(Color::new(25, 60, 0)));
-    con.put_char_ex(36, 30, '.', black, red.subtract(Color::new(25, 60, 0)));
-    con.put_char_ex(38, 30, '.', black, red.lerp(black, 0.8));
+    con.put_char_ex(32, 30, '.', black, red * Color::new(200, 0, 0));
+    con.put_char_ex(34, 30, '.', black, red * 0.3);
+    con.put_char_ex(36, 30, '.', black, red + Color::new(25, 60, 0));
+    con.put_char_ex(36, 30, '.', black, red - Color::new(25, 60, 0));
+    con.put_char_ex(38, 30, '.', black, colors::lerp(red, black, 0.8));
 
     let (h, s, v) = red.hsv();
     println!("Red colour's hue: {}, saturation: {}, value: {}", h, s, v);
