@@ -2,7 +2,7 @@ use std::ops::{Add, Sub, Div, Mul};
 use bindings::{AsNative, FromNative, ffi};
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, Default, PartialEq)]
 pub struct Color {
     pub r: u8,
     pub g: u8,
