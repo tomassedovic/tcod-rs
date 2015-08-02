@@ -2,4 +2,4 @@ build:
 	cargo build
 
 test:
-	cargo test
+	cargo test  --features "rustc-serialize_impls"
