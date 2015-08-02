@@ -76,11 +76,23 @@ pub enum KeyCode {
     Char = ffi::TCODK_CHAR as isize,
 }
 
+impl Default for KeyCode {
+    fn default() -> Self {
+        KeyCode::NoKey
+    }
+}
+
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum Key {
     Printable(char),
     Special(KeyCode),
+}
+
+impl Default for Key {
+    fn default() -> Self {
+        Key::Special(Default::default())
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -94,7 +106,7 @@ pub struct KeyState {
     pub shift: bool,
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug, Default)]
 pub struct MouseState {
     pub x: isize,
     pub y: isize,

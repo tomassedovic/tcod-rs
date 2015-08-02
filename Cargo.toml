@@ -29,11 +29,18 @@ path = "src/lib.rs"
 # Workaround for cargo test giving linker errors for doctests
 doctest = false
 
+[features]
+rustc-serialize_impls = ["rustc-serialize"]
+
 [dependencies]
 bitflags = "0.1"
 libc = "0.1"
 time = "0.1"
 lazy_static = "0.1"
+
+[dependencies.rustc-serialize]
+rustc-serialize = "0.3"
+optional = true
 
 [dependencies.tcod-sys]
 path = "tcod_sys"
