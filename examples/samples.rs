@@ -17,20 +17,31 @@ fn render_mouse(first: bool) -> () {}
 fn render_name(first: bool) -> () {}
 fn render_sdl(first: bool) -> () {}
 
+struct MenuItem {
+    name : String,
+    function : fn(bool) -> ()
+}
+
+impl MenuItem {
+    fn new(name : &str, f : fn(bool) -> ()) -> Self {
+        MenuItem { name: name.to_string(), function: f}
+    }
+}
+
 fn main() {
-    let samples : Vec<(String, fn(bool) -> ())> = vec![
-        ("  True colors      ".to_string(), render_colors),
-        ("  Offscreen console".to_string(), render_offscreen),
-        ("  Line drawing     ".to_string(), render_lines),
-        ("  Noise            ".to_string(), render_noise),
-        ("  Field of view    ".to_string(), render_fov),
-        ("  Path finding     ".to_string(), render_path),
-        ("  Bsp toolkit      ".to_string(), render_bsp),
-        ("  Image toolkit    ".to_string(), render_image),
-        ("  Mouse support    ".to_string(), render_mouse),
-        ("  Name generator   ".to_string(), render_name),
-        ("  SDL callback     ".to_string(), render_sdl)
-    ];
+    let samples = vec![
+        MenuItem::new("  True colors      ", render_colors),
+        MenuItem::new("  Offscreen console", render_offscreen),
+        MenuItem::new("  Line drawing     ", render_lines),
+        MenuItem::new("  Noise            ", render_noise),
+        MenuItem::new("  Field of view    ", render_fov),
+        MenuItem::new("  Path finding     ", render_path),
+        MenuItem::new("  Bsp toolkit      ", render_bsp),
+        MenuItem::new("  Image toolkit    ", render_image),
+        MenuItem::new("  Mouse support    ", render_mouse),
+        MenuItem::new("  Name generator   ", render_name),
+        MenuItem::new("  SDL callback     ", render_sdl)
+            ];
     let mut cur_sample = 0;
     
     let renderer = Renderer::SDL;
@@ -51,7 +62,7 @@ fn main() {
                 root.set_default_background(colors::BLACK);
             }
             let y : i32 = 46 - (samples.len() as i32 - i as i32);
-            let fun = &samples[i].0;
+            let fun = &samples[i].name;
             root.print_ex(2, y, BackgroundFlag::Set, TextAlignment::Left, fun);
         }
         
