@@ -57,7 +57,11 @@ fn main() {
         .fullscreen(false)
         .renderer(renderer)
         .init();
+    let mut credits_end = false;
     while !root.window_closed() {
+        if !credits_end {
+            credits_end = root.render_credits(60, 43, false);
+        }
         // print the list of samples
         for i in 0..samples.len() {
             if i == cur_sample {
