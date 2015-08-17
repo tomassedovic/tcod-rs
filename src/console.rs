@@ -353,11 +353,11 @@ impl Root {
     }
 
     pub fn render_credits(&self, x : i32, y: i32, alpha: bool) -> bool {
-        let mut result;
         unsafe {
-            result = ffi::TCOD_console_credits_render(x, y, alpha as c_bool)
+            let result = ffi::TCOD_console_credits_render(x, y, alpha as c_bool);
+            result != 0
         }
-        result != 0
+
     }
 
     fn set_custom_font(font_path: &Path,
