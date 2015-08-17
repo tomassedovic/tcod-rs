@@ -1,4 +1,6 @@
 extern crate tcod;
+extern crate tcod_sys as ffi;
+
 use tcod::console::{Root, Console, BackgroundFlag, Offscreen, blit};
 use tcod::console::{TextAlignment, Renderer};
 use tcod::input::{Key, KeyCode, KEY_PRESS, MOUSE, check_for_event, Event};
@@ -28,6 +30,8 @@ impl MenuItem {
         MenuItem { name: name.to_string(), function: f}
     }
 }
+
+static RENDERER_NAME : [&'static str; 3] = ["F1 GLSL   ","F2 OPENGL ","F3 SDL    "];
 
 fn main() {
     let samples = vec![
@@ -84,6 +88,25 @@ fn main() {
         let fullscreen_text = if root.is_fullscreen() {"windowed mode"}
                               else {"fullscren_mode"};
         root.print(2, 48, format!("ALT-ENTER : switch to {}", fullscreen_text));
+
+        let cur_renderer = system::get_renderer();
+        root.set_default_foreground(colors::GREY);
+        root.set_default_background(colors::BLACK);
+        root.print_ex(42, 46-(ffi::TCOD_NB_RENDERERS as i32 + 1),
+                      BackgroundFlag::Set, TextAlignment::Left,
+                      "Renderer :");
+        for i in 0..(ffi::TCOD_NB_RENDERERS as i32) {
+            if i == system::get_renderer() as i32{
+                root.set_default_foreground(colors::WHITE);
+                root.set_default_background(colors::LIGHT_BLUE);
+            } else {
+                root.set_default_foreground(colors::GREY);
+                root.set_default_background(colors::BLACK);
+            }
+            root.print_ex(42, 46 - (ffi::TCOD_NB_RENDERERS as i32 - i),
+                          BackgroundFlag::Set, TextAlignment::Left,
+                          RENDERER_NAME[i as usize]);
+        }
         
         root.flush();
         let event = check_for_event(KEY_PRESS | MOUSE);
@@ -107,7 +130,16 @@ fn main() {
                     Key::Special(KeyCode::PrintScreen) => {
                         // TODO
                     }
-                    Key::Special(KeyCode::Escape) => {break}
+                    Key::Special(KeyCode::Escape) => { break }
+                    Key::Special(KeyCode::F1) => {
+                        system::set_renderer(Renderer::GLSL)
+                    }
+                    Key::Special(KeyCode::F2) => {
+                        system::set_renderer(Renderer::OpenGL)
+                    }
+                    Key::Special(KeyCode::F3) => {
+                        system::set_renderer(Renderer::SDL)
+                    }
                     _ => {continue;}
                 }
             }

@@ -6,8 +6,10 @@ use std::ptr;
 use std::ffi::{CStr, CString};
 use std::path::Path;
 use bindings::ffi;
+use std::mem::transmute;
 
 use self::time::Duration;
+use super::console::Renderer;
 
 pub fn set_fps(fps: i32) {
     assert!(fps > 0);
@@ -23,6 +25,24 @@ pub fn get_fps() -> i32 {
     }
     assert!(result >= 0);
     return result
+}
+
+pub fn set_renderer(renderer : Renderer) {
+    unsafe {
+        ffi::TCOD_sys_set_renderer(renderer as u32)
+    }
+}
+
+pub fn get_renderer() -> Renderer {
+    let mut result;
+    unsafe {
+        result = ffi::TCOD_sys_get_renderer();
+
+        assert!(result == ffi::TCOD_RENDERER_GLSL   ||
+                result == ffi::TCOD_RENDERER_OPENGL ||
+                result == ffi::TCOD_RENDERER_SDL);
+        transmute(result)
+    }
 }
 
 pub fn get_last_frame_length() -> f32 {
