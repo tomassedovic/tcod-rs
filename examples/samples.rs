@@ -2,8 +2,9 @@ extern crate tcod;
 use tcod::console::{Root, Console, BackgroundFlag, Offscreen, blit};
 use tcod::console::{TextAlignment, Renderer};
 use tcod::input::{Key, KeyCode, KEY_RELEASED};
-use tcod::system::set_fps;
+use tcod::system;
 use tcod::colors;
+use tcod::chars;
 
 fn render_colors(first: bool) -> () {}
 fn render_offscreen(first:bool) -> () {}
@@ -65,6 +66,23 @@ fn main() {
             let fun = &samples[i].name;
             root.print_ex(2, y, BackgroundFlag::Set, TextAlignment::Left, fun);
         }
+
+        // print the help message
+        root.set_default_foreground(colors::GREY);
+        root.print_ex(79, 46, BackgroundFlag::None, TextAlignment::Right,
+                      format!("last frame : {:3.0} ms ({:3} fps)",
+                      system::get_last_frame_length() * 1000.0,
+                              system::get_fps()));
+        let time = system::get_elapsed_time();
+        root.print_ex(79, 47, BackgroundFlag::None, TextAlignment::Right,
+                      format!("elapsed {:8}ms {:4.2}s",
+                              time.num_milliseconds(),
+                              time.num_milliseconds() as f32/ 1000.0));
+        root.print(2, 47, format!("{}{} : select a sample",
+                                  chars::ARROW_N, chars::ARROW_S));
+        let fullscreen_text = if root.is_fullscreen() {"windowed mode"}
+                              else {"fullscren_mode"};
+        root.print(2, 48, format!("ALT-ENTER : switch to {}", fullscreen_text));
         
         root.flush();
         root.check_for_keypress(KEY_RELEASED);
