@@ -1,7 +1,7 @@
 extern crate tcod;
 use tcod::console::{Root, Console, BackgroundFlag, Offscreen, blit};
 use tcod::console::{TextAlignment, Renderer};
-use tcod::input::{Key, KeyCode, KEY_RELEASED};
+use tcod::input::{Key, KeyCode, KEY_PRESS, MOUSE, check_for_event, Event};
 use tcod::system;
 use tcod::colors;
 use tcod::chars;
@@ -44,6 +44,7 @@ fn main() {
         MenuItem::new("  SDL callback     ", render_sdl)
             ];
     let mut cur_sample = 0;
+    let mut first = true;
     
     let renderer = Renderer::SDL;
     let mut root = Root::initializer()
@@ -85,6 +86,32 @@ fn main() {
         root.print(2, 48, format!("ALT-ENTER : switch to {}", fullscreen_text));
         
         root.flush();
-        root.check_for_keypress(KEY_RELEASED);
+        let event = check_for_event(KEY_PRESS | MOUSE);
+        match event {
+            None => {continue;}
+            Some((flag, Event::Key(state))) => {
+                match state.key {
+                    Key::Special(KeyCode::Down) => {
+                        cur_sample = (cur_sample + 1) % samples.len();
+                        first = true
+                    }
+                    Key::Special(KeyCode::Up) => {
+                        if cur_sample == 0 { cur_sample = samples.len()-1; }
+                        else { cur_sample -= 1; }
+                        first = true
+                    }
+                    Key::Special(KeyCode::Enter) if state.left_alt => {
+                        let fullscreen = root.is_fullscreen();
+                        root.set_fullscreen(!fullscreen)
+                    }
+                    Key::Special(KeyCode::PrintScreen) => {
+                        // TODO
+                    }
+                    Key::Special(KeyCode::Escape) => {break}
+                    _ => {continue;}
+                }
+            }
+            _ => {continue;}
+        }
     }
 }
