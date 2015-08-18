@@ -50,12 +50,69 @@ fn main() {
     let mut cur_sample = 0;
     let mut first = true;
     let (mut fullscreen_width, mut fullscreen_height) = (0, 0);
-    let mut font = "consolas10x10_gs_tc.png";
+    let mut font = "consolas10x10_gs_tc.png".to_string();
     let mut font_type = FontType::Greyscale;
     let mut font_layout = FontLayout::Tcod;
     let (mut nb_char_horiz, mut nb_char_vertic) = (0, 0);
+    let mut fullscreen = false;
     
     let renderer = Renderer::SDL;
+
+    let mut args = std::env::args();
+
+    loop {
+        use std::i32;
+        use std::str::FromStr;
+
+        match args.next() {
+            None => break,
+            Some(opt) => match opt.as_ref() {
+                "-font" => {
+                    let n = args.next();
+                    if n.is_some() {
+                        font = n.unwrap()
+                    }
+                },
+                "-font-nb-char" => {
+                    let horiz = args.next();
+                    let vertic = args.next();
+                    if horiz.is_some() {
+                        nb_char_horiz = i32::from_str(horiz.unwrap().as_ref()).unwrap()
+                    }
+                    if vertic.is_some() {
+                        nb_char_vertic = i32::from_str(vertic.unwrap().as_ref()).unwrap()
+                    }
+                }
+                "-fullscreen-resolution" => {
+                    let width  = args.next();
+                    let height = args.next();
+                    if width.is_some() {
+                        fullscreen_width = i32::from_str(width.unwrap().as_ref()).unwrap()
+                    }
+                    if height.is_some() {
+                        fullscreen_height = i32::from_str(height.unwrap().as_ref()).unwrap()
+                    }
+                }
+                "-fullscreen" => fullscreen = true,
+                "-font-in-row" => font_layout = FontLayout::AsciiInRow,
+                "-font-greyscale" => font_type = FontType::Greyscale,
+                "-font-tcod" => font_layout = FontLayout::Tcod,
+                "-help" | "-?" => {
+                    println!("options :");
+			        println!("-font <filename> : use a custom font");
+			        println!("-font-nb-char <nb_char_horiz> <nb_char_vertic> : number of characters in the font");
+			        println!("-font-in-row : the font layout is in row instead of columns");
+			        println!("-font-tcod : the font uses TCOD layout instead of ASCII");
+			        println!("-font-greyscale : antialiased font using greyscale bitmap");
+			        println!("-fullscreen : start in fullscreen");
+			        println!("-fullscreen-resolution <screen_width> <screen_height> : force fullscreen resolution");
+			        println!("-renderer <num> : set renderer. 0 : GLSL 1 : OPENGL 2 : SDL");
+                    std::process::exit(0)
+                }
+                _ => continue
+            }
+        }
+    }
 
     if fullscreen_width > 0 {
 		system::force_fullscreen_resolution(fullscreen_width, fullscreen_height);
@@ -63,7 +120,7 @@ fn main() {
     let mut root = Root::initializer()
         .size(80, 50)
         .title("libtcod Rust sample")
-        .fullscreen(false)
+        .fullscreen(fullscreen)
         .renderer(renderer)
         .font(font, font_layout)
         .font_type(font_type)
