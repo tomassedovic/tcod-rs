@@ -2,7 +2,7 @@ extern crate tcod;
 extern crate tcod_sys as ffi;
 
 use tcod::console::{Root, Console, BackgroundFlag, Offscreen, blit};
-use tcod::console::{TextAlignment, Renderer};
+use tcod::console::{TextAlignment, Renderer, FontType, FontLayout};
 use tcod::input::{Key, KeyCode, KEY_PRESS, MOUSE, check_for_event, Event};
 use tcod::system;
 use tcod::colors;
@@ -49,15 +49,28 @@ fn main() {
             ];
     let mut cur_sample = 0;
     let mut first = true;
+    let (mut fullscreen_width, mut fullscreen_height) = (0, 0);
+    let mut font = "consolas10x10_gs_tc.png";
+    let mut font_type = FontType::Greyscale;
+    let mut font_layout = FontLayout::Tcod;
+    let (mut nb_char_horiz, mut nb_char_vertic) = (0, 0);
     
     let renderer = Renderer::SDL;
+
+    if fullscreen_width > 0 {
+		system::force_fullscreen_resolution(fullscreen_width, fullscreen_height);
+    }
     let mut root = Root::initializer()
         .size(80, 50)
         .title("libtcod Rust sample")
         .fullscreen(false)
         .renderer(renderer)
+        .font(font, font_layout)
+        .font_type(font_type)
+        .font_dimensions(nb_char_horiz, nb_char_vertic)
         .init();
     let mut credits_end = false;
+
     while !root.window_closed() {
         if !credits_end {
             credits_end = root.render_credits(60, 43, false);
