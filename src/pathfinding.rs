@@ -1,11 +1,10 @@
 use bindings::ffi;
 use bindings::{AsNative, c_bool, c_float, c_int, c_void};
-
 use map::Map;
 
 enum PathInnerData<'a> {
     Map(Map),
-    Callback(Box<FnMut((i32, i32), (i32, i32)) -> f32+'a>, Box<(usize, usize)>),
+    Callback(Box<FnMut((i32, i32), (i32, i32)) -> f32+'a>),
 }
 
 pub struct AStar<'a>{
@@ -24,41 +23,32 @@ impl<'a> Drop for AStar<'a> {
     }
 }
 
-extern "C" fn c_path_callback(xf: c_int, yf: c_int,
+extern "C" fn c_path_callback<T: FnMut((i32, i32), (i32, i32)) -> f32>(xf: c_int, yf: c_int,
                           xt: c_int, yt: c_int,
                           user_data: *mut c_void) -> c_float {
-    unsafe {
-        let ptr: &(usize, usize) = &*(user_data as *const (usize, usize));
-        let cb: &mut FnMut((i32, i32), (i32, i32)) -> f32 = ::std::mem::transmute(*ptr);
-        cb((xf, yf), (xt, yt))
-    }
+    let callback_ptr = user_data as *mut T;
+    let cb: &mut T = unsafe {
+        &mut *callback_ptr
+    };
+    cb((xf, yf), (xt, yt))
 }
-
-type TcodPathCb = extern "C" fn(c_int, c_int, c_int, c_int, *mut c_void) -> c_float;
 
 impl<'a> AStar<'a> {
     pub fn new_from_callback<T: 'a+FnMut((i32, i32), (i32, i32)) -> f32>(
         width: i32, height: i32, path_callback: T,
         diagonal_cost: f32) -> AStar<'a> {
-        // Convert the closure to a trait object. This will turn it into a fat pointer:
-        let user_closure: Box<FnMut((i32, i32), (i32, i32)) -> f32> = Box::new(path_callback);
+        let callback = Box::new(path_callback);
+        let user_data = &*callback as *const T as *mut c_void;
         unsafe {
-            let fat_ptr: (usize, usize) = ::std::mem::transmute(&*user_closure);
-            // Allocate the fat pointer on the heap:
-            let mut ptr: Box<(usize, usize)> = Box::new(fat_ptr);
-            // Create a pointer to the fat pointer. This well be passed as *void user_data:
-            let user_data_ptr: *mut (usize, usize) = &mut *ptr;
-
             let tcod_path = ffi::TCOD_path_new_using_function(width, height,
-                                                              Some(c_path_callback),
-                                                              user_data_ptr as *mut c_void,
+                                                              Some(c_path_callback::<T>),
+                                                              user_data,
                                                               diagonal_cost);
             AStar {
                 tcod_path: tcod_path,
-                // Keep track of everything we've allocated on the heap. Both
-                // `user_closure` and `ptr` will be deallocated when AStar
-                // is dropped:
-                inner: PathInnerData::Callback(user_closure, ptr),
+                // We need to keep user_closure around, otherwise it
+                // would get deallocated at the end of this function.
+                inner: PathInnerData::Callback(callback),
                 width: width,
                 height: height,
             }
@@ -182,21 +172,17 @@ impl<'a> Dijkstra<'a> {
         width: i32, height: i32,
         path_callback: T,
         diagonal_cost: f32) -> Dijkstra<'a> {
-        // NOTE: this is might be a bit confusing. See the
-        // AStar::new_from_callback implementation comments.
-        let user_closure: Box<FnMut((i32, i32), (i32, i32)) -> f32> = Box::new(path_callback);
+        let callback = Box::new(path_callback);
+        let user_data = &*callback as *const T as *mut c_void;
         unsafe {
-            let fat_ptr: (usize, usize) = ::std::mem::transmute(&*user_closure);
-            let mut ptr: Box<(usize, usize)> = Box::new(fat_ptr);
-            let user_data_ptr: *mut (usize, usize) = &mut *ptr;
             let tcod_path = ffi::TCOD_dijkstra_new_using_function(width,
                                                                   height,
-                                                                  Some(c_path_callback),
-                                                                  user_data_ptr as *mut c_void,
+                                                                  Some(c_path_callback::<T>),
+                                                                  user_data,
                                                                   diagonal_cost);
             Dijkstra {
                 tcod_path: tcod_path,
-                inner: PathInnerData::Callback(user_closure, ptr),
+                inner: PathInnerData::Callback(callback),
                 width: width,
                 height: height,
             }
