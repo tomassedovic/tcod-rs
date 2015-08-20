@@ -663,10 +663,7 @@ void TCOD_dijkstra_delete (TCOD_dijkstra_t dijkstra) {
 	TCOD_IFNOT(data != NULL) return;
 	if ( data->distances ) free(data->distances);
 	if ( data->nodes ) free(data->nodes);
-	if ( data->path ) {
-		TCOD_list_clear_and_delete(data->path);
-		TCOD_list_delete(data->path);
-	}
+	if ( data->path ) TCOD_list_delete(data->path);
 	free(data);
 }
 
