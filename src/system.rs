@@ -10,7 +10,7 @@ use bindings::ffi;
 use self::time::Duration;
 
 pub fn set_fps(fps: i32) {
-    assert!(fps > 0);
+    assert!(fps >= 0);
     unsafe {
         ffi::TCOD_sys_set_fps(fps)
     }
