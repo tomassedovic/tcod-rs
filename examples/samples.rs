@@ -129,16 +129,16 @@ fn render_colors(console: &mut Offscreen, first: bool) -> () {
 		                  "The Doryen library uses 24 bits colors, for both background and foreground.");
 }
 
-fn render_offscreen(console: &mut Offscreen, first: bool) -> () {}
-fn render_lines(console: &mut Offscreen, first: bool) -> () {}
-fn render_noise(console: &mut Offscreen, first: bool) -> () {}
-fn render_fov(console: &mut Offscreen, first: bool) -> () {}
-fn render_path(console: &mut Offscreen, first: bool) -> () {}
-fn render_bsp(console: &mut Offscreen, first: bool) -> () {}
-fn render_image(console: &mut Offscreen, first: bool) -> () {}
-fn render_mouse(console: &mut Offscreen, first: bool) -> () {}
-fn render_name(console: &mut Offscreen, first: bool) -> () {}
-fn render_sdl(console: &mut Offscreen, first: bool) -> () {}
+fn render_offscreen(_console: &mut Offscreen, _first: bool) -> () {}
+fn render_lines(_console: &mut Offscreen, _first: bool) -> () {}
+fn render_noise(_console: &mut Offscreen, _first: bool) -> () {}
+fn render_fov(_console: &mut Offscreen, _first: bool) -> () {}
+fn render_path(_console: &mut Offscreen, _first: bool) -> () {}
+fn render_bsp(_console: &mut Offscreen, _first: bool) -> () {}
+fn render_image(_console: &mut Offscreen, _first: bool) -> () {}
+fn render_mouse(_console: &mut Offscreen, _first: bool) -> () {}
+fn render_name(_console: &mut Offscreen, _first: bool) -> () {}
+fn render_sdl(_console: &mut Offscreen, _first: bool) -> () {}
 
 struct MenuItem {
     name : String,
