@@ -1,32 +1,152 @@
 extern crate tcod;
 extern crate tcod_sys as ffi;
+extern crate rand;
 
 use tcod::console::{Root, Console, BackgroundFlag, Offscreen, blit};
 use tcod::console::{TextAlignment, Renderer, FontType, FontLayout};
 use tcod::input::{Key, KeyCode, KEY_PRESS, MOUSE, check_for_event, Event};
 use tcod::system;
 use tcod::colors;
+use tcod::colors::Color;
 use tcod::chars;
+use rand::Rng;
+use rand::ThreadRng;
+use std::char::from_u32;
 
-fn render_colors(first: bool) -> () {}
-fn render_offscreen(first:bool) -> () {}
-fn render_lines(first: bool) -> () {}
-fn render_noise(first: bool) -> () {}
-fn render_fov(first: bool) -> () {}
-fn render_path(first: bool) -> () {}
-fn render_bsp(first: bool) -> () {}
-fn render_image(first: bool) -> () {}
-fn render_mouse(first: bool) -> () {}
-fn render_name(first: bool) -> () {}
-fn render_sdl(first: bool) -> () {}
+static SAMPLE_SCREEN_WIDTH : i32 = 46;
+static SAMPLE_SCREEN_HEIGHT : i32 = 20;
+
+static SAMPLE_SCREEN_X : i32 = 20;
+static SAMPLE_SCREEN_Y : i32 = 10;
+
+fn render_colors(console: &mut Offscreen, first: bool) -> () {
+    enum Dir {
+        TopLeft = 0,
+        TopRight,
+        BottomLeft,
+        BottomRight,
+    };
+
+    static mut cols : [Color; 4] = [Color {r:50,  g:40, b:150},
+                                    Color {r:240, g:85, b:5},
+                                    Color {r:50,  g:35, b:240},
+                                    Color {r:10,  g:200, b:130}];
+    static mut dirr : [i8; 4] = [1, -1, 1, 1];
+    static mut dirg : [i8; 4] = [1, -1, -1, 1];
+    static mut dirb : [i8; 4] = [1, 1, 1, -1];
+
+    let rng : &mut ThreadRng = &mut rand::thread_rng();
+
+    if first {
+        system::set_fps(0);
+        console.clear()
+    }
+
+    for c in 0..4 {
+        let component = rng.gen_range(0, 3);
+        match component {
+            0 => unsafe {
+                let delta : i16 = (5 * dirr[c]) as i16;
+                cols[c].r = (cols[c].r as i16 + delta) as u8;
+                
+                if cols[c].r == 255 {
+                    dirr[c] = -1
+                } else if cols[c].r == 0 {
+                    dirr[c] = 1
+                }
+            },
+            1 => unsafe {
+                let delta : i16 = (5 * dirg[c]) as i16;
+                cols[c].g = (cols[c].g as i16 + delta) as u8;
+                
+                if cols[c].g == 255 {
+                    dirg[c] = -1
+                } else if cols[c].g == 0 {
+                    dirg[c] = 1
+                }
+            },
+            2 => unsafe {
+                let delta : i16 = (5 * dirb[c]) as i16;
+                cols[c].b = (cols[c].b as i16 + delta) as u8;
+                
+                if cols[c].b == 255 {
+                    dirb[c] = -1
+                } else if cols[c].b == 0 {
+                    dirb[c] = 1
+                }
+            },
+            _ => panic!("Random number generator is broken!")
+        }
+    }
+
+    // ==== scan the whole screen, interpolating corner colors ====
+	for x in 0..SAMPLE_SCREEN_WIDTH { unsafe {
+		let xcoef = (x as f32) / ((SAMPLE_SCREEN_WIDTH-1) as f32);
+        
+		// get the current column top and bottom colors
+		let top = colors::lerp(cols[Dir::TopLeft as usize], cols[Dir::TopRight as usize], xcoef);
+		let bottom = colors::lerp(cols[Dir::BottomLeft as usize], cols[Dir::BottomRight as usize], xcoef);
+		for y in 0..SAMPLE_SCREEN_HEIGHT {
+			let ycoef = (y as f32) / ((SAMPLE_SCREEN_HEIGHT-1) as f32);
+            
+			// get the current cell color
+			let cur_color = colors::lerp(top, bottom, ycoef);
+			console.set_char_background(x, y, cur_color, BackgroundFlag::Set);
+		}
+	}}
+
+    // ==== print the text with a random color ====
+	// get the background color at the text position
+	let mut text_color = console.get_char_background(SAMPLE_SCREEN_WIDTH/2, 5);
+	// and invert it
+	text_color.r = 255 - text_color.r;
+	text_color.g = 255 - text_color.g;
+	text_color.b = 255 - text_color.b;
+	// put random text (for performance tests) 
+	for x in 0..SAMPLE_SCREEN_WIDTH {
+        for y in 0..SAMPLE_SCREEN_HEIGHT {
+			let mut c;
+			let mut col = console.get_char_background(x, y);
+			col = colors::lerp(col, colors::BLACK, 0.5);
+			// use colored character 255 on first and last lines
+			if y == 0 || y == SAMPLE_SCREEN_HEIGHT-1 {
+				c = std::char::from_u32(0x00ff).unwrap();
+			} else {
+                let r = rng.gen_range('a' as u32, 'z' as u32);
+				c = from_u32(r).unwrap();
+			}
+			
+			console.set_default_foreground(col);
+			console.put_char(x, y, c, BackgroundFlag::None);
+		}
+	}
+
+    console.set_default_foreground(text_color);
+	// the background behind the text is slightly darkened using the Multiply flag
+	console.set_default_background(colors::GREY);
+	console.print_rect_ex(SAMPLE_SCREEN_WIDTH/2, 5, SAMPLE_SCREEN_WIDTH-2, SAMPLE_SCREEN_HEIGHT-1,
+		                  BackgroundFlag::Multiply, TextAlignment::Center,
+		                  "The Doryen library uses 24 bits colors, for both background and foreground.");
+}
+
+fn render_offscreen(console: &mut Offscreen, first: bool) -> () {}
+fn render_lines(console: &mut Offscreen, first: bool) -> () {}
+fn render_noise(console: &mut Offscreen, first: bool) -> () {}
+fn render_fov(console: &mut Offscreen, first: bool) -> () {}
+fn render_path(console: &mut Offscreen, first: bool) -> () {}
+fn render_bsp(console: &mut Offscreen, first: bool) -> () {}
+fn render_image(console: &mut Offscreen, first: bool) -> () {}
+fn render_mouse(console: &mut Offscreen, first: bool) -> () {}
+fn render_name(console: &mut Offscreen, first: bool) -> () {}
+fn render_sdl(console: &mut Offscreen, first: bool) -> () {}
 
 struct MenuItem {
     name : String,
-    function : fn(bool) -> ()
+    function : fn(&mut Offscreen, bool) -> ()
 }
 
 impl MenuItem {
-    fn new(name : &str, f : fn(bool) -> ()) -> Self {
+    fn new(name : &str, f : fn(&mut Offscreen, bool) -> ()) -> Self {
         MenuItem { name: name.to_string(), function: f}
     }
 }
@@ -55,6 +175,7 @@ fn main() {
     let mut font_layout = FontLayout::Tcod;
     let (mut nb_char_horiz, mut nb_char_vertic) = (0, 0);
     let mut fullscreen = false;
+    let mut console = Offscreen::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
     
     let renderer = Renderer::SDL;
 
@@ -163,7 +284,15 @@ fn main() {
                               else {"fullscren_mode"};
         root.print(2, 48, format!("ALT-ENTER : switch to {}", fullscreen_text));
 
-        let cur_renderer = system::get_renderer();
+        // render current sample
+        (samples[cur_sample].function)(&mut console, first);
+        blit(&console, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
+             &mut root, (SAMPLE_SCREEN_X, SAMPLE_SCREEN_Y), 1.0, 1.0);
+
+        // erase the renderer in debug mode (needed because the root
+        // console is not cleared each frame)
+		root.print(1, 1, "        ");
+
         root.set_default_foreground(colors::GREY);
         root.set_default_background(colors::BLACK);
         root.print_ex(42, 46-(ffi::TCOD_NB_RENDERERS as i32 + 1),
@@ -186,7 +315,7 @@ fn main() {
         let event = check_for_event(KEY_PRESS | MOUSE);
         match event {
             None => {continue;}
-            Some((flag, Event::Key(state))) => {
+            Some((_flag, Event::Key(state))) => {
                 match state.key {
                     Key::Special(KeyCode::Down) => {
                         cur_sample = (cur_sample + 1) % samples.len();
