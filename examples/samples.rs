@@ -2,8 +2,7 @@ extern crate tcod;
 extern crate tcod_sys as ffi;
 extern crate rand;
 
-use tcod::console::{Root, Console, BackgroundFlag, Offscreen, blit};
-use tcod::console::{TextAlignment, Renderer, FontType, FontLayout};
+use tcod::console::*;
 use tcod::input::{Key, KeyCode, KEY_PRESS, MOUSE, check_for_event, Event};
 use tcod::system;
 use tcod::colors;
@@ -13,11 +12,11 @@ use rand::Rng;
 use rand::ThreadRng;
 use std::char::from_u32;
 
-static SAMPLE_SCREEN_WIDTH : i32 = 46;
-static SAMPLE_SCREEN_HEIGHT : i32 = 20;
+const SAMPLE_SCREEN_WIDTH : i32 = 46;
+const SAMPLE_SCREEN_HEIGHT : i32 = 20;
 
-static SAMPLE_SCREEN_X : i32 = 20;
-static SAMPLE_SCREEN_Y : i32 = 10;
+const SAMPLE_SCREEN_X : i32 = 20;
+const SAMPLE_SCREEN_Y : i32 = 10;
 
 fn render_colors(console: &mut Offscreen, first: bool) -> () {
     enum Dir {
@@ -129,7 +128,53 @@ fn render_colors(console: &mut Offscreen, first: bool) -> () {
 		                  "The Doryen library uses 24 bits colors, for both background and foreground.");
 }
 
-fn render_offscreen(_console: &mut Offscreen, _first: bool) -> () {}
+fn render_offscreen(console: &mut Offscreen, first: bool) -> () {
+    //static mut secondary : &'static Offscreen  = &Offscreen::new(SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2);
+    let mut secondary : Offscreen = Offscreen::new(SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2);
+    //static mut screenshot : Offscreen = Offscreen::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
+    let mut screenshot : Offscreen = Offscreen::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
+    static mut init : bool = false;
+    static mut counter : i32 = 0;
+    static mut x : i32 = 0;
+    static mut y : i32 = 0;
+    static mut xdir : i32 = 1;
+    static mut ydir : i32 = 1;
+
+    unsafe {
+    if !init {
+        init = true;
+        secondary.print_frame(0, 0, SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2,
+                              false, BackgroundFlag::Set, Some("Offscreen console"));
+        secondary.print_rect_ex(SAMPLE_SCREEN_WIDTH/4, 2, SAMPLE_SCREEN_WIDTH/2-2,
+                                SAMPLE_SCREEN_HEIGHT/2, BackgroundFlag::None, TextAlignment::Center,
+                                "You can render to an offscreen console and blit in on another one, simulating alpha transparency.");
+    }
+    }
+
+    if first {
+        system::set_fps(30);
+        blit(console, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
+             &mut screenshot, (0, 0), 1.0, 1.0);
+    }
+
+    unsafe {
+    counter += 1;
+    if counter % 20 == 0 {
+        x += xdir;
+        y += ydir;
+        if x == SAMPLE_SCREEN_WIDTH/2 + 5 { xdir = -1 }
+        else if x == -5 { xdir = 1 }
+        if y == SAMPLE_SCREEN_WIDTH/2 + 5 { ydir = -1 }
+        else if y == -5 { ydir = 1 }
+    }
+
+    blit(&screenshot, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
+         console, (0, 0), 1.0, 1.0);
+    blit(&secondary, (0, 0), (SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2),
+         console, (x, y), 1.0, 0.75);
+    }
+}
+
 fn render_lines(_console: &mut Offscreen, _first: bool) -> () {}
 fn render_noise(_console: &mut Offscreen, _first: bool) -> () {}
 fn render_fov(_console: &mut Offscreen, _first: bool) -> () {}
