@@ -18,7 +18,28 @@ const SAMPLE_SCREEN_HEIGHT : i32 = 20;
 const SAMPLE_SCREEN_X : i32 = 20;
 const SAMPLE_SCREEN_Y : i32 = 10;
 
-fn render_colors(console: &mut Offscreen, first: bool) -> () {
+struct ColorsState {
+    cols : [Color; 4],
+    dirr : [i8; 4],
+    dirg : [i8; 4],
+    dirb : [i8; 4],
+}
+
+impl ColorsState {
+    fn new() -> ColorsState {
+        ColorsState {
+            cols : [Color {r:50,  g:40, b:150},
+                    Color {r:240, g:85, b:5},
+                    Color {r:50,  g:35, b:240},
+                    Color {r:10,  g:200, b:130}],
+            dirr : [1, -1, 1, 1],
+            dirg : [1, -1, -1, 1],
+            dirb : [1, 1, 1, -1]
+        }
+    }
+}
+
+fn render_colors(console: &mut Offscreen, first: bool, state : &mut ColorsState) -> () {
     enum Dir {
         TopLeft = 0,
         TopRight,
@@ -26,13 +47,10 @@ fn render_colors(console: &mut Offscreen, first: bool) -> () {
         BottomRight,
     };
 
-    static mut cols : [Color; 4] = [Color {r:50,  g:40, b:150},
-                                    Color {r:240, g:85, b:5},
-                                    Color {r:50,  g:35, b:240},
-                                    Color {r:10,  g:200, b:130}];
-    static mut dirr : [i8; 4] = [1, -1, 1, 1];
-    static mut dirg : [i8; 4] = [1, -1, -1, 1];
-    static mut dirb : [i8; 4] = [1, 1, 1, -1];
+    let mut cols = state.cols;
+    let mut dirr = state.dirr;
+    let mut dirg = state.dirg;
+    let mut dirb = state.dirb;
 
     let rng : &mut ThreadRng = &mut rand::thread_rng();
 
@@ -44,7 +62,7 @@ fn render_colors(console: &mut Offscreen, first: bool) -> () {
     for c in 0..4 {
         let component = rng.gen_range(0, 3);
         match component {
-            0 => unsafe {
+            0 => {
                 let delta : i16 = (5 * dirr[c]) as i16;
                 cols[c].r = (cols[c].r as i16 + delta) as u8;
                 
@@ -54,7 +72,7 @@ fn render_colors(console: &mut Offscreen, first: bool) -> () {
                     dirr[c] = 1
                 }
             },
-            1 => unsafe {
+            1 => {
                 let delta : i16 = (5 * dirg[c]) as i16;
                 cols[c].g = (cols[c].g as i16 + delta) as u8;
                 
@@ -64,7 +82,7 @@ fn render_colors(console: &mut Offscreen, first: bool) -> () {
                     dirg[c] = 1
                 }
             },
-            2 => unsafe {
+            2 => {
                 let delta : i16 = (5 * dirb[c]) as i16;
                 cols[c].b = (cols[c].b as i16 + delta) as u8;
                 
@@ -79,7 +97,7 @@ fn render_colors(console: &mut Offscreen, first: bool) -> () {
     }
 
     // ==== scan the whole screen, interpolating corner colors ====
-	for x in 0..SAMPLE_SCREEN_WIDTH { unsafe {
+	for x in 0..SAMPLE_SCREEN_WIDTH {
 		let xcoef = (x as f32) / ((SAMPLE_SCREEN_WIDTH-1) as f32);
         
 		// get the current column top and bottom colors
@@ -92,7 +110,7 @@ fn render_colors(console: &mut Offscreen, first: bool) -> () {
 			let cur_color = colors::lerp(top, bottom, ycoef);
 			console.set_char_background(x, y, cur_color, BackgroundFlag::Set);
 		}
-	}}
+	}
 
     // ==== print the text with a random color ====
 	// get the background color at the text position
@@ -128,53 +146,67 @@ fn render_colors(console: &mut Offscreen, first: bool) -> () {
 		                  "The Doryen library uses 24 bits colors, for both background and foreground.");
 }
 
-fn render_offscreen(console: &mut Offscreen, first: bool) -> () {
-    //static mut secondary : &'static Offscreen  = &Offscreen::new(SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2);
-    let mut secondary : Offscreen = Offscreen::new(SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2);
-    //static mut screenshot : Offscreen = Offscreen::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
-    let mut screenshot : Offscreen = Offscreen::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
-    static mut init : bool = false;
-    static mut counter : i32 = 0;
-    static mut x : i32 = 0;
-    static mut y : i32 = 0;
-    static mut xdir : i32 = 1;
-    static mut ydir : i32 = 1;
+struct OffscreenState {
+    secondary : Offscreen,
+    screenshot : Offscreen,
+    init : bool,
+    counter : i32,
+    x : i32,
+    y : i32,
+    xdir : i32,
+    ydir : i32
+}
 
-    unsafe {
-    if !init {
-        init = true;
-        secondary.print_frame(0, 0, SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2,
-                              false, BackgroundFlag::Set, Some("Offscreen console"));
-        secondary.print_rect_ex(SAMPLE_SCREEN_WIDTH/4, 2, SAMPLE_SCREEN_WIDTH/2-2,
-                                SAMPLE_SCREEN_HEIGHT/2, BackgroundFlag::None, TextAlignment::Center,
-                                "You can render to an offscreen console and blit in on another one, simulating alpha transparency.");
+impl OffscreenState {
+    fn new() -> OffscreenState {
+        OffscreenState {
+            secondary : Offscreen::new(SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2),
+            screenshot : Offscreen::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
+            init : false,
+            counter : 0,
+            x : 0,
+            y : 0,
+            xdir : 1,
+            ydir : 1
+        }
     }
+}
+
+fn render_offscreen(console: &mut Offscreen,
+                    first: bool,
+                    state: &mut OffscreenState) -> () {
+    if !state.init {
+        state.init = true;
+        state.secondary.print_frame(0, 0, SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2,
+                                    false, BackgroundFlag::Set, Some("Offscreen console"));
+        state.secondary.print_rect_ex(SAMPLE_SCREEN_WIDTH/4, 2, SAMPLE_SCREEN_WIDTH/2-2,
+                                      SAMPLE_SCREEN_HEIGHT/2, BackgroundFlag::None, TextAlignment::Center,
+                                      "You can render to an offscreen console and blit in on another one, simulating alpha transparency.");
     }
 
     if first {
         system::set_fps(30);
         blit(console, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
-             &mut screenshot, (0, 0), 1.0, 1.0);
+             &mut state.screenshot, (0, 0), 1.0, 1.0);
     }
 
-    unsafe {
-    counter += 1;
-    if counter % 20 == 0 {
-        x += xdir;
-        y += ydir;
-        if x == SAMPLE_SCREEN_WIDTH/2 + 5 { xdir = -1 }
-        else if x == -5 { xdir = 1 }
-        if y == SAMPLE_SCREEN_WIDTH/2 + 5 { ydir = -1 }
-        else if y == -5 { ydir = 1 }
+    state.counter += 1;
+    if state.counter % 20 == 0 {
+        state.x += state.xdir;
+        state.y += state.ydir;
+        if state.x == (SAMPLE_SCREEN_WIDTH/2 + 5) { state.xdir = -1 }
+        else if state.x == -5 { state.xdir = 1 }
+        if state.y == (SAMPLE_SCREEN_HEIGHT/2 + 5) { state.ydir = -1 }
+        else if state.y == -5 { state.ydir = 1 }
     }
 
-    blit(&screenshot, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
+    blit(&state.screenshot, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
          console, (0, 0), 1.0, 1.0);
-    blit(&secondary, (0, 0), (SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2),
-         console, (x, y), 1.0, 0.75);
-    }
+    blit(&state.secondary, (0, 0), (SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2),
+         console, (state.x, state.y), 1.0, 0.75);
 }
 
+/*
 fn render_lines(_console: &mut Offscreen, _first: bool) -> () {}
 fn render_noise(_console: &mut Offscreen, _first: bool) -> () {}
 fn render_fov(_console: &mut Offscreen, _first: bool) -> () {}
@@ -184,34 +216,24 @@ fn render_image(_console: &mut Offscreen, _first: bool) -> () {}
 fn render_mouse(_console: &mut Offscreen, _first: bool) -> () {}
 fn render_name(_console: &mut Offscreen, _first: bool) -> () {}
 fn render_sdl(_console: &mut Offscreen, _first: bool) -> () {}
-
-struct MenuItem {
-    name : String,
-    function : fn(&mut Offscreen, bool) -> ()
-}
-
-impl MenuItem {
-    fn new(name : &str, f : fn(&mut Offscreen, bool) -> ()) -> Self {
-        MenuItem { name: name.to_string(), function: f}
-    }
-}
+*/
 
 static RENDERER_NAME : [&'static str; 3] = ["F1 GLSL   ","F2 OPENGL ","F3 SDL    "];
 
 fn main() {
-    let samples = vec![
-        MenuItem::new("  True colors      ", render_colors),
-        MenuItem::new("  Offscreen console", render_offscreen),
-        MenuItem::new("  Line drawing     ", render_lines),
-        MenuItem::new("  Noise            ", render_noise),
-        MenuItem::new("  Field of view    ", render_fov),
-        MenuItem::new("  Path finding     ", render_path),
-        MenuItem::new("  Bsp toolkit      ", render_bsp),
-        MenuItem::new("  Image toolkit    ", render_image),
-        MenuItem::new("  Mouse support    ", render_mouse),
-        MenuItem::new("  Name generator   ", render_name),
-        MenuItem::new("  SDL callback     ", render_sdl)
-            ];
+    let mut colors_state = ColorsState::new();
+    let mut offscreen_state = OffscreenState::new();
+    let samples = vec!["  True colors      ".to_string(),
+        "  Offscreen console".to_string(),
+        "  Line drawing     ".to_string(),
+        "  Noise            ".to_string(),
+        "  Field of view    ".to_string(),
+        "  Path finding     ".to_string(),
+        "  Bsp toolkit      ".to_string(),
+        "  Image toolkit    ".to_string(),
+        "  Mouse support    ".to_string(),
+        "  Name generator   ".to_string(),
+        "  SDL callback     ".to_string()];
     let mut cur_sample = 0;
     let mut first = true;
     let (mut fullscreen_width, mut fullscreen_height) = (0, 0);
@@ -308,7 +330,7 @@ fn main() {
                 root.set_default_background(colors::BLACK);
             }
             let y : i32 = 46 - (samples.len() as i32 - i as i32);
-            let fun = &samples[i].name;
+            let fun = &samples[i]; //.name;
             root.print_ex(2, y, BackgroundFlag::Set, TextAlignment::Left, fun);
         }
 
@@ -329,8 +351,13 @@ fn main() {
                               else {"fullscren_mode"};
         root.print(2, 48, format!("ALT-ENTER : switch to {}", fullscreen_text));
 
-        // render current sample
-        (samples[cur_sample].function)(&mut console, first);
+        match cur_sample {
+            0 => render_colors(&mut console, first, &mut colors_state),
+            1 => render_offscreen(&mut console, first, &mut offscreen_state),
+            2...10 => {}
+            _ => panic!("Wrong menu item")
+        }
+        first = false;
         blit(&console, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
              &mut root, (SAMPLE_SCREEN_X, SAMPLE_SCREEN_Y), 1.0, 1.0);
 

@@ -1021,8 +1021,7 @@ pub fn blit<T, U>(source_console: &T,
     where T: Console,
           U: Console {
     assert!(source_x >= 0 && source_y >= 0 &&
-            source_width >= 0 && source_height >= 0 && // If width or height is 0, the source width/height is used.
-            destination_x >= 0 && destination_y >= 0);
+            source_width >= 0 && source_height >= 0);  // If width or height is 0, the source width/height is used.
 
     unsafe {
         ffi::TCOD_console_blit(*source_console.as_native(),
