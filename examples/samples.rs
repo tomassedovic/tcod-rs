@@ -226,7 +226,7 @@ struct MouseSample {
 impl MouseSample {
     fn new() -> Self {
         MouseSample { left_button: false, middle_button: false, right_button: false,
-                      mouse_state: None
+                      mouse_state: None,
         }
     }
 }
@@ -271,9 +271,9 @@ impl Render for MouseSample {
                                    Right button   : {} (toggle {})\n \
                                    Middle button  : {} (toggle {})\n \
 	                               Wheel          : {}\n",
-                                  true, //root.is_active()?"":"APPLICATION INACTIVE",
+                                  if Root::is_active() {""} else {"APPLICATION INACTIVE"},
                                   mouse.x, mouse.y,
-                                  true, // TODO: implement console.has_mouse_focus
+                                  if Root::has_focus() {""} else {"OUT OF FOCUS"},
                                   mouse.cx, mouse.cy,
                                   mouse.dx, mouse.dy,
                                   if mouse.lbutton { " ON" } else { "OFF" },

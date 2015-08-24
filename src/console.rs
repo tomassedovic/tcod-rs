@@ -251,11 +251,19 @@ impl Root {
     }
 
     /// Returns true if the `Root` console is currently active.
-    pub fn is_active(&self) -> bool {
+    pub fn is_active() -> bool {
         unsafe {
             ffi::TCOD_console_is_active() != 0
         }
     }
+
+    /// Returns true if the `Root` console has focus.
+    pub fn has_focus() -> bool {
+        unsafe {
+            ffi::TCOD_console_has_mouse_focus() != 0
+        }
+    }
+
 
     /// Returns the current fade amount (previously set by `set_fade`).
     pub fn get_fade(&self) -> u8 {
