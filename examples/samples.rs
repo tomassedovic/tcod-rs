@@ -18,16 +18,20 @@ const SAMPLE_SCREEN_HEIGHT : i32 = 20;
 const SAMPLE_SCREEN_X : i32 = 20;
 const SAMPLE_SCREEN_Y : i32 = 10;
 
-struct ColorsState {
+trait Render {
+    fn render(&mut self, console: &mut Offscreen, first: bool) -> ();
+}
+
+struct ColorsSample {
     cols : [Color; 4],
     dirr : [i8; 4],
     dirg : [i8; 4],
     dirb : [i8; 4],
 }
 
-impl ColorsState {
-    fn new() -> ColorsState {
-        ColorsState {
+impl ColorsSample {
+    fn new() -> ColorsSample {
+        ColorsSample {
             cols : [Color {r:50,  g:40, b:150},
                     Color {r:240, g:85, b:5},
                     Color {r:50,  g:35, b:240},
@@ -39,111 +43,111 @@ impl ColorsState {
     }
 }
 
-fn render_colors(console: &mut Offscreen, first: bool, state : &mut ColorsState) -> () {
-    enum Dir {
-        TopLeft = 0,
-        TopRight,
-        BottomLeft,
-        BottomRight,
-    };
+impl Render for ColorsSample {
+    fn render(&mut self, console: &mut Offscreen, first: bool) -> () {
+        enum Dir {
+            TopLeft = 0,
+            TopRight,
+            BottomLeft,
+            BottomRight,
+        };
 
-    let rng : &mut ThreadRng = &mut rand::thread_rng();
+        let rng : &mut ThreadRng = &mut rand::thread_rng();
 
-    if first {
-        system::set_fps(0);
-        console.clear()
-    }
-
-    for c in 0..4 {
-        let component = rng.gen_range(0, 3);
-        match component {
-            0 => {
-                let delta : i16 = (5 * state.dirr[c]) as i16;
-                state.cols[c].r = (state.cols[c].r as i16 + delta) as u8;
-                
-                if state.cols[c].r == 255 {
-                    state.dirr[c] = -1
-                } else if state.cols[c].r == 0 {
-                    state.dirr[c] = 1
-                }
-            },
-            1 => {
-                let delta : i16 = (5 * state.dirg[c]) as i16;
-                state.cols[c].g = (state.cols[c].g as i16 + delta) as u8;
-                
-                if state.cols[c].g == 255 {
-                    state.dirg[c] = -1
-                } else if state.cols[c].g == 0 {
-                    state.dirg[c] = 1
-                }
-            },
-            2 => {
-                let delta : i16 = (5 * state.dirb[c]) as i16;
-                state.cols[c].b = (state.cols[c].b as i16 + delta) as u8;
-                
-                if state.cols[c].b == 255 {
-                    state.dirb[c] = -1
-                } else if state.cols[c].b == 0 {
-                    state.dirb[c] = 1
-                }
-            },
-            _ => panic!("Random number generator is broken!")
+        if first {
+            system::set_fps(0);
+            console.clear()
         }
-    }
-    // println!("{:?}", cols);
-    // println!("{:?}", dirr);
 
-    // ==== scan the whole screen, interpolating corner colors ====
-	for x in 0..SAMPLE_SCREEN_WIDTH {
-		let xcoef = (x as f32) / ((SAMPLE_SCREEN_WIDTH-1) as f32);
-        
-		// get the current column top and bottom colors
-		let top = colors::lerp(state.cols[Dir::TopLeft as usize], state.cols[Dir::TopRight as usize], xcoef);
-		let bottom = colors::lerp(state.cols[Dir::BottomLeft as usize], state.cols[Dir::BottomRight as usize], xcoef);
-		for y in 0..SAMPLE_SCREEN_HEIGHT {
-			let ycoef = (y as f32) / ((SAMPLE_SCREEN_HEIGHT-1) as f32);
+        for c in 0..4 {
+            let component = rng.gen_range(0, 3);
+            match component {
+                0 => {
+                    let delta : i16 = (5 * self.dirr[c]) as i16;
+                    self.cols[c].r = (self.cols[c].r as i16 + delta) as u8;
+
+                    if self.cols[c].r == 255 {
+                        self.dirr[c] = -1
+                    } else if self.cols[c].r == 0 {
+                        self.dirr[c] = 1
+                    }
+                },
+                1 => {
+                    let delta : i16 = (5 * self.dirg[c]) as i16;
+                    self.cols[c].g = (self.cols[c].g as i16 + delta) as u8;
+
+                    if self.cols[c].g == 255 {
+                        self.dirg[c] = -1
+                    } else if self.cols[c].g == 0 {
+                        self.dirg[c] = 1
+                    }
+                },
+                2 => {
+                    let delta : i16 = (5 * self.dirb[c]) as i16;
+                    self.cols[c].b = (self.cols[c].b as i16 + delta) as u8;
+
+                    if self.cols[c].b == 255 {
+                        self.dirb[c] = -1
+                    } else if self.cols[c].b == 0 {
+                        self.dirb[c] = 1
+                    }
+                },
+                _ => panic!("Random number generator is broken!")
+            }
+        }
+
+        // ==== scan the whole screen, interpolating corner colors ====
+	    for x in 0..SAMPLE_SCREEN_WIDTH {
+		    let xcoef = (x as f32) / ((SAMPLE_SCREEN_WIDTH-1) as f32);
             
-			// get the current cell color
-			let cur_color = colors::lerp(top, bottom, ycoef);
-			console.set_char_background(x, y, cur_color, BackgroundFlag::Set);
-		}
-	}
+		    // get the current column top and bottom colors
+		    let top = colors::lerp(self.cols[Dir::TopLeft as usize], self.cols[Dir::TopRight as usize], xcoef);
+		    let bottom = colors::lerp(self.cols[Dir::BottomLeft as usize], self.cols[Dir::BottomRight as usize], xcoef);
+		    for y in 0..SAMPLE_SCREEN_HEIGHT {
+			    let ycoef = (y as f32) / ((SAMPLE_SCREEN_HEIGHT-1) as f32);
+                
+			    // get the current cell color
+			    let cur_color = colors::lerp(top, bottom, ycoef);
+			    console.set_char_background(x, y, cur_color, BackgroundFlag::Set);
+		    }
+	    }
 
-    // ==== print the text with a random color ====
-	// get the background color at the text position
-	let mut text_color = console.get_char_background(SAMPLE_SCREEN_WIDTH/2, 5);
-	// and invert it
-	text_color.r = 255 - text_color.r;
-	text_color.g = 255 - text_color.g;
-	text_color.b = 255 - text_color.b;
-	// put random text (for performance tests) 
-	for x in 0..SAMPLE_SCREEN_WIDTH {
-        for y in 0..SAMPLE_SCREEN_HEIGHT {
-			let mut c;
-			let mut col = console.get_char_background(x, y);
-			col = colors::lerp(col, colors::BLACK, 0.5);
-			// use colored character 255 on first and last lines
-			if y == 0 || y == SAMPLE_SCREEN_HEIGHT-1 {
-				c = std::char::from_u32(0x00ff).unwrap();
-			} else {
-                let r = rng.gen_range('a' as u32, 'z' as u32);
-				c = from_u32(r).unwrap();
-			}
-			
-			console.set_default_foreground(col);
-			console.put_char(x, y, c, BackgroundFlag::None);
-		}
-	}
+        // ==== print the text with a random color ====
+	    // get the background color at the text position
+	    let mut text_color = console.get_char_background(SAMPLE_SCREEN_WIDTH/2, 5);
+	    // and invert it
+	    text_color.r = 255 - text_color.r;
+	    text_color.g = 255 - text_color.g;
+	    text_color.b = 255 - text_color.b;
+	    // put random text (for performance tests)
+	    for x in 0..SAMPLE_SCREEN_WIDTH {
+            for y in 0..SAMPLE_SCREEN_HEIGHT {
+			    let mut c;
+			    let mut col = console.get_char_background(x, y);
+			    col = colors::lerp(col, colors::BLACK, 0.5);
+			    // use colored character 255 on first and last lines
+			    if y == 0 || y == SAMPLE_SCREEN_HEIGHT-1 {
+				    c = std::char::from_u32(0x00ff).unwrap();
+			    } else {
+                    let r = rng.gen_range('a' as u32, 'z' as u32);
+				    c = from_u32(r).unwrap();
+			    }
 
-    console.set_default_foreground(text_color);
-	// the background behind the text is slightly darkened using the Multiply flag
-	console.set_default_background(colors::GREY);
-	console.print_rect_ex(SAMPLE_SCREEN_WIDTH/2, 5, SAMPLE_SCREEN_WIDTH-2, SAMPLE_SCREEN_HEIGHT-1,
-		                  BackgroundFlag::Multiply, TextAlignment::Center,
-		                  "The Doryen library uses 24 bits colors, for both background and foreground.");
+			    console.set_default_foreground(col);
+			    console.put_char(x, y, c, BackgroundFlag::None);
+		    }
+	    }
+
+        console.set_default_foreground(text_color);
+	    // the background behind the text is slightly darkened using the Multiply flag
+	    console.set_default_background(colors::GREY);
+	    console.print_rect_ex(SAMPLE_SCREEN_WIDTH/2, 5, SAMPLE_SCREEN_WIDTH-2, SAMPLE_SCREEN_HEIGHT-1,
+		                      BackgroundFlag::Multiply, TextAlignment::Center,
+		                      "The Doryen library uses 24 bits colors, for both background and foreground.");
+    }
 }
 
-struct OffscreenState {
+struct OffscreenSample {
     secondary : Offscreen,
     screenshot : Offscreen,
     init : bool,
@@ -154,9 +158,9 @@ struct OffscreenState {
     ydir : i32
 }
 
-impl OffscreenState {
-    fn new() -> OffscreenState {
-        OffscreenState {
+impl OffscreenSample {
+    fn new() -> OffscreenSample {
+        OffscreenSample {
             secondary : Offscreen::new(SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2),
             screenshot : Offscreen::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
             init : false,
@@ -169,38 +173,38 @@ impl OffscreenState {
     }
 }
 
-fn render_offscreen(console: &mut Offscreen,
-                    first: bool,
-                    state: &mut OffscreenState) -> () {
-    if !state.init {
-        state.init = true;
-        state.secondary.print_frame(0, 0, SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2,
-                                    false, BackgroundFlag::Set, Some("Offscreen console"));
-        state.secondary.print_rect_ex(SAMPLE_SCREEN_WIDTH/4, 2, SAMPLE_SCREEN_WIDTH/2-2,
-                                      SAMPLE_SCREEN_HEIGHT/2, BackgroundFlag::None, TextAlignment::Center,
-                                      "You can render to an offscreen console and blit in on another one, simulating alpha transparency.");
-    }
+impl Render for OffscreenSample {
+    fn render(&mut self, console: &mut Offscreen, first: bool) -> () {
+        if !self.init {
+            self.init = true;
+            self.secondary.print_frame(0, 0, SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2,
+                                        false, BackgroundFlag::Set, Some("Offscreen console"));
+            self.secondary.print_rect_ex(SAMPLE_SCREEN_WIDTH/4, 2, SAMPLE_SCREEN_WIDTH/2-2,
+                                          SAMPLE_SCREEN_HEIGHT/2, BackgroundFlag::None, TextAlignment::Center,
+                                          "You can render to an offscreen console and blit in on another one, simulating alpha transparency.");
+        }
 
-    if first {
-        system::set_fps(30);
-        blit(console, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
-             &mut state.screenshot, (0, 0), 1.0, 1.0);
-    }
+        if first {
+            system::set_fps(30);
+            blit(console, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
+                 &mut self.screenshot, (0, 0), 1.0, 1.0);
+        }
 
-    state.counter += 1;
-    if state.counter % 20 == 0 {
-        state.x += state.xdir;
-        state.y += state.ydir;
-        if state.x == (SAMPLE_SCREEN_WIDTH/2 + 5) { state.xdir = -1 }
-        else if state.x == -5 { state.xdir = 1 }
-        if state.y == (SAMPLE_SCREEN_HEIGHT/2 + 5) { state.ydir = -1 }
-        else if state.y == -5 { state.ydir = 1 }
-    }
+        self.counter += 1;
+        if self.counter % 20 == 0 {
+            self.x += self.xdir;
+            self.y += self.ydir;
+            if self.x == (SAMPLE_SCREEN_WIDTH/2 + 5) { self.xdir = -1 }
+            else if self.x == -5 { self.xdir = 1 }
+            if self.y == (SAMPLE_SCREEN_HEIGHT/2 + 5) { self.ydir = -1 }
+            else if self.y == -5 { self.ydir = 1 }
+        }
 
-    blit(&state.screenshot, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
-         console, (0, 0), 1.0, 1.0);
-    blit(&state.secondary, (0, 0), (SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2),
-         console, (state.x, state.y), 1.0, 0.75);
+        blit(&self.screenshot, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
+             console, (0, 0), 1.0, 1.0);
+        blit(&self.secondary, (0, 0), (SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2),
+             console, (self.x, self.y), 1.0, 0.75);
+    }
 }
 
 /*
@@ -215,22 +219,36 @@ fn render_name(_console: &mut Offscreen, _first: bool) -> () {}
 fn render_sdl(_console: &mut Offscreen, _first: bool) -> () {}
 */
 
+struct MenuItem<'a> {
+    name: String,
+    render: &'a mut Render
+}
+
+impl<'a> MenuItem<'a> {
+    fn new(name: &str, render: &'a mut Render) -> Self {
+        MenuItem { name: name.to_string(), render: render }
+    }
+}
+
 static RENDERER_NAME : [&'static str; 3] = ["F1 GLSL   ","F2 OPENGL ","F3 SDL    "];
 
 fn main() {
-    let mut colors_state = ColorsState::new();
-    let mut offscreen_state = OffscreenState::new();
-    let samples = vec!["  True colors      ".to_string(),
-        "  Offscreen console".to_string(),
-        "  Line drawing     ".to_string(),
-        "  Noise            ".to_string(),
-        "  Field of view    ".to_string(),
-        "  Path finding     ".to_string(),
-        "  Bsp toolkit      ".to_string(),
-        "  Image toolkit    ".to_string(),
-        "  Mouse support    ".to_string(),
-        "  Name generator   ".to_string(),
-        "  SDL callback     ".to_string()];
+    let mut colors = ColorsSample::new();
+    let mut offscreen = OffscreenSample::new();
+    let mut samples = vec![MenuItem::new("  True colors      ", &mut colors),
+                           MenuItem::new("  Offscreen console", &mut offscreen),
+                           ];
+    // let samples = vec!["  True colors      ".to_string(),
+    //     "  Offscreen console".to_string(),
+    //     "  Line drawing     ".to_string(),
+    //     "  Noise            ".to_string(),
+    //     "  Field of view    ".to_string(),
+    //     "  Path finding     ".to_string(),
+    //     "  Bsp toolkit      ".to_string(),
+    //     "  Image toolkit    ".to_string(),
+    //     "  Mouse support    ".to_string(),
+    //     "  Name generator   ".to_string(),
+    //     "  SDL callback     ".to_string()];
     let mut cur_sample = 0;
     let mut first = true;
     let (mut fullscreen_width, mut fullscreen_height) = (0, 0);
@@ -327,7 +345,7 @@ fn main() {
                 root.set_default_background(colors::BLACK);
             }
             let y : i32 = 46 - (samples.len() as i32 - i as i32);
-            let fun = &samples[i]; //.name;
+            let fun = &samples[i].name; //.name;
             root.print_ex(2, y, BackgroundFlag::Set, TextAlignment::Left, fun);
         }
 
@@ -348,12 +366,12 @@ fn main() {
                               else {"fullscren_mode"};
         root.print(2, 48, format!("ALT-ENTER : switch to {}", fullscreen_text));
 
-        match cur_sample {
-            0 => render_colors(&mut console, first, &mut colors_state),
-            1 => render_offscreen(&mut console, first, &mut offscreen_state),
-            2...10 => {}
-            _ => panic!("Wrong menu item")
+        {
+            // Scope to limit mutable borrow
+            let mut r = &mut samples[cur_sample].render;
+            r.render(&mut console, first);
         }
+
         first = false;
         blit(&console, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
              &mut root, (SAMPLE_SCREEN_X, SAMPLE_SCREEN_Y), 1.0, 1.0);
@@ -391,7 +409,7 @@ fn main() {
                         first = true
                     }
                     Key::Special(KeyCode::Up) => {
-                        if cur_sample == 0 { cur_sample = samples.len()-1; }
+                        if cur_sample == 0 { cur_sample = samples.len() - 1; }
                         else { cur_sample -= 1; }
                         first = true
                     }
