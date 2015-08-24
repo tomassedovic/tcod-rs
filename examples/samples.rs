@@ -3,7 +3,7 @@ extern crate tcod_sys as ffi;
 extern crate rand;
 
 use tcod::console::*;
-use tcod::input::{Key, KeyCode, KEY_PRESS, MOUSE, check_for_event, Event};
+use tcod::input::*;
 use tcod::system;
 use tcod::colors;
 use tcod::colors::Color;
@@ -19,7 +19,7 @@ const SAMPLE_SCREEN_X : i32 = 20;
 const SAMPLE_SCREEN_Y : i32 = 10;
 
 trait Render {
-    fn render(&mut self, console: &mut Offscreen, first: bool) -> ();
+    fn render(&mut self, console: &mut Offscreen, first: bool, event: Option<(EventFlags, Event)>) -> ();
 }
 
 struct ColorsSample {
@@ -44,7 +44,7 @@ impl ColorsSample {
 }
 
 impl Render for ColorsSample {
-    fn render(&mut self, console: &mut Offscreen, first: bool) -> () {
+    fn render(&mut self, console: &mut Offscreen, first: bool, _event: Option<(EventFlags, Event)>) -> () {
         enum Dir {
             TopLeft = 0,
             TopRight,
@@ -174,7 +174,7 @@ impl OffscreenSample {
 }
 
 impl Render for OffscreenSample {
-    fn render(&mut self, console: &mut Offscreen, first: bool) -> () {
+    fn render(&mut self, console: &mut Offscreen, first: bool, _event: Option<(EventFlags, Event)>) -> () {
         if !self.init {
             self.init = true;
             self.secondary.print_frame(0, 0, SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2,
@@ -208,15 +208,92 @@ impl Render for OffscreenSample {
 }
 
 /*
-fn render_lines(_console: &mut Offscreen, _first: bool) -> () {}
-fn render_noise(_console: &mut Offscreen, _first: bool) -> () {}
-fn render_fov(_console: &mut Offscreen, _first: bool) -> () {}
-fn render_path(_console: &mut Offscreen, _first: bool) -> () {}
-fn render_bsp(_console: &mut Offscreen, _first: bool) -> () {}
-fn render_image(_console: &mut Offscreen, _first: bool) -> () {}
-fn render_mouse(_console: &mut Offscreen, _first: bool) -> () {}
-fn render_name(_console: &mut Offscreen, _first: bool) -> () {}
-fn render_sdl(_console: &mut Offscreen, _first: bool) -> () {}
+fn render_lines(_console: &mut Offscreen, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
+fn render_noise(_console: &mut Offscreen, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
+fn render_fov(_console: &mut Offscreen, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
+fn render_path(_console: &mut Offscreen, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
+fn render_bsp(_console: &mut Offscreen, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
+fn render_image(_console: &mut Offscreen, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
+ */
+
+struct MouseSample {
+    left_button:   bool,
+    middle_button: bool,
+    right_button:  bool,
+    mouse_state: Option<MouseState>,
+}
+
+impl MouseSample {
+    fn new() -> Self {
+        MouseSample { left_button: false, middle_button: false, right_button: false,
+                      mouse_state: None
+        }
+    }
+}
+
+impl Render for MouseSample {
+    fn render(&mut self, console: &mut Offscreen, first: bool,
+              event: Option<(EventFlags, Event)>) -> () {
+        if first {
+            system::set_fps(30);
+            console.set_default_background(colors::GREY);
+            console.set_default_foreground(colors::LIGHT_YELLOW);
+            move_cursor(320, 200);
+            show_cursor(true)
+        }
+
+        console.clear();
+        match event {
+            Some((_, Event::Mouse(mouse))) => {
+                if mouse.lbutton_pressed {self.left_button = !self.left_button;}
+                if mouse.mbutton_pressed {self.middle_button = !self.middle_button;}
+                if mouse.rbutton_pressed {self.right_button = !self.right_button;}
+
+                self.mouse_state = Some(mouse);
+            },
+            Some((_, Event::Key(state))) if state.key == Key::Special(KeyCode::Number1) => {
+                show_cursor(false);
+            },
+            Some((_, Event::Key(state))) if state.key == Key::Special(KeyCode::Number2) => {
+                show_cursor(true)
+            },
+            _ => {} // Ignore other events
+        }
+
+        if self.mouse_state.is_some() {
+            let mouse = self.mouse_state.unwrap();
+            console.print(1, 1,
+                          format!("{}\n \
+                                   Mouse position : {:4}x{:4} {}\n \
+                                   Mouse cell     : {:4}x{:4}\n \
+                                   Mouse movement : {:4}x{:4}\n \
+                                   Left button    : {} (toggle {})\n \
+                                   Right button   : {} (toggle {})\n \
+                                   Middle button  : {} (toggle {})\n \
+	                               Wheel          : {}\n",
+                                  true, //root.is_active()?"":"APPLICATION INACTIVE",
+                                  mouse.x, mouse.y,
+                                  true, // TODO: implement console.has_mouse_focus
+                                  mouse.cx, mouse.cy,
+                                  mouse.dx, mouse.dy,
+                                  if mouse.lbutton { " ON" } else { "OFF" },
+                                  if self.left_button { " ON" } else { "OFF" },
+                                  if mouse.rbutton { " ON" } else { "OFF" },
+                                  if self.right_button { " ON" } else { "OFF" },
+                                  if mouse.mbutton { " ON" } else { "OFF" },
+                                  if self.middle_button { " ON" } else { "OFF" },
+                                  if mouse.wheel_up { "UP" } else if mouse.wheel_down { "DOWN" } else { "" }
+                                  ));
+
+        }
+
+        console.print(1, 10, "1 : Hide cursor\n2 : Show cursor");
+    }
+}
+
+/*
+fn render_name(_console: &mut Offscreen, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
+fn render_sdl(_console: &mut Offscreen, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
 */
 
 struct MenuItem<'a> {
@@ -235,8 +312,10 @@ static RENDERER_NAME : [&'static str; 3] = ["F1 GLSL   ","F2 OPENGL ","F3 SDL   
 fn main() {
     let mut colors = ColorsSample::new();
     let mut offscreen = OffscreenSample::new();
+    let mut mouse = MouseSample::new();
     let mut samples = vec![MenuItem::new("  True colors      ", &mut colors),
                            MenuItem::new("  Offscreen console", &mut offscreen),
+                           MenuItem::new("  Mouse support    ", &mut mouse),
                            ];
     // let samples = vec!["  True colors      ".to_string(),
     //     "  Offscreen console".to_string(),
@@ -366,10 +445,12 @@ fn main() {
                               else {"fullscren_mode"};
         root.print(2, 48, format!("ALT-ENTER : switch to {}", fullscreen_text));
 
+        let event = check_for_event(KEY_PRESS | MOUSE);
+
         {
             // Scope to limit mutable borrow
             let mut r = &mut samples[cur_sample].render;
-            r.render(&mut console, first);
+            r.render(&mut console, first, event);
         }
 
         first = false;
@@ -399,7 +480,6 @@ fn main() {
         }
         
         root.flush();
-        let event = check_for_event(KEY_PRESS | MOUSE);
         match event {
             None => {continue;}
             Some((_flag, Event::Key(state))) => {
