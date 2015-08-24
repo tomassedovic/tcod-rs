@@ -47,11 +47,6 @@ fn render_colors(console: &mut Offscreen, first: bool, state : &mut ColorsState)
         BottomRight,
     };
 
-    let mut cols = state.cols;
-    let mut dirr = state.dirr;
-    let mut dirg = state.dirg;
-    let mut dirb = state.dirb;
-
     let rng : &mut ThreadRng = &mut rand::thread_rng();
 
     if first {
@@ -63,46 +58,48 @@ fn render_colors(console: &mut Offscreen, first: bool, state : &mut ColorsState)
         let component = rng.gen_range(0, 3);
         match component {
             0 => {
-                let delta : i16 = (5 * dirr[c]) as i16;
-                cols[c].r = (cols[c].r as i16 + delta) as u8;
+                let delta : i16 = (5 * state.dirr[c]) as i16;
+                state.cols[c].r = (state.cols[c].r as i16 + delta) as u8;
                 
-                if cols[c].r == 255 {
-                    dirr[c] = -1
-                } else if cols[c].r == 0 {
-                    dirr[c] = 1
+                if state.cols[c].r == 255 {
+                    state.dirr[c] = -1
+                } else if state.cols[c].r == 0 {
+                    state.dirr[c] = 1
                 }
             },
             1 => {
-                let delta : i16 = (5 * dirg[c]) as i16;
-                cols[c].g = (cols[c].g as i16 + delta) as u8;
+                let delta : i16 = (5 * state.dirg[c]) as i16;
+                state.cols[c].g = (state.cols[c].g as i16 + delta) as u8;
                 
-                if cols[c].g == 255 {
-                    dirg[c] = -1
-                } else if cols[c].g == 0 {
-                    dirg[c] = 1
+                if state.cols[c].g == 255 {
+                    state.dirg[c] = -1
+                } else if state.cols[c].g == 0 {
+                    state.dirg[c] = 1
                 }
             },
             2 => {
-                let delta : i16 = (5 * dirb[c]) as i16;
-                cols[c].b = (cols[c].b as i16 + delta) as u8;
+                let delta : i16 = (5 * state.dirb[c]) as i16;
+                state.cols[c].b = (state.cols[c].b as i16 + delta) as u8;
                 
-                if cols[c].b == 255 {
-                    dirb[c] = -1
-                } else if cols[c].b == 0 {
-                    dirb[c] = 1
+                if state.cols[c].b == 255 {
+                    state.dirb[c] = -1
+                } else if state.cols[c].b == 0 {
+                    state.dirb[c] = 1
                 }
             },
             _ => panic!("Random number generator is broken!")
         }
     }
+    // println!("{:?}", cols);
+    // println!("{:?}", dirr);
 
     // ==== scan the whole screen, interpolating corner colors ====
 	for x in 0..SAMPLE_SCREEN_WIDTH {
 		let xcoef = (x as f32) / ((SAMPLE_SCREEN_WIDTH-1) as f32);
         
 		// get the current column top and bottom colors
-		let top = colors::lerp(cols[Dir::TopLeft as usize], cols[Dir::TopRight as usize], xcoef);
-		let bottom = colors::lerp(cols[Dir::BottomLeft as usize], cols[Dir::BottomRight as usize], xcoef);
+		let top = colors::lerp(state.cols[Dir::TopLeft as usize], state.cols[Dir::TopRight as usize], xcoef);
+		let bottom = colors::lerp(state.cols[Dir::BottomLeft as usize], state.cols[Dir::BottomRight as usize], xcoef);
 		for y in 0..SAMPLE_SCREEN_HEIGHT {
 			let ycoef = (y as f32) / ((SAMPLE_SCREEN_HEIGHT-1) as f32);
             
