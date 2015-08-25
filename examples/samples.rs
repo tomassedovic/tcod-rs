@@ -8,6 +8,8 @@ use tcod::system;
 use tcod::colors;
 use tcod::colors::Color;
 use tcod::chars;
+use tcod::pathfinding::Dijkstra;
+use tcod::map::Map;
 use rand::Rng;
 use rand::ThreadRng;
 use std::char::from_u32;
@@ -241,7 +243,132 @@ impl Render for OffscreenSample {
 fn render_lines(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
 fn render_noise(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
 fn render_fov(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
-fn render_path(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
+ */
+
+struct PathSample<'a> {
+    px: i32,
+    py: i32,
+	dx: i32,
+    dy: i32,
+	//map: Map,
+	dark_wall: colors::Color,
+	dark_ground: colors::Color,
+	light_ground: colors::Color,
+	//static TCODPath *path=NULL;
+	using_astar: bool,
+	dijkstra_dist: f32,
+	dijkstra: Dijkstra<'a>,
+	recalculate_path: bool,
+	busy: f32,
+	old_char: char,
+}
+
+static smap : [&'static str; 20] = [
+	"##############################################",
+	"#######################      #################",
+	"#####################    #     ###############",
+	"######################  ###        ###########",
+	"##################      #####             ####",
+	"################       ########    ###### ####",
+	"###############      #################### ####",
+	"################    ######                  ##",
+	"########   #######  ######   #     #     #  ##",
+	"########   ######      ###                  ##",
+	"########                                    ##",
+	"####       ######      ###   #     #     #  ##",
+	"#### ###   ########## ####                  ##",
+	"#### ###   ##########   ###########=##########",
+	"#### ##################   #####          #####",
+	"#### ###             #### #####          #####",
+	"####           #     ####                #####",
+	"########       #     #### #####          #####",
+	"########       #####      ####################",
+	"##############################################",
+	];
+
+const TORCH_RADIUS : f32 = 10.0f32;
+const SQUARED_TORCH_RADIUS : f32 = TORCH_RADIUS * TORCH_RADIUS;
+
+impl<'a> PathSample<'a> {
+    
+    fn new() -> Self {
+        let mut map = Map::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
+        PathSample::iterate_map(&mut |x, y, c| {
+            if c == ' ' { map.set(x, y, true, true) } // ground
+            else if c == '=' { map.set(x, y, true, false) } // window
+        });
+        PathSample {
+            px: 20, py: 10,
+            dx: 24, dy: 1,
+            //map: map,
+            dark_wall: colors::Color::new(0, 0, 100),
+            dark_ground: colors::Color::new(50, 50, 150),
+            light_ground: colors::Color::new(200, 180, 50),
+            using_astar: true,
+            dijkstra_dist: 0.0,
+            dijkstra: Dijkstra::new_from_map(map, 1.41f32),
+            recalculate_path: false,
+            busy: 0.0,
+            old_char: ' ',
+        }
+    }
+
+    fn init(&mut self, console: &mut Offscreen) {
+        system::set_fps(30);
+        console.clear();
+        // we draw the foreground only the first time.
+		// during the player movement, only the @ is redrawn.
+		// the rest impacts only the background color
+		// draw the help text & player @
+        console.set_default_foreground(colors::WHITE);
+		console.put_char(self.dx, self.dy, '+', BackgroundFlag::None);
+		console.put_char(self.px, self.py, '@', BackgroundFlag::None);
+		console.print(1, 1, "IJKL / mouse :\nmove destination\nTAB : A*/dijkstra");
+		console.print(1, 4, "Using : A*");
+
+		// draw windows
+        PathSample::iterate_map(&mut |x, y, c| {
+            if c == '=' {
+                console.put_char(x, y, chars::DHLINE, BackgroundFlag::None)
+            }
+        });
+		self.recalculate_path = true;
+    }
+
+    fn iterate_map<F>(closure: &mut F) -> ()
+        where F: FnMut(i32, i32, char) -> ()
+    {
+        for (y, line) in smap.iter().enumerate() {
+            for (x, c) in line.chars().enumerate() {
+                closure(x as i32, y as i32, c)
+            }
+        }
+    }
+
+    fn display_map(&mut self, console: &mut Offscreen) {
+        PathSample::iterate_map(&mut |x, y, c| {
+            let wall = c == '#';
+            let color = if wall { self.dark_wall} else { self.dark_ground };
+            console.set_char_background(x, y, color, BackgroundFlag::Set);
+        });
+    }
+    
+}
+
+impl<'a> Render for PathSample<'a> {
+    fn render(&mut self,
+              console: &mut Offscreen,
+              _root: &Root,
+              first: bool,
+              _event: Option<(EventFlags, Event)>) -> () {
+        if first { self.init(console) }
+        if self.recalculate_path {}
+
+        self.display_map(console);
+    }
+}
+
+/*
 fn render_bsp(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
 fn render_image(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
  */
@@ -374,21 +501,19 @@ fn main() {
     let mut colors = ColorsSample::new();
     let mut offscreen = OffscreenSample::new();
     let mut mouse = MouseSample::new();
+    let mut path_sample = PathSample::new();
     let mut samples = vec![MenuItem::new("  True colors      ", &mut colors),
                            MenuItem::new("  Offscreen console", &mut offscreen),
+                           // MenuItem::new("  Line drawing     ", &mut ),
+                           // MenuItem::new("  Noise            ", &mut ),
+                           // MenuItem::new("  Field of view    ", &mut ),
+                           MenuItem::new("  Path finding     ", &mut path_sample),
+                           // MenuItem::new("  Bsp toolkit      ", &mut ),
+                           // MenuItem::new("  Image toolkit    ", &mut ),
                            MenuItem::new("  Mouse support    ", &mut mouse),
+                           // MenuItem::new("  Name generator   ", &mut ),
+                           // MenuItem::new("  SDL callback     ", &mut ),
                            ];
-    // let samples = vec!["  True colors      ".to_string(),
-    //     "  Offscreen console".to_string(),
-    //     "  Line drawing     ".to_string(),
-    //     "  Noise            ".to_string(),
-    //     "  Field of view    ".to_string(),
-    //     "  Path finding     ".to_string(),
-    //     "  Bsp toolkit      ".to_string(),
-    //     "  Image toolkit    ".to_string(),
-    //     "  Mouse support    ".to_string(),
-    //     "  Name generator   ".to_string(),
-    //     "  SDL callback     ".to_string()];
     let mut cur_sample = 0;
     let mut options = Options::new();
     let mut first = true;
