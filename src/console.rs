@@ -251,14 +251,14 @@ impl Root {
     }
 
     /// Returns true if the `Root` console is currently active.
-    pub fn is_active() -> bool {
+    pub fn is_active(&self) -> bool {
         unsafe {
             ffi::TCOD_console_is_active() != 0
         }
     }
 
     /// Returns true if the `Root` console has focus.
-    pub fn has_focus() -> bool {
+    pub fn has_focus(&self) -> bool {
         unsafe {
             ffi::TCOD_console_has_mouse_focus() != 0
         }

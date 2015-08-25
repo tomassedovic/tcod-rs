@@ -21,6 +21,7 @@ const SAMPLE_SCREEN_Y : i32 = 10;
 trait Render {
     fn render(&mut self,
               console: &mut Offscreen,
+              root: &Root,
               first: bool,
               event: Option<(EventFlags, Event)>) -> ();
 }
@@ -47,7 +48,11 @@ impl ColorsSample {
 }
 
 impl Render for ColorsSample {
-    fn render(&mut self, console: &mut Offscreen, first: bool, _event: Option<(EventFlags, Event)>) -> () {
+    fn render(&mut self,
+              console: &mut Offscreen,
+              _root: &Root,
+              first: bool,
+              _event: Option<(EventFlags, Event)>) -> () {
         enum Dir {
             TopLeft = 0,
             TopRight,
@@ -177,7 +182,11 @@ impl OffscreenSample {
 }
 
 impl Render for OffscreenSample {
-    fn render(&mut self, console: &mut Offscreen, first: bool, _event: Option<(EventFlags, Event)>) -> () {
+    fn render(&mut self,
+              console: &mut Offscreen,
+              _root: &Root,
+              first: bool,
+              _event: Option<(EventFlags, Event)>) -> () {
         if !self.init {
             self.init = true;
             self.secondary.print_frame(0, 0, SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2,
@@ -211,12 +220,12 @@ impl Render for OffscreenSample {
 }
 
 /*
-fn render_lines(_console: &mut Offscreen, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
-fn render_noise(_console: &mut Offscreen, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
-fn render_fov(_console: &mut Offscreen, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
-fn render_path(_console: &mut Offscreen, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
-fn render_bsp(_console: &mut Offscreen, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
-fn render_image(_console: &mut Offscreen, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
+fn render_lines(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
+fn render_noise(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
+fn render_fov(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
+fn render_path(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
+fn render_bsp(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
+fn render_image(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
  */
 
 struct MouseSample {
@@ -235,7 +244,10 @@ impl MouseSample {
 }
 
 impl Render for MouseSample {
-    fn render(&mut self, console: &mut Offscreen, first: bool,
+    fn render(&mut self,
+              console: &mut Offscreen,
+              root: &Root,
+              first: bool,
               event: Option<(EventFlags, Event)>) -> () {
         if first {
             system::set_fps(30);
@@ -274,9 +286,9 @@ impl Render for MouseSample {
                                    Right button   : {} (toggle {})\n \
                                    Middle button  : {} (toggle {})\n \
 	                               Wheel          : {}\n",
-                                  if Root::is_active() {""} else {"APPLICATION INACTIVE"},
+                                  if root.is_active() {""} else {"APPLICATION INACTIVE"},
                                   mouse.x, mouse.y,
-                                  if Root::has_focus() {""} else {"OUT OF FOCUS"},
+                                  if root.has_focus() {""} else {"OUT OF FOCUS"},
                                   mouse.cx, mouse.cy,
                                   mouse.dx, mouse.dy,
                                   if mouse.lbutton { " ON" } else { "OFF" },
@@ -392,7 +404,7 @@ fn main() {
         {
             // Scope to limit mutable borrow
             let mut r = &mut samples[cur_sample].render;
-            r.render(&mut console, first, event);
+            r.render(&mut console, &root, first, event);
         }
 
         first = false;
