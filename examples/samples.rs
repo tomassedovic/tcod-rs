@@ -8,7 +8,7 @@ use tcod::system;
 use tcod::colors;
 use tcod::colors::Color;
 use tcod::chars;
-use tcod::pathfinding::Dijkstra;
+use tcod::pathfinding::{Dijkstra, AStar};
 use tcod::map::Map;
 use rand::Rng;
 use rand::ThreadRng;
@@ -248,19 +248,18 @@ fn render_fov(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Opti
 struct PathSample<'a> {
     px: i32,
     py: i32,
-	dx: i32,
+    dx: i32,
     dy: i32,
-	//map: Map,
-	dark_wall: colors::Color,
-	dark_ground: colors::Color,
-	light_ground: colors::Color,
-	//static TCODPath *path=NULL;
-	using_astar: bool,
-	dijkstra_dist: f32,
-	dijkstra: Dijkstra<'a>,
-	recalculate_path: bool,
-	busy: f32,
-	old_char: char,
+    dark_wall: colors::Color,
+    dark_ground: colors::Color,
+    light_ground: colors::Color,
+    using_astar: bool,
+    dijkstra_dist: f32,
+    dijkstra: Dijkstra<'a>,
+    astar: AStar<'a>,
+    recalculate_path: bool,
+    busy: f32,
+    old_char: char,
 }
 
 static smap : [&'static str; 20] = [
@@ -292,25 +291,29 @@ const SQUARED_TORCH_RADIUS : f32 = TORCH_RADIUS * TORCH_RADIUS;
 impl<'a> PathSample<'a> {
     
     fn new() -> Self {
-        let mut map = Map::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
-        PathSample::iterate_map(&mut |x, y, c| {
-            if c == ' ' { map.set(x, y, true, true) } // ground
-            else if c == '=' { map.set(x, y, true, false) } // window
-        });
         PathSample {
             px: 20, py: 10,
             dx: 24, dy: 1,
-            //map: map,
             dark_wall: colors::Color::new(0, 0, 100),
             dark_ground: colors::Color::new(50, 50, 150),
             light_ground: colors::Color::new(200, 180, 50),
             using_astar: true,
             dijkstra_dist: 0.0,
-            dijkstra: Dijkstra::new_from_map(map, 1.41f32),
+            dijkstra: Dijkstra::new_from_map(PathSample::create_map(), 1.41f32),
+            astar: AStar::new_from_map(PathSample::create_map(), 1.41f32),
             recalculate_path: false,
             busy: 0.0,
             old_char: ' ',
         }
+    }
+
+    fn create_map() -> Map {
+        let mut map = Map::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
+        PathSample::iterate_map(&mut |x, y, c| {
+            if c == ' ' { map.set(x, y, true, true) } // ground
+            else if c == '=' { map.set(x, y, true, false) } // window
+        });
+        map
     }
 
     fn init(&mut self, console: &mut Offscreen) {
@@ -362,7 +365,7 @@ impl<'a> Render for PathSample<'a> {
               first: bool,
               _event: Option<(EventFlags, Event)>) -> () {
         if first { self.init(console) }
-        if self.recalculate_path {}
+        if self.recalculate_path { /* TODO */ }
 
         self.display_map(console);
     }
