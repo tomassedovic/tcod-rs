@@ -31,10 +31,11 @@ struct ColorsSample {
     dirr : [i8; 4],
     dirg : [i8; 4],
     dirb : [i8; 4],
+    rng : Box<ThreadRng>,
 }
 
 impl ColorsSample {
-    fn new() -> ColorsSample {
+    fn new() -> Self {
         ColorsSample {
             cols : [Color {r:50,  g:40, b:150},
                     Color {r:240, g:85, b:5},
@@ -42,33 +43,14 @@ impl ColorsSample {
                     Color {r:10,  g:200, b:130}],
             dirr : [1, -1, 1, 1],
             dirg : [1, -1, -1, 1],
-            dirb : [1, 1, 1, -1]
+            dirb : [1, 1, 1, -1],
+            rng: Box::new(rand::thread_rng()),
         }
     }
-}
 
-impl Render for ColorsSample {
-    fn render(&mut self,
-              console: &mut Offscreen,
-              _root: &Root,
-              first: bool,
-              _event: Option<(EventFlags, Event)>) -> () {
-        enum Dir {
-            TopLeft = 0,
-            TopRight,
-            BottomLeft,
-            BottomRight,
-        };
-
-        let rng : &mut ThreadRng = &mut rand::thread_rng();
-
-        if first {
-            system::set_fps(0);
-            console.clear()
-        }
-
+    fn cycle_colors(&mut self) -> () {
         for c in 0..4 {
-            let component = rng.gen_range(0, 3);
+            let component = self.rng.gen_range(0, 3);
             match component {
                 0 => {
                     let delta : i16 = (5 * self.dirr[c]) as i16;
@@ -104,13 +86,27 @@ impl Render for ColorsSample {
             }
         }
 
+    }
+
+    fn set_colors(&self, console: &mut Console) {
+        enum Dir {
+            TopLeft = 0,
+            TopRight,
+            BottomLeft,
+            BottomRight,
+        };
+
         // ==== scan the whole screen, interpolating corner colors ====
 	    for x in 0..SAMPLE_SCREEN_WIDTH {
 		    let xcoef = (x as f32) / ((SAMPLE_SCREEN_WIDTH-1) as f32);
             
 		    // get the current column top and bottom colors
-		    let top = colors::lerp(self.cols[Dir::TopLeft as usize], self.cols[Dir::TopRight as usize], xcoef);
-		    let bottom = colors::lerp(self.cols[Dir::BottomLeft as usize], self.cols[Dir::BottomRight as usize], xcoef);
+		    let top = colors::lerp(self.cols[Dir::TopLeft as usize],
+                                   self.cols[Dir::TopRight as usize],
+                                   xcoef);
+		    let bottom = colors::lerp(self.cols[Dir::BottomLeft as usize],
+                                      self.cols[Dir::BottomRight as usize],
+                                      xcoef);
 		    for y in 0..SAMPLE_SCREEN_HEIGHT {
 			    let ycoef = (y as f32) / ((SAMPLE_SCREEN_HEIGHT-1) as f32);
                 
@@ -119,7 +115,9 @@ impl Render for ColorsSample {
 			    console.set_char_background(x, y, cur_color, BackgroundFlag::Set);
 		    }
 	    }
+    }
 
+    fn print_random_chars(&mut self, console: &mut Console) -> colors::Color {
         // ==== print the text with a random color ====
 	    // get the background color at the text position
 	    let mut text_color = console.get_char_background(SAMPLE_SCREEN_WIDTH/2, 5);
@@ -137,7 +135,7 @@ impl Render for ColorsSample {
 			    if y == 0 || y == SAMPLE_SCREEN_HEIGHT-1 {
 				    c = std::char::from_u32(0x00ff).unwrap();
 			    } else {
-                    let r = rng.gen_range('a' as u32, 'z' as u32);
+                    let r = self.rng.gen_range('a' as u32, 'z' as u32);
 				    c = from_u32(r).unwrap();
 			    }
 
@@ -145,6 +143,26 @@ impl Render for ColorsSample {
 			    console.put_char(x, y, c, BackgroundFlag::None);
 		    }
 	    }
+
+        text_color
+    }
+}
+
+impl Render for ColorsSample {
+    fn render(&mut self,
+              console: &mut Offscreen,
+              _root: &Root,
+              first: bool,
+              _event: Option<(EventFlags, Event)>) -> () {
+
+        if first {
+            system::set_fps(0);
+            console.clear()
+        }
+
+        self.cycle_colors();
+        self.set_colors(console);
+        let text_color = self.print_random_chars(console);
 
         console.set_default_foreground(text_color);
 	    // the background behind the text is slightly darkened using the Multiply flag
@@ -241,6 +259,29 @@ impl MouseSample {
                       mouse_state: None,
         }
     }
+
+    fn format(&self, mouse: &MouseState, root: &Root) -> String {
+        format!("{}\n \
+                 Mouse position : {:4}x{:4} {}\n \
+                 Mouse cell     : {:4}x{:4}\n \
+                 Mouse movement : {:4}x{:4}\n \
+                 Left button    : {} (toggle {})\n \
+                 Right button   : {} (toggle {})\n \
+                 Middle button  : {} (toggle {})\n \
+	             Wheel          : {}\n",
+                if root.is_active() {""} else {"APPLICATION INACTIVE"},
+                mouse.x, mouse.y,
+                if root.has_focus() {""} else {"OUT OF FOCUS"},
+                mouse.cx, mouse.cy,
+                mouse.dx, mouse.dy,
+                if mouse.lbutton { " ON" } else { "OFF" },
+                if self.left_button { " ON" } else { "OFF" },
+                if mouse.rbutton { " ON" } else { "OFF" },
+                if self.right_button { " ON" } else { "OFF" },
+                if mouse.mbutton { " ON" } else { "OFF" },
+                if self.middle_button { " ON" } else { "OFF" },
+                if mouse.wheel_up { "UP" } else if mouse.wheel_down { "DOWN" } else { "" })
+    }
 }
 
 impl Render for MouseSample {
@@ -277,29 +318,7 @@ impl Render for MouseSample {
 
         if self.mouse_state.is_some() {
             let mouse = self.mouse_state.unwrap();
-            console.print(1, 1,
-                          format!("{}\n \
-                                   Mouse position : {:4}x{:4} {}\n \
-                                   Mouse cell     : {:4}x{:4}\n \
-                                   Mouse movement : {:4}x{:4}\n \
-                                   Left button    : {} (toggle {})\n \
-                                   Right button   : {} (toggle {})\n \
-                                   Middle button  : {} (toggle {})\n \
-	                               Wheel          : {}\n",
-                                  if root.is_active() {""} else {"APPLICATION INACTIVE"},
-                                  mouse.x, mouse.y,
-                                  if root.has_focus() {""} else {"OUT OF FOCUS"},
-                                  mouse.cx, mouse.cy,
-                                  mouse.dx, mouse.dy,
-                                  if mouse.lbutton { " ON" } else { "OFF" },
-                                  if self.left_button { " ON" } else { "OFF" },
-                                  if mouse.rbutton { " ON" } else { "OFF" },
-                                  if self.right_button { " ON" } else { "OFF" },
-                                  if mouse.mbutton { " ON" } else { "OFF" },
-                                  if self.middle_button { " ON" } else { "OFF" },
-                                  if mouse.wheel_up { "UP" } else if mouse.wheel_down { "DOWN" } else { "" }
-                                  ));
-
+            console.print(1, 1, self.format(&mouse, root))
         }
 
         console.print(1, 10, "1 : Hide cursor\n2 : Show cursor");
