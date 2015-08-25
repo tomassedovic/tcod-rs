@@ -19,7 +19,10 @@ const SAMPLE_SCREEN_X : i32 = 20;
 const SAMPLE_SCREEN_Y : i32 = 10;
 
 trait Render {
-    fn render(&mut self, console: &mut Offscreen, first: bool, event: Option<(EventFlags, Event)>) -> ();
+    fn render(&mut self,
+              console: &mut Offscreen,
+              first: bool,
+              event: Option<(EventFlags, Event)>) -> ();
 }
 
 struct ColorsSample {
@@ -307,7 +310,32 @@ impl<'a> MenuItem<'a> {
     }
 }
 
-static RENDERER_NAME : [&'static str; 3] = ["F1 GLSL   ","F2 OPENGL ","F3 SDL    "];
+static RENDERER_NAME : [&'static str; 3] = ["F1 GLSL   ", "F2 OPENGL ", "F3 SDL    "];
+
+struct Options {
+    fullscreen_width: i32,
+    fullscreen_height: i32,
+    font: String,
+    font_type: FontType,
+    font_layout: FontLayout,
+    nb_char_horiz: i32,
+    nb_char_vertic: i32,
+    fullscreen: bool,
+}
+
+impl Options {
+    fn new() -> Self {
+        Options {fullscreen_width: 0,
+                 fullscreen_height: 0,
+                 font: "consolas10x10_gs_tc.png".to_string(),
+                 font_type: FontType::Greyscale,
+                 font_layout: FontLayout::Tcod,
+                 nb_char_horiz: 0,
+                 nb_char_vertic: 0,
+                 fullscreen: false,
+        }
+    }
+}
 
 fn main() {
     let mut colors = ColorsSample::new();
@@ -329,84 +357,25 @@ fn main() {
     //     "  Name generator   ".to_string(),
     //     "  SDL callback     ".to_string()];
     let mut cur_sample = 0;
+    let mut options = Options::new();
     let mut first = true;
-    let (mut fullscreen_width, mut fullscreen_height) = (0, 0);
-    let mut font = "consolas10x10_gs_tc.png".to_string();
-    let mut font_type = FontType::Greyscale;
-    let mut font_layout = FontLayout::Tcod;
-    let (mut nb_char_horiz, mut nb_char_vertic) = (0, 0);
-    let mut fullscreen = false;
     let mut console = Offscreen::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
-    
     let renderer = Renderer::SDL;
 
-    let mut args = std::env::args();
+    parse_args(&mut options);
 
-    loop {
-        use std::i32;
-        use std::str::FromStr;
-
-        match args.next() {
-            None => break,
-            Some(opt) => match opt.as_ref() {
-                "-font" => {
-                    let n = args.next();
-                    if n.is_some() {
-                        font = n.unwrap()
-                    }
-                },
-                "-font-nb-char" => {
-                    let horiz = args.next();
-                    let vertic = args.next();
-                    if horiz.is_some() {
-                        nb_char_horiz = i32::from_str(horiz.unwrap().as_ref()).unwrap()
-                    }
-                    if vertic.is_some() {
-                        nb_char_vertic = i32::from_str(vertic.unwrap().as_ref()).unwrap()
-                    }
-                }
-                "-fullscreen-resolution" => {
-                    let width  = args.next();
-                    let height = args.next();
-                    if width.is_some() {
-                        fullscreen_width = i32::from_str(width.unwrap().as_ref()).unwrap()
-                    }
-                    if height.is_some() {
-                        fullscreen_height = i32::from_str(height.unwrap().as_ref()).unwrap()
-                    }
-                }
-                "-fullscreen" => fullscreen = true,
-                "-font-in-row" => font_layout = FontLayout::AsciiInRow,
-                "-font-greyscale" => font_type = FontType::Greyscale,
-                "-font-tcod" => font_layout = FontLayout::Tcod,
-                "-help" | "-?" => {
-                    println!("options :");
-			        println!("-font <filename> : use a custom font");
-			        println!("-font-nb-char <nb_char_horiz> <nb_char_vertic> : number of characters in the font");
-			        println!("-font-in-row : the font layout is in row instead of columns");
-			        println!("-font-tcod : the font uses TCOD layout instead of ASCII");
-			        println!("-font-greyscale : antialiased font using greyscale bitmap");
-			        println!("-fullscreen : start in fullscreen");
-			        println!("-fullscreen-resolution <screen_width> <screen_height> : force fullscreen resolution");
-			        println!("-renderer <num> : set renderer. 0 : GLSL 1 : OPENGL 2 : SDL");
-                    std::process::exit(0)
-                }
-                _ => continue
-            }
-        }
-    }
-
-    if fullscreen_width > 0 {
-		system::force_fullscreen_resolution(fullscreen_width, fullscreen_height);
+    if options.fullscreen_width > 0 {
+		system::force_fullscreen_resolution(options.fullscreen_width,
+                                            options.fullscreen_height);
     }
     let mut root = Root::initializer()
         .size(80, 50)
         .title("libtcod Rust sample")
-        .fullscreen(fullscreen)
+        .fullscreen(options.fullscreen)
         .renderer(renderer)
-        .font(font, font_layout)
-        .font_type(font_type)
-        .font_dimensions(nb_char_horiz, nb_char_vertic)
+        .font(options.font, options.font_layout)
+        .font_type(options.font_type)
+        .font_dimensions(options.nb_char_horiz, options.nb_char_vertic)
         .init();
     let mut credits_end = false;
 
@@ -414,36 +383,9 @@ fn main() {
         if !credits_end {
             credits_end = root.render_credits(60, 43, false);
         }
-        // print the list of samples
-        for i in 0..samples.len() {
-            if i == cur_sample {
-                root.set_default_foreground(colors::WHITE);
-                root.set_default_background(colors::LIGHT_BLUE);
-            } else {
-                root.set_default_foreground(colors::GREY);
-                root.set_default_background(colors::BLACK);
-            }
-            let y : i32 = 46 - (samples.len() as i32 - i as i32);
-            let fun = &samples[i].name; //.name;
-            root.print_ex(2, y, BackgroundFlag::Set, TextAlignment::Left, fun);
-        }
 
-        // print the help message
-        root.set_default_foreground(colors::GREY);
-        root.print_ex(79, 46, BackgroundFlag::None, TextAlignment::Right,
-                      format!("last frame : {:3.0} ms ({:3} fps)",
-                      system::get_last_frame_length() * 1000.0,
-                              system::get_fps()));
-        let time = system::get_elapsed_time();
-        root.print_ex(79, 47, BackgroundFlag::None, TextAlignment::Right,
-                      format!("elapsed {:8}ms {:4.2}s",
-                              time.num_milliseconds(),
-                              time.num_milliseconds() as f32/ 1000.0));
-        root.print(2, 47, format!("{}{} : select a sample",
-                                  chars::ARROW_N, chars::ARROW_S));
-        let fullscreen_text = if root.is_fullscreen() {"windowed mode"}
-                              else {"fullscren_mode"};
-        root.print(2, 48, format!("ALT-ENTER : switch to {}", fullscreen_text));
+        print_samples(&mut root, cur_sample, &samples);
+        print_help_message(&mut root);
 
         let event = check_for_event(KEY_PRESS | MOUSE);
 
@@ -461,23 +403,7 @@ fn main() {
         // console is not cleared each frame)
 		root.print(1, 1, "        ");
 
-        root.set_default_foreground(colors::GREY);
-        root.set_default_background(colors::BLACK);
-        root.print_ex(42, 46-(ffi::TCOD_NB_RENDERERS as i32 + 1),
-                      BackgroundFlag::Set, TextAlignment::Left,
-                      "Renderer :");
-        for i in 0..(ffi::TCOD_NB_RENDERERS as i32) {
-            if i == system::get_renderer() as i32{
-                root.set_default_foreground(colors::WHITE);
-                root.set_default_background(colors::LIGHT_BLUE);
-            } else {
-                root.set_default_foreground(colors::GREY);
-                root.set_default_background(colors::BLACK);
-            }
-            root.print_ex(42, 46 - (ffi::TCOD_NB_RENDERERS as i32 - i),
-                          BackgroundFlag::Set, TextAlignment::Left,
-                          RENDERER_NAME[i as usize]);
-        }
+        print_renderers(&mut root);
         
         root.flush();
         match event {
@@ -516,4 +442,117 @@ fn main() {
             _ => {continue;}
         }
     }
+}
+
+fn print_samples(root: &mut Root, cur_sample: usize, samples: &Vec<MenuItem>) -> () {
+    for i in 0..samples.len() {
+        if i == cur_sample {
+            root.set_default_foreground(colors::WHITE);
+            root.set_default_background(colors::LIGHT_BLUE);
+        } else {
+            root.set_default_foreground(colors::GREY);
+            root.set_default_background(colors::BLACK);
+        }
+        let y : i32 = 46 - (samples.len() as i32 - i as i32);
+        let fun = &samples[i].name; //.name;
+        root.print_ex(2, y, BackgroundFlag::Set, TextAlignment::Left, fun);
+    }
+
+}
+
+fn print_help_message(root: &mut Root) -> () {
+    root.set_default_foreground(colors::GREY);
+    root.print_ex(79, 46, BackgroundFlag::None, TextAlignment::Right,
+                  format!("last frame : {:3.0} ms ({:3} fps)",
+                          system::get_last_frame_length() * 1000.0,
+                          system::get_fps()));
+    let time = system::get_elapsed_time();
+    root.print_ex(79, 47, BackgroundFlag::None, TextAlignment::Right,
+                  format!("elapsed {:8}ms {:4.2}s",
+                          time.num_milliseconds(),
+                          time.num_milliseconds() as f32/ 1000.0));
+    root.print(2, 47, format!("{}{} : select a sample",
+                              chars::ARROW_N, chars::ARROW_S));
+    let fullscreen_text = if root.is_fullscreen() {"windowed mode"}
+    else {"fullscren_mode"};
+    root.print(2, 48, format!("ALT-ENTER : switch to {}", fullscreen_text));
+}
+
+fn print_renderers(root: &mut Root) -> () {
+    root.set_default_foreground(colors::GREY);
+    root.set_default_background(colors::BLACK);
+    root.print_ex(42, 46-(ffi::TCOD_NB_RENDERERS as i32 + 1),
+                  BackgroundFlag::Set, TextAlignment::Left,
+                  "Renderer :");
+    for i in 0..(ffi::TCOD_NB_RENDERERS as i32) {
+        if i == system::get_renderer() as i32{
+            root.set_default_foreground(colors::WHITE);
+            root.set_default_background(colors::LIGHT_BLUE);
+        } else {
+            root.set_default_foreground(colors::GREY);
+            root.set_default_background(colors::BLACK);
+        }
+        root.print_ex(42, 46 - (ffi::TCOD_NB_RENDERERS as i32 - i),
+                      BackgroundFlag::Set, TextAlignment::Left,
+                      RENDERER_NAME[i as usize]);
+    }
+}
+
+fn parse_args(options: &mut Options) {
+    let mut args = std::env::args();
+
+    loop {
+        use std::i32;
+        use std::str::FromStr;
+
+        match args.next() {
+            None => break,
+            Some(opt) => match opt.as_ref() {
+                "-font" => {
+                    let n = args.next();
+                    if n.is_some() {
+                        options.font = n.unwrap()
+                    }
+                },
+                "-font-nb-char" => {
+                    let horiz = args.next();
+                    let vertic = args.next();
+                    if horiz.is_some() {
+                        options.nb_char_horiz = i32::from_str(horiz.unwrap().as_ref()).unwrap()
+                    }
+                    if vertic.is_some() {
+                        options.nb_char_vertic = i32::from_str(vertic.unwrap().as_ref()).unwrap()
+                    }
+                }
+                "-fullscreen-resolution" => {
+                    let width  = args.next();
+                    let height = args.next();
+                    if width.is_some() {
+                        options.fullscreen_width = i32::from_str(width.unwrap().as_ref()).unwrap()
+                    }
+                    if height.is_some() {
+                        options.fullscreen_height = i32::from_str(height.unwrap().as_ref()).unwrap()
+                    }
+                }
+                "-fullscreen" => options.fullscreen = true,
+                "-font-in-row" => options.font_layout = FontLayout::AsciiInRow,
+                "-font-greyscale" => options.font_type = FontType::Greyscale,
+                "-font-tcod" => options.font_layout = FontLayout::Tcod,
+                "-help" | "-?" => {
+                    println!("options :");
+			        println!("-font <filename> : use a custom font");
+			        println!("-font-nb-char <nb_char_horiz> <nb_char_vertic> : number of characters in the font");
+			        println!("-font-in-row : the font layout is in row instead of columns");
+			        println!("-font-tcod : the font uses TCOD layout instead of ASCII");
+			        println!("-font-greyscale : antialiased font using greyscale bitmap");
+			        println!("-fullscreen : start in fullscreen");
+			        println!("-fullscreen-resolution <screen_width> <screen_height> : force fullscreen resolution");
+			        println!("-renderer <num> : set renderer. 0 : GLSL 1 : OPENGL 2 : SDL");
+                    std::process::exit(0)
+                }
+                _ => continue
+            }
+        }
+    }
+
 }
