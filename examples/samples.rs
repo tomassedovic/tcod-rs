@@ -352,6 +352,7 @@ struct Options {
     nb_char_horiz: i32,
     nb_char_vertic: i32,
     fullscreen: bool,
+    renderer: Renderer,
 }
 
 impl Options {
@@ -364,6 +365,7 @@ impl Options {
                  nb_char_horiz: 0,
                  nb_char_vertic: 0,
                  fullscreen: false,
+                 renderer: Renderer::SDL,
         }
     }
 }
@@ -391,7 +393,6 @@ fn main() {
     let mut options = Options::new();
     let mut first = true;
     let mut console = Offscreen::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
-    let renderer = Renderer::SDL;
 
     parse_args(&mut options);
 
@@ -403,7 +404,7 @@ fn main() {
         .size(80, 50)
         .title("libtcod Rust sample")
         .fullscreen(options.fullscreen)
-        .renderer(renderer)
+        .renderer(options.renderer)
         .font(options.font, options.font_layout)
         .font_type(options.font_type)
         .font_dimensions(options.nb_char_horiz, options.nb_char_vertic)
@@ -569,6 +570,20 @@ fn parse_args(options: &mut Options) {
                 "-font-in-row" => options.font_layout = FontLayout::AsciiInRow,
                 "-font-greyscale" => options.font_type = FontType::Greyscale,
                 "-font-tcod" => options.font_layout = FontLayout::Tcod,
+                "-renderer" => {
+                    let r = args.next();
+                    if r.is_some() {
+                        match i32::from_str(r.unwrap().as_ref()).unwrap() {
+                            0 => options.renderer = Renderer::GLSL,
+                            1 => options.renderer = Renderer::OpenGL,
+                            2 => options.renderer = Renderer::SDL,
+                            _ => {
+                                println!("Invalid renderer");
+                                std::process::exit(1)
+                            }
+                        }
+                    }
+                }
                 "-help" | "-?" => {
                     println!("options :");
 			        println!("-font <filename> : use a custom font");
