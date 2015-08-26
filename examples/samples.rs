@@ -783,6 +783,14 @@ impl MouseSample {
                 if self.middle_button { " ON" } else { "OFF" },
                 if mouse.wheel_up { "UP" } else if mouse.wheel_down { "DOWN" } else { "" })
     }
+
+    fn init(&mut self, console: &mut Console) -> () {
+        system::set_fps(30);
+        console.set_default_background(colors::GREY);
+        console.set_default_foreground(colors::LIGHT_YELLOW);
+        move_cursor(320, 200);
+        show_cursor(true)
+    }
 }
 
 impl Render for MouseSample {
@@ -792,11 +800,7 @@ impl Render for MouseSample {
               first: bool,
               event: Option<(EventFlags, Event)>) -> () {
         if first {
-            system::set_fps(30);
-            console.set_default_background(colors::GREY);
-            console.set_default_foreground(colors::LIGHT_YELLOW);
-            move_cursor(320, 200);
-            show_cursor(true)
+            self.init(console)
         }
 
         console.clear();
@@ -858,6 +862,26 @@ impl NameSample {
                      name_gen: n,
         }
     }
+
+    fn display_names(&self, console: &mut Offscreen) {
+        console.set_default_background(colors::LIGHT_BLUE);
+        console.clear();
+        console.set_default_foreground(colors::WHITE);
+        console.print(1, 1, format!("{}\n\n+ : next generator\n- : prev generator",
+		                            self.sets[self.cur_set]));
+        for (i, name) in self.names.iter().enumerate() {
+            if (name.len() as i32) < SAMPLE_SCREEN_WIDTH {
+                console.print_ex(SAMPLE_SCREEN_WIDTH - 2, 2 + i as i32,
+                                 BackgroundFlag::None, TextAlignment::Right, name)
+            }
+        }
+    }
+
+    fn limit_names(&mut self) -> () {
+        while self.names.len() >= 15 {
+            self.names.remove(0);
+        }
+    }
 }
 
 impl Render for NameSample {
@@ -870,21 +894,8 @@ impl Render for NameSample {
             system::set_fps(30);
         }
 
-        while self.names.len() >= 15 {
-            self.names.remove(0);
-        }
-
-        console.set_default_background(colors::LIGHT_BLUE);
-        console.clear();
-        console.set_default_foreground(colors::WHITE);
-        console.print(1, 1, format!("{}\n\n+ : next generator\n- : prev generator",
-		                            self.sets[self.cur_set]));
-        for (i, name) in self.names.iter().enumerate() {
-            if (name.len() as i32) < SAMPLE_SCREEN_WIDTH {
-                console.print_ex(SAMPLE_SCREEN_WIDTH - 2, 2 + i as i32,
-                                 BackgroundFlag::None, TextAlignment::Right, name)
-            }
-        }
+        self.limit_names();
+        self.display_names(console);
 
         self.delay += system::get_last_frame_length();
         if self.delay >= 0.5 {
