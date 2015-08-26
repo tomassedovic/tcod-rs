@@ -11,9 +11,12 @@ use tcod::chars;
 use tcod::pathfinding::{Dijkstra, AStar};
 use tcod::map::{Map, FovAlgorithm};
 use tcod::image;
+use tcod::namegen::Namegen;
 use rand::Rng;
 use rand::ThreadRng;
 use std::char::from_u32;
+use std::default::Default;
+use std::fs::read_dir;
 
 const SAMPLE_SCREEN_WIDTH : i32 = 46;
 const SAMPLE_SCREEN_HEIGHT : i32 = 20;
@@ -824,8 +827,45 @@ impl Render for MouseSample {
     }
 }
 
+struct NameSample {
+    sets: Vec<String>,
+    cur_set: usize,
+    delay: f32,
+    names: Vec<String>,
+    name_gen: Box<Namegen>,
+}
+
+impl NameSample {
+    fn new() -> Self {
+        let n = NameSample { sets: vec![],
+                     cur_set: 0,
+                     delay: 0.0,
+                     names: vec![],
+                     name_gen: Box::new(Namegen::new().unwrap()),
+        };
+
+        // let entries = read_dir("data/namegen").ok().expect("Could not read data/namegen");
+        // for entry in entries {
+        //     match entry {
+        //         Ok(e) => 
+        //             println!("{:?}", e.path()),
+        //         _ => {}
+        //     }
+        // };
+        n
+    }
+}
+
+impl Render for NameSample {
+    fn render(&mut self,
+              _console: &mut Offscreen,
+              _root: &Root,
+              _first: bool,
+              _event: Option<(EventFlags, Event)>) -> () {
+    }
+}
+
 /*
-fn render_name(_console: &mut Offscreen, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
 fn render_sdl(_console: &mut Offscreen, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
 */
 
@@ -876,6 +916,7 @@ fn main() {
     let mut path_sample = PathSample::new();
     let mut fov = FovSample::new();
     let mut image_sample = ImageSample::new();
+    let mut names = NameSample::new();
     let mut samples = vec![MenuItem::new("  True colors      ", &mut colors),
                            MenuItem::new("  Offscreen console", &mut offscreen),
                            // MenuItem::new("  Line drawing     ", &mut ),
@@ -885,7 +926,7 @@ fn main() {
                            // MenuItem::new("  Bsp toolkit      ", &mut ),
                            MenuItem::new("  Image toolkit    ", &mut image_sample),
                            MenuItem::new("  Mouse support    ", &mut mouse),
-                           // MenuItem::new("  Name generator   ", &mut ),
+                           MenuItem::new("  Name generator   ", &mut names),
                            // MenuItem::new("  SDL callback     ", &mut ),
                            ];
     let mut cur_sample = 0;
