@@ -15,7 +15,6 @@ use tcod::namegen::Namegen;
 use rand::Rng;
 use rand::ThreadRng;
 use std::char::from_u32;
-use std::default::Default;
 use std::fs::read_dir;
 
 const SAMPLE_SCREEN_WIDTH : i32 = 46;
@@ -832,36 +831,90 @@ struct NameSample {
     cur_set: usize,
     delay: f32,
     names: Vec<String>,
-    name_gen: Box<Namegen>,
+    name_gen: Namegen,
 }
 
 impl NameSample {
     fn new() -> Self {
-        let n = NameSample { sets: vec![],
+        let mut n = Namegen::new().unwrap();
+
+        let entries = read_dir("data/namegen").ok().expect("Could not read data/namegen");
+        for entry in entries {
+            match entry {
+                Ok(e) => {
+                    let path = e.path();
+                    let extension = path.extension().unwrap().to_str().unwrap();
+                    if extension.ends_with("cfg") {
+                        n.parse(&path);
+                    }
+                },
+                _ => {}
+            }
+        };
+        NameSample { sets: n.get_sets(),
                      cur_set: 0,
                      delay: 0.0,
                      names: vec![],
-                     name_gen: Box::new(Namegen::new().unwrap()),
-        };
-
-        // let entries = read_dir("data/namegen").ok().expect("Could not read data/namegen");
-        // for entry in entries {
-        //     match entry {
-        //         Ok(e) => 
-        //             println!("{:?}", e.path()),
-        //         _ => {}
-        //     }
-        // };
-        n
+                     name_gen: n,
+        }
     }
 }
 
 impl Render for NameSample {
     fn render(&mut self,
-              _console: &mut Offscreen,
+              console: &mut Offscreen,
               _root: &Root,
-              _first: bool,
-              _event: Option<(EventFlags, Event)>) -> () {
+              first: bool,
+              event: Option<(EventFlags, Event)>) -> () {
+        if first {
+            system::set_fps(30);
+        }
+
+        while self.names.len() >= 15 {
+            self.names.remove(0);
+        }
+
+        console.set_default_background(colors::LIGHT_BLUE);
+        console.clear();
+        console.set_default_foreground(colors::WHITE);
+        console.print(1, 1, format!("{}\n\n+ : next generator\n- : prev generator",
+		                            self.sets[self.cur_set]));
+        for (i, name) in self.names.iter().enumerate() {
+            if (name.len() as i32) < SAMPLE_SCREEN_WIDTH {
+                console.print_ex(SAMPLE_SCREEN_WIDTH - 2, 2 + i as i32,
+                                 BackgroundFlag::None, TextAlignment::Right, name)
+            }
+        }
+
+        self.delay += system::get_last_frame_length();
+        if self.delay >= 0.5 {
+            let name = &self.sets[self.cur_set];
+
+            self.delay -= 0.5;
+            self.names.push(self.name_gen.generate(name).unwrap())
+        }
+
+        match event {
+            Some((_, Event::Key(state))) => {
+                match state.key {
+                    Key::Printable('+') => {
+                        self.cur_set += 1;
+                        if self.cur_set == self.sets.len() { self.cur_set = 0 }
+                        self.names.push("======".to_string());
+                    },
+                    Key::Printable('-') => {
+                        if self.cur_set == 0 {
+                            self.cur_set = self.sets.len() - 1
+                        } else {
+                            self.cur_set -= 1;
+                        }
+                        self.names.push("======".to_string());
+                    },
+                    _ => {}
+                }
+            }
+            _ => {}
+        }
     }
 }
 
