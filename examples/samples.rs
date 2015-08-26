@@ -50,39 +50,34 @@ impl ColorsSample {
         }
     }
 
+    fn cycle_color_component(&self, color_component: u8, dir: i8) -> (u8, i8) {
+        let delta : i16 = (5 * dir) as i16;
+        let new_component = (color_component as i16 + delta) as u8;
+
+        let new_dir = if new_component == 255 { -1 }
+                      else if new_component == 0 { 1 }
+                      else { dir };
+        (new_component, new_dir)
+    }
+
     fn cycle_colors(&mut self) -> () {
         for c in 0..4 {
             let component = self.rng.gen_range(0, 3);
             match component {
                 0 => {
-                    let delta : i16 = (5 * self.dirr[c]) as i16;
-                    self.cols[c].r = (self.cols[c].r as i16 + delta) as u8;
-
-                    if self.cols[c].r == 255 {
-                        self.dirr[c] = -1
-                    } else if self.cols[c].r == 0 {
-                        self.dirr[c] = 1
-                    }
+                    let (n_c, n_d) = self.cycle_color_component(self.cols[c].r, self.dirr[c]);
+                    self.cols[c].r = n_c;
+                    self.dirr[c] = n_d;
                 },
                 1 => {
-                    let delta : i16 = (5 * self.dirg[c]) as i16;
-                    self.cols[c].g = (self.cols[c].g as i16 + delta) as u8;
-
-                    if self.cols[c].g == 255 {
-                        self.dirg[c] = -1
-                    } else if self.cols[c].g == 0 {
-                        self.dirg[c] = 1
-                    }
+                    let (n_c, n_d) = self.cycle_color_component(self.cols[c].g, self.dirg[c]);
+                    self.cols[c].g = n_c;
+                    self.dirg[c] = n_d;
                 },
                 2 => {
-                    let delta : i16 = (5 * self.dirb[c]) as i16;
-                    self.cols[c].b = (self.cols[c].b as i16 + delta) as u8;
-
-                    if self.cols[c].b == 255 {
-                        self.dirb[c] = -1
-                    } else if self.cols[c].b == 0 {
-                        self.dirb[c] = 1
-                    }
+                    let (n_c, n_d) = self.cycle_color_component(self.cols[c].b, self.dirb[c]);
+                    self.cols[c].b = n_c;
+                    self.dirb[c] = n_d;
                 },
                 _ => panic!("Random number generator is broken!")
             }
