@@ -262,7 +262,7 @@ struct PathSample<'a> {
     old_char: char,
 }
 
-static smap : [&'static str; 20] = [
+static SMAP : [&'static str; 20] = [
 	"##############################################",
 	"#######################      #################",
 	"#####################    #     ###############",
@@ -284,9 +284,6 @@ static smap : [&'static str; 20] = [
 	"########       #####      ####################",
 	"##############################################",
 	];
-
-const TORCH_RADIUS : f32 = 10.0f32;
-const SQUARED_TORCH_RADIUS : f32 = TORCH_RADIUS * TORCH_RADIUS;
 
 impl<'a> PathSample<'a> {
     
@@ -341,21 +338,98 @@ impl<'a> PathSample<'a> {
     fn iterate_map<F>(closure: &mut F) -> ()
         where F: FnMut(i32, i32, char) -> ()
     {
-        for (y, line) in smap.iter().enumerate() {
+        for (y, line) in SMAP.iter().enumerate() {
             for (x, c) in line.chars().enumerate() {
                 closure(x as i32, y as i32, c)
             }
         }
     }
 
-    fn display_map(&mut self, console: &mut Offscreen) {
+    fn display_map(&mut self, console: &mut Offscreen) -> () {
         PathSample::iterate_map(&mut |x, y, c| {
             let wall = c == '#';
             let color = if wall { self.dark_wall} else { self.dark_ground };
             console.set_char_background(x, y, color, BackgroundFlag::Set);
         });
     }
-    
+
+    fn recalculate(&mut self) -> () {
+        if self.using_astar {
+            self.astar.find((self.px, self.py), (self.dx, self.dy));
+        } else {
+            self.dijkstra_dist = 0.0;
+            self.dijkstra.compute_grid((self.px, self.py));
+            PathSample::iterate_map(&mut |x, y, _c| {
+                let d = self.dijkstra.distance_from_root((x, y));
+                if d.is_some() && d.unwrap() > self.dijkstra_dist {
+                    self.dijkstra_dist = d.unwrap()
+                }
+            });
+            self.dijkstra.find((self.dx, self.dy));
+        }
+        self.recalculate_path = false;
+        self.busy = 0.2;
+    }
+
+    fn draw_path(&mut self, console: &mut Offscreen) -> () {
+        if self.using_astar {
+            for i in 0..self.astar.len() {
+                let (x, y) = self.astar.get(i).unwrap();
+                console.set_char_background(x, y, self.light_ground, BackgroundFlag::Set);
+            }
+        } else {
+            PathSample::iterate_map(&mut |x, y, c| {
+                let wall = c == '#';
+                if !wall {
+                    let d = self.dijkstra.distance_from_root((x, y));
+                    if d.is_some() {
+                        let color = colors::lerp(self.light_ground,
+                                                 self.dark_ground,
+                                                 0.9 * d.unwrap() / self.dijkstra_dist);
+                        console.set_char_background(x, y, color, BackgroundFlag::Set);
+                    }
+                }
+            });
+            for i in 0..self.dijkstra.len() {
+                let (x, y) = self.dijkstra.get(i).unwrap();
+                console.set_char_background(x, y, self.light_ground, BackgroundFlag::Set);
+            }
+        }
+    }
+
+    fn move_creature(&mut self, console: &mut Offscreen) -> () {
+        self.busy = 0.2;
+        if self.using_astar {
+            if ! self.astar.is_empty() {
+                console.put_char(self.px, self.py, ' ', BackgroundFlag::None);
+                let (x, y) = self.astar.walk_one_step(true).unwrap();
+                self.px = x;
+                self.py = y;
+                console.put_char(self.px, self.py, '@', BackgroundFlag::None);
+            }
+        } else {
+            if !self.dijkstra.is_empty() {
+                console.put_char(self.px, self.py, ' ', BackgroundFlag::None);
+                let (x, y) = self.dijkstra.walk_one_step().unwrap();
+                self.px = x;
+                self.py = y;
+                console.put_char(self.px, self.py, '@', BackgroundFlag::None);
+                self.recalculate_path = true;
+            }
+        }
+    }
+
+    fn handle_event<F>(&mut self, console: &mut Offscreen, clo: &mut F)
+        where F: Fn(&mut PathSample) -> ()
+    {
+        console.put_char(self.dx, self.dy, self.old_char, BackgroundFlag::None);
+        clo(self);
+        self.old_char = console.get_char(self.dx, self.dy);
+        console.put_char(self.dx, self.dy, '+', BackgroundFlag::None);
+        if SMAP[self.dy as usize].to_string().chars().nth(self.dx as usize).unwrap() == ' ' {
+            self.recalculate_path = true;
+        }
+    }
 }
 
 impl<'a> Render for PathSample<'a> {
@@ -363,11 +437,56 @@ impl<'a> Render for PathSample<'a> {
               console: &mut Offscreen,
               _root: &Root,
               first: bool,
-              _event: Option<(EventFlags, Event)>) -> () {
+              event: Option<(EventFlags, Event)>) -> () {
         if first { self.init(console) }
-        if self.recalculate_path { /* TODO */ }
+        if self.recalculate_path { self.recalculate() }
 
         self.display_map(console);
+        self.draw_path(console);
+
+        self.busy -= system::get_last_frame_length();
+        if self.busy < 0.0 {
+            self.move_creature(console);
+        }
+
+        match event {
+            Some((_, Event::Key(state))) => {
+                match state.key {
+                    Key::Printable('i') | Key::Printable('I') if self.dy > 0 =>
+                        self.handle_event(console, &mut |s| s.dy -= 1),
+                    Key::Printable('k') | Key::Printable('K') if self.dy < SAMPLE_SCREEN_HEIGHT-1 =>
+                        self.handle_event(console, &mut |s| s.dy += 1),
+                    Key::Printable('j') | Key::Printable('J') if self.dx > 0 =>
+                        self.handle_event(console, &mut |s| s.dx -= 1),
+                    Key::Printable('l') | Key::Printable('L') if self.dx < SAMPLE_SCREEN_WIDTH-1 =>
+                        self.handle_event(console, &mut |s| s.dx += 1),
+                    Key::Special(KeyCode::Tab) => {
+                        self.using_astar = ! self.using_astar;
+                        if self.using_astar {
+                            console.print(1, 4, "Using : A*      ");
+                        } else {
+                            console.print(1, 4, "Using : Dijkstra");
+                        }
+                        self.recalculate_path = true;
+                    }
+                    _ => {}
+                }
+            },
+            Some((_, Event::Mouse(state))) => {
+                let mx: i32 = state.cx as i32 - SAMPLE_SCREEN_X;
+                let my: i32 = state.cy as i32 - SAMPLE_SCREEN_Y;
+                if  mx >= 0 && mx < SAMPLE_SCREEN_WIDTH &&
+                    my >= 0 && my < SAMPLE_SCREEN_HEIGHT &&
+                    (self.dx != mx || self.dy != my)
+                {
+                    self.handle_event(console, &mut |s| {
+                        s.dx = mx;
+                        s.dy = my;
+                    });
+                }
+            }
+            _ => {}
+        }
     }
 }
 
