@@ -9,7 +9,7 @@ use tcod::colors;
 use tcod::colors::Color;
 use tcod::chars;
 use tcod::pathfinding::{Dijkstra, AStar};
-use tcod::map::Map;
+use tcod::map::{Map, FovAlgorithm};
 use rand::Rng;
 use rand::ThreadRng;
 use std::char::from_u32;
@@ -96,7 +96,7 @@ impl ColorsSample {
         // ==== scan the whole screen, interpolating corner colors ====
 	    for x in 0..SAMPLE_SCREEN_WIDTH {
 		    let xcoef = (x as f32) / ((SAMPLE_SCREEN_WIDTH-1) as f32);
-            
+
 		    // get the current column top and bottom colors
 		    let top = colors::lerp(self.cols[Dir::TopLeft as usize],
                                    self.cols[Dir::TopRight as usize],
@@ -106,7 +106,7 @@ impl ColorsSample {
                                       xcoef);
 		    for y in 0..SAMPLE_SCREEN_HEIGHT {
 			    let ycoef = (y as f32) / ((SAMPLE_SCREEN_HEIGHT-1) as f32);
-                
+
 			    // get the current cell color
 			    let cur_color = colors::lerp(top, bottom, ycoef);
 			    console.set_char_background(x, y, cur_color, BackgroundFlag::Set);
@@ -237,8 +237,187 @@ impl Render for OffscreenSample {
 /*
 fn render_lines(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
 fn render_noise(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
-fn render_fov(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
- */
+*/
+
+struct FovSample {
+    px: i32,
+    py: i32,
+    recompute_fov: bool,
+    torch: bool,
+    map: Map,
+    dark_wall: colors::Color,
+    light_wall: colors::Color,
+    dark_ground: colors::Color,
+    light_ground: colors::Color,
+    // noise: Noise,
+    light_walls: bool,
+    algorithm: FovAlgorithm,
+    _torch_x: f32,
+}
+
+fn clamp(a: f32, b: f32, x: f32) -> f32 {
+    if x < a { a } else if x > b { b } else { x }
+}
+
+impl FovSample {
+    fn new() -> Self {
+        FovSample {
+            px: 20, py: 10,
+            recompute_fov: true,
+            torch: false,
+            map: create_map(),
+            dark_wall: colors::Color::new(0, 0, 100),
+            light_wall: colors::Color::new(130, 110, 50),
+            dark_ground: colors::Color::new(50, 50, 150),
+            light_ground: colors::Color::new(200, 180, 50),
+            // noise: ,
+            light_walls: true,
+            algorithm: FovAlgorithm::Basic,
+            _torch_x: 0.0,
+        }
+    }
+
+    fn init(&mut self, console: &mut Offscreen) -> () {
+        system::set_fps(30);
+        console.clear();
+        self.display_help(console);
+        console.put_char(self.px, self.py, '@', BackgroundFlag::None);
+        iterate_map(&mut |x, y, c| {
+            if c == '=' {
+                console.put_char(x, y, chars::DHLINE, BackgroundFlag::None)
+            }
+        });
+    }
+
+    fn display_help(&self, console: &mut Offscreen) -> () {
+        console.set_default_foreground(colors::WHITE);
+        console.print(1, 0,
+                      format!("IJKL : move around\nT : torch fx {}\nW : light walls {}\n+-: algo {:11?}",
+			                  if self.torch { "on " } else { "off" },
+                              if self.light_walls { "on "  } else { "off" },
+                              self.algorithm));
+        console.set_default_foreground(colors::BLACK);
+    }
+
+    fn display_map(&mut self, console: &mut Offscreen, dx: f32, dy: f32, di: f32) -> () {
+        iterate_map(&mut |x, y, c| {
+            let visible = self.map.is_in_fov(x, y);
+            let is_wall = c == '#';
+            if !visible {
+                let color = if is_wall { self.dark_wall } else { self.dark_ground };
+                console.set_char_background(x, y, color, BackgroundFlag::Set);
+            } else {
+                let mut light: colors::Color;
+                if !self.torch {
+                    light = if is_wall { self.light_wall } else { self.light_ground };
+                } else {
+                    let mut base = if is_wall { self.dark_wall } else { self.dark_ground };
+                    light = if is_wall { self.light_wall } else { self.light_ground };
+                    let r = (x as f32 - self.px as f32 + dx) *
+                        (x as f32 - self.px as f32 + dx) +
+                        (y as f32 - self.py as f32 + dy) *
+                        (y as f32 - self.py as f32 + dy);
+                    if r < SQUARED_TORCH_RADIUS {
+                        let mut l = (SQUARED_TORCH_RADIUS - r) / SQUARED_TORCH_RADIUS + di;
+                        l = clamp(0.0, 1.0, l);
+                        base = colors::lerp(base, light, l);
+                    }
+                    light = base;
+                }
+                console.set_char_background(x, y, light, BackgroundFlag::Set);
+            }
+        });
+    }
+
+    fn handle_event<F>(&mut self, console: &mut Offscreen, clo: &mut F)
+        where F: Fn(&mut FovSample) -> ()
+    {
+        console.put_char(self.px, self.py, ' ', BackgroundFlag::None);
+        clo(self);
+        console.put_char(self.px, self.py, '@', BackgroundFlag::None);
+        self.recompute_fov = true;
+    }
+
+    fn next_algorithm(&mut self) -> () {
+        match self.algorithm {
+            FovAlgorithm::Restrictive => return,
+            _ => self.algorithm = unsafe { std::mem::transmute(self.algorithm as i32 + 1) }
+        };
+    }
+
+    fn previous_algorithm(&mut self) -> () {
+        match self.algorithm {
+            FovAlgorithm::Basic => return,
+            _ => self.algorithm = unsafe { std::mem::transmute(self.algorithm as i32 - 1) }
+        };
+    }
+}
+
+impl Render for FovSample {
+    fn render(&mut self,
+              console: &mut Offscreen,
+              _root: &Root,
+              first: bool,
+              event: Option<(EventFlags, Event)>) -> () {
+        if first { self.init(console) }
+        if self.recompute_fov {
+            self.recompute_fov = false;
+            let radius = if self.torch { TORCH_RADIUS as i32 } else { 0 };
+            self.map.compute_fov(self.px, self.py, radius, self.light_walls, self.algorithm);
+        }
+
+        let dx = 0.0;
+        let dy = 0.0;
+        let di = 0.0;
+        if self.torch {
+            // TODO implemenent when noise in wrapped in Rust API
+        }
+
+        self.display_map(console, dx, dy, di);
+
+        match event {
+            Some((_, Event::Key(state))) => {
+                match state.key {
+                    Key::Printable('i') | Key::Printable('I')
+                        if self.map.is_walkable(self.px, self.py - 1) =>
+                        self.handle_event(console, &mut |s| s.py -= 1),
+                    Key::Printable('k') | Key::Printable('K')
+                        if self.map.is_walkable(self.px, self.py + 1) =>
+                        self.handle_event(console, &mut |s| s.py += 1),
+                    Key::Printable('j') | Key::Printable('J')
+                        if self.map.is_walkable(self.px - 1, self.py) =>
+                        self.handle_event(console, &mut |s| s.px -= 1),
+                    Key::Printable('l') | Key::Printable('L')
+                        if self.map.is_walkable(self.px + 1, self.py) =>
+                        self.handle_event(console, &mut |s| s.px += 1),
+                    Key::Printable('t') | Key::Printable('T') => {
+                        self.torch = !self.torch;
+                        self.display_help(console);
+                    },
+                    Key::Printable('w') | Key::Printable('W') => {
+                        self.light_walls = !self.light_walls;
+                        self.display_help(console);
+                        self.recompute_fov = true;
+                    },
+                    Key::Printable('+') => {
+                        self.next_algorithm();
+                        self.display_help(console);
+                        self.recompute_fov = true;
+                    },
+                    Key::Printable('-') => {
+                        self.previous_algorithm();
+                        self.display_help(console);
+                        self.recompute_fov = true;
+                    },
+                    _ => {}
+                }
+            },
+            _ => {}
+        }
+
+    }
+}
+
 
 struct PathSample<'a> {
     px: i32,
@@ -256,6 +435,10 @@ struct PathSample<'a> {
     busy: f32,
     old_char: char,
 }
+
+const TORCH_RADIUS : f32 = 10.0;
+const SQUARED_TORCH_RADIUS : f32 = (TORCH_RADIUS*TORCH_RADIUS);
+
 
 static SMAP : [&'static str; 20] = [
 	"##############################################",
@@ -280,8 +463,29 @@ static SMAP : [&'static str; 20] = [
 	"##############################################",
 	];
 
+fn iterate_map<F>(closure: &mut F) -> ()
+    where F: FnMut(i32, i32, char) -> ()
+{
+    for (y, line) in SMAP.iter().enumerate() {
+        for (x, c) in line.chars().enumerate() {
+            closure(x as i32, y as i32, c)
+        }
+    }
+}
+
+fn create_map() -> Map {
+    let mut map = Map::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
+    iterate_map(&mut |x, y, c| {
+        if c == ' ' { map.set(x, y, true, true) } // ground
+        else if c == '=' { map.set(x, y, true, false) } // window
+    });
+    map
+}
+
+
+
 impl<'a> PathSample<'a> {
-    
+
     fn new() -> Self {
         PathSample {
             px: 20, py: 10,
@@ -291,21 +495,12 @@ impl<'a> PathSample<'a> {
             light_ground: colors::Color::new(200, 180, 50),
             using_astar: true,
             dijkstra_dist: 0.0,
-            dijkstra: Dijkstra::new_from_map(PathSample::create_map(), 1.41f32),
-            astar: AStar::new_from_map(PathSample::create_map(), 1.41f32),
+            dijkstra: Dijkstra::new_from_map(create_map(), 1.41f32),
+            astar: AStar::new_from_map(create_map(), 1.41f32),
             recalculate_path: false,
             busy: 0.0,
             old_char: ' ',
         }
-    }
-
-    fn create_map() -> Map {
-        let mut map = Map::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
-        PathSample::iterate_map(&mut |x, y, c| {
-            if c == ' ' { map.set(x, y, true, true) } // ground
-            else if c == '=' { map.set(x, y, true, false) } // window
-        });
-        map
     }
 
     fn init(&mut self, console: &mut Offscreen) {
@@ -322,7 +517,7 @@ impl<'a> PathSample<'a> {
 		console.print(1, 4, "Using : A*");
 
 		// draw windows
-        PathSample::iterate_map(&mut |x, y, c| {
+        iterate_map(&mut |x, y, c| {
             if c == '=' {
                 console.put_char(x, y, chars::DHLINE, BackgroundFlag::None)
             }
@@ -330,18 +525,8 @@ impl<'a> PathSample<'a> {
 		self.recalculate_path = true;
     }
 
-    fn iterate_map<F>(closure: &mut F) -> ()
-        where F: FnMut(i32, i32, char) -> ()
-    {
-        for (y, line) in SMAP.iter().enumerate() {
-            for (x, c) in line.chars().enumerate() {
-                closure(x as i32, y as i32, c)
-            }
-        }
-    }
-
     fn display_map(&mut self, console: &mut Offscreen) -> () {
-        PathSample::iterate_map(&mut |x, y, c| {
+        iterate_map(&mut |x, y, c| {
             let wall = c == '#';
             let color = if wall { self.dark_wall} else { self.dark_ground };
             console.set_char_background(x, y, color, BackgroundFlag::Set);
@@ -354,7 +539,7 @@ impl<'a> PathSample<'a> {
         } else {
             self.dijkstra_dist = 0.0;
             self.dijkstra.compute_grid((self.px, self.py));
-            PathSample::iterate_map(&mut |x, y, _c| {
+            iterate_map(&mut |x, y, _c| {
                 let d = self.dijkstra.distance_from_root((x, y));
                 if d.is_some() && d.unwrap() > self.dijkstra_dist {
                     self.dijkstra_dist = d.unwrap()
@@ -373,7 +558,7 @@ impl<'a> PathSample<'a> {
                 console.set_char_background(x, y, self.light_ground, BackgroundFlag::Set);
             }
         } else {
-            PathSample::iterate_map(&mut |x, y, c| {
+            iterate_map(&mut |x, y, c| {
                 let wall = c == '#';
                 if !wall {
                     let d = self.dijkstra.distance_from_root((x, y));
@@ -619,11 +804,12 @@ fn main() {
     let mut offscreen = OffscreenSample::new();
     let mut mouse = MouseSample::new();
     let mut path_sample = PathSample::new();
+    let mut fov = FovSample::new();
     let mut samples = vec![MenuItem::new("  True colors      ", &mut colors),
                            MenuItem::new("  Offscreen console", &mut offscreen),
                            // MenuItem::new("  Line drawing     ", &mut ),
                            // MenuItem::new("  Noise            ", &mut ),
-                           // MenuItem::new("  Field of view    ", &mut ),
+                           MenuItem::new("  Field of view    ", &mut fov),
                            MenuItem::new("  Path finding     ", &mut path_sample),
                            // MenuItem::new("  Bsp toolkit      ", &mut ),
                            // MenuItem::new("  Image toolkit    ", &mut ),
@@ -678,7 +864,7 @@ fn main() {
 		root.print(1, 1, "        ");
 
         print_renderers(&mut root);
-        
+
         root.flush();
         match event {
             None => {continue;}
