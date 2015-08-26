@@ -10,6 +10,7 @@ use tcod::colors::Color;
 use tcod::chars;
 use tcod::pathfinding::{Dijkstra, AStar};
 use tcod::map::{Map, FovAlgorithm};
+use tcod::image;
 use rand::Rng;
 use rand::ThreadRng;
 use std::char::from_u32;
@@ -672,8 +673,77 @@ impl<'a> Render for PathSample<'a> {
 
 /*
 fn render_bsp(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
-fn render_image(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
  */
+
+struct ImageSample {
+    img: image::Image,
+    circle: image::Image,
+    blue: colors::Color,
+    green: colors::Color,
+}
+
+impl ImageSample {
+    fn new() -> Self {
+        let mut i = ImageSample {
+            img: image::Image::from_file("data/img/skull.png")
+                .ok()
+                .expect("Could not load data/img/skull.png"),
+            circle: image::Image::from_file("data/img/circle.png")
+                .ok()
+                .expect("Could not load data/img/circle.png"),
+            blue: colors::Color::new(0, 0, 255),
+            green: colors::Color::new(0, 255, 0),
+        };
+        i.img.set_key_color(colors::BLACK);
+        i
+    }
+}
+
+impl Render for ImageSample {
+    fn render(&mut self,
+              console: &mut Offscreen,
+              _root: &Root,
+              first: bool,
+              _event: Option<(EventFlags, Event)>) -> () {
+        if first {
+            system::set_fps(30)
+        }
+
+        console.set_default_background(colors::BLACK);
+        console.clear();
+
+        let elapsed_seconds: f32 = (system::get_elapsed_time().num_milliseconds() as f32) / 1000.0;
+	    let x = (SAMPLE_SCREEN_WIDTH/2) as f32 + (elapsed_seconds as f32).cos() * 10.0;
+	    let y = ( SAMPLE_SCREEN_HEIGHT/2 ) as f32;
+	    let scale_x = 0.2 + 1.8 * (1.0 + (elapsed_seconds / 2.0).cos()) / 2.0;
+	    let scale_y = scale_x;
+	    let angle = elapsed_seconds;
+	    let elapsed = system::get_elapsed_time().num_milliseconds() / 2000;
+
+        if (elapsed & 1) != 0 {
+            // split the color channels of circle.png
+		    // the red channel
+		    console.set_default_background(colors::RED);
+		    console.rect(0, 3, 15, 15, false, BackgroundFlag::Set);
+		    image::blit_rect(&self.circle, (-1, -1), console, (0, 3), BackgroundFlag::Multiply);
+		    // the green channel
+		    console.set_default_background(self.green);
+		    console.rect(15, 3, 15, 15, false, BackgroundFlag::Set);
+		    image::blit_rect(&self.circle, (-1, -1), console, (15, 3), BackgroundFlag::Multiply);
+		    // the blue channel
+		    console.set_default_background(self.blue);
+		    console.rect(30, 3, 15, 15, false, BackgroundFlag::Set);
+            image::blit_rect(&self.circle, (-1, -1), console, (30, 3), BackgroundFlag::Multiply);
+        } else {
+            image::blit_rect(&self.circle, (-1, -1), console, ( 0, 3), BackgroundFlag::Set);
+            image::blit_rect(&self.circle, (-1, -1), console, (15, 3), BackgroundFlag::Set);
+            image::blit_rect(&self.circle, (-1, -1), console, (30, 3), BackgroundFlag::Set);
+        }
+
+        image::blit(&self.img, (scale_x, scale_y), angle, console, (x, y), BackgroundFlag::Set);
+    }
+}
+
 
 struct MouseSample {
     left_button:   bool,
@@ -805,6 +875,7 @@ fn main() {
     let mut mouse = MouseSample::new();
     let mut path_sample = PathSample::new();
     let mut fov = FovSample::new();
+    let mut image_sample = ImageSample::new();
     let mut samples = vec![MenuItem::new("  True colors      ", &mut colors),
                            MenuItem::new("  Offscreen console", &mut offscreen),
                            // MenuItem::new("  Line drawing     ", &mut ),
@@ -812,7 +883,7 @@ fn main() {
                            MenuItem::new("  Field of view    ", &mut fov),
                            MenuItem::new("  Path finding     ", &mut path_sample),
                            // MenuItem::new("  Bsp toolkit      ", &mut ),
-                           // MenuItem::new("  Image toolkit    ", &mut ),
+                           MenuItem::new("  Image toolkit    ", &mut image_sample),
                            MenuItem::new("  Mouse support    ", &mut mouse),
                            // MenuItem::new("  Name generator   ", &mut ),
                            // MenuItem::new("  SDL callback     ", &mut ),
