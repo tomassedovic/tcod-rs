@@ -944,8 +944,6 @@ impl<'a> MenuItem<'a> {
     }
 }
 
-static RENDERER_NAME : [&'static str; 3] = ["F1 GLSL   ", "F2 OPENGL ", "F3 SDL    "];
-
 struct Options {
     fullscreen_width: i32,
     fullscreen_height: i32,
@@ -1039,8 +1037,6 @@ fn main() {
         // console is not cleared each frame)
 		root.print(1, 1, "        ");
 
-        print_renderers(&mut root);
-
         root.flush();
         match event {
             None => {continue;}
@@ -1063,15 +1059,6 @@ fn main() {
                         // TODO
                     }
                     Key::Special(KeyCode::Escape) => { break }
-                    Key::Special(KeyCode::F1) => {
-                        system::set_renderer(Renderer::GLSL)
-                    }
-                    Key::Special(KeyCode::F2) => {
-                        system::set_renderer(Renderer::OpenGL)
-                    }
-                    Key::Special(KeyCode::F3) => {
-                        system::set_renderer(Renderer::SDL)
-                    }
                     _ => {continue;}
                 }
             }
@@ -1112,26 +1099,6 @@ fn print_help_message(root: &mut Root) -> () {
     let fullscreen_text = if root.is_fullscreen() {"windowed mode"}
     else {"fullscren_mode"};
     root.print(2, 48, format!("ALT-ENTER : switch to {}", fullscreen_text));
-}
-
-fn print_renderers(root: &mut Root) -> () {
-    root.set_default_foreground(colors::GREY);
-    root.set_default_background(colors::BLACK);
-    root.print_ex(42, 46-(ffi::TCOD_NB_RENDERERS as i32 + 1),
-                  BackgroundFlag::Set, TextAlignment::Left,
-                  "Renderer :");
-    for i in 0..(ffi::TCOD_NB_RENDERERS as i32) {
-        if i == system::get_renderer() as i32{
-            root.set_default_foreground(colors::WHITE);
-            root.set_default_background(colors::LIGHT_BLUE);
-        } else {
-            root.set_default_foreground(colors::GREY);
-            root.set_default_background(colors::BLACK);
-        }
-        root.print_ex(42, 46 - (ffi::TCOD_NB_RENDERERS as i32 - i),
-                      BackgroundFlag::Set, TextAlignment::Left,
-                      RENDERER_NAME[i as usize]);
-    }
 }
 
 fn parse_args(options: &mut Options) {
