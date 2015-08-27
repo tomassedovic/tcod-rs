@@ -82,45 +82,33 @@ impl Default for KeyCode {
     }
 }
 
-
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub enum Key {
-    Printable(char),
-    Special(KeyCode),
-}
-
-impl Default for Key {
-    fn default() -> Self {
-        Key::Special(Default::default())
-    }
-}
-
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub struct KeyState {
-    pub key: Key,
+#[derive(Copy, Clone, PartialEq, Debug, Default)]
+pub struct Key {
+    pub code: KeyCode,
+    pub printable: char,
     pub pressed: bool,
     pub left_alt: bool,
     pub left_ctrl: bool,
     pub right_alt: bool,
     pub right_ctrl: bool,
     pub shift: bool,
+    pub alt: bool,
+    pub ctrl: bool,
 }
 
-impl Into<KeyState> for ffi::TCOD_key_t {
-    fn into(self) -> KeyState {
-        let key = if self.vk == ffi::TCODK_CHAR {
-            Key::Printable(self.c as u8 as char)
-        } else {
-            Key::Special(keycode_from_u32(self.vk).unwrap())
-        };
-        KeyState{
-            key: key,
+impl Into<Key> for ffi::TCOD_key_t {
+    fn into(self) -> Key {
+        Key {
+            code: keycode_from_u32(self.vk).unwrap(),
+            printable: self.c as u8 as char,
             pressed: self.pressed != 0,
             left_alt: self.lalt != 0,
             left_ctrl: self.lctrl != 0,
             right_alt: self.ralt != 0,
             right_ctrl: self.rctrl != 0,
             shift: self.shift != 0,
+            alt: self.lalt != 0 || self.ralt != 0,
+            ctrl: self.lctrl != 0 || self.rctrl != 0,
         }
     }
 }
@@ -242,7 +230,7 @@ pub fn events() -> EventIterator {
 
 #[derive(Copy, Clone, Debug)]
 pub enum Event {
-    Key(KeyState),
+    Key(Key),
     Mouse(MouseState)
 }
 

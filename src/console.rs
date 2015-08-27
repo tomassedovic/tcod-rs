@@ -65,7 +65,7 @@ use bindings::ffi;
 use bindings::{AsNative, FromNative, c_bool, c_char, CString};
 
 use colors::Color;
-use input::{KeyPressFlags, KeyState};
+use input::{Key, KeyPressFlags};
 
 /// A type representing secondary consoles
 ///
@@ -292,7 +292,7 @@ impl Root {
     /// This function will wait for a keypress event from the user, returning the [KeyState](../input/struct.KeyState.html)
     /// that represents the event. If `flush` is true, all pending keypresses are flushed from the
     /// keyboard buffer. If false, it returns the first element from it.
-    pub fn wait_for_keypress(&mut self, flush: bool) -> KeyState {
+    pub fn wait_for_keypress(&mut self, flush: bool) -> Key {
         let tcod_key = unsafe {
             ffi::TCOD_console_wait_for_keypress(flush as c_bool)
         };
@@ -302,7 +302,7 @@ impl Root {
     /// This function checks if the user pressed a key. It returns the
     /// [KeyState](../input/struct.KeyState.html) representing the
     /// event if they have, or `None` if they have not.
-    pub fn check_for_keypress(&self, status: KeyPressFlags) -> Option<KeyState> {
+    pub fn check_for_keypress(&self, status: KeyPressFlags) -> Option<Key> {
         let tcod_key = unsafe {
             ffi::TCOD_console_check_for_keypress(status.bits() as i32)
         };

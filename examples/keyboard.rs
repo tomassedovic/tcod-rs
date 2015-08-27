@@ -1,7 +1,7 @@
 extern crate tcod;
 
 use tcod::{Console, RootConsole, BackgroundFlag};
-use tcod::input::Key::Special;
+use tcod::input::Key;
 use tcod::input::KeyCode::{Up, Down, Left, Right, Escape};
 
 fn main() {
@@ -20,12 +20,12 @@ fn main() {
         // libtcod 1.5.1 has a bug where `wait_for_keypress` emits two events:
         // one for key down and one for key up. So we ignore the "key up" ones.
         if keypress.pressed {
-            match keypress.key {
-                Special(Escape) => break,
-                Special(Up) => y -= 1,
-                Special(Down) => y += 1,
-                Special(Left) => x -= 1,
-                Special(Right) => x += 1,
+            match keypress {
+                Key { code: Escape, .. } => break,
+                Key { code: Up, .. } => y -= 1,
+                Key { code: Down, .. } => y += 1,
+                Key { code: Left, .. } => x -= 1,
+                Key { code: Right, .. } => x += 1,
                 _ => {}
             }
         }
