@@ -88,7 +88,7 @@ impl<'a> AStar<'a> {
         }
     }
 
-    pub fn iter<'b>(&'b self) -> AStarPathIter<'a, 'b> {
+    pub fn iter(&'a self) -> AStarPathIter<'a> {
         AStarPathIter { current: -1, path: self }
     }
 
@@ -237,7 +237,7 @@ impl<'a> Dijkstra<'a> {
         }
     }
 
-    pub fn iter<'b>(&'b self) -> DijkstraPathIter<'a, 'b> {
+    pub fn iter(&'a self) -> DijkstraPathIter<'a> {
         DijkstraPathIter { current: -1, path: self }
     }
 
@@ -340,12 +340,12 @@ impl Iterator for DijkstraIterator {
     }
 }
 
-pub struct AStarPathIter<'a, 'b> where 'a: 'b {
+pub struct AStarPathIter<'a> {
     current: i32,
-    path: &'b AStar<'a>,
+    path: &'a AStar<'a>,
 }
 
-impl<'a, 'b> Iterator for AStarPathIter<'a, 'b> {
+impl<'a> Iterator for AStarPathIter<'a> {
     type Item = (i32, i32);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -363,12 +363,12 @@ impl<'a, 'b> Iterator for AStarPathIter<'a, 'b> {
     }
 }
 
-pub struct DijkstraPathIter<'a, 'b> where 'a: 'b {
+pub struct DijkstraPathIter<'a> {
     current: i32,
-    path: &'b Dijkstra<'a>,
+    path: &'a Dijkstra<'a>,
 }
 
-impl<'a, 'b> Iterator for DijkstraPathIter<'a, 'b> {
+impl<'a> Iterator for DijkstraPathIter<'a> {
     type Item = (i32, i32);
 
     fn next(&mut self) -> Option<Self::Item> {
