@@ -953,7 +953,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
     fn print_frame<T>(&mut self, x: i32, y: i32, width: i32, height: i32,
                      clear: bool, background_flag: BackgroundFlag, title: Option<T>) where Self: Sized, T: AsRef<str> {
         assert!(x >= 0 && y >= 0 && width >= 0 && height >= 0);
-        assert!(x + width < self.width() && y + height < self.height());
+        assert!(x + width <= self.width() && y + height <= self.height());
         let c_title: *const c_char = match title {
             Some(s) => {
                 assert!(s.as_ref().is_ascii());
@@ -1021,8 +1021,7 @@ pub fn blit<T, U>(source_console: &T,
     where T: Console,
           U: Console {
     assert!(source_x >= 0 && source_y >= 0 &&
-            source_width >= 0 && source_height >= 0 && // If width or height is 0, the source width/height is used.
-            destination_x >= 0 && destination_y >= 0);
+            source_width >= 0 && source_height >= 0); // If width or height is 0, the source width/height is used.
 
     unsafe {
         ffi::TCOD_console_blit(*source_console.as_native(),
