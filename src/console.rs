@@ -257,6 +257,14 @@ impl Root {
         }
     }
 
+    /// Returns true if the `Root` console has focus.
+    pub fn has_focus(&self) -> bool {
+        unsafe {
+            ffi::TCOD_console_has_mouse_focus() != 0
+        }
+    }
+
+
     /// Returns the current fade amount (previously set by `set_fade`).
     pub fn get_fade(&self) -> u8 {
         unsafe {
@@ -350,6 +358,17 @@ impl Root {
             let c_title = CString::new(title.as_ref().as_bytes()).unwrap();
             ffi::TCOD_console_set_window_title(c_title.as_ptr());
         }
+    }
+
+    /// Embeds libtcod credits in a console.
+    /// Returns true when the credits screen is finished.
+
+    pub fn render_credits(&self, x : i32, y: i32, alpha: bool) -> bool {
+        unsafe {
+            let result = ffi::TCOD_console_credits_render(x, y, alpha as c_bool);
+            result != 0
+        }
+
     }
 
     fn set_custom_font(font_path: &Path,
