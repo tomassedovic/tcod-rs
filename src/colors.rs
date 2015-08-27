@@ -364,7 +364,6 @@ pub const PEACH: Color = Color{r: 255, g: 159, b: 127};
 #[cfg(test)]
 mod test {
     #[cfg(feature = "rustc-serialize_impls")] use ::rustc_serialize::json;
-    use super::Color;
 
     #[test]
     #[cfg(feature = "rustc-serialize_impls")]

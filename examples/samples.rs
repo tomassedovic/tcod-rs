@@ -28,7 +28,7 @@ trait Render {
               console: &mut Offscreen,
               root: &Root,
               first: bool,
-              event: Option<(EventFlags, Event)>) -> ();
+              event: Option<(EventFlags, Event)>);
 }
 
 struct ColorsSample {
@@ -63,7 +63,7 @@ impl ColorsSample {
         (new_component, new_dir)
     }
 
-    fn cycle_colors(&mut self) -> () {
+    fn cycle_colors(&mut self) {
         for c in 0..4 {
             let component = self.rng.gen_range(0, 3);
             match component {
@@ -153,7 +153,7 @@ impl Render for ColorsSample {
               console: &mut Offscreen,
               _root: &Root,
               first: bool,
-              _event: Option<(EventFlags, Event)>) -> () {
+              _event: Option<(EventFlags, Event)>) {
 
         if first {
             system::set_fps(0);
@@ -204,7 +204,7 @@ impl Render for OffscreenSample {
               console: &mut Offscreen,
               _root: &Root,
               first: bool,
-              _event: Option<(EventFlags, Event)>) -> () {
+              _event: Option<(EventFlags, Event)>) {
         if !self.init {
             self.init = true;
             self.secondary.print_frame(0, 0, SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2,
@@ -238,8 +238,8 @@ impl Render for OffscreenSample {
 }
 
 /*
-fn render_lines(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
-fn render_noise(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
+fn render_lines(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) {}
+fn render_noise(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) {}
 */
 
 struct FovSample {
@@ -280,7 +280,7 @@ impl FovSample {
         }
     }
 
-    fn init(&mut self, console: &mut Offscreen) -> () {
+    fn init(&mut self, console: &mut Offscreen) {
         system::set_fps(30);
         console.clear();
         self.display_help(console);
@@ -292,7 +292,7 @@ impl FovSample {
         });
     }
 
-    fn display_help(&self, console: &mut Offscreen) -> () {
+    fn display_help(&self, console: &mut Offscreen) {
         console.set_default_foreground(colors::WHITE);
         console.print(1, 0,
                       format!("IJKL : move around\nT : torch fx {}\nW : light walls {}\n+-: algo {:11?}",
@@ -302,7 +302,7 @@ impl FovSample {
         console.set_default_foreground(colors::BLACK);
     }
 
-    fn display_map(&mut self, console: &mut Offscreen, dx: f32, dy: f32, di: f32) -> () {
+    fn display_map(&mut self, console: &mut Offscreen, dx: f32, dy: f32, di: f32) {
         iterate_map(&mut |x, y, c| {
             let visible = self.map.is_in_fov(x, y);
             let is_wall = c == '#';
@@ -341,14 +341,14 @@ impl FovSample {
         self.recompute_fov = true;
     }
 
-    fn next_algorithm(&mut self) -> () {
+    fn next_algorithm(&mut self) {
         match self.algorithm {
             FovAlgorithm::Restrictive => return,
             _ => self.algorithm = unsafe { std::mem::transmute(self.algorithm as i32 + 1) }
         };
     }
 
-    fn previous_algorithm(&mut self) -> () {
+    fn previous_algorithm(&mut self) {
         match self.algorithm {
             FovAlgorithm::Basic => return,
             _ => self.algorithm = unsafe { std::mem::transmute(self.algorithm as i32 - 1) }
@@ -361,7 +361,7 @@ impl Render for FovSample {
               console: &mut Offscreen,
               _root: &Root,
               first: bool,
-              event: Option<(EventFlags, Event)>) -> () {
+              event: Option<(EventFlags, Event)>) {
         if first { self.init(console) }
         if self.recompute_fov {
             self.recompute_fov = false;
@@ -524,7 +524,7 @@ impl<'a> PathSample<'a> {
         self.recalculate_path = true;
     }
 
-    fn display_map(&mut self, console: &mut Offscreen) -> () {
+    fn display_map(&mut self, console: &mut Offscreen) {
         iterate_map(&mut |x, y, c| {
             let wall = c == '#';
             let color = if wall { self.dark_wall} else { self.dark_ground };
@@ -532,7 +532,7 @@ impl<'a> PathSample<'a> {
         });
     }
 
-    fn recalculate(&mut self) -> () {
+    fn recalculate(&mut self) {
         if self.using_astar {
             self.astar.find((self.px, self.py), (self.dx, self.dy));
         } else {
@@ -551,7 +551,7 @@ impl<'a> PathSample<'a> {
         self.busy = 0.2;
     }
 
-    fn draw_path(&mut self, console: &mut Offscreen) -> () {
+    fn draw_path(&mut self, console: &mut Offscreen) {
         if self.using_astar {
             for i in 0..self.astar.len() {
                 let (x, y) = self.astar.get(i).unwrap();
@@ -577,7 +577,7 @@ impl<'a> PathSample<'a> {
         }
     }
 
-    fn move_creature(&mut self, console: &mut Offscreen) -> () {
+    fn move_creature(&mut self, console: &mut Offscreen) {
         self.busy = 0.2;
         if self.using_astar {
             if ! self.astar.is_empty() {
@@ -617,7 +617,7 @@ impl<'a> Render for PathSample<'a> {
               console: &mut Offscreen,
               _root: &Root,
               first: bool,
-              event: Option<(EventFlags, Event)>) -> () {
+              event: Option<(EventFlags, Event)>) {
         if first { self.init(console) }
         if self.recalculate_path { self.recalculate() }
 
@@ -668,7 +668,7 @@ impl<'a> Render for PathSample<'a> {
 }
 
 /*
-fn render_bsp(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
+fn render_bsp(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) {}
  */
 
 struct ImageSample {
@@ -700,7 +700,7 @@ impl Render for ImageSample {
               console: &mut Offscreen,
               _root: &Root,
               first: bool,
-              _event: Option<(EventFlags, Event)>) -> () {
+              _event: Option<(EventFlags, Event)>) {
         if first {
             system::set_fps(30)
         }
@@ -778,7 +778,7 @@ impl MouseSample {
                 if mouse.wheel_up { "UP" } else if mouse.wheel_down { "DOWN" } else { "" })
     }
 
-    fn init(&mut self, console: &mut Console) -> () {
+    fn init(&mut self, console: &mut Console) {
         system::set_fps(30);
         console.set_default_background(colors::GREY);
         console.set_default_foreground(colors::LIGHT_YELLOW);
@@ -792,7 +792,7 @@ impl Render for MouseSample {
               console: &mut Offscreen,
               root: &Root,
               first: bool,
-              event: Option<(EventFlags, Event)>) -> () {
+              event: Option<(EventFlags, Event)>) {
         if first {
             self.init(console)
         }
@@ -870,7 +870,7 @@ impl NameSample {
         }
     }
 
-    fn limit_names(&mut self) -> () {
+    fn limit_names(&mut self) {
         while self.names.len() >= 15 {
             self.names.remove(0);
         }
@@ -882,7 +882,7 @@ impl Render for NameSample {
               console: &mut Offscreen,
               _root: &Root,
               first: bool,
-              event: Option<(EventFlags, Event)>) -> () {
+              event: Option<(EventFlags, Event)>) {
         if first {
             system::set_fps(30);
         }
@@ -922,10 +922,6 @@ impl Render for NameSample {
     }
 }
 
-/*
-fn render_sdl(_console: &mut Offscreen, _first: bool, _event: Option<(EventFlags, Event)>) -> () {}
-*/
-
 struct MenuItem<'a> {
     name: String,
     render: &'a mut Render
@@ -934,6 +930,16 @@ struct MenuItem<'a> {
 impl<'a> MenuItem<'a> {
     fn new(name: &str, render: &'a mut Render) -> Self {
         MenuItem { name: name.to_string(), render: render }
+    }
+}
+
+impl<'a> Render for MenuItem<'a> {
+    fn render(&mut self,
+              console: &mut Offscreen,
+              _root: &Root,
+              first: bool,
+              event: Option<(EventFlags, Event)>) {
+        self.render.render(console, _root, first, event);
     }
 }
 
@@ -995,6 +1001,7 @@ fn main() {
         system::force_fullscreen_resolution(options.fullscreen_width,
                                             options.fullscreen_height);
     }
+
     let mut root = Root::initializer()
         .size(80, 50)
         .title("libtcod Rust sample")
@@ -1004,8 +1011,8 @@ fn main() {
         .font_type(options.font_type)
         .font_dimensions(options.nb_char_horiz, options.nb_char_vertic)
         .init();
-    let mut credits_end = false;
 
+    let mut credits_end = false;
     while !root.window_closed() {
         if !credits_end {
             credits_end = root.render_credits(60, 43, false);
@@ -1015,12 +1022,7 @@ fn main() {
         print_help_message(&mut root);
 
         let event = check_for_event(KEY_PRESS | MOUSE);
-
-        {
-            // Scope to limit mutable borrow
-            let mut r = &mut samples[cur_sample].render;
-            r.render(&mut console, &root, first, event);
-        }
+        samples[cur_sample].render(&mut console, &root, first, event);
 
         first = false;
         blit(&console, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
@@ -1029,39 +1031,37 @@ fn main() {
         // erase the renderer in debug mode (needed because the root
         // console is not cleared each frame)
         root.print(1, 1, "        ");
-
         root.flush();
-        match event {
-            None => {continue;}
-            Some((_flag, Event::Key(state))) => {
-                match state {
-                    Key { code: KeyCode::Down, .. } => {
-                        cur_sample = (cur_sample + 1) % samples.len();
-                        first = true
+
+        if let Some((_, Event::Key(key))) = event {
+            match key.code {
+                KeyCode::Down => {
+                    cur_sample = (cur_sample + 1) % samples.len();
+                    first = true;
+                },
+                KeyCode::Up => {
+                    if cur_sample == 0 {
+                        cur_sample = samples.len() - 1;
+                    } else {
+                        cur_sample -= 1;
                     }
-                    Key { code: KeyCode::Up, .. } => {
-                        if cur_sample == 0 { cur_sample = samples.len() - 1; }
-                        else { cur_sample -= 1; }
-                        first = true
-                    }
-                    Key { code: KeyCode::Enter, .. } if state.left_alt => {
-                        let fullscreen = root.is_fullscreen();
-                        root.set_fullscreen(!fullscreen)
-                    }
-                    Key { code: KeyCode::PrintScreen, .. } => {
-                        // TODO
-                    }
-                    Key { code: KeyCode::Escape, .. } => { break }
-                    _ => {continue;}
-                }
+                    first = true;
+                },
+                KeyCode::Enter if key.left_alt => {
+                    let fullscreen = root.is_fullscreen();
+                    root.set_fullscreen(!fullscreen);
+                },
+                KeyCode::PrintScreen => {
+                    // TODO
+                },
+                _ => {},
             }
-            _ => {continue;}
         }
     }
 }
 
-fn print_samples(root: &mut Root, cur_sample: usize, samples: &Vec<MenuItem>) -> () {
-    for i in 0..samples.len() {
+fn print_samples(root: &mut Root, cur_sample: usize, samples: &[MenuItem]) {
+    for (i, sample) in samples.iter().enumerate() {
         if i == cur_sample {
             root.set_default_foreground(colors::WHITE);
             root.set_default_background(colors::LIGHT_BLUE);
@@ -1069,100 +1069,90 @@ fn print_samples(root: &mut Root, cur_sample: usize, samples: &Vec<MenuItem>) ->
             root.set_default_foreground(colors::GREY);
             root.set_default_background(colors::BLACK);
         }
-        let y : i32 = 46 - (samples.len() as i32 - i as i32);
-        let fun = &samples[i].name; //.name;
-        root.print_ex(2, y, BackgroundFlag::Set, TextAlignment::Left, fun);
+        let y = 46 - (samples.len() - i);
+        let fun = &sample.name;
+        root.print_ex(2, y as i32, BackgroundFlag::Set, TextAlignment::Left, fun);
     }
 
 }
 
-fn print_help_message(root: &mut Root) -> () {
+fn print_help_message(root: &mut Root) {
     root.set_default_foreground(colors::GREY);
     root.print_ex(79, 46, BackgroundFlag::None, TextAlignment::Right,
                   format!("last frame : {:3.0} ms ({:3} fps)",
                           system::get_last_frame_length() * 1000.0,
                           system::get_fps()));
+
     let time = system::get_elapsed_time();
     root.print_ex(79, 47, BackgroundFlag::None, TextAlignment::Right,
                   format!("elapsed {:8}ms {:4.2}s",
                           time.num_milliseconds(),
                           time.num_milliseconds() as f32/ 1000.0));
+
     root.print(2, 47, format!("{}{} : select a sample",
                               chars::ARROW_N, chars::ARROW_S));
-    let fullscreen_text = if root.is_fullscreen() {"windowed mode"}
-    else {"fullscren_mode"};
+
+    let fullscreen_text = if root.is_fullscreen() {
+        "windowed mode"
+    } else {
+        "fullscren_mode"
+    };
+
     root.print(2, 48, format!("ALT-ENTER : switch to {}", fullscreen_text));
 }
 
 fn parse_args(options: &mut Options) {
     let mut args = std::env::args();
 
-    loop {
-        use std::i32;
-        use std::str::FromStr;
-
-        match args.next() {
-            None => break,
-            Some(opt) => match opt.as_ref() {
-                "-font" => {
-                    let n = args.next();
-                    if n.is_some() {
-                        options.font = n.unwrap()
-                    }
-                },
-                "-font-nb-char" => {
-                    let horiz = args.next();
-                    let vertic = args.next();
-                    if horiz.is_some() {
-                        options.nb_char_horiz = i32::from_str(horiz.unwrap().as_ref()).unwrap()
-                    }
-                    if vertic.is_some() {
-                        options.nb_char_vertic = i32::from_str(vertic.unwrap().as_ref()).unwrap()
-                    }
+    while let Some(opt) = args.next() {
+        match opt.as_ref() {
+            "-font" => {
+                if let Some(font) = args.next() {
+                    options.font = font;
                 }
-                "-fullscreen-resolution" => {
-                    let width  = args.next();
-                    let height = args.next();
-                    if width.is_some() {
-                        options.fullscreen_width = i32::from_str(width.unwrap().as_ref()).unwrap()
-                    }
-                    if height.is_some() {
-                        options.fullscreen_height = i32::from_str(height.unwrap().as_ref()).unwrap()
-                    }
+            },
+            "-font-nb-char" => {
+                if let (Some(h), Some(v)) = (args.next(), args.next()) {
+                    options.nb_char_horiz = h.parse().ok().unwrap();
+                    options.nb_char_vertic = v.parse().ok().unwrap();
                 }
-                "-fullscreen" => options.fullscreen = true,
-                "-font-in-row" => options.font_layout = FontLayout::AsciiInRow,
-                "-font-greyscale" => options.font_type = FontType::Greyscale,
-                "-font-tcod" => options.font_layout = FontLayout::Tcod,
-                "-renderer" => {
-                    let r = args.next();
-                    if r.is_some() {
-                        match i32::from_str(r.unwrap().as_ref()).unwrap() {
-                            0 => options.renderer = Renderer::GLSL,
-                            1 => options.renderer = Renderer::OpenGL,
-                            2 => options.renderer = Renderer::SDL,
-                            _ => {
-                                println!("Invalid renderer");
-                                std::process::exit(1)
-                            }
+            },
+            "-fullscreen-resolution" => {
+                if let (Some(w), Some(h)) = (args.next(), args.next()) {
+                    options.fullscreen_width = w.parse().ok().unwrap();
+                    options.fullscreen_height = h.parse().ok().unwrap();
+                }
+            },
+            "-fullscreen" => options.fullscreen = true,
+            "-font-in-row" => options.font_layout = FontLayout::AsciiInRow,
+            "-font-greyscale" => options.font_type = FontType::Greyscale,
+            "-font-tcod" => options.font_layout = FontLayout::Tcod,
+            "-renderer" => {
+                if let Some(renderer) = args.next() {
+                    match renderer.parse::<i32>().ok() {
+                        Some(0) => options.renderer = Renderer::GLSL,
+                        Some(1) => options.renderer = Renderer::OpenGL,
+                        Some(2) => options.renderer = Renderer::SDL,
+                        _ => {
+                            println!("Invalid renderer");
+                            std::process::exit(1)
                         }
                     }
                 }
-                "-help" | "-?" => {
-                    println!("options :");
-                    println!("-font <filename> : use a custom font");
-                    println!("-font-nb-char <nb_char_horiz> <nb_char_vertic> : number of characters in the font");
-                    println!("-font-in-row : the font layout is in row instead of columns");
-                    println!("-font-tcod : the font uses TCOD layout instead of ASCII");
-                    println!("-font-greyscale : antialiased font using greyscale bitmap");
-                    println!("-fullscreen : start in fullscreen");
-                    println!("-fullscreen-resolution <screen_width> <screen_height> : force fullscreen resolution");
-                    println!("-renderer <num> : set renderer. 0 : GLSL 1 : OPENGL 2 : SDL");
-                    std::process::exit(0)
-                }
-                _ => continue
-            }
+            },
+            "-help" | "-?" => {
+                println!("options :");
+                println!("-font <filename> : use a custom font");
+                println!("-font-nb-char <nb_char_horiz> <nb_char_vertic> : number of characters in the font");
+                println!("-font-in-row : the font layout is in row instead of columns");
+                println!("-font-tcod : the font uses TCOD layout instead of ASCII");
+                println!("-font-greyscale : antialiased font using greyscale bitmap");
+                println!("-fullscreen : start in fullscreen");
+                println!("-fullscreen-resolution <screen_width> <screen_height> : force fullscreen resolution");
+                println!("-renderer <num> : set renderer. 0 : GLSL 1 : OPENGL 2 : SDL");
+                std::process::exit(0)
+            },
+            _ => {},
         }
     }
-
 }

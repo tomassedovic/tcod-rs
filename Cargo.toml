@@ -26,9 +26,6 @@ authors = ["Tomas Sedovic <tomas@sedovic.cz>",
 name = "tcod"
 path = "src/lib.rs"
 
-# Workaround for cargo test giving linker errors for doctests
-doctest = false
-
 [features]
 rustc-serialize_impls = ["rustc-serialize"]
 

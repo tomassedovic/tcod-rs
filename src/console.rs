@@ -10,7 +10,7 @@
 //!
 //! Initializing the `Root` console and creating an `Offscreen` console:
 //!
-//! ```rust
+//! ```no_run
 //! use tcod::console::{Root, Offscreen};
 //!
 //! let mut root = Root::initializer().init();
@@ -20,7 +20,7 @@
 //!
 //! A typical `tcod-rs` program's basic structure would look something like this:
 //!
-//! ```rust
+//! ```no_run
 //! use tcod::console::Root;
 //!
 //! fn main() {
@@ -44,7 +44,7 @@
 //! `RootConsole` and `OffscreenConsole`, making the following code sample equivalent to the
 //! previous one:
 //!
-//! ```rust
+//! ```no_run
 //! use tcod::{RootConsole, OffscreenConsole};
 //!
 //! let mut root = RootConsole::initializer().init();
@@ -81,7 +81,7 @@ use input::{Key, KeyPressFlags};
 ///
 /// Creating an `Offscreen` console
 ///
-/// ```rust
+/// ```no_run
 /// use tcod::console::Offscreen;
 ///
 /// let width = 80;
@@ -91,7 +91,7 @@ use input::{Key, KeyPressFlags};
 ///
 /// Blitting an `Offscreen` console to the `Root` console:
 ///
-/// ```rust
+/// ```no_run
 /// use tcod::console as console;
 /// use tcod::console::{Root, Offscreen};
 ///
@@ -140,20 +140,20 @@ impl Offscreen {
 /// `tcod-rs` provides two ways of handling user input: blocking or non-blocking. The following
 /// exaple will show the blocking method
 ///
-/// ```rust
+/// ```no_run
 /// use tcod::console::Root;
-/// use tcod::input::Key::Special;
+/// use tcod::input::Key;
 /// use tcod::input::KeyCode::{Up, Down, Left, Right};
 ///
 /// fn main() {
 ///     let mut root = Root::initializer().init();
 ///
 ///     let keypress = root.wait_for_keypress(true);
-///     match keypress.key {
-///         Special(Up) => {}, // Handle arrow key up
-///         Special(Down) => {}, // Arrow key down
-///         Special(Left) => {},
-///         Special(Right) => {},
+///     match keypress.code {
+///         Up => {}, // Handle arrow key up
+///         Down => {}, // Arrow key down
+///         Left => {},
+///         Right => {},
 ///         _ => {}
 ///     }
 /// }
@@ -169,7 +169,7 @@ impl Offscreen {
 /// see the [Console](./trait.Console.html) trait's documentation. The basic structure of the
 /// rendering code:
 ///
-/// ```rust
+/// ```no_run
 /// use tcod::console::{Console, Root};
 ///
 /// fn main() {
@@ -204,7 +204,7 @@ impl Root {
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```no_run
     /// use tcod::console::Root;
     ///
     /// let mut root = Root::initializer()
@@ -392,7 +392,7 @@ impl Root {
 /// Initializing the `Root` console using `Root::initializer` instead of explicitly creating a
 /// `RootInitializer` instance:
 ///
-/// ```rust
+/// ```no_run
 /// use tcod::console::{Root, FontLayout, Renderer};
 ///
 /// fn main() {
@@ -582,7 +582,7 @@ fn to_wstring(text: &[u8]) -> Vec<char> {
 /// # Examples
 /// Printing text with explicit alignment:
 ///
-/// ```rust
+/// ```no_run
 /// use tcod::console::{Console, Root, BackgroundFlag, TextAlignment};
 ///
 /// let mut root = Root::initializer().size(80, 50).init();
@@ -975,7 +975,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
 ///
 /// Using `blit` with concrete types and `Console` trait objects:
 ///
-/// ```rust
+/// ```no_run
 /// use tcod::console as console;
 /// use tcod::console::{Console, Root, Offscreen};
 ///
