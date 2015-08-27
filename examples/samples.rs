@@ -97,52 +97,52 @@ impl ColorsSample {
         };
 
         // ==== scan the whole screen, interpolating corner colors ====
-	    for x in 0..SAMPLE_SCREEN_WIDTH {
-		    let xcoef = (x as f32) / ((SAMPLE_SCREEN_WIDTH-1) as f32);
+        for x in 0..SAMPLE_SCREEN_WIDTH {
+            let xcoef = (x as f32) / ((SAMPLE_SCREEN_WIDTH-1) as f32);
 
-		    // get the current column top and bottom colors
-		    let top = colors::lerp(self.cols[Dir::TopLeft as usize],
+            // get the current column top and bottom colors
+            let top = colors::lerp(self.cols[Dir::TopLeft as usize],
                                    self.cols[Dir::TopRight as usize],
                                    xcoef);
-		    let bottom = colors::lerp(self.cols[Dir::BottomLeft as usize],
+            let bottom = colors::lerp(self.cols[Dir::BottomLeft as usize],
                                       self.cols[Dir::BottomRight as usize],
                                       xcoef);
-		    for y in 0..SAMPLE_SCREEN_HEIGHT {
-			    let ycoef = (y as f32) / ((SAMPLE_SCREEN_HEIGHT-1) as f32);
+            for y in 0..SAMPLE_SCREEN_HEIGHT {
+                let ycoef = (y as f32) / ((SAMPLE_SCREEN_HEIGHT-1) as f32);
 
-			    // get the current cell color
-			    let cur_color = colors::lerp(top, bottom, ycoef);
-			    console.set_char_background(x, y, cur_color, BackgroundFlag::Set);
-		    }
-	    }
+                // get the current cell color
+                let cur_color = colors::lerp(top, bottom, ycoef);
+                console.set_char_background(x, y, cur_color, BackgroundFlag::Set);
+            }
+        }
     }
 
     fn print_random_chars(&mut self, console: &mut Console) -> colors::Color {
         // ==== print the text with a random color ====
-	    // get the background color at the text position
-	    let mut text_color = console.get_char_background(SAMPLE_SCREEN_WIDTH/2, 5);
-	    // and invert it
-	    text_color.r = 255 - text_color.r;
-	    text_color.g = 255 - text_color.g;
-	    text_color.b = 255 - text_color.b;
-	    // put random text (for performance tests)
-	    for x in 0..SAMPLE_SCREEN_WIDTH {
+        // get the background color at the text position
+        let mut text_color = console.get_char_background(SAMPLE_SCREEN_WIDTH/2, 5);
+        // and invert it
+        text_color.r = 255 - text_color.r;
+        text_color.g = 255 - text_color.g;
+        text_color.b = 255 - text_color.b;
+        // put random text (for performance tests)
+        for x in 0..SAMPLE_SCREEN_WIDTH {
             for y in 0..SAMPLE_SCREEN_HEIGHT {
-			    let mut c;
-			    let mut col = console.get_char_background(x, y);
-			    col = colors::lerp(col, colors::BLACK, 0.5);
-			    // use colored character 255 on first and last lines
-			    if y == 0 || y == SAMPLE_SCREEN_HEIGHT-1 {
-				    c = std::char::from_u32(0x00ff).unwrap();
-			    } else {
+                let mut c;
+                let mut col = console.get_char_background(x, y);
+                col = colors::lerp(col, colors::BLACK, 0.5);
+                // use colored character 255 on first and last lines
+                if y == 0 || y == SAMPLE_SCREEN_HEIGHT-1 {
+                    c = std::char::from_u32(0x00ff).unwrap();
+                } else {
                     let r = self.rng.gen_range('a' as u32, 'z' as u32);
-				    c = from_u32(r).unwrap();
-			    }
+                    c = from_u32(r).unwrap();
+                }
 
-			    console.set_default_foreground(col);
-			    console.put_char(x, y, c, BackgroundFlag::None);
-		    }
-	    }
+                console.set_default_foreground(col);
+                console.put_char(x, y, c, BackgroundFlag::None);
+            }
+        }
 
         text_color
     }
@@ -165,11 +165,11 @@ impl Render for ColorsSample {
         let text_color = self.print_random_chars(console);
 
         console.set_default_foreground(text_color);
-	    // the background behind the text is slightly darkened using the Multiply flag
-	    console.set_default_background(colors::GREY);
-	    console.print_rect_ex(SAMPLE_SCREEN_WIDTH/2, 5, SAMPLE_SCREEN_WIDTH-2, SAMPLE_SCREEN_HEIGHT-1,
-		                      BackgroundFlag::Multiply, TextAlignment::Center,
-		                      "The Doryen library uses 24 bits colors, for both background and foreground.");
+        // the background behind the text is slightly darkened using the Multiply flag
+        console.set_default_background(colors::GREY);
+        console.print_rect_ex(SAMPLE_SCREEN_WIDTH/2, 5, SAMPLE_SCREEN_WIDTH-2, SAMPLE_SCREEN_HEIGHT-1,
+                              BackgroundFlag::Multiply, TextAlignment::Center,
+                              "The Doryen library uses 24 bits colors, for both background and foreground.");
     }
 }
 
@@ -296,7 +296,7 @@ impl FovSample {
         console.set_default_foreground(colors::WHITE);
         console.print(1, 0,
                       format!("IJKL : move around\nT : torch fx {}\nW : light walls {}\n+-: algo {:11?}",
-			                  if self.torch { "on " } else { "off" },
+                              if self.torch { "on " } else { "off" },
                               if self.light_walls { "on "  } else { "off" },
                               self.algorithm));
         console.set_default_foreground(colors::BLACK);
@@ -444,27 +444,27 @@ const SQUARED_TORCH_RADIUS : f32 = (TORCH_RADIUS*TORCH_RADIUS);
 
 
 static SMAP : [&'static str; 20] = [
-	"##############################################",
-	"#######################      #################",
-	"#####################    #     ###############",
-	"######################  ###        ###########",
-	"##################      #####             ####",
-	"################       ########    ###### ####",
-	"###############      #################### ####",
-	"################    ######                  ##",
-	"########   #######  ######   #     #     #  ##",
-	"########   ######      ###                  ##",
-	"########                                    ##",
-	"####       ######      ###   #     #     #  ##",
-	"#### ###   ########## ####                  ##",
-	"#### ###   ##########   ###########=##########",
-	"#### ##################   #####          #####",
-	"#### ###             #### #####          #####",
-	"####           #     ####                #####",
-	"########       #     #### #####          #####",
-	"########       #####      ####################",
-	"##############################################",
-	];
+    "##############################################",
+    "#######################      #################",
+    "#####################    #     ###############",
+    "######################  ###        ###########",
+    "##################      #####             ####",
+    "################       ########    ###### ####",
+    "###############      #################### ####",
+    "################    ######                  ##",
+    "########   #######  ######   #     #     #  ##",
+    "########   ######      ###                  ##",
+    "########                                    ##",
+    "####       ######      ###   #     #     #  ##",
+    "#### ###   ########## ####                  ##",
+    "#### ###   ##########   ###########=##########",
+    "#### ##################   #####          #####",
+    "#### ###             #### #####          #####",
+    "####           #     ####                #####",
+    "########       #     #### #####          #####",
+    "########       #####      ####################",
+    "##############################################",
+    ];
 
 fn iterate_map<F>(closure: &mut F) -> ()
     where F: FnMut(i32, i32, char) -> ()
@@ -510,22 +510,22 @@ impl<'a> PathSample<'a> {
         system::set_fps(30);
         console.clear();
         // we draw the foreground only the first time.
-		// during the player movement, only the @ is redrawn.
-		// the rest impacts only the background color
-		// draw the help text & player @
+        // during the player movement, only the @ is redrawn.
+        // the rest impacts only the background color
+        // draw the help text & player @
         console.set_default_foreground(colors::WHITE);
-		console.put_char(self.dx, self.dy, '+', BackgroundFlag::None);
-		console.put_char(self.px, self.py, '@', BackgroundFlag::None);
-		console.print(1, 1, "IJKL / mouse :\nmove destination\nTAB : A*/dijkstra");
-		console.print(1, 4, "Using : A*");
+        console.put_char(self.dx, self.dy, '+', BackgroundFlag::None);
+        console.put_char(self.px, self.py, '@', BackgroundFlag::None);
+        console.print(1, 1, "IJKL / mouse :\nmove destination\nTAB : A*/dijkstra");
+        console.print(1, 4, "Using : A*");
 
-		// draw windows
+        // draw windows
         iterate_map(&mut |x, y, c| {
             if c == '=' {
                 console.put_char(x, y, chars::DHLINE, BackgroundFlag::None)
             }
         });
-		self.recalculate_path = true;
+        self.recalculate_path = true;
     }
 
     fn display_map(&mut self, console: &mut Offscreen) -> () {
@@ -715,26 +715,26 @@ impl Render for ImageSample {
         console.clear();
 
         let elapsed_seconds: f32 = (system::get_elapsed_time().num_milliseconds() as f32) / 1000.0;
-	    let x = (SAMPLE_SCREEN_WIDTH/2) as f32 + (elapsed_seconds as f32).cos() * 10.0;
-	    let y = ( SAMPLE_SCREEN_HEIGHT/2 ) as f32;
-	    let scale_x = 0.2 + 1.8 * (1.0 + (elapsed_seconds / 2.0).cos()) / 2.0;
-	    let scale_y = scale_x;
-	    let angle = elapsed_seconds;
-	    let elapsed = system::get_elapsed_time().num_milliseconds() / 2000;
+        let x = (SAMPLE_SCREEN_WIDTH/2) as f32 + (elapsed_seconds as f32).cos() * 10.0;
+        let y = ( SAMPLE_SCREEN_HEIGHT/2 ) as f32;
+        let scale_x = 0.2 + 1.8 * (1.0 + (elapsed_seconds / 2.0).cos()) / 2.0;
+        let scale_y = scale_x;
+        let angle = elapsed_seconds;
+        let elapsed = system::get_elapsed_time().num_milliseconds() / 2000;
 
         if (elapsed & 1) != 0 {
             // split the color channels of circle.png
-		    // the red channel
-		    console.set_default_background(colors::RED);
-		    console.rect(0, 3, 15, 15, false, BackgroundFlag::Set);
-		    image::blit_rect(&self.circle, (-1, -1), console, (0, 3), BackgroundFlag::Multiply);
-		    // the green channel
-		    console.set_default_background(self.green);
-		    console.rect(15, 3, 15, 15, false, BackgroundFlag::Set);
-		    image::blit_rect(&self.circle, (-1, -1), console, (15, 3), BackgroundFlag::Multiply);
-		    // the blue channel
-		    console.set_default_background(self.blue);
-		    console.rect(30, 3, 15, 15, false, BackgroundFlag::Set);
+            // the red channel
+            console.set_default_background(colors::RED);
+            console.rect(0, 3, 15, 15, false, BackgroundFlag::Set);
+            image::blit_rect(&self.circle, (-1, -1), console, (0, 3), BackgroundFlag::Multiply);
+            // the green channel
+            console.set_default_background(self.green);
+            console.rect(15, 3, 15, 15, false, BackgroundFlag::Set);
+            image::blit_rect(&self.circle, (-1, -1), console, (15, 3), BackgroundFlag::Multiply);
+            // the blue channel
+            console.set_default_background(self.blue);
+            console.rect(30, 3, 15, 15, false, BackgroundFlag::Set);
             image::blit_rect(&self.circle, (-1, -1), console, (30, 3), BackgroundFlag::Multiply);
         } else {
             image::blit_rect(&self.circle, (-1, -1), console, ( 0, 3), BackgroundFlag::Set);
@@ -769,7 +769,7 @@ impl MouseSample {
                  Left button    : {} (toggle {})\n \
                  Right button   : {} (toggle {})\n \
                  Middle button  : {} (toggle {})\n \
-	             Wheel          : {}\n",
+                 Wheel          : {}\n",
                 if root.is_active() {""} else {"APPLICATION INACTIVE"},
                 mouse.x, mouse.y,
                 if root.has_focus() {""} else {"OUT OF FOCUS"},
@@ -868,7 +868,7 @@ impl NameSample {
         console.clear();
         console.set_default_foreground(colors::WHITE);
         console.print(1, 1, format!("{}\n\n+ : next generator\n- : prev generator",
-		                            self.sets[self.cur_set]));
+                                    self.sets[self.cur_set]));
         for (i, name) in self.names.iter().enumerate() {
             if (name.len() as i32) < SAMPLE_SCREEN_WIDTH {
                 console.print_ex(SAMPLE_SCREEN_WIDTH - 2, 2 + i as i32,
@@ -999,7 +999,7 @@ fn main() {
     parse_args(&mut options);
 
     if options.fullscreen_width > 0 {
-		system::force_fullscreen_resolution(options.fullscreen_width,
+        system::force_fullscreen_resolution(options.fullscreen_width,
                                             options.fullscreen_height);
     }
     let mut root = Root::initializer()
@@ -1035,7 +1035,7 @@ fn main() {
 
         // erase the renderer in debug mode (needed because the root
         // console is not cleared each frame)
-		root.print(1, 1, "        ");
+        root.print(1, 1, "        ");
 
         root.flush();
         match event {
@@ -1157,14 +1157,14 @@ fn parse_args(options: &mut Options) {
                 }
                 "-help" | "-?" => {
                     println!("options :");
-			        println!("-font <filename> : use a custom font");
-			        println!("-font-nb-char <nb_char_horiz> <nb_char_vertic> : number of characters in the font");
-			        println!("-font-in-row : the font layout is in row instead of columns");
-			        println!("-font-tcod : the font uses TCOD layout instead of ASCII");
-			        println!("-font-greyscale : antialiased font using greyscale bitmap");
-			        println!("-fullscreen : start in fullscreen");
-			        println!("-fullscreen-resolution <screen_width> <screen_height> : force fullscreen resolution");
-			        println!("-renderer <num> : set renderer. 0 : GLSL 1 : OPENGL 2 : SDL");
+                    println!("-font <filename> : use a custom font");
+                    println!("-font-nb-char <nb_char_horiz> <nb_char_vertic> : number of characters in the font");
+                    println!("-font-in-row : the font layout is in row instead of columns");
+                    println!("-font-tcod : the font uses TCOD layout instead of ASCII");
+                    println!("-font-greyscale : antialiased font using greyscale bitmap");
+                    println!("-fullscreen : start in fullscreen");
+                    println!("-fullscreen-resolution <screen_width> <screen_height> : force fullscreen resolution");
+                    println!("-renderer <num> : set renderer. 0 : GLSL 1 : OPENGL 2 : SDL");
                     std::process::exit(0)
                 }
                 _ => continue
