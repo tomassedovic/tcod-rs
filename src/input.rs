@@ -106,6 +106,25 @@ pub struct KeyState {
     pub shift: bool,
 }
 
+impl Into<KeyState> for ffi::TCOD_key_t {
+    fn into(self) -> KeyState {
+        let key = if self.vk == ffi::TCODK_CHAR {
+            Key::Printable(self.c as u8 as char)
+        } else {
+            Key::Special(keycode_from_u32(self.vk).unwrap())
+        };
+        KeyState{
+            key: key,
+            pressed: self.pressed != 0,
+            left_alt: self.lalt != 0,
+            left_ctrl: self.lctrl != 0,
+            right_alt: self.ralt != 0,
+            right_ctrl: self.rctrl != 0,
+            shift: self.shift != 0,
+        }
+    }
+}
+
 #[derive(Copy, Clone, PartialEq, Debug, Default)]
 pub struct MouseState {
     pub x: isize,
@@ -190,19 +209,7 @@ pub fn check_for_event(event_mask: EventFlags) -> Option<(EventFlags, Event)> {
     }
 
     let ret_event = if ret_flag.intersects(KEY_PRESS|KEY_RELEASE|KEY) {
-        Some(Event::Key(KeyState {
-            key: if c_key_state.vk == ffi::TCODK_CHAR {
-                Key::Printable(c_key_state.c as u8 as char)
-            } else {
-                Key::Special(keycode_from_u32(c_key_state.vk).unwrap())
-            },
-            pressed: c_key_state.pressed != 0,
-            left_alt: c_key_state.lalt != 0,
-            left_ctrl: c_key_state.lctrl != 0,
-            right_alt: c_key_state.ralt != 0,
-            right_ctrl: c_key_state.rctrl != 0,
-            shift: c_key_state.shift != 0
-        }))
+        Some(Event::Key(c_key_state.into()))
     } else if ret_flag.intersects(MOUSE_MOVE|MOUSE_PRESS|MOUSE_RELEASE|MOUSE) {
         Some(Event::Mouse(MouseState {
             x: c_mouse_state.x as isize,
