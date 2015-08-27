@@ -745,7 +745,7 @@ struct MouseSample {
     left_button:   bool,
     middle_button: bool,
     right_button:  bool,
-    mouse_state: Option<MouseState>,
+    mouse_state: Option<Mouse>,
 }
 
 impl MouseSample {
@@ -755,7 +755,7 @@ impl MouseSample {
         }
     }
 
-    fn format(&self, mouse: &MouseState, root: &Root) -> String {
+    fn format(&self, mouse: &Mouse, root: &Root) -> String {
         format!("{}\n \
                  Mouse position : {:4}x{:4} {}\n \
                  Mouse cell     : {:4}x{:4}\n \

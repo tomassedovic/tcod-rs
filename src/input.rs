@@ -3,6 +3,10 @@ use std::mem;
 use bindings::ffi;
 use bindings::{c_bool, c_uint, keycode_from_u32};
 
+
+/// Deprecated. Use `tcod::input::mouse` instead.
+pub type MouseState = Mouse;
+
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum KeyCode {
@@ -114,7 +118,7 @@ impl Into<Key> for ffi::TCOD_key_t {
 }
 
 #[derive(Copy, Clone, PartialEq, Debug, Default)]
-pub struct MouseState {
+pub struct Mouse {
     pub x: isize,
     pub y: isize,
     pub dx: isize,
@@ -199,7 +203,7 @@ pub fn check_for_event(event_mask: EventFlags) -> Option<(EventFlags, Event)> {
     let ret_event = if ret_flag.intersects(KEY_PRESS|KEY_RELEASE|KEY) {
         Some(Event::Key(c_key_state.into()))
     } else if ret_flag.intersects(MOUSE_MOVE|MOUSE_PRESS|MOUSE_RELEASE|MOUSE) {
-        Some(Event::Mouse(MouseState {
+        Some(Event::Mouse(Mouse {
             x: c_mouse_state.x as isize,
             y: c_mouse_state.y as isize,
             dx: c_mouse_state.dx as isize,
@@ -231,7 +235,7 @@ pub fn events() -> EventIterator {
 #[derive(Copy, Clone, Debug)]
 pub enum Event {
     Key(Key),
-    Mouse(MouseState)
+    Mouse(Mouse)
 }
 
 pub struct EventIterator;
