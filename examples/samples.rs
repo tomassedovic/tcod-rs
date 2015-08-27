@@ -32,24 +32,24 @@ trait Render {
 }
 
 struct ColorsSample {
-    cols : [Color; 4],
-    dirr : [i8; 4],
-    dirg : [i8; 4],
-    dirb : [i8; 4],
-    rng : Box<ThreadRng>,
+    cols: [Color; 4],
+    dirr: [i8; 4],
+    dirg: [i8; 4],
+    dirb: [i8; 4],
+    rng: ThreadRng,
 }
 
 impl ColorsSample {
     fn new() -> Self {
         ColorsSample {
-            cols : [Color {r:50,  g:40, b:150},
-                    Color {r:240, g:85, b:5},
-                    Color {r:50,  g:35, b:240},
-                    Color {r:10,  g:200, b:130}],
-            dirr : [1, -1, 1, 1],
-            dirg : [1, -1, -1, 1],
-            dirb : [1, 1, 1, -1],
-            rng: Box::new(rand::thread_rng()),
+            cols: [Color::new(50,  40, 150),
+                    Color::new(240, 85, 5),
+                    Color::new(50,  35, 240),
+                    Color::new(10, 200, 130)],
+            dirr: [1, -1, 1, 1],
+            dirg: [1, -1, -1, 1],
+            dirb: [1, 1, 1, -1],
+            rng: rand::thread_rng(),
         }
     }
 
@@ -378,46 +378,42 @@ impl Render for FovSample {
 
         self.display_map(console, dx, dy, di);
 
-        match event {
-            Some((_, Event::Key(state))) => {
-                match state.key {
-                    Key::Printable('i') | Key::Printable('I')
-                        if self.map.is_walkable(self.px, self.py - 1) =>
-                        self.handle_event(console, &mut |s| s.py -= 1),
-                    Key::Printable('k') | Key::Printable('K')
-                        if self.map.is_walkable(self.px, self.py + 1) =>
-                        self.handle_event(console, &mut |s| s.py += 1),
-                    Key::Printable('j') | Key::Printable('J')
-                        if self.map.is_walkable(self.px - 1, self.py) =>
-                        self.handle_event(console, &mut |s| s.px -= 1),
-                    Key::Printable('l') | Key::Printable('L')
-                        if self.map.is_walkable(self.px + 1, self.py) =>
-                        self.handle_event(console, &mut |s| s.px += 1),
-                    Key::Printable('t') | Key::Printable('T') => {
-                        self.torch = !self.torch;
-                        self.display_help(console);
-                    },
-                    Key::Printable('w') | Key::Printable('W') => {
-                        self.light_walls = !self.light_walls;
-                        self.display_help(console);
-                        self.recompute_fov = true;
-                    },
-                    Key::Printable('+') => {
-                        self.next_algorithm();
-                        self.display_help(console);
-                        self.recompute_fov = true;
-                    },
-                    Key::Printable('-') => {
-                        self.previous_algorithm();
-                        self.display_help(console);
-                        self.recompute_fov = true;
-                    },
-                    _ => {}
-                }
-            },
-            _ => {}
+        if let Some((_, Event::Key(state))) = event {
+            match state.key {
+                Key::Printable('i') | Key::Printable('I')
+                    if self.map.is_walkable(self.px, self.py - 1) =>
+                    self.handle_event(console, &mut |s| s.py -= 1),
+                Key::Printable('k') | Key::Printable('K')
+                    if self.map.is_walkable(self.px, self.py + 1) =>
+                    self.handle_event(console, &mut |s| s.py += 1),
+                Key::Printable('j') | Key::Printable('J')
+                    if self.map.is_walkable(self.px - 1, self.py) =>
+                    self.handle_event(console, &mut |s| s.px -= 1),
+                Key::Printable('l') | Key::Printable('L')
+                    if self.map.is_walkable(self.px + 1, self.py) =>
+                    self.handle_event(console, &mut |s| s.px += 1),
+                Key::Printable('t') | Key::Printable('T') => {
+                    self.torch = !self.torch;
+                    self.display_help(console);
+                },
+                Key::Printable('w') | Key::Printable('W') => {
+                    self.light_walls = !self.light_walls;
+                    self.display_help(console);
+                    self.recompute_fov = true;
+                },
+                Key::Printable('+') => {
+                    self.next_algorithm();
+                    self.display_help(console);
+                    self.recompute_fov = true;
+                },
+                Key::Printable('-') => {
+                    self.previous_algorithm();
+                    self.display_help(console);
+                    self.recompute_fov = true;
+                },
+                _ => {}
+            }
         }
-
     }
 }
 
@@ -544,8 +540,9 @@ impl<'a> PathSample<'a> {
             self.dijkstra.compute_grid((self.px, self.py));
             iterate_map(&mut |x, y, _c| {
                 let d = self.dijkstra.distance_from_root((x, y));
-                if d.is_some() && d.unwrap() > self.dijkstra_dist {
-                    self.dijkstra_dist = d.unwrap()
+                match d {
+                    Some(d) if d > self.dijkstra_dist => self.dijkstra_dist = d,
+                    _ => {},
                 }
             });
             self.dijkstra.find((self.dx, self.dy));
@@ -565,10 +562,10 @@ impl<'a> PathSample<'a> {
                 let wall = c == '#';
                 if !wall {
                     let d = self.dijkstra.distance_from_root((x, y));
-                    if d.is_some() {
+                    if let Some(d) = d {
                         let color = colors::lerp(self.light_ground,
                                                  self.dark_ground,
-                                                 0.9 * d.unwrap() / self.dijkstra_dist);
+                                                 0.9 * d / self.dijkstra_dist);
                         console.set_char_background(x, y, color, BackgroundFlag::Set);
                     }
                 }
@@ -609,7 +606,7 @@ impl<'a> PathSample<'a> {
         clo(self);
         self.old_char = console.get_char(self.dx, self.dy);
         console.put_char(self.dx, self.dy, '+', BackgroundFlag::None);
-        if SMAP[self.dy as usize].to_string().chars().nth(self.dx as usize).unwrap() == ' ' {
+        if SMAP[self.dy as usize].chars().nth(self.dx as usize).unwrap() == ' ' {
             self.recalculate_path = true;
         }
     }
@@ -632,43 +629,40 @@ impl<'a> Render for PathSample<'a> {
             self.move_creature(console);
         }
 
-        match event {
-            Some((_, Event::Key(state))) => {
-                match state.key {
-                    Key::Printable('i') | Key::Printable('I') if self.dy > 0 =>
-                        self.handle_event(console, &mut |s| s.dy -= 1),
-                    Key::Printable('k') | Key::Printable('K') if self.dy < SAMPLE_SCREEN_HEIGHT-1 =>
-                        self.handle_event(console, &mut |s| s.dy += 1),
-                    Key::Printable('j') | Key::Printable('J') if self.dx > 0 =>
-                        self.handle_event(console, &mut |s| s.dx -= 1),
-                    Key::Printable('l') | Key::Printable('L') if self.dx < SAMPLE_SCREEN_WIDTH-1 =>
-                        self.handle_event(console, &mut |s| s.dx += 1),
-                    Key::Special(KeyCode::Tab) => {
-                        self.using_astar = ! self.using_astar;
-                        if self.using_astar {
-                            console.print(1, 4, "Using : A*      ");
-                        } else {
-                            console.print(1, 4, "Using : Dijkstra");
-                        }
-                        self.recalculate_path = true;
+        if let Some((_, Event::Key(state))) = event {
+            match state.key {
+                Key::Printable('i') | Key::Printable('I') if self.dy > 0 =>
+                    self.handle_event(console, &mut |s| s.dy -= 1),
+                Key::Printable('k') | Key::Printable('K') if self.dy < SAMPLE_SCREEN_HEIGHT-1 =>
+                    self.handle_event(console, &mut |s| s.dy += 1),
+                Key::Printable('j') | Key::Printable('J') if self.dx > 0 =>
+                    self.handle_event(console, &mut |s| s.dx -= 1),
+                Key::Printable('l') | Key::Printable('L') if self.dx < SAMPLE_SCREEN_WIDTH-1 =>
+                    self.handle_event(console, &mut |s| s.dx += 1),
+                Key::Special(KeyCode::Tab) => {
+                    self.using_astar = ! self.using_astar;
+                    if self.using_astar {
+                        console.print(1, 4, "Using : A*      ");
+                    } else {
+                        console.print(1, 4, "Using : Dijkstra");
                     }
-                    _ => {}
+                    self.recalculate_path = true;
                 }
-            },
-            Some((_, Event::Mouse(state))) => {
-                let mx: i32 = state.cx as i32 - SAMPLE_SCREEN_X;
-                let my: i32 = state.cy as i32 - SAMPLE_SCREEN_Y;
-                if  mx >= 0 && mx < SAMPLE_SCREEN_WIDTH &&
-                    my >= 0 && my < SAMPLE_SCREEN_HEIGHT &&
-                    (self.dx != mx || self.dy != my)
-                {
-                    self.handle_event(console, &mut |s| {
-                        s.dx = mx;
-                        s.dy = my;
-                    });
-                }
+                _ => {}
             }
-            _ => {}
+        }
+        if let Some((_, Event::Mouse(state))) = event {
+            let mx: i32 = state.cx as i32 - SAMPLE_SCREEN_X;
+            let my: i32 = state.cy as i32 - SAMPLE_SCREEN_Y;
+            if  mx >= 0 && mx < SAMPLE_SCREEN_WIDTH &&
+                my >= 0 && my < SAMPLE_SCREEN_HEIGHT &&
+                (self.dx != mx || self.dy != my)
+            {
+                self.handle_event(console, &mut |s| {
+                    s.dx = mx;
+                    s.dy = my;
+                });
+            }
         }
     }
 }
@@ -821,9 +815,8 @@ impl Render for MouseSample {
             _ => {} // Ignore other events
         }
 
-        if self.mouse_state.is_some() {
-            let mouse = self.mouse_state.unwrap();
-            console.print(1, 1, self.format(&mouse, root))
+        if let Some(mouse) = self.mouse_state {
+            console.print(1, 1, self.format(&mouse, root));
         }
 
         console.print(1, 10, "1 : Hide cursor\n2 : Show cursor");
