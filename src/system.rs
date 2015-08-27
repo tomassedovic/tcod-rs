@@ -17,12 +17,11 @@ pub fn set_fps(fps: i32) {
 }
 
 pub fn get_fps() -> i32 {
-    let mut result;
-    unsafe {
-        result = ffi::TCOD_sys_get_fps();
-    }
+    let result = unsafe {
+        ffi::TCOD_sys_get_fps()
+    };
     assert!(result >= 0);
-    return result
+    result
 }
 
 pub fn get_last_frame_length() -> f32 {

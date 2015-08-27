@@ -15,6 +15,12 @@ pub struct AStar<'a>{
     height: i32,
 }
 
+impl<'a> AsNative<ffi::TCOD_path_t> for AStar<'a> {
+    unsafe fn as_native(&self) -> &ffi::TCOD_path_t {
+        &self.tcod_path
+    }
+}
+
 impl<'a> Drop for AStar<'a> {
     fn drop(&mut self) {
         unsafe {
@@ -80,6 +86,10 @@ impl<'a> AStar<'a> {
                                    from_x, from_y,
                                    to_x, to_y) != 0
         }
+    }
+
+    pub fn iter(&'a self) -> AStarPathIter<'a> {
+        AStarPathIter { current: -1, path: self }
     }
 
     pub fn walk(&mut self) -> AStarIterator {
@@ -159,6 +169,12 @@ pub struct Dijkstra<'a> {
     height: i32,
 }
 
+impl<'a> AsNative<ffi::TCOD_path_t> for Dijkstra<'a> {
+    unsafe fn as_native(&self) -> &ffi::TCOD_dijkstra_t {
+        &self.tcod_path
+    }
+}
+
 impl<'a> Drop for Dijkstra<'a> {
     fn drop(&mut self) {
         unsafe {
@@ -219,6 +235,10 @@ impl<'a> Dijkstra<'a> {
         } else {
             false
         }
+    }
+
+    pub fn iter(&'a self) -> DijkstraPathIter<'a> {
+        DijkstraPathIter { current: -1, path: self }
     }
 
     pub fn walk(&mut self) -> DijkstraIterator {
@@ -315,6 +335,52 @@ impl Iterator for DijkstraIterator {
             match ffi::TCOD_dijkstra_path_walk(self.tcod_path, &mut x, &mut y) != 0 {
                 true => Some((x, y)),
                 false => None,
+            }
+        }
+    }
+}
+
+pub struct AStarPathIter<'a> {
+    current: i32,
+    path: &'a AStar<'a>,
+}
+
+impl<'a> Iterator for AStarPathIter<'a> {
+    type Item = (i32, i32);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current == self.path.len() - 1 {
+            None
+        } else {
+            self.current += 1;
+            unsafe {
+                let mut x: c_int = 0;
+                let mut y: c_int = 0;
+                ffi::TCOD_path_get(*self.path.as_native(), self.current, &mut x, &mut y);
+                Some((x, y))
+            }
+        }
+    }
+}
+
+pub struct DijkstraPathIter<'a> {
+    current: i32,
+    path: &'a Dijkstra<'a>,
+}
+
+impl<'a> Iterator for DijkstraPathIter<'a> {
+    type Item = (i32, i32);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current == self.path.len() - 1 {
+            None
+        } else {
+            self.current += 1;
+            unsafe {
+                let mut x: c_int = 0;
+                let mut y: c_int = 0;
+                ffi::TCOD_dijkstra_get(*self.path.as_native(), self.current, &mut x, &mut y);
+                Some((x, y))
             }
         }
     }
