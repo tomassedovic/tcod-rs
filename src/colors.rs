@@ -368,6 +368,7 @@ mod test {
     #[test]
     #[cfg(feature = "rustc-serialize_impls")]
     fn rustc_serialize_encode() {
+        use super::Color;
         let encoded = json::encode(&Color{r: 1, g: 2, b: 3}).unwrap();
         assert_eq!("{\"r\":1,\"g\":2,\"b\":3}", encoded);
     }
@@ -375,6 +376,7 @@ mod test {
     #[test]
     #[cfg(feature = "rustc-serialize_impls")]
     fn rustc_serialize_decode() {
+        use super::Color;
         let decoded: Color = json::decode("{\"r\":1,\"g\":2,\"b\":3}").unwrap();
         assert_eq!(Color{r: 1, g: 2, b: 3}, decoded);
     }
