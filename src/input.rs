@@ -3,6 +3,10 @@ use std::mem;
 use bindings::ffi;
 use bindings::{c_bool, c_uint, keycode_from_u32};
 
+
+/// Deprecated. Use `tcod::input::mouse` instead.
+pub type MouseState = Mouse;
+
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum KeyCode {
@@ -82,32 +86,39 @@ impl Default for KeyCode {
     }
 }
 
-
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub enum Key {
-    Printable(char),
-    Special(KeyCode),
-}
-
-impl Default for Key {
-    fn default() -> Self {
-        Key::Special(Default::default())
-    }
-}
-
-#[derive(Copy, Clone, PartialEq, Debug)]
-pub struct KeyState {
-    pub key: Key,
+#[derive(Copy, Clone, PartialEq, Debug, Default)]
+pub struct Key {
+    pub code: KeyCode,
+    pub printable: char,
     pub pressed: bool,
     pub left_alt: bool,
     pub left_ctrl: bool,
     pub right_alt: bool,
     pub right_ctrl: bool,
     pub shift: bool,
+    pub alt: bool,
+    pub ctrl: bool,
+}
+
+impl Into<Key> for ffi::TCOD_key_t {
+    fn into(self) -> Key {
+        Key {
+            code: keycode_from_u32(self.vk).unwrap(),
+            printable: self.c as u8 as char,
+            pressed: self.pressed != 0,
+            left_alt: self.lalt != 0,
+            left_ctrl: self.lctrl != 0,
+            right_alt: self.ralt != 0,
+            right_ctrl: self.rctrl != 0,
+            shift: self.shift != 0,
+            alt: self.lalt != 0 || self.ralt != 0,
+            ctrl: self.lctrl != 0 || self.rctrl != 0,
+        }
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Debug, Default)]
-pub struct MouseState {
+pub struct Mouse {
     pub x: isize,
     pub y: isize,
     pub dx: isize,
@@ -190,21 +201,9 @@ pub fn check_for_event(event_mask: EventFlags) -> Option<(EventFlags, Event)> {
     }
 
     let ret_event = if ret_flag.intersects(KEY_PRESS|KEY_RELEASE|KEY) {
-        Some(Event::Key(KeyState {
-            key: if c_key_state.vk == ffi::TCODK_CHAR {
-                Key::Printable(c_key_state.c as u8 as char)
-            } else {
-                Key::Special(keycode_from_u32(c_key_state.vk).unwrap())
-            },
-            pressed: c_key_state.pressed != 0,
-            left_alt: c_key_state.lalt != 0,
-            left_ctrl: c_key_state.lctrl != 0,
-            right_alt: c_key_state.ralt != 0,
-            right_ctrl: c_key_state.rctrl != 0,
-            shift: c_key_state.shift != 0
-        }))
+        Some(Event::Key(c_key_state.into()))
     } else if ret_flag.intersects(MOUSE_MOVE|MOUSE_PRESS|MOUSE_RELEASE|MOUSE) {
-        Some(Event::Mouse(MouseState {
+        Some(Event::Mouse(Mouse {
             x: c_mouse_state.x as isize,
             y: c_mouse_state.y as isize,
             dx: c_mouse_state.dx as isize,
@@ -235,8 +234,8 @@ pub fn events() -> EventIterator {
 
 #[derive(Copy, Clone, Debug)]
 pub enum Event {
-    Key(KeyState),
-    Mouse(MouseState)
+    Key(Key),
+    Mouse(Mouse)
 }
 
 pub struct EventIterator;

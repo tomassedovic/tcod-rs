@@ -8,7 +8,7 @@ extern crate tcod;
 
 use tcod::console::{Root, Console, FontLayout, FontType, BackgroundFlag};
 use tcod::colors;
-use tcod::input::Key::Special;
+use tcod::input::Key;
 use tcod::input::KeyCode::{Up, Down, Left, Right, Escape, Enter};
 
 // actual size of the window
@@ -21,20 +21,20 @@ fn handle_keys(root: &mut Root, player_x: &mut i32, player_y: &mut i32) -> bool 
     // if let Some(keypress) = root.check_for_keypress()  // real-time
     let keypress = root.wait_for_keypress(true);
 
-    match keypress.key {
+    match keypress {
         // Alt+Enter: toggle fullscreen
-        Special(Enter) if keypress.left_alt => {
+        Key { code: Enter, alt: true, .. } => {
             let fullscreen = !root.is_fullscreen();
             root.set_fullscreen(fullscreen);
         }
-        Special(Escape) => {
+        Key { code: Escape, .. } => {
             return true  // exit game
         }
         // movement keys
-        Special(Up) => *player_y -= 1,
-        Special(Down) => *player_y += 1,
-        Special(Left) => *player_x -= 1,
-        Special(Right) => *player_x += 1,
+        Key { code: Up, .. } => *player_y -= 1,
+        Key { code: Down, .. } => *player_y += 1,
+        Key { code: Left, .. } => *player_x -= 1,
+        Key { code: Right, .. } => *player_x += 1,
         _ => {}
     }
     return false;

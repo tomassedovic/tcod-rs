@@ -62,10 +62,10 @@ use std::mem::transmute;
 use std::path::Path;
 
 use bindings::ffi;
-use bindings::{AsNative, FromNative, c_bool, c_char, CString, keycode_from_u32};
+use bindings::{AsNative, FromNative, c_bool, c_char, CString};
 
 use colors::Color;
-use input::{Key, KeyPressFlags, KeyState};
+use input::{Key, KeyPressFlags};
 
 /// A type representing secondary consoles
 ///
@@ -292,50 +292,24 @@ impl Root {
     /// This function will wait for a keypress event from the user, returning the [KeyState](../input/struct.KeyState.html)
     /// that represents the event. If `flush` is true, all pending keypresses are flushed from the
     /// keyboard buffer. If false, it returns the first element from it.
-    pub fn wait_for_keypress(&mut self, flush: bool) -> KeyState {
+    pub fn wait_for_keypress(&mut self, flush: bool) -> Key {
         let tcod_key = unsafe {
             ffi::TCOD_console_wait_for_keypress(flush as c_bool)
         };
-        let key = if tcod_key.vk == ffi::TCODK_CHAR {
-            Key::Printable(tcod_key.c as u8 as char)
-        } else {
-            Key::Special(keycode_from_u32(tcod_key.vk).unwrap())
-        };
-        KeyState{
-            key: key,
-            pressed: tcod_key.pressed != 0,
-            left_alt: tcod_key.lalt != 0,
-            left_ctrl: tcod_key.lctrl != 0,
-            right_alt: tcod_key.ralt != 0,
-            right_ctrl: tcod_key.rctrl != 0,
-            shift: tcod_key.shift != 0,
-        }
+        tcod_key.into()
     }
 
     /// This function checks if the user pressed a key. It returns the
     /// [KeyState](../input/struct.KeyState.html) representing the
     /// event if they have, or `None` if they have not.
-    pub fn check_for_keypress(&self, status: KeyPressFlags) -> Option<KeyState> {
+    pub fn check_for_keypress(&self, status: KeyPressFlags) -> Option<Key> {
         let tcod_key = unsafe {
             ffi::TCOD_console_check_for_keypress(status.bits() as i32)
         };
         if tcod_key.vk == ffi::TCODK_NONE {
             return None;
         }
-        let key = if tcod_key.vk == ffi::TCODK_CHAR {
-            Key::Printable(tcod_key.c as u8 as char)
-        } else {
-            Key::Special(keycode_from_u32(tcod_key.vk).unwrap())
-        };
-        Some(KeyState{
-            key: key,
-            pressed: tcod_key.pressed != 0,
-            left_alt: tcod_key.lalt != 0,
-            left_ctrl: tcod_key.lctrl != 0,
-            right_alt: tcod_key.ralt != 0,
-            right_ctrl: tcod_key.rctrl != 0,
-            shift: tcod_key.shift != 0,
-        })
+        Some(tcod_key.into())
     }
 
     /// Returns with true if the `Root` console has been closed.

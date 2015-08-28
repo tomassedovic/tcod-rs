@@ -379,34 +379,34 @@ impl Render for FovSample {
         self.display_map(console, dx, dy, di);
 
         if let Some((_, Event::Key(state))) = event {
-            match state.key {
-                Key::Printable('i') | Key::Printable('I')
+            match state {
+                Key { printable: 'i', .. } | Key { printable: 'I', .. }
                     if self.map.is_walkable(self.px, self.py - 1) =>
                     self.handle_event(console, &mut |s| s.py -= 1),
-                Key::Printable('k') | Key::Printable('K')
+                Key { printable: 'k', .. } | Key { printable: 'K', .. }
                     if self.map.is_walkable(self.px, self.py + 1) =>
                     self.handle_event(console, &mut |s| s.py += 1),
-                Key::Printable('j') | Key::Printable('J')
+                Key { printable: 'j', .. } | Key { printable: 'J', .. }
                     if self.map.is_walkable(self.px - 1, self.py) =>
                     self.handle_event(console, &mut |s| s.px -= 1),
-                Key::Printable('l') | Key::Printable('L')
+                Key { printable: 'l', .. } | Key { printable: 'L', .. }
                     if self.map.is_walkable(self.px + 1, self.py) =>
                     self.handle_event(console, &mut |s| s.px += 1),
-                Key::Printable('t') | Key::Printable('T') => {
+                Key { printable: 't', .. } | Key { printable: 'T', .. } => {
                     self.torch = !self.torch;
                     self.display_help(console);
                 },
-                Key::Printable('w') | Key::Printable('W') => {
+                Key { printable: 'w', .. } | Key { printable: 'W', .. } => {
                     self.light_walls = !self.light_walls;
                     self.display_help(console);
                     self.recompute_fov = true;
                 },
-                Key::Printable('+') => {
+                Key { printable: '+', .. } => {
                     self.next_algorithm();
                     self.display_help(console);
                     self.recompute_fov = true;
                 },
-                Key::Printable('-') => {
+                Key { printable: '-', .. } => {
                     self.previous_algorithm();
                     self.display_help(console);
                     self.recompute_fov = true;
@@ -630,16 +630,16 @@ impl<'a> Render for PathSample<'a> {
         }
 
         if let Some((_, Event::Key(state))) = event {
-            match state.key {
-                Key::Printable('i') | Key::Printable('I') if self.dy > 0 =>
+            match state {
+                Key { printable: 'i', .. } | Key { printable: 'I', .. } if self.dy > 0 =>
                     self.handle_event(console, &mut |s| s.dy -= 1),
-                Key::Printable('k') | Key::Printable('K') if self.dy < SAMPLE_SCREEN_HEIGHT-1 =>
+                Key { printable: 'k', .. } | Key { printable: 'K', .. } if self.dy < SAMPLE_SCREEN_HEIGHT-1 =>
                     self.handle_event(console, &mut |s| s.dy += 1),
-                Key::Printable('j') | Key::Printable('J') if self.dx > 0 =>
+                Key { printable: 'j', .. } | Key { printable: 'J', .. } if self.dx > 0 =>
                     self.handle_event(console, &mut |s| s.dx -= 1),
-                Key::Printable('l') | Key::Printable('L') if self.dx < SAMPLE_SCREEN_WIDTH-1 =>
+                Key { printable: 'l', .. } | Key { printable: 'L', .. } if self.dx < SAMPLE_SCREEN_WIDTH-1 =>
                     self.handle_event(console, &mut |s| s.dx += 1),
-                Key::Special(KeyCode::Tab) => {
+                Key { code: KeyCode::Tab, .. } => {
                     self.using_astar = ! self.using_astar;
                     if self.using_astar {
                         console.print(1, 4, "Using : A*      ");
@@ -745,7 +745,7 @@ struct MouseSample {
     left_button:   bool,
     middle_button: bool,
     right_button:  bool,
-    mouse_state: Option<MouseState>,
+    mouse_state: Option<Mouse>,
 }
 
 impl MouseSample {
@@ -755,7 +755,7 @@ impl MouseSample {
         }
     }
 
-    fn format(&self, mouse: &MouseState, root: &Root) -> String {
+    fn format(&self, mouse: &Mouse, root: &Root) -> String {
         format!("{}\n \
                  Mouse position : {:4}x{:4} {}\n \
                  Mouse cell     : {:4}x{:4}\n \
@@ -806,10 +806,10 @@ impl Render for MouseSample {
 
                 self.mouse_state = Some(mouse);
             },
-            Some((_, Event::Key(state))) if state.key == Key::Special(KeyCode::Number1) => {
+            Some((_, Event::Key(Key {code: KeyCode::Number1, ..}))) => {
                 show_cursor(false);
             },
-            Some((_, Event::Key(state))) if state.key == Key::Special(KeyCode::Number2) => {
+            Some((_, Event::Key(Key {code: KeyCode::Number2, ..}))) => {
                 show_cursor(true)
             },
             _ => {} // Ignore other events
@@ -900,13 +900,13 @@ impl Render for NameSample {
 
         match event {
             Some((_, Event::Key(state))) => {
-                match state.key {
-                    Key::Printable('+') => {
+                match state {
+                    Key { printable: '+', .. } => {
                         self.cur_set += 1;
                         if self.cur_set == self.sets.len() { self.cur_set = 0 }
                         self.names.push("======".to_string());
                     },
-                    Key::Printable('-') => {
+                    Key { printable: '-', .. } => {
                         if self.cur_set == 0 {
                             self.cur_set = self.sets.len() - 1
                         } else {
@@ -1034,24 +1034,24 @@ fn main() {
         match event {
             None => {continue;}
             Some((_flag, Event::Key(state))) => {
-                match state.key {
-                    Key::Special(KeyCode::Down) => {
+                match state {
+                    Key { code: KeyCode::Down, .. } => {
                         cur_sample = (cur_sample + 1) % samples.len();
                         first = true
                     }
-                    Key::Special(KeyCode::Up) => {
+                    Key { code: KeyCode::Up, .. } => {
                         if cur_sample == 0 { cur_sample = samples.len() - 1; }
                         else { cur_sample -= 1; }
                         first = true
                     }
-                    Key::Special(KeyCode::Enter) if state.left_alt => {
+                    Key { code: KeyCode::Enter, .. } if state.left_alt => {
                         let fullscreen = root.is_fullscreen();
                         root.set_fullscreen(!fullscreen)
                     }
-                    Key::Special(KeyCode::PrintScreen) => {
+                    Key { code: KeyCode::PrintScreen, .. } => {
                         // TODO
                     }
-                    Key::Special(KeyCode::Escape) => { break }
+                    Key { code: KeyCode::Escape, .. } => { break }
                     _ => {continue;}
                 }
             }
