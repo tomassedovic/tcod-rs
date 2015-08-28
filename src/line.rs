@@ -22,7 +22,20 @@ impl Line {
     }
     
     // pub fn new_from_listener(start: (i32, i32), end: (i32, i32), listener: &Listener) -> Self {}
-    // pub fn step(&self) -> (i32, i32) {}
+
+    pub fn step(&mut self) -> Option<(i32, i32)> {
+        let mut x: c_int = 0;
+        let mut y: c_int = 0;
+        let end = unsafe {
+            ffi::TCOD_line_step_mt(&mut x, &mut y, &mut self.tcod_line)
+        };
+
+        if end == 0 {
+            Some((x, y))
+        } else {
+            None
+        }
+    }
 }
 
 #[cfg(test)]
@@ -49,4 +62,31 @@ mod test {
         assert_eq!(line.tcod_line.desty, 1);
     }
 
+    #[test]
+    fn step_line() {
+        let mut line = Line::new((1, 1), (5, 5));
+
+        assert_eq!(Some((2, 2)), line.step());
+        assert_eq!(Some((3, 3)), line.step());
+        assert_eq!(Some((4, 4)), line.step());
+        assert_eq!(Some((5, 5)), line.step());
+        assert_eq!(None, line.step());
+    }
+
+    #[test]
+    fn step_two_lines() {
+        let mut line1 = Line::new((1, 1), (5, 5));
+        let mut line2 = Line::new((10, 10), (14, 14));
+
+        assert_eq!(Some((2, 2)), line1.step());
+        assert_eq!(Some((11, 11)), line2.step());
+        assert_eq!(Some((3, 3)), line1.step());
+        assert_eq!(Some((12, 12)), line2.step());
+        assert_eq!(Some((4, 4)), line1.step());
+        assert_eq!(Some((13, 13)), line2.step());
+        assert_eq!(Some((5, 5)), line1.step());
+        assert_eq!(Some((14, 14)), line2.step());
+        assert_eq!(None, line1.step());
+        assert_eq!(None, line2.step());
+    }
 }
