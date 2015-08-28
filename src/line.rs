@@ -38,6 +38,14 @@ impl Line {
     }
 }
 
+impl Iterator for Line {
+    type Item = (i32, i32);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.step()
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::Line;
@@ -88,5 +96,16 @@ mod test {
         assert_eq!(Some((14, 14)), line2.step());
         assert_eq!(None, line1.step());
         assert_eq!(None, line2.step());
+    }
+
+    #[test]
+    fn iterate_over_line() {
+        let mut line = Line::new((1, 1), (5, 5));
+
+        assert_eq!(Some((2, 2)), line.next());
+        assert_eq!(Some((3, 3)), line.next());
+        assert_eq!(Some((4, 4)), line.next());
+        assert_eq!(Some((5, 5)), line.next());
+        assert_eq!(None, line.next());
     }
 }
