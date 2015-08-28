@@ -351,8 +351,9 @@ impl Root {
                        nb_char_horizontal: i32,
                        nb_char_vertical: i32) {
         unsafe {
-            let filename = font_path.to_str().unwrap();
-            let path = CString::new(filename).unwrap();
+            let filename = font_path.to_str().expect("Invalid font path");
+            let path = CString::new(filename).ok().expect("Font path could not be converted \
+                                                           to a C string");
             ffi::TCOD_console_set_custom_font(
                 path.as_ptr(), (font_layout as i32) | (font_type as i32),
                 nb_char_horizontal, nb_char_vertical);
