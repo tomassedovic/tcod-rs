@@ -20,8 +20,12 @@ pub struct Namegen {
 impl Drop for Namegen {
     fn drop(&mut self) {
         unsafe {
-            let _lock = NAMEGEN_MUTEX.lock().unwrap();
-            ffi::TCOD_namegen_destroy();
+            let _lock = NAMEGEN_MUTEX.lock()
+                .ok()
+                .expect("Namegen mutex could not be locked");
+            if self.rng.len() > 0 {
+                ffi::TCOD_namegen_destroy();
+            }
             NAMEGEN_FREE = true;
         }
     }
@@ -32,7 +36,9 @@ impl Namegen {
         unsafe {
             match NAMEGEN_FREE {
                 true => {
-                    let _lock = NAMEGEN_MUTEX.lock().unwrap();
+                    let _lock = NAMEGEN_MUTEX.lock()
+                        .ok()
+                        .expect("Namegen mutex could not be locked");
                     NAMEGEN_FREE = false;
                     Some(Namegen { rng: Vec::new() })
                 },
@@ -67,7 +73,8 @@ impl Namegen {
             let name_string = CString::new(name.as_ref()).unwrap();
             let rule_string = CString::new(rule.as_ref()).unwrap();
 
-            let borrowed = ffi::TCOD_namegen_generate_custom(name_string.as_ptr() as *mut _, rule_string.as_ptr() as *mut _, 0);
+            let borrowed = ffi::TCOD_namegen_generate_custom(name_string.as_ptr() as *mut _,
+                                                             rule_string.as_ptr() as *mut _, 0);
             cstr_to_owned(borrowed)
         }
     }
@@ -98,4 +105,3 @@ fn cstr_to_owned(string: *mut c_char) -> Option<String> {
             .ok()
     }
 }
-

@@ -40,11 +40,11 @@ pub fn get_elapsed_time() -> Duration {
     let ms: u32 = unsafe {
         ffi::TCOD_sys_elapsed_milli()
     };
-    return Duration::milliseconds(ms as i64)
+    Duration::milliseconds(ms as i64)
 }
 
 pub fn save_screenshot<P>(path: P) where P: AsRef<Path> {
-    let filename = path.as_ref().to_str().unwrap();
+    let filename = path.as_ref().to_str().expect("Invalid screenshot path");
     let c_path = CString::new(filename).unwrap();
     unsafe {
         ffi::TCOD_sys_save_screenshot(c_path.as_ptr());
