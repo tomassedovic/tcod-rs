@@ -24,10 +24,9 @@ const SAMPLE_SCREEN_X : i32 = 20;
 const SAMPLE_SCREEN_Y : i32 = 10;
 
 trait Render {
-    fn render(&mut self,
-              console: &mut Offscreen,
-              root: &Root,
-              first: bool,
+    fn initialize(&mut self, console: &mut Offscreen);
+
+    fn render(&mut self, console: &mut Offscreen, root: &Root,
               event: Option<(EventFlags, Event)>);
 }
 
@@ -43,9 +42,9 @@ impl ColorsSample {
     fn new() -> Self {
         ColorsSample {
             cols: [Color::new(50,  40, 150),
-                    Color::new(240, 85, 5),
-                    Color::new(50,  35, 240),
-                    Color::new(10, 200, 130)],
+                   Color::new(240, 85, 5),
+                   Color::new(50,  35, 240),
+                   Color::new(10, 200, 130)],
             dirr: [1, -1, 1, 1],
             dirg: [1, -1, -1, 1],
             dirb: [1, 1, 1, -1],
@@ -128,16 +127,15 @@ impl ColorsSample {
         // put random text (for performance tests)
         for x in 0..SAMPLE_SCREEN_WIDTH {
             for y in 0..SAMPLE_SCREEN_HEIGHT {
-                let mut c;
                 let mut col = console.get_char_background(x, y);
                 col = colors::lerp(col, colors::BLACK, 0.5);
                 // use colored character 255 on first and last lines
-                if y == 0 || y == SAMPLE_SCREEN_HEIGHT-1 {
-                    c = std::char::from_u32(0x00ff).unwrap();
+                let c = if y == 0 || y == SAMPLE_SCREEN_HEIGHT-1 {
+                    '\u{00ff}'
                 } else {
                     let r = self.rng.gen_range('a' as u32, 'z' as u32);
-                    c = from_u32(r).unwrap();
-                }
+                    from_u32(r).unwrap()
+                };
 
                 console.set_default_foreground(col);
                 console.put_char(x, y, c, BackgroundFlag::None);
@@ -149,17 +147,15 @@ impl ColorsSample {
 }
 
 impl Render for ColorsSample {
+    fn initialize(&mut self, console: &mut Offscreen) {
+        system::set_fps(0);
+        console.clear()
+    }
+
     fn render(&mut self,
               console: &mut Offscreen,
               _root: &Root,
-              first: bool,
               _event: Option<(EventFlags, Event)>) {
-
-        if first {
-            system::set_fps(0);
-            console.clear()
-        }
-
         self.cycle_colors();
         self.set_colors(console);
         let text_color = self.print_random_chars(console);
@@ -200,26 +196,27 @@ impl OffscreenSample {
 }
 
 impl Render for OffscreenSample {
-    fn render(&mut self,
-              console: &mut Offscreen,
-              _root: &Root,
-              first: bool,
-              _event: Option<(EventFlags, Event)>) {
+    fn initialize(&mut self, console: &mut Offscreen) {
         if !self.init {
             self.init = true;
             self.secondary.print_frame(0, 0, SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2,
-                                        false, BackgroundFlag::Set, Some("Offscreen console"));
+                                       false, BackgroundFlag::Set, Some("Offscreen console"));
             self.secondary.print_rect_ex(SAMPLE_SCREEN_WIDTH/4, 2, SAMPLE_SCREEN_WIDTH/2-2,
-                                          SAMPLE_SCREEN_HEIGHT/2, BackgroundFlag::None, TextAlignment::Center,
-                                          "You can render to an offscreen console and blit in on another one, simulating alpha transparency.");
+                                         SAMPLE_SCREEN_HEIGHT/2, BackgroundFlag::None, TextAlignment::Center,
+                                         "You can render to an offscreen console\
+                                          and blit in on another one, simulating\
+                                          alpha transparency.");
         }
 
-        if first {
-            system::set_fps(30);
-            blit(console, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
-                 &mut self.screenshot, (0, 0), 1.0, 1.0);
-        }
+        system::set_fps(30);
+        blit(console, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
+             &mut self.screenshot, (0, 0), 1.0, 1.0);
+    }
 
+    fn render(&mut self,
+              console: &mut Offscreen,
+              _root: &Root,
+              _event: Option<(EventFlags, Event)>) {
         self.counter += 1;
         if self.counter % 20 == 0 {
             self.x += self.xdir;
@@ -236,11 +233,6 @@ impl Render for OffscreenSample {
              console, (self.x, self.y), 1.0, 0.75);
     }
 }
-
-/*
-fn render_lines(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) {}
-fn render_noise(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) {}
-*/
 
 struct FovSample {
     px: i32,
@@ -280,18 +272,6 @@ impl FovSample {
         }
     }
 
-    fn init(&mut self, console: &mut Offscreen) {
-        system::set_fps(30);
-        console.clear();
-        self.display_help(console);
-        console.put_char(self.px, self.py, '@', BackgroundFlag::None);
-        iterate_map(&mut |x, y, c| {
-            if c == '=' {
-                console.put_char(x, y, chars::DHLINE, BackgroundFlag::None)
-            }
-        });
-    }
-
     fn display_help(&self, console: &mut Offscreen) {
         console.set_default_foreground(colors::WHITE);
         console.print(1, 0,
@@ -317,9 +297,9 @@ impl FovSample {
                     let mut base = if is_wall { self.dark_wall } else { self.dark_ground };
                     light = if is_wall { self.light_wall } else { self.light_ground };
                     let r = (x as f32 - self.px as f32 + dx) *
-                        (x as f32 - self.px as f32 + dx) +
-                        (y as f32 - self.py as f32 + dy) *
-                        (y as f32 - self.py as f32 + dy);
+                            (x as f32 - self.px as f32 + dx) +
+                            (y as f32 - self.py as f32 + dy) *
+                            (y as f32 - self.py as f32 + dy);
                     if r < SQUARED_TORCH_RADIUS {
                         let mut l = (SQUARED_TORCH_RADIUS - r) / SQUARED_TORCH_RADIUS + di;
                         l = clamp(0.0, 1.0, l);
@@ -357,12 +337,22 @@ impl FovSample {
 }
 
 impl Render for FovSample {
+    fn initialize(&mut self, console: &mut Offscreen) {
+        system::set_fps(30);
+        console.clear();
+        self.display_help(console);
+        console.put_char(self.px, self.py, '@', BackgroundFlag::None);
+        iterate_map(&mut |x, y, c| {
+            if c == '=' {
+                console.put_char(x, y, chars::DHLINE, BackgroundFlag::None)
+            }
+        });
+    }
+
     fn render(&mut self,
               console: &mut Offscreen,
               _root: &Root,
-              first: bool,
               event: Option<(EventFlags, Event)>) {
-        if first { self.init(console) }
         if self.recompute_fov {
             self.recompute_fov = false;
             let radius = if self.torch { TORCH_RADIUS as i32 } else { 0 };
@@ -373,40 +363,40 @@ impl Render for FovSample {
         let dy = 0.0;
         let di = 0.0;
         if self.torch {
-            // TODO implemenent when noise in wrapped in Rust API
+            // TODO implemenent when noise is wrapped in Rust API
         }
 
         self.display_map(console, dx, dy, di);
 
-        if let Some((_, Event::Key(state))) = event {
-            match state {
-                Key { printable: 'i', .. } | Key { printable: 'I', .. }
-                    if self.map.is_walkable(self.px, self.py - 1) =>
-                    self.handle_event(console, &mut |s| s.py -= 1),
-                Key { printable: 'k', .. } | Key { printable: 'K', .. }
-                    if self.map.is_walkable(self.px, self.py + 1) =>
-                    self.handle_event(console, &mut |s| s.py += 1),
-                Key { printable: 'j', .. } | Key { printable: 'J', .. }
-                    if self.map.is_walkable(self.px - 1, self.py) =>
-                    self.handle_event(console, &mut |s| s.px -= 1),
-                Key { printable: 'l', .. } | Key { printable: 'L', .. }
-                    if self.map.is_walkable(self.px + 1, self.py) =>
-                    self.handle_event(console, &mut |s| s.px += 1),
-                Key { printable: 't', .. } | Key { printable: 'T', .. } => {
+        if let Some((_, Event::Key(key))) = event {
+            match key.printable {
+                'i' | 'I' if self.map.is_walkable(self.px, self.py - 1) => {
+                    self.handle_event(console, &mut |s| s.py -= 1);
+                },
+                'k' | 'K' if self.map.is_walkable(self.px, self.py + 1) => {
+                    self.handle_event(console, &mut |s| s.py += 1);
+                },
+                'j' | 'J' if self.map.is_walkable(self.px - 1, self.py) => {
+                    self.handle_event(console, &mut |s| s.px -= 1);
+                },
+                'l' | 'L' if self.map.is_walkable(self.px + 1, self.py) => {
+                    self.handle_event(console, &mut |s| s.px += 1);
+                },
+                't' | 'T' => {
                     self.torch = !self.torch;
                     self.display_help(console);
                 },
-                Key { printable: 'w', .. } | Key { printable: 'W', .. } => {
+                'w' | 'W' => {
                     self.light_walls = !self.light_walls;
                     self.display_help(console);
                     self.recompute_fov = true;
                 },
-                Key { printable: '+', .. } => {
+                '+' => {
                     self.next_algorithm();
                     self.display_help(console);
                     self.recompute_fov = true;
                 },
-                Key { printable: '-', .. } => {
+                '-' => {
                     self.previous_algorithm();
                     self.display_help(console);
                     self.recompute_fov = true;
@@ -438,7 +428,6 @@ struct PathSample<'a> {
 const TORCH_RADIUS : f32 = 10.0;
 const SQUARED_TORCH_RADIUS : f32 = (TORCH_RADIUS*TORCH_RADIUS);
 
-
 static SMAP : [&'static str; 20] = [
     "##############################################",
     "#######################      #################",
@@ -462,9 +451,7 @@ static SMAP : [&'static str; 20] = [
     "##############################################",
     ];
 
-fn iterate_map<F>(closure: &mut F) -> ()
-    where F: FnMut(i32, i32, char) -> ()
-{
+fn iterate_map<F>(closure: &mut F) where F: FnMut(i32, i32, char) -> () {
     for (y, line) in SMAP.iter().enumerate() {
         for (x, c) in line.chars().enumerate() {
             closure(x as i32, y as i32, c)
@@ -482,9 +469,7 @@ fn create_map() -> Map {
 }
 
 
-
 impl<'a> PathSample<'a> {
-
     fn new() -> Self {
         PathSample {
             px: 20, py: 10,
@@ -494,40 +479,18 @@ impl<'a> PathSample<'a> {
             light_ground: colors::Color::new(200, 180, 50),
             using_astar: true,
             dijkstra_dist: 0.0,
-            dijkstra: Dijkstra::new_from_map(create_map(), 1.41f32),
-            astar: AStar::new_from_map(create_map(), 1.41f32),
+            dijkstra: Dijkstra::new_from_map(create_map(), 1.41),
+            astar: AStar::new_from_map(create_map(), 1.41),
             recalculate_path: false,
             busy: 0.0,
             old_char: ' ',
         }
     }
 
-    fn init(&mut self, console: &mut Offscreen) {
-        system::set_fps(30);
-        console.clear();
-        // we draw the foreground only the first time.
-        // during the player movement, only the @ is redrawn.
-        // the rest impacts only the background color
-        // draw the help text & player @
-        console.set_default_foreground(colors::WHITE);
-        console.put_char(self.dx, self.dy, '+', BackgroundFlag::None);
-        console.put_char(self.px, self.py, '@', BackgroundFlag::None);
-        console.print(1, 1, "IJKL / mouse :\nmove destination\nTAB : A*/dijkstra");
-        console.print(1, 4, "Using : A*");
-
-        // draw windows
-        iterate_map(&mut |x, y, c| {
-            if c == '=' {
-                console.put_char(x, y, chars::DHLINE, BackgroundFlag::None)
-            }
-        });
-        self.recalculate_path = true;
-    }
-
     fn display_map(&mut self, console: &mut Offscreen) {
         iterate_map(&mut |x, y, c| {
             let wall = c == '#';
-            let color = if wall { self.dark_wall} else { self.dark_ground };
+            let color = if wall { self.dark_wall } else { self.dark_ground };
             console.set_char_background(x, y, color, BackgroundFlag::Set);
         });
     }
@@ -553,8 +516,7 @@ impl<'a> PathSample<'a> {
 
     fn draw_path(&mut self, console: &mut Offscreen) {
         if self.using_astar {
-            for i in 0..self.astar.len() {
-                let (x, y) = self.astar.get(i).unwrap();
+            for (x, y) in self.astar.iter() {
                 console.set_char_background(x, y, self.light_ground, BackgroundFlag::Set);
             }
         } else {
@@ -570,8 +532,7 @@ impl<'a> PathSample<'a> {
                     }
                 }
             });
-            for i in 0..self.dijkstra.len() {
-                let (x, y) = self.dijkstra.get(i).unwrap();
+            for (x, y) in self.dijkstra.iter() {
                 console.set_char_background(x, y, self.light_ground, BackgroundFlag::Set);
             }
         }
@@ -580,7 +541,7 @@ impl<'a> PathSample<'a> {
     fn move_creature(&mut self, console: &mut Offscreen) {
         self.busy = 0.2;
         if self.using_astar {
-            if ! self.astar.is_empty() {
+            if !self.astar.is_empty() {
                 console.put_char(self.px, self.py, ' ', BackgroundFlag::None);
                 let (x, y) = self.astar.walk_one_step(true).unwrap();
                 self.px = x;
@@ -613,12 +574,32 @@ impl<'a> PathSample<'a> {
 }
 
 impl<'a> Render for PathSample<'a> {
+    fn initialize(&mut self, console: &mut Offscreen) {
+        system::set_fps(30);
+        console.clear();
+        // we draw the foreground only the first time.
+        // during the player movement, only the @ is redrawn.
+        // the rest impacts only the background color
+        // draw the help text & player @
+        console.set_default_foreground(colors::WHITE);
+        console.put_char(self.dx, self.dy, '+', BackgroundFlag::None);
+        console.put_char(self.px, self.py, '@', BackgroundFlag::None);
+        console.print(1, 1, "IJKL / mouse :\nmove destination\nTAB : A*/dijkstra");
+        console.print(1, 4, "Using : A*");
+
+        // draw windows
+        iterate_map(&mut |x, y, c| {
+            if c == '=' {
+                console.put_char(x, y, chars::DHLINE, BackgroundFlag::None)
+            }
+        });
+        self.recalculate_path = true;
+    }
+
     fn render(&mut self,
               console: &mut Offscreen,
               _root: &Root,
-              first: bool,
               event: Option<(EventFlags, Event)>) {
-        if first { self.init(console) }
         if self.recalculate_path { self.recalculate() }
 
         self.display_map(console);
@@ -629,8 +610,8 @@ impl<'a> Render for PathSample<'a> {
             self.move_creature(console);
         }
 
-        if let Some((_, Event::Key(state))) = event {
-            match state {
+        if let Some((_, Event::Key(key))) = event {
+            match key {
                 Key { printable: 'i', .. } | Key { printable: 'I', .. } if self.dy > 0 =>
                     self.handle_event(console, &mut |s| s.dy -= 1),
                 Key { printable: 'k', .. } | Key { printable: 'K', .. } if self.dy < SAMPLE_SCREEN_HEIGHT-1 =>
@@ -667,10 +648,6 @@ impl<'a> Render for PathSample<'a> {
     }
 }
 
-/*
-fn render_bsp(_console: &mut Offscreen, _root: &Root, _first: bool, _event: Option<(EventFlags, Event)>) {}
- */
-
 struct ImageSample {
     img: image::Image,
     circle: image::Image,
@@ -696,27 +673,26 @@ impl ImageSample {
 }
 
 impl Render for ImageSample {
+    fn initialize(&mut self, _: &mut Offscreen) {
+        system::set_fps(30)
+    }
+
     fn render(&mut self,
               console: &mut Offscreen,
               _root: &Root,
-              first: bool,
               _event: Option<(EventFlags, Event)>) {
-        if first {
-            system::set_fps(30)
-        }
-
         console.set_default_background(colors::BLACK);
         console.clear();
 
         let elapsed_seconds: f32 = (system::get_elapsed_time().num_milliseconds() as f32) / 1000.0;
         let x = (SAMPLE_SCREEN_WIDTH/2) as f32 + (elapsed_seconds as f32).cos() * 10.0;
-        let y = ( SAMPLE_SCREEN_HEIGHT/2 ) as f32;
+        let y = (SAMPLE_SCREEN_HEIGHT/2) as f32;
         let scale_x = 0.2 + 1.8 * (1.0 + (elapsed_seconds / 2.0).cos()) / 2.0;
         let scale_y = scale_x;
         let angle = elapsed_seconds;
         let elapsed = system::get_elapsed_time().num_milliseconds() / 2000;
 
-        if (elapsed & 1) != 0 {
+        if elapsed % 2 != 0 {
             // split the color channels of circle.png
             // the red channel
             console.set_default_background(colors::RED);
@@ -750,8 +726,11 @@ struct MouseSample {
 
 impl MouseSample {
     fn new() -> Self {
-        MouseSample { left_button: false, middle_button: false, right_button: false,
-                      mouse_state: None,
+        MouseSample {
+            left_button: false,
+            middle_button: false,
+            right_button: false,
+            mouse_state: None,
         }
     }
 
@@ -777,27 +756,23 @@ impl MouseSample {
                 if self.middle_button { " ON" } else { "OFF" },
                 if mouse.wheel_up { "UP" } else if mouse.wheel_down { "DOWN" } else { "" })
     }
+}
 
-    fn init(&mut self, console: &mut Console) {
+impl Render for MouseSample {
+    fn initialize(&mut self, console: &mut Offscreen) {
         system::set_fps(30);
         console.set_default_background(colors::GREY);
         console.set_default_foreground(colors::LIGHT_YELLOW);
         move_cursor(320, 200);
         show_cursor(true)
     }
-}
 
-impl Render for MouseSample {
     fn render(&mut self,
               console: &mut Offscreen,
               root: &Root,
-              first: bool,
               event: Option<(EventFlags, Event)>) {
-        if first {
-            self.init(console)
-        }
-
         console.clear();
+
         match event {
             Some((_, Event::Mouse(mouse))) => {
                 if mouse.lbutton_pressed {self.left_button = !self.left_button;}
@@ -848,11 +823,13 @@ impl NameSample {
                 _ => {}
             }
         };
-        NameSample { sets: n.get_sets(),
-                     cur_set: 0,
-                     delay: 0.0,
-                     names: vec![],
-                     name_gen: n,
+
+        NameSample {
+            sets: n.get_sets(),
+            cur_set: 0,
+            delay: 0.0,
+            names: vec![],
+            name_gen: n,
         }
     }
 
@@ -878,46 +855,40 @@ impl NameSample {
 }
 
 impl Render for NameSample {
+    fn initialize(&mut self, _: &mut Offscreen) {
+        system::set_fps(30);
+    }
+
     fn render(&mut self,
               console: &mut Offscreen,
               _root: &Root,
-              first: bool,
               event: Option<(EventFlags, Event)>) {
-        if first {
-            system::set_fps(30);
-        }
-
         self.limit_names();
         self.display_names(console);
 
         self.delay += system::get_last_frame_length();
         if self.delay >= 0.5 {
             let name = &self.sets[self.cur_set];
-
             self.delay -= 0.5;
             self.names.push(self.name_gen.generate(name).unwrap())
         }
 
-        match event {
-            Some((_, Event::Key(state))) => {
-                match state {
-                    Key { printable: '+', .. } => {
-                        self.cur_set += 1;
-                        if self.cur_set == self.sets.len() { self.cur_set = 0 }
-                        self.names.push("======".to_string());
-                    },
-                    Key { printable: '-', .. } => {
-                        if self.cur_set == 0 {
-                            self.cur_set = self.sets.len() - 1
-                        } else {
-                            self.cur_set -= 1;
-                        }
-                        self.names.push("======".to_string());
-                    },
-                    _ => {}
-                }
+        if let Some((_, Event::Key(key))) = event {
+            match key.printable {
+                '+' => {
+                    self.cur_set = (self.cur_set + 1) % self.sets.len();
+                    self.names.push("======".to_owned());
+                },
+                '-' => {
+                    if self.cur_set == 0 {
+                        self.cur_set = self.sets.len() - 1
+                    } else {
+                        self.cur_set -= 1;
+                    }
+                    self.names.push("======".to_owned());
+                },
+                _ => {},
             }
-            _ => {}
         }
     }
 }
@@ -929,17 +900,20 @@ struct MenuItem<'a> {
 
 impl<'a> MenuItem<'a> {
     fn new(name: &str, render: &'a mut Render) -> Self {
-        MenuItem { name: name.to_string(), render: render }
+        MenuItem { name: name.to_owned(), render: render }
     }
 }
 
 impl<'a> Render for MenuItem<'a> {
+    fn initialize(&mut self, console: &mut Offscreen) {
+        self.render.initialize(console);
+    }
+
     fn render(&mut self,
               console: &mut Offscreen,
               _root: &Root,
-              first: bool,
               event: Option<(EventFlags, Event)>) {
-        self.render.render(console, _root, first, event);
+        self.render.render(console, _root, event);
     }
 }
 
@@ -957,15 +931,16 @@ struct Options {
 
 impl Options {
     fn new() -> Self {
-        Options {fullscreen_width: 0,
-                 fullscreen_height: 0,
-                 font: "consolas10x10_gs_tc.png".to_string(),
-                 font_type: FontType::Greyscale,
-                 font_layout: FontLayout::Tcod,
-                 nb_char_horiz: 0,
-                 nb_char_vertic: 0,
-                 fullscreen: false,
-                 renderer: Renderer::SDL,
+        Options {
+            fullscreen_width: 0,
+            fullscreen_height: 0,
+            font: "consolas10x10_gs_tc.png".to_owned(),
+            font_type: FontType::Greyscale,
+            font_layout: FontLayout::Tcod,
+            nb_char_horiz: 0,
+            nb_char_vertic: 0,
+            fullscreen: false,
+            renderer: Renderer::SDL,
         }
     }
 }
@@ -992,7 +967,6 @@ fn main() {
                            ];
     let mut cur_sample = 0;
     let mut options = Options::new();
-    let mut first = true;
     let mut console = Offscreen::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
 
     parse_args(&mut options);
@@ -1022,9 +996,8 @@ fn main() {
         print_help_message(&mut root);
 
         let event = check_for_event(KEY_PRESS | MOUSE);
-        samples[cur_sample].render(&mut console, &root, first, event);
+        samples[cur_sample].render(&mut console, &root, event);
 
-        first = false;
         blit(&console, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
              &mut root, (SAMPLE_SCREEN_X, SAMPLE_SCREEN_Y), 1.0, 1.0);
 
@@ -1037,7 +1010,7 @@ fn main() {
             match key.code {
                 KeyCode::Down => {
                     cur_sample = (cur_sample + 1) % samples.len();
-                    first = true;
+                    samples[cur_sample].initialize(&mut console);
                 },
                 KeyCode::Up => {
                     if cur_sample == 0 {
@@ -1045,7 +1018,7 @@ fn main() {
                     } else {
                         cur_sample -= 1;
                     }
-                    first = true;
+                    samples[cur_sample].initialize(&mut console);
                 },
                 KeyCode::Enter if key.left_alt => {
                     let fullscreen = root.is_fullscreen();
@@ -1054,6 +1027,7 @@ fn main() {
                 KeyCode::PrintScreen => {
                     // TODO
                 },
+                KeyCode::Escape => break,
                 _ => {},
             }
         }
