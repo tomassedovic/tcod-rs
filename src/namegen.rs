@@ -23,7 +23,9 @@ impl Drop for Namegen {
             let _lock = NAMEGEN_MUTEX.lock()
                 .ok()
                 .expect("Namegen mutex could not be locked");
-            ffi::TCOD_namegen_destroy();
+            if self.rng.len() > 0 {
+                ffi::TCOD_namegen_destroy();
+            }
             NAMEGEN_FREE = true;
         }
     }
@@ -103,4 +105,3 @@ fn cstr_to_owned(string: *mut c_char) -> Option<String> {
             .ok()
     }
 }
-
