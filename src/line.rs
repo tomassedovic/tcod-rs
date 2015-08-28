@@ -12,6 +12,8 @@ pub trait Listener {
     fn put_point(&self, x: i32, y: i32) -> bool;
 }
 
+pub type Callback = extern "C" fn(x: c_int, y: c_int) -> c_bool;
+
 impl Line {
     pub fn new(start: (i32, i32), end: (i32, i32)) -> Self {
         let mut line: Line = Default::default();
@@ -21,28 +23,15 @@ impl Line {
         line
     }
     
-    // pub fn new_from_listener(start: (i32, i32), end: (i32, i32), listener: &Listener) -> Self {
-    //     let mut line: Line = Default::default();
-    //     let wrapper = ???;
-    //     unsafe {
-    //         ffi::TCOD_line_mt(start.0, start.1, end.0, end.1,
-    //                           Some(wrapper),
-    //                           &mut line.tcod_line)
-    //     };
-    //     line
-    // }
-
-    // pub fn new_from_callback<F>(start: (i32, i32), end: (i32, i32), callback: F) -> Self
-    //     where F: Fn(i32, i32) -> bool {
-    //         let mut line: Line = Default::default();
-    //         let wrapper = ???;
-    //         unsafe {
-    //             ffi::TCOD_line_mt(start.0, start.1, end.0, end.1,
-    //                               Some(wrapper),
-    //                               &mut line.tcod_line)
-    //         };
-    //         line
-    // }
+    pub fn draw_with_callback(start: (i32, i32), end: (i32, i32), callback: Callback) -> Self {
+        let mut line: Line = Default::default();
+        unsafe {
+            ffi::TCOD_line_mt(start.0, start.1, end.0, end.1,
+                              Some(callback),
+                              &mut line.tcod_line)
+        };
+        line
+    }
 
     pub fn step(&mut self) -> Option<(i32, i32)> {
         let mut x: c_int = 0;
@@ -70,7 +59,7 @@ impl Iterator for Line {
 #[cfg(test)]
 mod test {
     use super::Line;
-    use super::Listener;
+    use bindings::{c_int, c_bool};
 
     #[test]
     fn line_created() {
@@ -131,31 +120,16 @@ mod test {
         assert_eq!(None, line.next());
     }
 
-    // #[test]
-    // fn line_with_callback() {
-    //     let mut line = Line::new_from_callback((1, 1), (5, 5), |x, y| {
-    //         x <= 3
-    //     });
+    extern "C" fn less_then_four(x: c_int, _y: c_int) -> c_bool {
+        assert!(x <= 4);
+        (x < 4) as c_bool
+    }
 
-    //     assert_eq!(Some((2, 2)), line.next());
-    //     assert_eq!(Some((3, 3)), line.next());
-    //     assert_eq!(None, line.next());
-    // }
+    #[test]
+    fn line_with_callback() {
+        let mut line = Line::draw_with_callback((1, 1), (5, 5), less_then_four);
 
-    // struct MyListener;
-    // impl Listener for MyListener {
-    //     fn put_point(&self, x: i32, y: i32) -> bool {
-    //         x <= 3
-    //     }
-    // }
-
-    // #[test]
-    // fn line_with_listener() {
-    //     let listener = MyListener;
-    //     let mut line = Line::new_from_listener(listener);
-
-    //     assert_eq!(Some((2, 2)), line.next());
-    //     assert_eq!(Some((3, 3)), line.next());
-    //     assert_eq!(None, line.next());
-    // }
+        assert_eq!(Some((5, 5)), line.next());
+        assert_eq!(None, line.next());
+    }
 }
