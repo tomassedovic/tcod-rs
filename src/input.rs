@@ -4,7 +4,7 @@ use bindings::ffi;
 use bindings::{c_bool, c_uint, keycode_from_u32};
 
 
-/// Deprecated. Use `tcod::input::mouse` instead.
+/// Deprecated. Use `tcod::input::Mouse` instead.
 pub type MouseState = Mouse;
 
 #[repr(C)]
