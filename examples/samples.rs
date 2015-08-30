@@ -333,8 +333,8 @@ impl Render for LineSample {
         console.print(2, 2, format!("{:?} (ENTER to change)", display_flag));
 
         if let Some((_, Event::Key(key))) = event {
-            match key {
-                Key { code: KeyCode::Enter, .. } => self.next_flag(flag_byte),
+            match key.code {
+                KeyCode::Enter => self.next_flag(flag_byte),
                 _ => {}
             }
         }
