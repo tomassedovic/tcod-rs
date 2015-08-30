@@ -53,12 +53,13 @@ yet complete, however.
 * _Field of view_
 * _Map_
 * _Path finding_ (both A\* and Dijkstra)
+* _Pseudorandom number generator_ (prefer the `rand` crate, except for places where the API requires the built-in generators)
+* _Name generator_
+* _Image toolkit_
 
 ### Probably Won't Ever Be Implemented Because Rust Provides This Already
 * Filesystem utilities
 * Containers
-* Pseudorandom generator (Rust has good RNGs, but maybe we want to provide this
-  anyway for people porting existing code depending on tcod's RNG to Rust?)
 * Compression toolkit (there will probably be a better Rust library for this)
 
 ### Not Implemented Yet But Should Happen At Some Point In The Future
