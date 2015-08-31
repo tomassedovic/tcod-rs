@@ -1,16 +1,21 @@
 language: rust
+os:
+- linux
+- osx
 rust:
 - nightly
-- 1.0.0
+- stable
 before_install:
-- sudo apt-get update -qq
+- '[ "$TRAVIS_OS_NAME" = linux ] && sudo apt-get update -qq || brew update'
 install:
-- sudo apt-get install -y libsdl1.2-dev
+- '[ "$TRAVIS_OS_NAME" = linux ] && sudo apt-get install -y libsdl1.2-dev || brew install sdl'
 script:
 - cargo build --verbose
 - cargo test --verbose
 - cargo test --features "rustc-serialize_impls" --verbose
 after_success: ! '[ $TRAVIS_BRANCH = master ] &&
+
+  [ "$TRAVIS_OS_NAME" = linux ] &&
 
   [ $TRAVIS_PULL_REQUEST = false ] &&
 
