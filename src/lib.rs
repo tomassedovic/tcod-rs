@@ -46,6 +46,13 @@ pub use colors::Color;
 pub use console::{Console, RootInitializer, BackgroundFlag, Renderer, FontLayout, FontType, TextAlignment};
 pub use map::Map;
 
+#[macro_use]
+mod macros;
+mod bindings;
+
+#[macro_use]
+pub mod console_macros;
+
 pub mod chars;
 pub mod colors;
 pub mod console;
@@ -57,8 +64,6 @@ pub mod pathfinding;
 pub mod random;
 pub mod system;
 
-mod bindings;
-mod console_macros;
 
 pub type RootConsole = console::Root;
 pub type OffscreenConsole = console::Offscreen;
