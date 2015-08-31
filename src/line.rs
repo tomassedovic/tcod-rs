@@ -8,10 +8,6 @@ pub struct Line {
     tcod_line: ffi::TCOD_bresenham_data_t,
 }
 
-pub trait Listener {
-    fn put_point(&self, x: i32, y: i32) -> bool;
-}
-
 pub type Callback = extern "C" fn(x: c_int, y: c_int) -> c_bool;
 
 impl Line {
