@@ -56,9 +56,7 @@ impl Color {
 
     pub fn new_from_hsv(h: f32, s: f32, v: f32) -> Color {
         unsafe {
-            let mut tcod_c = *Color{r: 0, g: 0, b: 0}.as_native();
-            ffi::TCOD_color_set_HSV(&mut tcod_c, h, s, v);
-            FromNative::from_native(tcod_c)
+            FromNative::from_native(ffi::TCOD_color_HSV(h, s, v))
         }
     }
 
