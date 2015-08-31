@@ -19,7 +19,7 @@ impl Line {
         line
     }
     
-    pub fn draw_with_callback(start: (i32, i32), end: (i32, i32), callback: Callback) -> Self {
+    pub fn new_with_callback(start: (i32, i32), end: (i32, i32), callback: Callback) -> Self {
         let mut line: Line = Default::default();
         unsafe {
             ffi::TCOD_line_mt(start.0, start.1, end.0, end.1,
@@ -123,7 +123,7 @@ mod test {
 
     #[test]
     fn line_with_callback() {
-        let mut line = Line::draw_with_callback((1, 1), (5, 5), less_then_four);
+        let mut line = Line::new_with_callback((1, 1), (5, 5), less_then_four);
 
         assert_eq!(Some((5, 5)), line.next());
         assert_eq!(None, line.next());
