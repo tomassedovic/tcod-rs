@@ -12,11 +12,6 @@ pub struct Line {
     tcod_line: ffi::TCOD_bresenham_data_t,
 }
 
-pub trait Listener {
-    /// Call for each point of a line. Return `true` to abort stepping the line.
-    fn put_point(&self, x: i32, y: i32) -> bool;
-}
-
 impl Line {
     /// Creates a line from `start` to `end` (inclusive).
     pub fn new(start: (i32, i32), end: (i32, i32)) -> Self {
@@ -45,33 +40,6 @@ impl Line {
     {
         let mut line: Line = Line::new(start, end);
         line.step_with_callback(callback);
-        line
-    }
-
-    /// Creates a new line and steps over it using provided listener object as a callback.
-    /// The stepping is aborted when the listener's `put_point` returns false.
-    /// The function returs a part of the line that has not been stepped over.
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// # use tcod::line::*;
-    /// struct MyListener;
-    /// impl Listener for MyListener {
-    ///     fn put_point(&self, x: i32, _y:i32) -> bool {
-    ///         x < 4
-    ///     }
-    /// }
-    ///
-    /// # fn main() {
-    /// let listener = MyListener;
-    /// let mut line = Line::new_with_listener((1, 1), (5, 5), &listener);
-    /// assert_eq!(Some((5, 5)), line.next());
-    /// # }
-    /// ```
-    pub fn new_with_listener(start: (i32, i32), end: (i32, i32), listener: &Listener) -> Self {
-        let mut line: Line = Line::new(start, end);
-        line.step_with_listener(listener);
         line
     }
 
@@ -109,23 +77,6 @@ impl Line {
 	    }
 	    true
     }
-
-    fn step_with_listener(&mut self, listener: &Listener) -> bool {
-        let mut x: c_int = self.tcod_line.origx;
-        let mut y: c_int = self.tcod_line.origy;
-        loop {
-		    if !listener.put_point(x, y) {
-                return false
-            }
-            let step = unsafe {
-                ffi::TCOD_line_step_mt(&mut x, &mut y, &mut self.tcod_line)
-            };
-            if step != 0 {
-                break
-            }
-	    }
-	    true
-    }
 }
 
 impl Iterator for Line {
@@ -139,7 +90,6 @@ impl Iterator for Line {
 #[cfg(test)]
 mod test {
     use super::Line;
-    use super::Listener;
 
     #[test]
     fn line_created() {
@@ -206,22 +156,6 @@ mod test {
             assert!(x <= 4);
             x < 4
         });
-        assert_eq!(Some((5, 5)), line.next());
-        assert_eq!(None, line.next());
-    }
-
-    struct MyListener;
-    impl Listener for MyListener {
-        fn put_point(&self, x: i32, _y:i32) -> bool {
-            assert!(x <= 4);
-            x < 4
-        }
-    }
-
-    #[test]
-    fn line_with_listener() {
-        let listener = MyListener;
-        let mut line = Line::new_with_listener((1, 1), (5, 5), &listener);
         assert_eq!(Some((5, 5)), line.next());
         assert_eq!(None, line.next());
     }
