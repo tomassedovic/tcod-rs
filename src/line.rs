@@ -8,6 +8,10 @@ pub struct Line {
     tcod_line: ffi::TCOD_bresenham_data_t,
 }
 
+pub trait Listener {
+    fn put_point(&self, x: i32, y: i32) -> bool;
+}
+
 impl Line {
     pub fn new(start: (i32, i32), end: (i32, i32)) -> Self {
         let mut line: Line = Default::default();
@@ -25,6 +29,11 @@ impl Line {
         line
     }
 
+    pub fn new_with_listener(start: (i32, i32), end: (i32, i32), listener: &Listener) -> Self {
+        let mut line: Line = Line::new(start, end);
+        line.step_with_listener(listener);
+        line
+    }
     pub fn step(&mut self) -> Option<(i32, i32)> {
         let mut x: c_int = 0;
         let mut y: c_int = 0;
@@ -57,6 +66,23 @@ impl Line {
 	    }
 	    true
     }
+
+    fn step_with_listener(&mut self, listener: &Listener) -> bool {
+        let mut x: c_int = self.tcod_line.origx;
+        let mut y: c_int = self.tcod_line.origy;
+        loop {
+		    if !listener.put_point(x, y) {
+                return false
+            }
+            let step = unsafe {
+                ffi::TCOD_line_step_mt(&mut x, &mut y, &mut self.tcod_line)
+            };
+            if step != 0 {
+                break
+            }
+	    }
+	    true
+    }
 }
 
 impl Iterator for Line {
@@ -70,6 +96,7 @@ impl Iterator for Line {
 #[cfg(test)]
 mod test {
     use super::Line;
+    use super::Listener;
 
     #[test]
     fn line_created() {
@@ -136,6 +163,22 @@ mod test {
             assert!(x <= 4);
             x < 4
         });
+        assert_eq!(Some((5, 5)), line.next());
+        assert_eq!(None, line.next());
+    }
+
+    struct MyListener;
+    impl Listener for MyListener {
+        fn put_point(&self, x: i32, _y:i32) -> bool {
+            assert!(x <= 4);
+            x < 4
+        }
+    }
+
+    #[test]
+    fn line_with_listener() {
+        let listener = MyListener;
+        let mut line = Line::new_with_listener((1, 1), (5, 5), &listener);
         assert_eq!(Some((5, 5)), line.next());
         assert_eq!(None, line.next());
     }
