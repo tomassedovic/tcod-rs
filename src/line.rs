@@ -1,18 +1,24 @@
+//! Port of line drawing toolkit.
+
 extern crate libc;
 
 use bindings::ffi;
 use bindings::c_int;
 
+/// tcod-rs uses libtcod's multithreaded line API, therefore more then one line
+/// can be created and drawn. The `Line` struct represents a line.
 #[derive(Default)]
 pub struct Line {
     tcod_line: ffi::TCOD_bresenham_data_t,
 }
 
 pub trait Listener {
+    /// Call for each point of a line. Return `true` to abort stepping the line.
     fn put_point(&self, x: i32, y: i32) -> bool;
 }
 
 impl Line {
+    /// Creates a line from `start` to `end` (inclusive).
     pub fn new(start: (i32, i32), end: (i32, i32)) -> Self {
         let mut line: Line = Default::default();
         unsafe {
@@ -20,7 +26,20 @@ impl Line {
         };
         line
     }
-    
+
+    /// Creates a new line and steps over it using provided closure as a callback.
+    /// The stepping is aborted when the closure returns false. The function returs
+    /// a part of the line that has not been stepped over.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # use tcod::line::Line;
+    /// let mut line = Line::new_with_callback((1, 1), (5, 5), |x, _y| {
+    ///     x < 4
+    /// });
+    /// assert_eq!(Some((5, 5)), line.next());
+    /// ```
     pub fn new_with_callback<F>(start: (i32, i32), end: (i32, i32), callback: F) -> Self
         where F: FnMut(i32, i32) -> bool
     {
@@ -29,11 +48,35 @@ impl Line {
         line
     }
 
+    /// Creates a new line and steps over it using provided listener object as a callback.
+    /// The stepping is aborted when the listener's `put_point` returns false.
+    /// The function returs a part of the line that has not been stepped over.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # use tcod::line::*;
+    /// struct MyListener;
+    /// impl Listener for MyListener {
+    ///     fn put_point(&self, x: i32, _y:i32) -> bool {
+    ///         x < 4
+    ///     }
+    /// }
+    ///
+    /// # fn main() {
+    /// let listener = MyListener;
+    /// let mut line = Line::new_with_listener((1, 1), (5, 5), &listener);
+    /// assert_eq!(Some((5, 5)), line.next());
+    /// # }
+    /// ```
     pub fn new_with_listener(start: (i32, i32), end: (i32, i32), listener: &Listener) -> Self {
         let mut line: Line = Line::new(start, end);
         line.step_with_listener(listener);
         line
     }
+
+    /// You can step through each point of the line. Return `None` when end of line
+    /// has been reached.
     pub fn step(&mut self) -> Option<(i32, i32)> {
         let mut x: c_int = 0;
         let mut y: c_int = 0;
