@@ -1,14 +1,12 @@
 extern crate libc;
 
 use bindings::ffi;
-use bindings::{c_int, c_bool};
+use bindings::c_int;
 
 #[derive(Default)]
 pub struct Line {
     tcod_line: ffi::TCOD_bresenham_data_t,
 }
-
-pub type Callback = extern "C" fn(x: c_int, y: c_int) -> c_bool;
 
 impl Line {
     pub fn new(start: (i32, i32), end: (i32, i32)) -> Self {
@@ -19,13 +17,11 @@ impl Line {
         line
     }
     
-    pub fn new_with_callback(start: (i32, i32), end: (i32, i32), callback: Callback) -> Self {
-        let mut line: Line = Default::default();
-        unsafe {
-            ffi::TCOD_line_mt(start.0, start.1, end.0, end.1,
-                              Some(callback),
-                              &mut line.tcod_line)
-        };
+    pub fn new_with_callback<F>(start: (i32, i32), end: (i32, i32), callback: F) -> Self
+        where F: FnMut(i32, i32) -> bool
+    {
+        let mut line: Line = Line::new(start, end);
+        line.step_with_callback(callback);
         line
     }
 
@@ -42,6 +38,25 @@ impl Line {
             None
         }
     }
+
+    fn step_with_callback<F>(&mut self, mut callback: F) -> bool
+        where F: FnMut(i32, i32) -> bool
+    {
+        let mut x: c_int = self.tcod_line.origx;
+        let mut y: c_int = self.tcod_line.origy;
+        loop {
+		    if !callback(x, y) {
+                return false
+            }
+            let step = unsafe {
+                ffi::TCOD_line_step_mt(&mut x, &mut y, &mut self.tcod_line)
+            };
+            if step != 0 {
+                break
+            }
+	    }
+	    true
+    }
 }
 
 impl Iterator for Line {
@@ -55,7 +70,6 @@ impl Iterator for Line {
 #[cfg(test)]
 mod test {
     use super::Line;
-    use bindings::{c_int, c_bool};
 
     #[test]
     fn line_created() {
@@ -116,15 +130,12 @@ mod test {
         assert_eq!(None, line.next());
     }
 
-    extern "C" fn less_then_four(x: c_int, _y: c_int) -> c_bool {
-        assert!(x <= 4);
-        (x < 4) as c_bool
-    }
-
     #[test]
     fn line_with_callback() {
-        let mut line = Line::new_with_callback((1, 1), (5, 5), less_then_four);
-
+        let mut line = Line::new_with_callback((1, 1), (5, 5), |x, _y| {
+            assert!(x <= 4);
+            x < 4
+        });
         assert_eq!(Some((5, 5)), line.next());
         assert_eq!(None, line.next());
     }
