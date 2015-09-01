@@ -51,6 +51,7 @@ pub mod colors;
 pub mod console;
 pub mod image;
 pub mod input;
+pub mod line;
 pub mod map;
 pub mod namegen;
 pub mod pathfinding;

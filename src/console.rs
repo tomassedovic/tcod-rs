@@ -1048,7 +1048,7 @@ pub enum TextAlignment {
 /// See [libtcod's documentation](http://doryen.eptalys.net/data/libtcod/doc/1.5.2/html2/console_bkgnd_flag_t.html)
 /// for a detailed description of the different values.
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum BackgroundFlag {
     None = ffi::TCOD_BKGND_NONE as isize,
     Set = ffi::TCOD_BKGND_SET as isize,

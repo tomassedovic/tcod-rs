@@ -12,6 +12,7 @@ use tcod::pathfinding::{Dijkstra, AStar};
 use tcod::map::{Map, FovAlgorithm};
 use tcod::image;
 use tcod::namegen::Namegen;
+use tcod::line::Line;
 use rand::Rng;
 use rand::ThreadRng;
 use std::char::from_u32;
@@ -231,6 +232,112 @@ impl Render for OffscreenSample {
              console, (0, 0), 1.0, 1.0);
         blit(&self.secondary, (0, 0), (SAMPLE_SCREEN_WIDTH/2, SAMPLE_SCREEN_HEIGHT/2),
              console, (self.x, self.y), 1.0, 0.75);
+    }
+}
+
+struct LineSample {
+    bk_flag: BackgroundFlag,
+    bk: Offscreen,
+}
+
+impl LineSample {
+    fn new() -> Self {
+        let mut line = LineSample {
+            bk_flag: BackgroundFlag::Set,
+            bk: Offscreen::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
+        };
+
+        for x in 0..SAMPLE_SCREEN_WIDTH {
+            for y in 0..SAMPLE_SCREEN_HEIGHT {
+                let col = colors::Color::new(
+                    (x * 255 / (SAMPLE_SCREEN_WIDTH - 1)) as u8,
+                    ((x+y) * 255 / (SAMPLE_SCREEN_WIDTH + SAMPLE_SCREEN_HEIGHT - 2)) as u8,
+                    (y * 255 / (SAMPLE_SCREEN_HEIGHT - 1)) as u8);
+                line.bk.set_char_background(x, y, col, BackgroundFlag::Set);
+            }
+        };
+        line
+    }
+
+    fn next_flag(&mut self, flag_byte: i32) {
+        let max = BackgroundFlag::Default as i32;
+        if flag_byte >= max - 1 {
+            self.bk_flag = BackgroundFlag::None;
+        } else {
+            self.bk_flag = unsafe {
+                std::mem::transmute(flag_byte + 1)
+            }
+        }
+    }
+
+    fn set_alpha(&mut self, elapsed_seconds: f32, flag: BackgroundFlag) {
+        let alpha = (1.0 + (elapsed_seconds*2.0).cos()) / 2.0;
+        self.bk_flag = unsafe {
+            let alpha_value = ((alpha*255.0) as u32) <<8;
+            let new_flag = flag as u32 | alpha_value;
+            std::mem::transmute(new_flag)
+        };
+    }
+}
+
+impl Render for LineSample {
+    fn initialize(&mut self, console: &mut Offscreen) {
+        system::set_fps(30);
+        console.set_default_foreground(colors::WHITE);
+    }
+
+    fn render(&mut self,
+              console: &mut Offscreen,
+              _root: &Root,
+              event: Option<(EventFlags, Event)>) {
+        let elapsed_seconds: f32 = (system::get_elapsed_time().num_milliseconds() as f32) / 1000.0;
+        let flag_byte = self.bk_flag as i32 & 0xff;
+        if flag_byte == BackgroundFlag::Alph as i32 {
+            self.set_alpha(elapsed_seconds, BackgroundFlag::Alph);
+        }
+        if flag_byte == BackgroundFlag::AddA as i32 {
+            self.set_alpha(elapsed_seconds, BackgroundFlag::AddA);
+        }
+
+        blit(&self.bk, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
+             console, (0, 0), 1.0, 1.0);
+        let rect_y = ((SAMPLE_SCREEN_HEIGHT - 2) as f32 * ((1.0 + elapsed_seconds.cos()) / 2.0)) as i32;
+        for x in 0..SAMPLE_SCREEN_WIDTH {
+            let component = (x * 255 / SAMPLE_SCREEN_WIDTH) as u8;
+            let col = colors::Color::new(component, component, component);
+            console.set_char_background(x, rect_y,   col, self.bk_flag);
+            console.set_char_background(x, rect_y+1, col, self.bk_flag);
+            console.set_char_background(x, rect_y+2, col, self.bk_flag);
+        }
+
+        let angle = elapsed_seconds * 2.0;
+        let cos_angle = angle.cos();
+        let sin_angle = angle.sin();
+        let xo = ((SAMPLE_SCREEN_WIDTH / 2) as f32 * (1.0 + cos_angle)) as i32;
+        let yo = ((SAMPLE_SCREEN_HEIGHT / 2) as f32 +
+                  sin_angle * (SAMPLE_SCREEN_WIDTH / 2) as f32) as i32;
+        let xd = ((SAMPLE_SCREEN_WIDTH / 2) as f32 * (1.0 - cos_angle)) as i32;
+        let yd = ((SAMPLE_SCREEN_HEIGHT / 2) as f32 -
+                  sin_angle * (SAMPLE_SCREEN_WIDTH / 2) as f32) as i32;
+
+        let line = Line::new((xo, yo), (xd, yd));
+        for (x, y) in line {
+            if x >= 0 && y >=0 && x < SAMPLE_SCREEN_WIDTH && y < SAMPLE_SCREEN_HEIGHT {
+                console.set_char_background(x, y, colors::LIGHT_BLUE, self.bk_flag);
+            }
+        }
+
+        let display_flag : BackgroundFlag = unsafe {
+            std::mem::transmute(flag_byte)
+        };
+        console.print(2, 2, format!("{:?} (ENTER to change)", display_flag));
+
+        if let Some((_, Event::Key(key))) = event {
+            match key.code {
+                KeyCode::Enter => self.next_flag(flag_byte),
+                _ => {}
+            }
+        }
     }
 }
 
@@ -953,9 +1060,10 @@ fn main() {
     let mut fov = FovSample::new();
     let mut image_sample = ImageSample::new();
     let mut names = NameSample::new();
+    let mut line = LineSample::new();
     let mut samples = vec![MenuItem::new("  True colors      ", &mut colors),
                            MenuItem::new("  Offscreen console", &mut offscreen),
-                           // MenuItem::new("  Line drawing     ", &mut ),
+                           MenuItem::new("  Line drawing     ", &mut line),
                            // MenuItem::new("  Noise            ", &mut ),
                            MenuItem::new("  Field of view    ", &mut fov),
                            MenuItem::new("  Path finding     ", &mut path_sample),
