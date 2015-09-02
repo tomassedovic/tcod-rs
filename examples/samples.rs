@@ -13,7 +13,8 @@ use tcod::map::{Map, FovAlgorithm};
 use tcod::image;
 use tcod::namegen::Namegen;
 use tcod::line::Line;
-use tcod::noise::Noise;
+use tcod::noise::{Noise, NoiseType, DEFAULT_HURST, DEFAULT_LACUNARITY, MAX_OCTAVES};
+use tcod::image::{Image, blit_2x};
 use rand::Rng;
 use rand::ThreadRng;
 use std::char::from_u32;
@@ -336,6 +337,183 @@ impl Render for LineSample {
         if let Some((_, Event::Key(key))) = event {
             match key.code {
                 KeyCode::Enter => self.next_flag(flag_byte),
+                _ => {}
+            }
+        }
+    }
+}
+
+#[allow(dead_code)]
+#[derive(Clone,Copy,Debug)]
+enum NoiseFunction {
+    Perlin = 0,
+    Simplex,
+    Wavelet,
+	FbmPerlin,
+    TurbulencePerlin,
+	FbmSimplex,
+    TurbulenceSimplex,
+	FbmWavelet,
+    TurbulenceWavelet,
+}
+
+static FUNC_NAMES: [&'static str; 9] = [
+	"1 : perlin noise       ",
+	"2 : simplex noise      ",
+	"3 : wavelet noise      ",
+	"4 : perlin fbm         ",
+	"5 : perlin turbulence  ",
+	"6 : simplex fbm        ",
+	"7 : simplex turbulence ",
+	"8 : wavelet fbm        ",
+	"9 : wavelet turbulence ",
+];
+
+struct NoiseSample {
+    func: NoiseFunction,
+    noise: Noise,
+    dx: f32,
+    dy: f32,
+    octaves: u32,
+    hurst: f32,
+    lacunarity: f32,
+    img: Image,
+    zoom: f32
+}
+
+impl NoiseSample {
+    fn new() -> Self {
+        let noise = Noise::initializer()
+            .dimensions(2)
+            .hurst(DEFAULT_HURST)
+            .lacunarity(DEFAULT_LACUNARITY)
+            .init();
+        NoiseSample {
+            func: NoiseFunction::Perlin,
+            noise: noise,
+            dx: 0.0,
+            dy: 0.0,
+            octaves: 4,
+            hurst: DEFAULT_HURST,
+            lacunarity: DEFAULT_LACUNARITY,
+            img: Image::new(SAMPLE_SCREEN_WIDTH * 2, SAMPLE_SCREEN_HEIGHT * 2),
+            zoom: 3.0
+        }
+    }
+
+    fn new_noice(&self) -> Noise {
+        Noise::initializer()
+            .dimensions(2)
+            .hurst(self.hurst)
+            .lacunarity(self.lacunarity)
+            .init()
+    }
+}
+
+impl Render for NoiseSample {
+    fn initialize(&mut self, _console: &mut Offscreen) {
+        system::set_fps(30);
+    }
+
+    fn render(&mut self,
+              console: &mut Offscreen,
+              _root: &Root,
+              event: Option<(EventFlags, Event)>) {
+        self.dx += 0.01;
+        self.dy += 0.01;
+
+        for y in 0..2*SAMPLE_SCREEN_HEIGHT {
+            for x in 0..2*SAMPLE_SCREEN_WIDTH {
+                let x0 = self.zoom * x as f32 / (2 * SAMPLE_SCREEN_WIDTH) as f32 + self.dx;
+                let y0 = self.zoom * y as f32 / (2 * SAMPLE_SCREEN_HEIGHT) as f32 + self.dy;
+                let mut coords = [x0, y0];
+                let value = match self.func {
+                    NoiseFunction::Perlin =>
+                        self.noise.get_ex(&mut coords, NoiseType::Perlin),
+                    NoiseFunction::Simplex =>
+                        self.noise.get_ex(&mut coords, NoiseType::Simplex),
+                    NoiseFunction::Wavelet =>
+                        self.noise.get_ex(&mut coords, NoiseType::Wavelet),
+	                NoiseFunction::FbmPerlin =>
+                        self.noise.get_fbm_ex(&mut coords, self.octaves, NoiseType::Perlin),
+                    NoiseFunction::TurbulencePerlin =>
+                        self.noise.get_turbulence_ex(&mut coords, self.octaves, NoiseType::Perlin),
+	                NoiseFunction::FbmSimplex =>
+                        self.noise.get_fbm_ex(&mut coords, self.octaves, NoiseType::Simplex),
+                    NoiseFunction::TurbulenceSimplex =>
+                        self.noise.get_turbulence_ex(&mut coords, self.octaves, NoiseType::Simplex),
+	                NoiseFunction::FbmWavelet =>
+                        self.noise.get_fbm_ex(&mut coords, self.octaves, NoiseType::Wavelet),
+                    NoiseFunction::TurbulenceWavelet =>
+                        self.noise.get_turbulence_ex(&mut coords, self.octaves, NoiseType::Wavelet),
+                };
+
+                let c: u8 = ((value + 1.0) / 2.0 * 255.0) as u8;
+                let color = colors::Color::new(c/2, c/2, c);
+                self.img.put_pixel(x, y, color);
+            }
+        }
+
+        blit_2x(&self.img, (0, 0), (-1, -1), console, (0, 0));
+        console.set_default_background(colors::GREY);
+        let height = if self.func as u32 <= NoiseType::Wavelet as u32 {10} else {13};
+        console.rect(2, 2, 23, height, false, BackgroundFlag::Multiply);
+        for y in 2..(2+height) {
+            for x in 2..25 {
+                let old_col = console.get_char_foreground(x, y);
+                let color = old_col * colors::GREY;
+                console.set_char_foreground(x, y, color);
+            }
+        }
+
+        for cur_func in (NoiseFunction::Perlin as i32)..(NoiseFunction::TurbulenceWavelet as i32 + 1) {
+            if self.func as i32 == cur_func {
+                console.set_default_foreground(colors::WHITE);
+                console.set_default_background(colors::LIGHT_BLUE);
+                console.print_ex(2, 2 + cur_func, BackgroundFlag::Set, TextAlignment::Left,
+                                 FUNC_NAMES[cur_func as usize]);
+            } else {
+                console.set_default_foreground(colors::GREY);
+                console.print(2, 2 + cur_func, FUNC_NAMES[cur_func as usize]);
+            }
+        }
+
+        console.set_default_foreground(colors::WHITE);
+        console.print(2, 11, format!("Y/H : zoom({:2.1})", self.zoom));
+        if self.func as u32 > NoiseFunction::Wavelet as u32 {
+            console.print(2, 12, format!("E/D : hurst ({:2.1})", self.hurst));
+            console.print(2, 13, format!("R/F : lacunarity ({:2.1})", self.lacunarity));
+            console.print(2, 14, format!("T/G : octaves ({})", self.octaves));
+        }
+
+        if let Some((_, Event::Key(key))) = event {
+            match key.printable {
+                '1'...'9' =>
+                    self.func = unsafe{ std::mem::transmute(key.printable as u8 - '1' as u8) },
+                'e' | 'E' => {
+                    self.hurst += 0.1;
+                    self.noise = self.new_noice();
+                },
+                'd' | 'D' => {
+                    self.hurst -= 0.1;
+                    self.noise = self.new_noice();
+                },
+                'r' | 'R' => {
+                    self.lacunarity += 0.5;
+                    self.noise = self.new_noice();
+                },
+                'f' | 'F' => {
+                    self.lacunarity -= 0.5;
+                    self.noise = self.new_noice();
+                },
+                't' | 'T' => if self.octaves < MAX_OCTAVES - 1 {
+                    self.octaves += 1;
+                },
+                'g' | 'G' => if self.octaves > 1 {
+                    self.octaves -= 1
+                },
+                'y' | 'Y' => self.zoom += 0.2,
+                'h' | 'H' => self.zoom -= 0.2,
                 _ => {}
             }
         }
@@ -1067,10 +1245,11 @@ fn main() {
     let mut image_sample = ImageSample::new();
     let mut names = NameSample::new();
     let mut line = LineSample::new();
+    let mut noise = NoiseSample::new();
     let mut samples = vec![MenuItem::new("  True colors      ", &mut colors),
                            MenuItem::new("  Offscreen console", &mut offscreen),
                            MenuItem::new("  Line drawing     ", &mut line),
-                           // MenuItem::new("  Noise            ", &mut ),
+                           MenuItem::new("  Noise            ", &mut noise),
                            MenuItem::new("  Field of view    ", &mut fov),
                            MenuItem::new("  Path finding     ", &mut path_sample),
                            // MenuItem::new("  Bsp toolkit      ", &mut ),
