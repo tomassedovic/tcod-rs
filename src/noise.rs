@@ -16,7 +16,8 @@ pub enum NoiseType {
 
 #[derive(Debug)]
 pub struct Noise {
-    noise: ffi::TCOD_noise_t
+    noise: ffi::TCOD_noise_t,
+    dimensions: u32
 }
 
 const TCOD_NOISE_DEFAULT_HURST: f32 = 0.5;
@@ -32,6 +33,13 @@ impl Noise {
             ffi::TCOD_noise_set_type(self.noise, noise_type as u32)
         }
     }
+
+    pub fn get(&self, coords: &mut [f32]) -> f32 {
+        assert!(self.dimensions as usize == coords.len());
+        unsafe {
+            ffi::TCOD_noise_get(self.noise, coords.as_mut_ptr())
+        }
+    }
 }
 
 impl Drop for Noise {
@@ -41,7 +49,7 @@ impl Drop for Noise {
 }
 
 pub struct NoiseInitializer {
-    dimensions: i32,
+    dimensions: u32,
     hurst: f32,
     lacunarity: f32,
     noise_type: NoiseType,
@@ -59,7 +67,7 @@ impl NoiseInitializer {
         }
     }
 
-    pub fn dimensions(&mut self, dimensions: i32) -> &mut Self {
+    pub fn dimensions(&mut self, dimensions: u32) -> &mut Self {
         self.dimensions = dimensions;
         self
     }
@@ -87,8 +95,9 @@ impl NoiseInitializer {
     pub fn init(&self) -> Noise {
         unsafe {
             let noise = Noise {
-                noise: ffi::TCOD_noise_new(self.dimensions, self.hurst,
-                                           self.lacunarity, *self.random.as_native())
+                noise: ffi::TCOD_noise_new(self.dimensions as i32, self.hurst,
+                                           self.lacunarity, *self.random.as_native()),
+                dimensions: self.dimensions,
             };
             ffi::TCOD_noise_set_type(noise.noise, self.noise_type as u32);
             noise
@@ -99,20 +108,40 @@ impl NoiseInitializer {
 #[cfg(test)]
 mod test {
     use super::Noise;
-    use super::NoiseType;
 
     #[test]
-    fn default_noise() {
-        let noise = Noise::initializer().init();
+    fn get() {
+        let noise1d = Noise::initializer().dimensions(1).init();
+        let noise2d = Noise::initializer().dimensions(2).init();
+        let noise3d = Noise::initializer().dimensions(3).init();
+
+        let val1  = noise1d.get(&mut [1.0]);
+        let val1a = noise1d.get(&mut [1.0]);
+        assert!(val1 >= -1.0 && val1 <= 1.0);
+        assert_eq!(val1, val1a);
+
+        let val2  = noise2d.get(&mut [1.0, 2.0]);
+        let val2a = noise2d.get(&mut [1.0, 2.0]);
+        assert!(val2 >= -1.0 && val2 <= 1.0);
+        assert_eq!(val2, val2a);
+
+        let val3  = noise3d.get(&mut [1.0, 2.0, 3.0]);
+        let val3a = noise3d.get(&mut [1.0, 2.0, 3.0]);
+        assert!(val3 >= -1.0 && val3 <= 1.0);
+        assert_eq!(val3, val3a);
     }
 
     #[test]
-    fn custom_noise() {
-        let noise = Noise::initializer()
-            .dimensions(3)
-            .hurst(0.7)
-            .lacunarity(2.1)
-            .noise_type(NoiseType::Perlin)
-            .init();
+    #[should_panic]
+    fn get_not_enough_args() {
+        let noise2d = Noise::initializer().dimensions(2).init();
+        noise2d.get(&mut [1.0]);
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_too_many_args() {
+        let noise2d = Noise::initializer().dimensions(2).init();
+        noise2d.get(&mut [1.0, 2.0, 3.0]);
     }
 }
