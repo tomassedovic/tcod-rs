@@ -20,9 +20,9 @@ pub struct Noise {
     dimensions: u32
 }
 
-const TCOD_NOISE_DEFAULT_HURST: f32 = 0.5;
-const TCOD_NOISE_DEFAULT_LACUNARITY: f32 = 2.0;
-const TCOD_NOISE_MAX_OCTAVES: u32 = 128;
+pub const DEFAULT_HURST: f32 = 0.5;
+pub const DEFAULT_LACUNARITY: f32 = 2.0;
+pub const MAX_OCTAVES: u32 = 128;
 
 impl Noise {
     pub fn initializer() -> NoiseInitializer {
@@ -52,7 +52,7 @@ impl Noise {
     pub fn get_fbm(&self, coords: &mut [f32], octaves: u32) -> f32 {
         assert!(self.dimensions as usize == coords.len());
         assert!(octaves > 0);
-        assert!(octaves < TCOD_NOISE_MAX_OCTAVES);
+        assert!(octaves < MAX_OCTAVES);
         unsafe {
             ffi::TCOD_noise_get_fbm(self.noise, coords.as_mut_ptr(), octaves as f32)
         }
@@ -61,7 +61,7 @@ impl Noise {
     pub fn get_fbm_ex(&self, coords: &mut [f32], octaves: u32, noise_type: NoiseType) -> f32 {
         assert!(self.dimensions as usize == coords.len());
         assert!(octaves > 0);
-        assert!(octaves < TCOD_NOISE_MAX_OCTAVES);
+        assert!(octaves < MAX_OCTAVES);
         unsafe {
             ffi::TCOD_noise_get_fbm_ex(self.noise,
                                        coords.as_mut_ptr(),
@@ -73,7 +73,7 @@ impl Noise {
     pub fn get_turbulence(&self, coords: &mut [f32], octaves: u32) -> f32 {
         assert!(self.dimensions as usize == coords.len());
         assert!(octaves > 0);
-        assert!(octaves < TCOD_NOISE_MAX_OCTAVES);
+        assert!(octaves < MAX_OCTAVES);
         unsafe {
             ffi::TCOD_noise_get_turbulence(self.noise, coords.as_mut_ptr(), octaves as f32)
         }
@@ -82,7 +82,7 @@ impl Noise {
     pub fn get_turbulence_ex(&self, coords: &mut [f32], octaves: u32, noise_type: NoiseType) -> f32 {
         assert!(self.dimensions as usize == coords.len());
         assert!(octaves > 0);
-        assert!(octaves < TCOD_NOISE_MAX_OCTAVES);
+        assert!(octaves < MAX_OCTAVES);
         unsafe {
             ffi::TCOD_noise_get_turbulence_ex(self.noise,
                                               coords.as_mut_ptr(),
@@ -110,8 +110,8 @@ impl NoiseInitializer {
     fn new() -> Self {
         NoiseInitializer {
             dimensions: 2,
-            hurst: TCOD_NOISE_DEFAULT_HURST,
-            lacunarity: TCOD_NOISE_DEFAULT_LACUNARITY,
+            hurst: DEFAULT_HURST,
+            lacunarity: DEFAULT_LACUNARITY,
             noise_type: NoiseType::Default,
             random: Rng::get_instance()
         }
