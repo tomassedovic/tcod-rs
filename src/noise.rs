@@ -22,6 +22,7 @@ pub struct Noise {
 
 const TCOD_NOISE_DEFAULT_HURST: f32 = 0.5;
 const TCOD_NOISE_DEFAULT_LACUNARITY: f32 = 2.0;
+const TCOD_NOISE_MAX_OCTAVES: u32 = 128;
 
 impl Noise {
     pub fn initializer() -> NoiseInitializer {
@@ -45,6 +46,27 @@ impl Noise {
         assert!(self.dimensions as usize == coords.len());
         unsafe {
             ffi::TCOD_noise_get_ex(self.noise, coords.as_mut_ptr(), noise_type as u32)
+        }
+    }
+
+    pub fn get_fbm(&self, coords: &mut [f32], octaves: u32) -> f32 {
+        assert!(self.dimensions as usize == coords.len());
+        assert!(octaves > 0);
+        assert!(octaves < TCOD_NOISE_MAX_OCTAVES);
+        unsafe {
+            ffi::TCOD_noise_get_fbm(self.noise, coords.as_mut_ptr(), octaves as f32)
+        }
+    }
+
+    pub fn get_fbm_ex(&self, coords: &mut [f32], octaves: u32, noise_type: NoiseType) -> f32 {
+        assert!(self.dimensions as usize == coords.len());
+        assert!(octaves > 0);
+        assert!(octaves < TCOD_NOISE_MAX_OCTAVES);
+        unsafe {
+            ffi::TCOD_noise_get_fbm_ex(self.noise,
+                                       coords.as_mut_ptr(),
+                                       octaves as f32,
+                                       noise_type as u32)
         }
     }
 }
@@ -166,5 +188,122 @@ mod test {
         let val2a = noise2d.get_ex(&mut [1.0, 2.0], NoiseType::Wavelet);
         assert!(val2 >= -1.0 && val2 <= 1.0);
         assert_eq!(val2, val2a);
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_ex_not_enough_args() {
+        let noise2d = Noise::initializer().dimensions(2).init();
+        noise2d.get_ex(&mut [1.0], NoiseType::Perlin);
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_ex_too_many_args() {
+        let noise2d = Noise::initializer().dimensions(2).init();
+        noise2d.get_ex(&mut [1.0, 2.0, 3.0], NoiseType::Perlin);
+    }
+
+    #[test]
+    fn get_fbm() {
+        let noise1d = Noise::initializer().dimensions(1).init();
+        let noise2d = Noise::initializer().dimensions(2).init();
+        let noise3d = Noise::initializer().dimensions(3).init();
+
+        let val1  = noise1d.get_fbm(&mut [1.0], 32);
+        let val1a = noise1d.get_fbm(&mut [1.0], 32);
+        assert!(val1.is_nan() || val1 >= -1.0 && val1 <= 1.0);
+        if !val1.is_nan() {
+            assert_eq!(val1, val1a);
+        }
+
+        let val2  = noise2d.get_fbm(&mut [1.0, 2.0], 32);
+        let val2a = noise2d.get_fbm(&mut [1.0, 2.0], 32);
+        assert!(val2.is_nan() || val2 >= -1.0 && val2 <= 1.0);
+        if !val2.is_nan() {
+            assert_eq!(val2, val2a);
+        }
+
+        let val3  = noise3d.get_fbm(&mut [1.0, 2.0, 3.0], 32);
+        let val3a = noise3d.get_fbm(&mut [1.0, 2.0, 3.0], 32);
+        assert!(val3.is_nan() || val3 >= -1.0 && val3 <= 1.0);
+        if !val3.is_nan() {
+            assert_eq!(val3, val3a);
+        }
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_fbm_not_enough_args() {
+        let noise2d = Noise::initializer().dimensions(2).init();
+        noise2d.get_fbm(&mut [1.0], 32);
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_fbm_too_many_args() {
+        let noise2d = Noise::initializer().dimensions(2).init();
+        noise2d.get_fbm(&mut [1.0, 2.0, 3.0], 32);
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_fbm_octaves_zero() {
+        let noise2d = Noise::initializer().dimensions(2).init();
+        noise2d.get_fbm(&mut [1.0, 2.0, 3.0], 0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_fbm_octaves_too_big() {
+        let noise2d = Noise::initializer().dimensions(2).init();
+        noise2d.get_fbm(&mut [1.0, 2.0, 3.0], 128);
+    }
+
+    #[test]
+    fn get_fbm_ex() {
+        let noise2d = Noise::initializer().init();
+
+        let val1  = noise2d.get_fbm_ex(&mut [1.0, 2.0], 32, NoiseType::Perlin);
+        let val1a = noise2d.get_fbm_ex(&mut [1.0, 2.0], 32, NoiseType::Perlin);
+        assert!(val1.is_nan() || val1 >= -1.0 && val1 <= 1.0);
+        if !val1.is_nan() {
+            assert_eq!(val1, val1a);
+        }
+
+        let val2  = noise2d.get_fbm_ex(&mut [1.0, 2.0], 64, NoiseType::Wavelet);
+        let val2a = noise2d.get_fbm_ex(&mut [1.0, 2.0], 64, NoiseType::Wavelet);
+        assert!(val2.is_nan() || val2 >= -1.0 && val2 <= 1.0);
+        if !val2.is_nan() {
+            assert_eq!(val2, val2a);
+        }
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_fbm_ex_not_enough_args() {
+        let noise2d = Noise::initializer().dimensions(2).init();
+        noise2d.get_fbm_ex(&mut [1.0], 32, NoiseType::Perlin);
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_fbm_ex_too_many_args() {
+        let noise2d = Noise::initializer().dimensions(2).init();
+        noise2d.get_fbm_ex(&mut [1.0, 2.0, 3.0], 32, NoiseType::Perlin);
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_fbm_ex_octaves_zero() {
+        let noise2d = Noise::initializer().dimensions(2).init();
+        noise2d.get_fbm_ex(&mut [1.0, 2.0, 3.0], 0, NoiseType::Perlin);
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_fbm_ex_octaves_too_big() {
+        let noise2d = Noise::initializer().dimensions(2).init();
+        noise2d.get_fbm_ex(&mut [1.0, 2.0, 3.0], 128, NoiseType::Perlin);
     }
 }
