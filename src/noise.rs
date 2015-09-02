@@ -26,6 +26,12 @@ impl Noise {
     pub fn initializer() -> NoiseInitializer {
         NoiseInitializer::new()
     }
+
+    pub fn set_type(&self, noise_type: NoiseType) {
+        unsafe {
+            ffi::TCOD_noise_set_type(self.noise, noise_type as u32)
+        }
+    }
 }
 
 impl Drop for Noise {
@@ -98,7 +104,6 @@ mod test {
     #[test]
     fn default_noise() {
         let noise = Noise::initializer().init();
-        
     }
 
     #[test]
