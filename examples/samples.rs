@@ -408,20 +408,8 @@ impl NoiseSample {
             .lacunarity(self.lacunarity)
             .init()
     }
-}
 
-impl Render for NoiseSample {
-    fn initialize(&mut self, _console: &mut Offscreen) {
-        system::set_fps(30);
-    }
-
-    fn render(&mut self,
-              console: &mut Offscreen,
-              _root: &Root,
-              event: Option<(EventFlags, Event)>) {
-        self.dx += 0.01;
-        self.dy += 0.01;
-
+    fn draw_noise(&mut self) {
         for y in 0..2*SAMPLE_SCREEN_HEIGHT {
             for x in 0..2*SAMPLE_SCREEN_WIDTH {
                 let x0 = self.zoom * x as f32 / (2 * SAMPLE_SCREEN_WIDTH) as f32 + self.dx;
@@ -453,8 +441,9 @@ impl Render for NoiseSample {
                 self.img.put_pixel(x, y, color);
             }
         }
+    }
 
-        blit_2x(&self.img, (0, 0), (-1, -1), console, (0, 0));
+    fn draw_rectangle(&self, console: &mut Offscreen) {
         console.set_default_background(colors::GREY);
         let height = if self.func as u32 <= NoiseType::Wavelet as u32 {10} else {13};
         console.rect(2, 2, 23, height, false, BackgroundFlag::Multiply);
@@ -465,7 +454,9 @@ impl Render for NoiseSample {
                 console.set_char_foreground(x, y, color);
             }
         }
+    }
 
+    fn draw_menu(&self, console: &mut Offscreen) {
         for cur_func in (NoiseFunction::Perlin as i32)..(NoiseFunction::TurbulenceWavelet as i32 + 1) {
             if self.func as i32 == cur_func {
                 console.set_default_foreground(colors::WHITE);
@@ -485,6 +476,27 @@ impl Render for NoiseSample {
             console.print(2, 13, format!("R/F : lacunarity ({:2.1})", self.lacunarity));
             console.print(2, 14, format!("T/G : octaves ({})", self.octaves));
         }
+
+    }
+}
+
+impl Render for NoiseSample {
+    fn initialize(&mut self, _console: &mut Offscreen) {
+        system::set_fps(30);
+    }
+
+    fn render(&mut self,
+              console: &mut Offscreen,
+              _root: &Root,
+              event: Option<(EventFlags, Event)>) {
+        self.dx += 0.01;
+        self.dy += 0.01;
+
+        self.draw_noise();
+        blit_2x(&self.img, (0, 0), (-1, -1), console, (0, 0));
+
+        self.draw_rectangle(console);
+        self.draw_menu(console);
 
         if let Some((_, Event::Key(key))) = event {
             match key.printable {
