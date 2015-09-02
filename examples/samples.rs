@@ -13,6 +13,7 @@ use tcod::map::{Map, FovAlgorithm};
 use tcod::image;
 use tcod::namegen::Namegen;
 use tcod::line::Line;
+use tcod::noise::Noise;
 use rand::Rng;
 use rand::ThreadRng;
 use std::char::from_u32;
@@ -351,10 +352,10 @@ struct FovSample {
     light_wall: colors::Color,
     dark_ground: colors::Color,
     light_ground: colors::Color,
-    // noise: Noise,
+    noise: Noise,
     light_walls: bool,
     algorithm: FovAlgorithm,
-    _torch_x: f32,
+    torch_x: f32,
 }
 
 fn clamp(a: f32, b: f32, x: f32) -> f32 {
@@ -372,10 +373,10 @@ impl FovSample {
             light_wall: colors::Color::new(130, 110, 50),
             dark_ground: colors::Color::new(50, 50, 150),
             light_ground: colors::Color::new(200, 180, 50),
-            // noise: ,
+            noise: Noise::initializer().dimensions(1).init(),
             light_walls: true,
             algorithm: FovAlgorithm::Basic,
-            _torch_x: 0.0,
+            torch_x: 0.0,
         }
     }
 
@@ -466,11 +467,16 @@ impl Render for FovSample {
             self.map.compute_fov(self.px, self.py, radius, self.light_walls, self.algorithm);
         }
 
-        let dx = 0.0;
-        let dy = 0.0;
-        let di = 0.0;
+        let mut dx = 0.0;
+        let mut dy = 0.0;
+        let mut di = 0.0;
         if self.torch {
-            // TODO implemenent when noise is wrapped in Rust API
+            self.torch_x += 0.2;
+
+            let tdx = self.torch_x + 20.0;
+            dx = self.noise.get(&mut [tdx]) * 1.5;
+            dy = self.noise.get(&mut [tdx + 30.0]) * 1.5;
+            di = self.noise.get(&mut [self.torch_x]) * 0.2;
         }
 
         self.display_map(console, dx, dy, di);
