@@ -344,29 +344,29 @@ impl Render for LineSample {
 }
 
 #[allow(dead_code)]
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 enum NoiseFunction {
     Perlin = 0,
     Simplex,
     Wavelet,
-	FbmPerlin,
+    FbmPerlin,
     TurbulencePerlin,
-	FbmSimplex,
+    FbmSimplex,
     TurbulenceSimplex,
-	FbmWavelet,
+    FbmWavelet,
     TurbulenceWavelet,
 }
 
 static FUNC_NAMES: [&'static str; 9] = [
-	"1 : perlin noise       ",
-	"2 : simplex noise      ",
-	"3 : wavelet noise      ",
-	"4 : perlin fbm         ",
-	"5 : perlin turbulence  ",
-	"6 : simplex fbm        ",
-	"7 : simplex turbulence ",
-	"8 : wavelet fbm        ",
-	"9 : wavelet turbulence ",
+    "1 : perlin noise       ",
+    "2 : simplex noise      ",
+    "3 : wavelet noise      ",
+    "4 : perlin fbm         ",
+    "5 : perlin turbulence  ",
+    "6 : simplex fbm        ",
+    "7 : simplex turbulence ",
+    "8 : wavelet fbm        ",
+    "9 : wavelet turbulence ",
 ];
 
 struct NoiseSample {
@@ -383,8 +383,7 @@ struct NoiseSample {
 
 impl NoiseSample {
     fn new() -> Self {
-        let noise = Noise::initializer()
-            .dimensions(2)
+        let noise = Noise::init_with_dimensions(2)
             .hurst(DEFAULT_HURST)
             .lacunarity(DEFAULT_LACUNARITY)
             .init();
@@ -402,8 +401,7 @@ impl NoiseSample {
     }
 
     fn new_noice(&self) -> Noise {
-        Noise::initializer()
-            .dimensions(2)
+        Noise::init_with_dimensions(2)
             .hurst(self.hurst)
             .lacunarity(self.lacunarity)
             .init()
@@ -422,15 +420,15 @@ impl NoiseSample {
                         self.noise.get_ex(&mut coords, NoiseType::Simplex),
                     NoiseFunction::Wavelet =>
                         self.noise.get_ex(&mut coords, NoiseType::Wavelet),
-	                NoiseFunction::FbmPerlin =>
+                    NoiseFunction::FbmPerlin =>
                         self.noise.get_fbm_ex(&mut coords, self.octaves, NoiseType::Perlin),
                     NoiseFunction::TurbulencePerlin =>
                         self.noise.get_turbulence_ex(&mut coords, self.octaves, NoiseType::Perlin),
-	                NoiseFunction::FbmSimplex =>
+                    NoiseFunction::FbmSimplex =>
                         self.noise.get_fbm_ex(&mut coords, self.octaves, NoiseType::Simplex),
                     NoiseFunction::TurbulenceSimplex =>
                         self.noise.get_turbulence_ex(&mut coords, self.octaves, NoiseType::Simplex),
-	                NoiseFunction::FbmWavelet =>
+                    NoiseFunction::FbmWavelet =>
                         self.noise.get_fbm_ex(&mut coords, self.octaves, NoiseType::Wavelet),
                     NoiseFunction::TurbulenceWavelet =>
                         self.noise.get_turbulence_ex(&mut coords, self.octaves, NoiseType::Wavelet),
@@ -471,7 +469,7 @@ impl NoiseSample {
 
         console.set_default_foreground(colors::WHITE);
         console.print(2, 11, format!("Y/H : zoom({:2.1})", self.zoom));
-        if self.func as u32 > NoiseFunction::Wavelet as u32 {
+        if self.func > NoiseFunction::Wavelet {
             console.print(2, 12, format!("E/D : hurst ({:2.1})", self.hurst));
             console.print(2, 13, format!("R/F : lacunarity ({:2.1})", self.lacunarity));
             console.print(2, 14, format!("T/G : octaves ({})", self.octaves));
@@ -501,7 +499,10 @@ impl Render for NoiseSample {
         if let Some((_, Event::Key(key))) = event {
             match key.printable {
                 '1'...'9' =>
-                    self.func = unsafe{ std::mem::transmute(key.printable as u8 - '1' as u8) },
+                    self.func = unsafe{
+                        let number = key.printable.to_digit(10).unwrap() as u8;
+                        std::mem::transmute(number - 1)
+                    },
                 'e' | 'E' => {
                     self.hurst += 0.1;
                     self.noise = self.new_noice();
@@ -563,7 +564,7 @@ impl FovSample {
             light_wall: colors::Color::new(130, 110, 50),
             dark_ground: colors::Color::new(50, 50, 150),
             light_ground: colors::Color::new(200, 180, 50),
-            noise: Noise::initializer().dimensions(1).init(),
+            noise: Noise::init_with_dimensions(1).init(),
             light_walls: true,
             algorithm: FovAlgorithm::Basic,
             torch_x: 0.0,
