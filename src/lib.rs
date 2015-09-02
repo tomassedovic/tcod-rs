@@ -26,6 +26,8 @@
 //! * Field of View
 //! * Map
 //! * Pathfinding
+//! * Line toolkit
+//! * Noise
 //!
 //! ### Features that are not planned to be implemented:
 //! This are features that Rust already provides a good (and in most casese more idiomatic)
@@ -54,6 +56,7 @@ pub mod input;
 pub mod line;
 pub mod map;
 pub mod namegen;
+pub mod noise;
 pub mod pathfinding;
 pub mod random;
 pub mod system;
