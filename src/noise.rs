@@ -40,6 +40,13 @@ impl Noise {
             ffi::TCOD_noise_get(self.noise, coords.as_mut_ptr())
         }
     }
+
+    pub fn get_ex(&self, coords: &mut [f32], noise_type: NoiseType) -> f32 {
+        assert!(self.dimensions as usize == coords.len());
+        unsafe {
+            ffi::TCOD_noise_get_ex(self.noise, coords.as_mut_ptr(), noise_type as u32)
+        }
+    }
 }
 
 impl Drop for Noise {
@@ -108,6 +115,7 @@ impl NoiseInitializer {
 #[cfg(test)]
 mod test {
     use super::Noise;
+    use super::NoiseType;
 
     #[test]
     fn get() {
@@ -143,5 +151,20 @@ mod test {
     fn get_too_many_args() {
         let noise2d = Noise::initializer().dimensions(2).init();
         noise2d.get(&mut [1.0, 2.0, 3.0]);
+    }
+
+    #[test]
+    fn get_ex() {
+        let noise2d = Noise::initializer().init();
+
+        let val1  = noise2d.get_ex(&mut [1.0, 2.0], NoiseType::Perlin);
+        let val1a = noise2d.get_ex(&mut [1.0, 2.0], NoiseType::Perlin);
+        assert!(val1 >= -1.0 && val1 <= 1.0);
+        assert_eq!(val1, val1a);
+
+        let val2  = noise2d.get_ex(&mut [1.0, 2.0], NoiseType::Wavelet);
+        let val2a = noise2d.get_ex(&mut [1.0, 2.0], NoiseType::Wavelet);
+        assert!(val2 >= -1.0 && val2 <= 1.0);
+        assert_eq!(val2, val2a);
     }
 }
