@@ -28,6 +28,12 @@ impl Noise {
     }
 }
 
+impl Drop for Noise {
+    fn drop(&mut self) {
+        unsafe { ffi::TCOD_noise_delete(self.noise) }
+    }
+}
+
 pub struct NoiseInitializer {
     dimensions: i32,
     hurst: f32,
