@@ -1,3 +1,7 @@
+//! Noise toolkit.
+//!
+//! Rust bindings follow the original API pretty closely.
+
 extern crate libc;
 
 use bindings::ffi;
@@ -5,6 +9,7 @@ use bindings::AsNative;
 
 use random::Rng;
 
+/// Available noise types.
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub enum NoiseType {
@@ -14,17 +19,25 @@ pub enum NoiseType {
     Wavelet = ffi::TCOD_NOISE_WAVELET as isize,
 }
 
+/// Noise object encapsulates a noise generator.
 #[derive(Debug)]
 pub struct Noise {
     noise: ffi::TCOD_noise_t,
     dimensions: u32
 }
 
+/// Default hurst value.
 pub const DEFAULT_HURST: f32 = 0.5;
+
+/// Default lacunarity value.
 pub const DEFAULT_LACUNARITY: f32 = 2.0;
+
+/// Maximum number of octaves for turbulence and fbm noise functions.
 pub const MAX_OCTAVES: u32 = 128;
 
 impl Noise {
+    /// Return an instance of [NoiseInitializer](./struct.NoiseInitializer.html)
+    /// which is used to customize the creation of Noise object.
     pub fn initializer() -> NoiseInitializer {
         NoiseInitializer::new()
     }
@@ -98,6 +111,7 @@ impl Drop for Noise {
     }
 }
 
+/// An initializer is used to customize creation of a `Noise` object.
 pub struct NoiseInitializer {
     dimensions: u32,
     hurst: f32,
@@ -117,31 +131,38 @@ impl NoiseInitializer {
         }
     }
 
+    /// Sets the dimensions of the noise generator. Defaults to 2.
     pub fn dimensions(&mut self, dimensions: u32) -> &mut Self {
         self.dimensions = dimensions;
         self
     }
 
+    /// Sets the hurst value of the noise generator.
     pub fn hurst(&mut self, hurst: f32) -> &mut Self {
         self.hurst = hurst;
         self
     }
 
+    /// Sets the lacunarity value of the noise generator.
     pub fn lacunarity(&mut self, lacunarity: f32) -> &mut Self {
         self.lacunarity = lacunarity;
         self
     }
 
+    /// Sets the noise type the generator produces.
     pub fn noise_type(&mut self, noise_type: NoiseType) -> &mut Self {
         self.noise_type = noise_type;
         self
     }
 
+    /// Sets a custom random number generator. Use
+    /// [tcod::random::Rng](../random/struct.Rng.html) instance.
     pub fn random(&mut self, random: Rng) -> &mut Self {
         self.random = random;
         self
     }
 
+    /// Finalizes creation and returns a new `Noise` object.
     pub fn init(&self) -> Noise {
         unsafe {
             let noise = Noise {
