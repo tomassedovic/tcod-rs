@@ -661,20 +661,6 @@ impl FovSample {
         console.put_char(self.px, self.py, '@', BackgroundFlag::None);
         self.recompute_fov = true;
     }
-
-    fn next_algorithm(&mut self) {
-        match self.algorithm {
-            FovAlgorithm::Restrictive => return,
-            _ => self.algorithm = unsafe { std::mem::transmute(self.algorithm as i32 + 1) }
-        };
-    }
-
-    fn previous_algorithm(&mut self) {
-        match self.algorithm {
-            FovAlgorithm::Basic => return,
-            _ => self.algorithm = unsafe { std::mem::transmute(self.algorithm as i32 - 1) }
-        };
-    }
 }
 
 impl Render for FovSample {
@@ -738,12 +724,12 @@ impl Render for FovSample {
                     self.recompute_fov = true;
                 },
                 '+' => {
-                    self.next_algorithm();
+                    self.algorithm = self.algorithm.bounded_next();
                     self.display_help(console);
                     self.recompute_fov = true;
                 },
                 '-' => {
-                    self.previous_algorithm();
+                    self.algorithm = self.algorithm.bounded_prev();
                     self.display_help(console);
                     self.recompute_fov = true;
                 },

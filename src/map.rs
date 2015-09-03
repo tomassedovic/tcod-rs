@@ -69,7 +69,7 @@ impl Drop for Map {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum FovAlgorithm {
     Basic       = ffi::FOV_BASIC as isize,
     Diamond     = ffi::FOV_DIAMOND as isize,
@@ -84,4 +84,18 @@ pub enum FovAlgorithm {
     Permissive7 = ffi::FOV_PERMISSIVE_7 as isize,
     Permissive8 = ffi::FOV_PERMISSIVE_8 as isize,
     Restrictive = ffi::FOV_RESTRICTIVE as isize,
+}
+
+iterable_enum!(FovAlgorithm => [Basic]
+                               Diamond, Shadow, Permissive0, Permissive1,
+                               Permissive2, Permissive3, Permissive4, Permissive5,
+                               Permissive6, Permissive7, Permissive8
+                               [Restrictive]);
+
+#[cfg(test)]
+mod tests {
+    test_iterable_enum!(iterable_fov_algorithm,
+                        FovAlgorithm => Basic, Diamond, Shadow, Permissive0, Permissive1,
+                                        Permissive2, Permissive3, Permissive4, Permissive5,
+                                        Permissive6, Permissive7, Permissive8, Restrictive);
 }

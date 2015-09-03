@@ -52,13 +52,12 @@
 //! let mut offscreen = OffscreenConsole::new(width, height);
 //! ```
 //! This applies to all the examples in the rest of the modules documentation.
-
+use std::mem;
 use std::ptr;
 use std::str;
 
 use std::ascii::AsciiExt;
 use std::marker::PhantomData;
-use std::mem::transmute;
 use std::path::Path;
 
 use bindings::ffi;
@@ -608,7 +607,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
         let alignment = unsafe {
             ffi::TCOD_console_get_alignment(*self.as_native())
         };
-        unsafe { transmute(alignment) }
+        unsafe { mem::transmute(alignment) }
     }
 
     /// Sets the default text alignment for the console. For all the possible
@@ -679,7 +678,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
         let flag = unsafe {
             ffi::TCOD_console_get_background_flag(*self.as_native())
         };
-        unsafe { transmute(flag) }
+        unsafe { mem::transmute(flag) }
     }
 
     /// Sets the console's current background flag. For a detailed explanation
@@ -1036,7 +1035,7 @@ impl Console for Offscreen {}
 
 /// Represents the text alignment in console instances.
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum TextAlignment {
     Left = ffi::TCOD_LEFT as isize,
     Right = ffi::TCOD_RIGHT as isize,
@@ -1048,7 +1047,7 @@ pub enum TextAlignment {
 /// See [libtcod's documentation](http://doryen.eptalys.net/data/libtcod/doc/1.5.2/html2/console_bkgnd_flag_t.html)
 /// for a detailed description of the different values.
 #[repr(C)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum BackgroundFlag {
     None = ffi::TCOD_BKGND_NONE as isize,
     Set = ffi::TCOD_BKGND_SET as isize,
@@ -1066,18 +1065,24 @@ pub enum BackgroundFlag {
     Default = ffi::TCOD_BKGND_DEFAULT as isize
 }
 
+iterable_enum!(BackgroundFlag => [None] Set, Multiply, Lighten, Darken, Screen, ColorDodge,
+                                        ColorBurn, Add, AddA, Burn, Overlay, Alph
+                                 [Default]);
+
 /// All the possible renderers used by the `Root` console
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Renderer {
     GLSL = ffi::TCOD_RENDERER_GLSL as isize,
     OpenGL = ffi::TCOD_RENDERER_OPENGL as isize,
     SDL = ffi::TCOD_RENDERER_SDL as isize,
 }
 
+iterable_enum!(Renderer => [GLSL] OpenGL [SDL]);
+
 /// All the possible font layouts that can be used for custom bitmap fonts
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum FontLayout {
     AsciiInCol = ffi::TCOD_FONT_LAYOUT_ASCII_INCOL as isize,
     AsciiInRow = ffi::TCOD_FONT_LAYOUT_ASCII_INROW as isize,
@@ -1085,7 +1090,7 @@ pub enum FontLayout {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum FontType {
     Default = 0,
     Greyscale = ffi::TCOD_FONT_TYPE_GREYSCALE as isize,
@@ -1121,4 +1126,10 @@ mod test {
         let s: &str = &string;
         Root::initializer().font(s, AsciiInCol);
     }
+
+    test_iterable_enum!(iterable_background_flag,
+                        BackgroundFlag => None, Set, Multiply, Lighten, Darken,
+                                          Screen,ColorDodge, ColorBurn, Add, AddA, Burn,
+                                          Overlay, Alph, Default);
+    test_iterable_enum!(iterable_renderer, Renderer => GLSL, OpenGL, SDL);
 }
