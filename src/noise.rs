@@ -134,12 +134,6 @@ impl NoiseInitializer {
         }
     }
 
-    /// Sets the dimensions of the noise generator.
-    pub fn dimensions(&mut self, dimensions: u32) -> &mut Self {
-        self.dimensions = dimensions;
-        self
-    }
-
     /// Sets the hurst value of the noise generator.
     pub fn hurst(&mut self, hurst: f32) -> &mut Self {
         self.hurst = hurst;
