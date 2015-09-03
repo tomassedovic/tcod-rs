@@ -56,6 +56,8 @@ yet complete, however.
 * _Pseudorandom number generator_ (prefer the `rand` crate, except for places where the API requires the built-in generators)
 * _Name generator_
 * _Image toolkit_
+* _Line toolkit_
+* _Noise_
 
 ### Probably Won't Ever Be Implemented Because Rust Provides This Already
 * Filesystem utilities

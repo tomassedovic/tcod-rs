@@ -12,6 +12,9 @@ use tcod::pathfinding::{Dijkstra, AStar};
 use tcod::map::{Map, FovAlgorithm};
 use tcod::image;
 use tcod::namegen::Namegen;
+use tcod::line::Line;
+use tcod::noise::{Noise, NoiseType, DEFAULT_HURST, DEFAULT_LACUNARITY, MAX_OCTAVES};
+use tcod::image::{Image, blit_2x};
 use rand::Rng;
 use rand::ThreadRng;
 use std::char::from_u32;
@@ -234,6 +237,344 @@ impl Render for OffscreenSample {
     }
 }
 
+struct LineSample {
+    bk_flag: BackgroundFlag,
+    bk: Offscreen,
+}
+
+impl LineSample {
+    fn new() -> Self {
+        let mut line = LineSample {
+            bk_flag: BackgroundFlag::Set,
+            bk: Offscreen::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
+        };
+
+        for x in 0..SAMPLE_SCREEN_WIDTH {
+            for y in 0..SAMPLE_SCREEN_HEIGHT {
+                let col = colors::Color::new(
+                    (x * 255 / (SAMPLE_SCREEN_WIDTH - 1)) as u8,
+                    ((x+y) * 255 / (SAMPLE_SCREEN_WIDTH + SAMPLE_SCREEN_HEIGHT - 2)) as u8,
+                    (y * 255 / (SAMPLE_SCREEN_HEIGHT - 1)) as u8);
+                line.bk.set_char_background(x, y, col, BackgroundFlag::Set);
+            }
+        };
+        line
+    }
+
+    fn next_flag(&mut self, flag_byte: i32) {
+        let max = BackgroundFlag::Default as i32;
+        if flag_byte >= max - 1 {
+            self.bk_flag = BackgroundFlag::None;
+        } else {
+            self.bk_flag = unsafe {
+                std::mem::transmute(flag_byte + 1)
+            }
+        }
+    }
+
+    fn set_alpha(&mut self, elapsed_seconds: f32, flag: BackgroundFlag) {
+        let alpha = (1.0 + (elapsed_seconds*2.0).cos()) / 2.0;
+        self.bk_flag = unsafe {
+            let alpha_value = ((alpha*255.0) as u32) <<8;
+            let new_flag = flag as u32 | alpha_value;
+            std::mem::transmute(new_flag)
+        };
+    }
+}
+
+impl Render for LineSample {
+    fn initialize(&mut self, console: &mut Offscreen) {
+        system::set_fps(30);
+        console.set_default_foreground(colors::WHITE);
+    }
+
+    fn render(&mut self,
+              console: &mut Offscreen,
+              _root: &Root,
+              event: Option<(EventFlags, Event)>) {
+        let elapsed_seconds: f32 = (system::get_elapsed_time().num_milliseconds() as f32) / 1000.0;
+        let flag_byte = self.bk_flag as i32 & 0xff;
+        if flag_byte == BackgroundFlag::Alph as i32 {
+            self.set_alpha(elapsed_seconds, BackgroundFlag::Alph);
+        }
+        if flag_byte == BackgroundFlag::AddA as i32 {
+            self.set_alpha(elapsed_seconds, BackgroundFlag::AddA);
+        }
+
+        blit(&self.bk, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
+             console, (0, 0), 1.0, 1.0);
+        let rect_y = ((SAMPLE_SCREEN_HEIGHT - 2) as f32 * ((1.0 + elapsed_seconds.cos()) / 2.0)) as i32;
+        for x in 0..SAMPLE_SCREEN_WIDTH {
+            let component = (x * 255 / SAMPLE_SCREEN_WIDTH) as u8;
+            let col = colors::Color::new(component, component, component);
+            console.set_char_background(x, rect_y,   col, self.bk_flag);
+            console.set_char_background(x, rect_y+1, col, self.bk_flag);
+            console.set_char_background(x, rect_y+2, col, self.bk_flag);
+        }
+
+        let angle = elapsed_seconds * 2.0;
+        let cos_angle = angle.cos();
+        let sin_angle = angle.sin();
+        let xo = ((SAMPLE_SCREEN_WIDTH / 2) as f32 * (1.0 + cos_angle)) as i32;
+        let yo = ((SAMPLE_SCREEN_HEIGHT / 2) as f32 +
+                  sin_angle * (SAMPLE_SCREEN_WIDTH / 2) as f32) as i32;
+        let xd = ((SAMPLE_SCREEN_WIDTH / 2) as f32 * (1.0 - cos_angle)) as i32;
+        let yd = ((SAMPLE_SCREEN_HEIGHT / 2) as f32 -
+                  sin_angle * (SAMPLE_SCREEN_WIDTH / 2) as f32) as i32;
+
+        let line = Line::new((xo, yo), (xd, yd));
+        for (x, y) in line {
+            if x >= 0 && y >=0 && x < SAMPLE_SCREEN_WIDTH && y < SAMPLE_SCREEN_HEIGHT {
+                console.set_char_background(x, y, colors::LIGHT_BLUE, self.bk_flag);
+            }
+        }
+
+        let display_flag : BackgroundFlag = unsafe {
+            std::mem::transmute(flag_byte)
+        };
+        console.print(2, 2, format!("{:?} (ENTER to change)", display_flag));
+
+        if let Some((_, Event::Key(key))) = event {
+            match key.code {
+                KeyCode::Enter => self.next_flag(flag_byte),
+                _ => {}
+            }
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+enum NoiseFunction {
+    Perlin = 0,
+    Simplex,
+    Wavelet,
+    FbmPerlin,
+    TurbulencePerlin,
+    FbmSimplex,
+    TurbulenceSimplex,
+    FbmWavelet,
+    TurbulenceWavelet,
+}
+
+static VALUES: &'static [NoiseFunction] = &[
+    NoiseFunction::Perlin,
+    NoiseFunction::Simplex,
+    NoiseFunction::Wavelet,
+    NoiseFunction::FbmPerlin,
+    NoiseFunction::TurbulencePerlin,
+    NoiseFunction::FbmSimplex,
+    NoiseFunction::TurbulenceSimplex,
+    NoiseFunction::FbmWavelet,
+    NoiseFunction::TurbulenceWavelet];
+
+struct NoiseFunctionIterator {
+    val: usize
+}
+
+impl NoiseFunction {
+    fn iter() -> NoiseFunctionIterator {
+        NoiseFunctionIterator { val: 0 }
+    }
+
+    fn from_value(val: u8) -> Self {
+        match val as usize {
+            x if x < VALUES.len() => VALUES[x],
+            _ => panic!("Wrong value to convert to NoiseFunction")
+        }
+    }
+}
+
+impl Iterator for NoiseFunctionIterator {
+    type Item = NoiseFunction;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.val {
+            x if x < VALUES.len() => {
+                let retval = VALUES[self.val];
+                self.val += 1;
+                Some(retval)
+            },
+            _ => None,
+        }
+    }
+}
+
+static FUNC_NAMES: [&'static str; 9] = [
+    "1 : perlin noise       ",
+    "2 : simplex noise      ",
+    "3 : wavelet noise      ",
+    "4 : perlin fbm         ",
+    "5 : perlin turbulence  ",
+    "6 : simplex fbm        ",
+    "7 : simplex turbulence ",
+    "8 : wavelet fbm        ",
+    "9 : wavelet turbulence ",
+];
+
+struct NoiseSample {
+    func: NoiseFunction,
+    noise: Noise,
+    dx: f32,
+    dy: f32,
+    octaves: u32,
+    hurst: f32,
+    lacunarity: f32,
+    img: Image,
+    zoom: f32
+}
+
+impl NoiseSample {
+    fn new() -> Self {
+        let noise = Noise::init_with_dimensions(2)
+            .hurst(DEFAULT_HURST)
+            .lacunarity(DEFAULT_LACUNARITY)
+            .init();
+        NoiseSample {
+            func: NoiseFunction::Perlin,
+            noise: noise,
+            dx: 0.0,
+            dy: 0.0,
+            octaves: 4,
+            hurst: DEFAULT_HURST,
+            lacunarity: DEFAULT_LACUNARITY,
+            img: Image::new(SAMPLE_SCREEN_WIDTH * 2, SAMPLE_SCREEN_HEIGHT * 2),
+            zoom: 3.0
+        }
+    }
+
+    fn new_noise(&self) -> Noise {
+        Noise::init_with_dimensions(2)
+            .hurst(self.hurst)
+            .lacunarity(self.lacunarity)
+            .init()
+    }
+
+    fn draw_noise(&mut self) {
+        for y in 0..2*SAMPLE_SCREEN_HEIGHT {
+            for x in 0..2*SAMPLE_SCREEN_WIDTH {
+                let x0 = self.zoom * x as f32 / (2 * SAMPLE_SCREEN_WIDTH) as f32 + self.dx;
+                let y0 = self.zoom * y as f32 / (2 * SAMPLE_SCREEN_HEIGHT) as f32 + self.dy;
+                let mut coords = [x0, y0];
+                let value = match self.func {
+                    NoiseFunction::Perlin =>
+                        self.noise.get_ex(&mut coords, NoiseType::Perlin),
+                    NoiseFunction::Simplex =>
+                        self.noise.get_ex(&mut coords, NoiseType::Simplex),
+                    NoiseFunction::Wavelet =>
+                        self.noise.get_ex(&mut coords, NoiseType::Wavelet),
+                    NoiseFunction::FbmPerlin =>
+                        self.noise.get_fbm_ex(&mut coords, self.octaves, NoiseType::Perlin),
+                    NoiseFunction::TurbulencePerlin =>
+                        self.noise.get_turbulence_ex(&mut coords, self.octaves, NoiseType::Perlin),
+                    NoiseFunction::FbmSimplex =>
+                        self.noise.get_fbm_ex(&mut coords, self.octaves, NoiseType::Simplex),
+                    NoiseFunction::TurbulenceSimplex =>
+                        self.noise.get_turbulence_ex(&mut coords, self.octaves, NoiseType::Simplex),
+                    NoiseFunction::FbmWavelet =>
+                        self.noise.get_fbm_ex(&mut coords, self.octaves, NoiseType::Wavelet),
+                    NoiseFunction::TurbulenceWavelet =>
+                        self.noise.get_turbulence_ex(&mut coords, self.octaves, NoiseType::Wavelet),
+                };
+
+                let c: u8 = ((value + 1.0) / 2.0 * 255.0) as u8;
+                let color = colors::Color::new(c/2, c/2, c);
+                self.img.put_pixel(x, y, color);
+            }
+        }
+    }
+
+    fn draw_rectangle(&self, console: &mut Offscreen) {
+        console.set_default_background(colors::GREY);
+        let height = if self.func as u32 <= NoiseType::Wavelet as u32 {10} else {13};
+        console.rect(2, 2, 23, height, false, BackgroundFlag::Multiply);
+        for y in 2..(2+height) {
+            for x in 2..25 {
+                let old_col = console.get_char_foreground(x, y);
+                let color = old_col * colors::GREY;
+                console.set_char_foreground(x, y, color);
+            }
+        }
+    }
+
+    fn draw_menu(&self, console: &mut Offscreen) {
+        for cur_func in NoiseFunction::iter() {
+            if self.func == cur_func {
+                console.set_default_foreground(colors::WHITE);
+                console.set_default_background(colors::LIGHT_BLUE);
+                console.print_ex(2, 2 + cur_func as i32, BackgroundFlag::Set, TextAlignment::Left,
+                                 FUNC_NAMES[cur_func as usize]);
+            } else {
+                console.set_default_foreground(colors::GREY);
+                console.print(2, 2 + cur_func as i32, FUNC_NAMES[cur_func as usize]);
+            }
+        }
+
+        console.set_default_foreground(colors::WHITE);
+        console.print(2, 11, format!("Y/H : zoom({:2.1})", self.zoom));
+        if self.func > NoiseFunction::Wavelet {
+            console.print(2, 12, format!("E/D : hurst ({:2.1})", self.hurst));
+            console.print(2, 13, format!("R/F : lacunarity ({:2.1})", self.lacunarity));
+            console.print(2, 14, format!("T/G : octaves ({})", self.octaves));
+        }
+
+    }
+}
+
+impl Render for NoiseSample {
+    fn initialize(&mut self, _console: &mut Offscreen) {
+        system::set_fps(30);
+    }
+
+    fn render(&mut self,
+              console: &mut Offscreen,
+              _root: &Root,
+              event: Option<(EventFlags, Event)>) {
+        self.dx += 0.01;
+        self.dy += 0.01;
+
+        self.draw_noise();
+        blit_2x(&self.img, (0, 0), (-1, -1), console, (0, 0));
+
+        self.draw_rectangle(console);
+        self.draw_menu(console);
+
+        if let Some((_, Event::Key(key))) = event {
+            match key.printable {
+                '1'...'9' =>
+                    self.func = {
+                        let number = key.printable.to_digit(10).unwrap() as u8;
+                        NoiseFunction::from_value(number - 1)
+                    },
+                'e' | 'E' => {
+                    self.hurst += 0.1;
+                    self.noise = self.new_noise();
+                },
+                'd' | 'D' => {
+                    self.hurst -= 0.1;
+                    self.noise = self.new_noise();
+                },
+                'r' | 'R' => {
+                    self.lacunarity += 0.5;
+                    self.noise = self.new_noise();
+                },
+                'f' | 'F' => {
+                    self.lacunarity -= 0.5;
+                    self.noise = self.new_noise();
+                },
+                't' | 'T' => if self.octaves < MAX_OCTAVES - 1 {
+                    self.octaves += 1;
+                },
+                'g' | 'G' => if self.octaves > 1 {
+                    self.octaves -= 1
+                },
+                'y' | 'Y' => self.zoom += 0.2,
+                'h' | 'H' => self.zoom -= 0.2,
+                _ => {}
+            }
+        }
+    }
+}
+
 struct FovSample {
     px: i32,
     py: i32,
@@ -244,10 +585,10 @@ struct FovSample {
     light_wall: colors::Color,
     dark_ground: colors::Color,
     light_ground: colors::Color,
-    // noise: Noise,
+    noise: Noise,
     light_walls: bool,
     algorithm: FovAlgorithm,
-    _torch_x: f32,
+    torch_x: f32,
 }
 
 fn clamp(a: f32, b: f32, x: f32) -> f32 {
@@ -265,10 +606,10 @@ impl FovSample {
             light_wall: colors::Color::new(130, 110, 50),
             dark_ground: colors::Color::new(50, 50, 150),
             light_ground: colors::Color::new(200, 180, 50),
-            // noise: ,
+            noise: Noise::init_with_dimensions(1).init(),
             light_walls: true,
             algorithm: FovAlgorithm::Basic,
-            _torch_x: 0.0,
+            torch_x: 0.0,
         }
     }
 
@@ -345,11 +686,16 @@ impl Render for FovSample {
             self.map.compute_fov(self.px, self.py, radius, self.light_walls, self.algorithm);
         }
 
-        let dx = 0.0;
-        let dy = 0.0;
-        let di = 0.0;
+        let mut dx = 0.0;
+        let mut dy = 0.0;
+        let mut di = 0.0;
         if self.torch {
-            // TODO implemenent when noise is wrapped in Rust API
+            self.torch_x += 0.2;
+
+            let tdx = self.torch_x + 20.0;
+            dx = self.noise.get(&mut [tdx]) * 1.5;
+            dy = self.noise.get(&mut [tdx + 30.0]) * 1.5;
+            di = self.noise.get(&mut [self.torch_x]) * 0.2;
         }
 
         self.display_map(console, dx, dy, di);
@@ -939,10 +1285,12 @@ fn main() {
     let mut fov = FovSample::new();
     let mut image_sample = ImageSample::new();
     let mut names = NameSample::new();
+    let mut line = LineSample::new();
+    let mut noise = NoiseSample::new();
     let mut samples = vec![MenuItem::new("  True colors      ", &mut colors),
                            MenuItem::new("  Offscreen console", &mut offscreen),
-                           // MenuItem::new("  Line drawing     ", &mut ),
-                           // MenuItem::new("  Noise            ", &mut ),
+                           MenuItem::new("  Line drawing     ", &mut line),
+                           MenuItem::new("  Noise            ", &mut noise),
                            MenuItem::new("  Field of view    ", &mut fov),
                            MenuItem::new("  Path finding     ", &mut path_sample),
                            // MenuItem::new("  Bsp toolkit      ", &mut ),
