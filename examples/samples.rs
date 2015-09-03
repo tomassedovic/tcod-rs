@@ -343,8 +343,7 @@ impl Render for LineSample {
     }
 }
 
-#[allow(dead_code)]
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum NoiseFunction {
     Perlin = 0,
     Simplex,
@@ -355,6 +354,41 @@ enum NoiseFunction {
     TurbulenceSimplex,
 	FbmWavelet,
     TurbulenceWavelet,
+}
+
+struct NoiseFunctionIterator {
+    val: usize
+}
+
+impl NoiseFunction {
+    fn iter() -> NoiseFunctionIterator {
+        NoiseFunctionIterator { val: 0 }
+    }
+}
+
+impl Iterator for NoiseFunctionIterator {
+    type Item = NoiseFunction;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        use self::NoiseFunction::*;
+        static VALUES: &'static [NoiseFunction] = &[Perlin,
+                                                    Simplex,
+                                                    Wavelet,
+                                                    FbmPerlin,
+                                                    TurbulencePerlin,
+                                                    FbmSimplex,
+                                                    TurbulenceSimplex,
+                                                    FbmWavelet,
+                                                    TurbulenceWavelet];
+        match self.val {
+            x if x < VALUES.len() => {
+                let retval = VALUES[self.val];
+                self.val += 1;
+                Some(retval)
+            },
+            _ => None,
+        }
+    }
 }
 
 static FUNC_NAMES: [&'static str; 9] = [
@@ -457,15 +491,15 @@ impl NoiseSample {
     }
 
     fn draw_menu(&self, console: &mut Offscreen) {
-        for cur_func in (NoiseFunction::Perlin as i32)..(NoiseFunction::TurbulenceWavelet as i32 + 1) {
-            if self.func as i32 == cur_func {
+        for cur_func in NoiseFunction::iter() {
+            if self.func == cur_func {
                 console.set_default_foreground(colors::WHITE);
                 console.set_default_background(colors::LIGHT_BLUE);
-                console.print_ex(2, 2 + cur_func, BackgroundFlag::Set, TextAlignment::Left,
+                console.print_ex(2, 2 + cur_func as i32, BackgroundFlag::Set, TextAlignment::Left,
                                  FUNC_NAMES[cur_func as usize]);
             } else {
                 console.set_default_foreground(colors::GREY);
-                console.print(2, 2 + cur_func, FUNC_NAMES[cur_func as usize]);
+                console.print(2, 2 + cur_func as i32, FUNC_NAMES[cur_func as usize]);
             }
         }
 
