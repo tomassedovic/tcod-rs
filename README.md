@@ -57,6 +57,7 @@ yet complete, however.
 * _Name generator_
 * _Image toolkit_
 * _Line toolkit_
+* _Noise_
 
 ### Probably Won't Ever Be Implemented Because Rust Provides This Already
 * Filesystem utilities
