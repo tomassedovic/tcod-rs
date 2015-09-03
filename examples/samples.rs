@@ -356,6 +356,17 @@ enum NoiseFunction {
     TurbulenceWavelet,
 }
 
+static VALUES: &'static [NoiseFunction] = &[
+    NoiseFunction::Perlin,
+    NoiseFunction::Simplex,
+    NoiseFunction::Wavelet,
+    NoiseFunction::FbmPerlin,
+    NoiseFunction::TurbulencePerlin,
+    NoiseFunction::FbmSimplex,
+    NoiseFunction::TurbulenceSimplex,
+    NoiseFunction::FbmWavelet,
+    NoiseFunction::TurbulenceWavelet];
+
 struct NoiseFunctionIterator {
     val: usize
 }
@@ -364,22 +375,19 @@ impl NoiseFunction {
     fn iter() -> NoiseFunctionIterator {
         NoiseFunctionIterator { val: 0 }
     }
+
+    fn from_value(val: u8) -> Self {
+        match val as usize {
+            x if x < VALUES.len() => VALUES[x],
+            _ => panic!("Wrong value to convert to NoiseFunction")
+        }
+    }
 }
 
 impl Iterator for NoiseFunctionIterator {
     type Item = NoiseFunction;
 
     fn next(&mut self) -> Option<Self::Item> {
-        use self::NoiseFunction::*;
-        static VALUES: &'static [NoiseFunction] = &[Perlin,
-                                                    Simplex,
-                                                    Wavelet,
-                                                    FbmPerlin,
-                                                    TurbulencePerlin,
-                                                    FbmSimplex,
-                                                    TurbulenceSimplex,
-                                                    FbmWavelet,
-                                                    TurbulenceWavelet];
         match self.val {
             x if x < VALUES.len() => {
                 let retval = VALUES[self.val];
@@ -434,7 +442,7 @@ impl NoiseSample {
         }
     }
 
-    fn new_noice(&self) -> Noise {
+    fn new_noise(&self) -> Noise {
         Noise::init_with_dimensions(2)
             .hurst(self.hurst)
             .lacunarity(self.lacunarity)
@@ -533,25 +541,25 @@ impl Render for NoiseSample {
         if let Some((_, Event::Key(key))) = event {
             match key.printable {
                 '1'...'9' =>
-                    self.func = unsafe{
+                    self.func = {
                         let number = key.printable.to_digit(10).unwrap() as u8;
-                        std::mem::transmute(number - 1)
+                        NoiseFunction::from_value(number - 1)
                     },
                 'e' | 'E' => {
                     self.hurst += 0.1;
-                    self.noise = self.new_noice();
+                    self.noise = self.new_noise();
                 },
                 'd' | 'D' => {
                     self.hurst -= 0.1;
-                    self.noise = self.new_noice();
+                    self.noise = self.new_noise();
                 },
                 'r' | 'R' => {
                     self.lacunarity += 0.5;
-                    self.noise = self.new_noice();
+                    self.noise = self.new_noise();
                 },
                 'f' | 'F' => {
                     self.lacunarity -= 0.5;
-                    self.noise = self.new_noice();
+                    self.noise = self.new_noise();
                 },
                 't' | 'T' => if self.octaves < MAX_OCTAVES - 1 {
                     self.octaves += 1;

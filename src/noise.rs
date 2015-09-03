@@ -46,57 +46,61 @@ impl Noise {
         }
     }
 
-    pub fn get(&self, coords: &mut [f32]) -> f32 {
-        assert!(self.dimensions as usize == coords.len());
+    pub fn get<T: AsMut<[f32]>>(&self, mut coords: T) -> f32 {
+        assert!(self.dimensions as usize == coords.as_mut().len());
         unsafe {
-            ffi::TCOD_noise_get(self.noise, coords.as_mut_ptr())
+            ffi::TCOD_noise_get(self.noise, coords.as_mut().as_mut_ptr())
         }
     }
 
-    pub fn get_ex(&self, coords: &mut [f32], noise_type: NoiseType) -> f32 {
-        assert!(self.dimensions as usize == coords.len());
+    pub fn get_ex<T: AsMut<[f32]>>(&self, mut coords: T, noise_type: NoiseType) -> f32 {
+        assert!(self.dimensions as usize == coords.as_mut().len());
         unsafe {
-            ffi::TCOD_noise_get_ex(self.noise, coords.as_mut_ptr(), noise_type as u32)
+            ffi::TCOD_noise_get_ex(self.noise,
+                                   coords.as_mut().as_mut_ptr(),
+                                   noise_type as u32)
         }
     }
 
-    pub fn get_fbm(&self, coords: &mut [f32], octaves: u32) -> f32 {
-        assert!(self.dimensions as usize == coords.len());
+    pub fn get_fbm<T: AsMut<[f32]>>(&self, mut coords: T, octaves: u32) -> f32 {
+        assert!(self.dimensions as usize == coords.as_mut().len());
         assert!(octaves > 0);
         assert!(octaves < MAX_OCTAVES);
         unsafe {
-            ffi::TCOD_noise_get_fbm(self.noise, coords.as_mut_ptr(), octaves as f32)
+            ffi::TCOD_noise_get_fbm(self.noise, coords.as_mut().as_mut_ptr(), octaves as f32)
         }
     }
 
-    pub fn get_fbm_ex(&self, coords: &mut [f32], octaves: u32, noise_type: NoiseType) -> f32 {
-        assert!(self.dimensions as usize == coords.len());
+    pub fn get_fbm_ex<T: AsMut<[f32]>>(&self, mut coords: T, octaves: u32, noise_type: NoiseType) -> f32 {
+        assert!(self.dimensions as usize == coords.as_mut().len());
         assert!(octaves > 0);
         assert!(octaves < MAX_OCTAVES);
         unsafe {
             ffi::TCOD_noise_get_fbm_ex(self.noise,
-                                       coords.as_mut_ptr(),
+                                       coords.as_mut().as_mut_ptr(),
                                        octaves as f32,
                                        noise_type as u32)
         }
     }
 
-    pub fn get_turbulence(&self, coords: &mut [f32], octaves: u32) -> f32 {
-        assert!(self.dimensions as usize == coords.len());
+    pub fn get_turbulence<T: AsMut<[f32]>>(&self, mut coords: T, octaves: u32) -> f32 {
+        assert!(self.dimensions as usize == coords.as_mut().len());
         assert!(octaves > 0);
         assert!(octaves < MAX_OCTAVES);
         unsafe {
-            ffi::TCOD_noise_get_turbulence(self.noise, coords.as_mut_ptr(), octaves as f32)
+            ffi::TCOD_noise_get_turbulence(self.noise,
+                                           coords.as_mut().as_mut_ptr(),
+                                           octaves as f32)
         }
     }
 
-    pub fn get_turbulence_ex(&self, coords: &mut [f32], octaves: u32, noise_type: NoiseType) -> f32 {
-        assert!(self.dimensions as usize == coords.len());
+    pub fn get_turbulence_ex<T: AsMut<[f32]>>(&self, mut coords: T, octaves: u32, noise_type: NoiseType) -> f32 {
+        assert!(self.dimensions as usize == coords.as_mut().len());
         assert!(octaves > 0);
         assert!(octaves < MAX_OCTAVES);
         unsafe {
             ffi::TCOD_noise_get_turbulence_ex(self.noise,
-                                              coords.as_mut_ptr(),
+                                              coords.as_mut().as_mut_ptr(),
                                               octaves as f32,
                                               noise_type as u32)
         }
@@ -120,6 +124,7 @@ pub struct NoiseInitializer {
 
 impl NoiseInitializer {
     fn new_init_with_dimensions(dimensions: u32) -> Self {
+        assert!(dimensions > 0 && dimensions <= 4);
         NoiseInitializer {
             dimensions: dimensions,
             hurst: DEFAULT_HURST,
@@ -129,7 +134,7 @@ impl NoiseInitializer {
         }
     }
 
-    /// Sets the dimensions of the noise generator. Defaults to 2.
+    /// Sets the dimensions of the noise generator.
     pub fn dimensions(&mut self, dimensions: u32) -> &mut Self {
         self.dimensions = dimensions;
         self
@@ -185,47 +190,59 @@ mod test {
         let noise2d = Noise::init_with_dimensions(2).init();
         let noise3d = Noise::init_with_dimensions(3).init();
 
-        let val1  = noise1d.get(&mut [1.0]);
-        let val1a = noise1d.get(&mut [1.0]);
+        let val1  = noise1d.get([1.0]);
+        let val1a = noise1d.get([1.0]);
         assert!(val1 >= -1.0 && val1 <= 1.0);
         assert_eq!(val1, val1a);
 
-        let val2  = noise2d.get(&mut [1.0, 2.0]);
-        let val2a = noise2d.get(&mut [1.0, 2.0]);
+        let val2  = noise2d.get([1.0, 2.0]);
+        let val2a = noise2d.get([1.0, 2.0]);
         assert!(val2 >= -1.0 && val2 <= 1.0);
         assert_eq!(val2, val2a);
 
-        let val3  = noise3d.get(&mut [1.0, 2.0, 3.0]);
-        let val3a = noise3d.get(&mut [1.0, 2.0, 3.0]);
+        let val3  = noise3d.get([1.0, 2.0, 3.0]);
+        let val3a = noise3d.get([1.0, 2.0, 3.0]);
         assert!(val3 >= -1.0 && val3 <= 1.0);
         assert_eq!(val3, val3a);
     }
 
     #[test]
     #[should_panic]
+    fn init_with_wrong_dimensions() {
+        Noise::init_with_dimensions(5).init();
+    }
+
+    #[test]
+    #[should_panic]
+    fn init_with_zero_dimensions() {
+        Noise::init_with_dimensions(0).init();
+    }
+
+    #[test]
+    #[should_panic]
     fn get_not_enough_args() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get(&mut [1.0]);
+        noise2d.get([1.0]);
     }
 
     #[test]
     #[should_panic]
     fn get_too_many_args() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get(&mut [1.0, 2.0, 3.0]);
+        noise2d.get([1.0, 2.0, 3.0]);
     }
 
     #[test]
     fn get_ex() {
         let noise2d = Noise::init_with_dimensions(2).init();
 
-        let val1  = noise2d.get_ex(&mut [1.0, 2.0], NoiseType::Perlin);
-        let val1a = noise2d.get_ex(&mut [1.0, 2.0], NoiseType::Perlin);
+        let val1  = noise2d.get_ex([1.0, 2.0], NoiseType::Perlin);
+        let val1a = noise2d.get_ex([1.0, 2.0], NoiseType::Perlin);
         assert!(val1 >= -1.0 && val1 <= 1.0);
         assert_eq!(val1, val1a);
 
-        let val2  = noise2d.get_ex(&mut [1.0, 2.0], NoiseType::Wavelet);
-        let val2a = noise2d.get_ex(&mut [1.0, 2.0], NoiseType::Wavelet);
+        let val2  = noise2d.get_ex([1.0, 2.0], NoiseType::Wavelet);
+        let val2a = noise2d.get_ex([1.0, 2.0], NoiseType::Wavelet);
         assert!(val2 >= -1.0 && val2 <= 1.0);
         assert_eq!(val2, val2a);
     }
@@ -234,14 +251,14 @@ mod test {
     #[should_panic]
     fn get_ex_not_enough_args() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get_ex(&mut [1.0], NoiseType::Perlin);
+        noise2d.get_ex([1.0], NoiseType::Perlin);
     }
 
     #[test]
     #[should_panic]
     fn get_ex_too_many_args() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get_ex(&mut [1.0, 2.0, 3.0], NoiseType::Perlin);
+        noise2d.get_ex([1.0, 2.0, 3.0], NoiseType::Perlin);
     }
 
     #[test]
@@ -250,22 +267,22 @@ mod test {
         let noise2d = Noise::init_with_dimensions(2).init();
         let noise3d = Noise::init_with_dimensions(3).init();
 
-        let val1  = noise1d.get_fbm(&mut [1.0], 32);
-        let val1a = noise1d.get_fbm(&mut [1.0], 32);
+        let val1  = noise1d.get_fbm([1.0], 32);
+        let val1a = noise1d.get_fbm([1.0], 32);
         assert!(val1.is_nan() || val1 >= -1.0 && val1 <= 1.0);
         if !val1.is_nan() {
             assert_eq!(val1, val1a);
         }
 
-        let val2  = noise2d.get_fbm(&mut [1.0, 2.0], 32);
-        let val2a = noise2d.get_fbm(&mut [1.0, 2.0], 32);
+        let val2  = noise2d.get_fbm([1.0, 2.0], 32);
+        let val2a = noise2d.get_fbm([1.0, 2.0], 32);
         assert!(val2.is_nan() || val2 >= -1.0 && val2 <= 1.0);
         if !val2.is_nan() {
             assert_eq!(val2, val2a);
         }
 
-        let val3  = noise3d.get_fbm(&mut [1.0, 2.0, 3.0], 32);
-        let val3a = noise3d.get_fbm(&mut [1.0, 2.0, 3.0], 32);
+        let val3  = noise3d.get_fbm([1.0, 2.0, 3.0], 32);
+        let val3a = noise3d.get_fbm([1.0, 2.0, 3.0], 32);
         assert!(val3.is_nan() || val3 >= -1.0 && val3 <= 1.0);
         if !val3.is_nan() {
             assert_eq!(val3, val3a);
@@ -276,43 +293,43 @@ mod test {
     #[should_panic]
     fn get_fbm_not_enough_args() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get_fbm(&mut [1.0], 32);
+        noise2d.get_fbm([1.0], 32);
     }
 
     #[test]
     #[should_panic]
     fn get_fbm_too_many_args() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get_fbm(&mut [1.0, 2.0, 3.0], 32);
+        noise2d.get_fbm([1.0, 2.0, 3.0], 32);
     }
 
     #[test]
     #[should_panic]
     fn get_fbm_octaves_zero() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get_fbm(&mut [1.0, 2.0, 3.0], 0);
+        noise2d.get_fbm([1.0, 2.0, 3.0], 0);
     }
 
     #[test]
     #[should_panic]
     fn get_fbm_octaves_too_big() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get_fbm(&mut [1.0, 2.0, 3.0], 128);
+        noise2d.get_fbm([1.0, 2.0, 3.0], 128);
     }
 
     #[test]
     fn get_fbm_ex() {
         let noise2d = Noise::init_with_dimensions(2).init();
 
-        let val1  = noise2d.get_fbm_ex(&mut [1.0, 2.0], 32, NoiseType::Perlin);
-        let val1a = noise2d.get_fbm_ex(&mut [1.0, 2.0], 32, NoiseType::Perlin);
+        let val1  = noise2d.get_fbm_ex([1.0, 2.0], 32, NoiseType::Perlin);
+        let val1a = noise2d.get_fbm_ex([1.0, 2.0], 32, NoiseType::Perlin);
         assert!(val1.is_nan() || val1 >= -1.0 && val1 <= 1.0);
         if !val1.is_nan() {
             assert_eq!(val1, val1a);
         }
 
-        let val2  = noise2d.get_fbm_ex(&mut [1.0, 2.0], 64, NoiseType::Wavelet);
-        let val2a = noise2d.get_fbm_ex(&mut [1.0, 2.0], 64, NoiseType::Wavelet);
+        let val2  = noise2d.get_fbm_ex([1.0, 2.0], 64, NoiseType::Wavelet);
+        let val2a = noise2d.get_fbm_ex([1.0, 2.0], 64, NoiseType::Wavelet);
         assert!(val2.is_nan() || val2 >= -1.0 && val2 <= 1.0);
         if !val2.is_nan() {
             assert_eq!(val2, val2a);
@@ -323,28 +340,28 @@ mod test {
     #[should_panic]
     fn get_fbm_ex_not_enough_args() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get_fbm_ex(&mut [1.0], 32, NoiseType::Perlin);
+        noise2d.get_fbm_ex([1.0], 32, NoiseType::Perlin);
     }
 
     #[test]
     #[should_panic]
     fn get_fbm_ex_too_many_args() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get_fbm_ex(&mut [1.0, 2.0, 3.0], 32, NoiseType::Perlin);
+        noise2d.get_fbm_ex([1.0, 2.0, 3.0], 32, NoiseType::Perlin);
     }
 
     #[test]
     #[should_panic]
     fn get_fbm_ex_octaves_zero() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get_fbm_ex(&mut [1.0, 2.0, 3.0], 0, NoiseType::Perlin);
+        noise2d.get_fbm_ex([1.0, 2.0, 3.0], 0, NoiseType::Perlin);
     }
 
     #[test]
     #[should_panic]
     fn get_fbm_ex_octaves_too_big() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get_fbm_ex(&mut [1.0, 2.0, 3.0], 128, NoiseType::Perlin);
+        noise2d.get_fbm_ex([1.0, 2.0, 3.0], 128, NoiseType::Perlin);
     }
 
     #[test]
@@ -353,22 +370,22 @@ mod test {
         let noise2d = Noise::init_with_dimensions(2).init();
         let noise3d = Noise::init_with_dimensions(3).init();
 
-        let val1  = noise1d.get_turbulence(&mut [1.0], 32);
-        let val1a = noise1d.get_turbulence(&mut [1.0], 32);
+        let val1  = noise1d.get_turbulence([1.0], 32);
+        let val1a = noise1d.get_turbulence([1.0], 32);
         assert!(val1.is_nan() || val1 >= -1.0 && val1 <= 1.0);
         if !val1.is_nan() {
             assert_eq!(val1, val1a);
         }
 
-        let val2  = noise2d.get_turbulence(&mut [1.0, 2.0], 32);
-        let val2a = noise2d.get_turbulence(&mut [1.0, 2.0], 32);
+        let val2  = noise2d.get_turbulence([1.0, 2.0], 32);
+        let val2a = noise2d.get_turbulence([1.0, 2.0], 32);
         assert!(val2.is_nan() || val2 >= -1.0 && val2 <= 1.0);
         if !val2.is_nan() {
             assert_eq!(val2, val2a);
         }
 
-        let val3  = noise3d.get_turbulence(&mut [1.0, 2.0, 3.0], 32);
-        let val3a = noise3d.get_turbulence(&mut [1.0, 2.0, 3.0], 32);
+        let val3  = noise3d.get_turbulence([1.0, 2.0, 3.0], 32);
+        let val3a = noise3d.get_turbulence([1.0, 2.0, 3.0], 32);
         assert!(val3.is_nan() || val3 >= -1.0 && val3 <= 1.0);
         if !val3.is_nan() {
             assert_eq!(val3, val3a);
@@ -379,43 +396,43 @@ mod test {
     #[should_panic]
     fn get_turbulence_not_enough_args() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get_turbulence(&mut [1.0], 32);
+        noise2d.get_turbulence([1.0], 32);
     }
 
     #[test]
     #[should_panic]
     fn get_turbulence_too_many_args() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get_turbulence(&mut [1.0, 2.0, 3.0], 32);
+        noise2d.get_turbulence([1.0, 2.0, 3.0], 32);
     }
 
     #[test]
     #[should_panic]
     fn get_turbulence_octaves_zero() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get_turbulence(&mut [1.0, 2.0, 3.0], 0);
+        noise2d.get_turbulence([1.0, 2.0, 3.0], 0);
     }
 
     #[test]
     #[should_panic]
     fn get_turbulence_octaves_too_big() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get_turbulence(&mut [1.0, 2.0, 3.0], 128);
+        noise2d.get_turbulence([1.0, 2.0, 3.0], 128);
     }
 
     #[test]
     fn get_turbulence_ex() {
         let noise2d = Noise::init_with_dimensions(2).init();
 
-        let val1  = noise2d.get_turbulence_ex(&mut [1.0, 2.0], 32, NoiseType::Perlin);
-        let val1a = noise2d.get_turbulence_ex(&mut [1.0, 2.0], 32, NoiseType::Perlin);
+        let val1  = noise2d.get_turbulence_ex([1.0, 2.0], 32, NoiseType::Perlin);
+        let val1a = noise2d.get_turbulence_ex([1.0, 2.0], 32, NoiseType::Perlin);
         assert!(val1.is_nan() || val1 >= -1.0 && val1 <= 1.0);
         if !val1.is_nan() {
             assert_eq!(val1, val1a);
         }
 
-        let val2  = noise2d.get_turbulence_ex(&mut [1.0, 2.0], 64, NoiseType::Wavelet);
-        let val2a = noise2d.get_turbulence_ex(&mut [1.0, 2.0], 64, NoiseType::Wavelet);
+        let val2  = noise2d.get_turbulence_ex([1.0, 2.0], 64, NoiseType::Wavelet);
+        let val2a = noise2d.get_turbulence_ex([1.0, 2.0], 64, NoiseType::Wavelet);
         assert!(val2.is_nan() || val2 >= -1.0 && val2 <= 1.0);
         if !val2.is_nan() {
             assert_eq!(val2, val2a);
@@ -426,27 +443,27 @@ mod test {
     #[should_panic]
     fn get_turbulence_ex_not_enough_args() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get_turbulence_ex(&mut [1.0], 32, NoiseType::Perlin);
+        noise2d.get_turbulence_ex([1.0], 32, NoiseType::Perlin);
     }
 
     #[test]
     #[should_panic]
     fn get_turbulence_ex_too_many_args() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get_turbulence_ex(&mut [1.0, 2.0, 3.0], 32, NoiseType::Perlin);
+        noise2d.get_turbulence_ex([1.0, 2.0, 3.0], 32, NoiseType::Perlin);
     }
 
     #[test]
     #[should_panic]
     fn get_turbulence_ex_octaves_zero() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get_turbulence_ex(&mut [1.0, 2.0, 3.0], 0, NoiseType::Perlin);
+        noise2d.get_turbulence_ex([1.0, 2.0, 3.0], 0, NoiseType::Perlin);
     }
 
     #[test]
     #[should_panic]
     fn get_turbulence_ex_octaves_too_big() {
         let noise2d = Noise::init_with_dimensions(2).init();
-        noise2d.get_turbulence_ex(&mut [1.0, 2.0, 3.0], 128, NoiseType::Perlin);
+        noise2d.get_turbulence_ex([1.0, 2.0, 3.0], 128, NoiseType::Perlin);
     }
 }
