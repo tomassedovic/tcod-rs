@@ -12,7 +12,7 @@ install:
 script:
 - cargo build --verbose
 - cargo test --verbose
-- cargo test --features "rustc-serialize_impls" --verbose
+- cargo test --features "rustc-serialize serde" --verbose
 after_success: ! '[ $TRAVIS_BRANCH = master ] &&
 
   [ "$TRAVIS_OS_NAME" = linux ] &&
