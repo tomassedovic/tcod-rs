@@ -28,6 +28,7 @@ path = "src/lib.rs"
 
 [features]
 rustc-serialize_impls = ["rustc-serialize"]
+serde_impls = ["serde"]
 
 [dependencies]
 bitflags = "0.1"
@@ -39,9 +40,14 @@ lazy_static = "0.1"
 rustc-serialize = "0.3"
 optional = true
 
+[dependencies.serde]
+serde = "0.6"
+optional = true
+
 [dependencies.tcod-sys]
 path = "tcod_sys"
 version = "2.0"
 
 [dev-dependencies]
 rand = "0.3"
+serde_json = "0.6"
