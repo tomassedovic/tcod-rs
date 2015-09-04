@@ -41,8 +41,8 @@
 
 #[macro_use] extern crate bitflags;
 #[macro_use] extern crate lazy_static;
-#[cfg(feature = "rustc-serialize_impls")] extern crate rustc_serialize;
-#[cfg(feature = "serde_impls")] extern crate serde;
+#[cfg(feature = "rustc-serialize")] extern crate rustc_serialize;
+#[cfg(feature = "serde")] extern crate serde;
 #[cfg(test)] extern crate serde_json;
 
 pub use bindings::{AsNative, FromNative};

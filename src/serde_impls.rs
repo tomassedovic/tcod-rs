@@ -1,4 +1,4 @@
-#![cfg(feature = "serde_impls")]
+#![cfg(feature = "serde")]
 
 use super::Color;
 

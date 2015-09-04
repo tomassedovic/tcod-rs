@@ -1,4 +1,4 @@
-#![cfg(feature = "rustc-serialize_impls")]
+#![cfg(feature = "rustc-serialize")]
 
 use super::Color;
 use rustc_serialize::{Encodable, Encoder, Decodable, Decoder};
@@ -14,7 +14,7 @@ impl Encodable for Color {
     }
 }
 
-#[cfg(feature = "rustc-serialize_impls")]
+#[cfg(feature = "rustc-serialize")]
 impl Decodable for Color {
     fn decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
         d.read_struct("Color", 3, |d| {

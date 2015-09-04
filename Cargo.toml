@@ -26,23 +26,13 @@ authors = ["Tomas Sedovic <tomas@sedovic.cz>",
 name = "tcod"
 path = "src/lib.rs"
 
-[features]
-rustc-serialize_impls = ["rustc-serialize"]
-serde_impls = ["serde"]
-
 [dependencies]
 bitflags = "0.1"
 libc = "0.1"
 time = "0.1"
 lazy_static = "0.1"
-
-[dependencies.rustc-serialize]
-rustc-serialize = "0.3"
-optional = true
-
-[dependencies.serde]
-serde = "0.6"
-optional = true
+rustc-serialize = { optional = true, version = "0.3" }
+serde = { optional = true, version = "0.6" }
 
 [dependencies.tcod-sys]
 path = "tcod_sys"
