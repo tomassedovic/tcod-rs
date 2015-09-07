@@ -28,6 +28,7 @@
 //! * Pathfinding
 //! * Line toolkit
 //! * Noise
+//! * BSP Toolkit
 //!
 //! ### Features that are not planned to be implemented:
 //! This are features that Rust already provides a good (and in most casese more idiomatic)
@@ -50,6 +51,7 @@ pub use colors::Color;
 pub use console::{Console, RootInitializer, BackgroundFlag, Renderer, FontLayout, FontType, TextAlignment};
 pub use map::Map;
 
+pub mod bsp;
 pub mod chars;
 pub mod colors;
 pub mod console;
