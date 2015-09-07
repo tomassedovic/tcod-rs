@@ -11,6 +11,10 @@ impl BSP {
         };
         BSP { bsp: bsp }
     }
+
+    pub fn remove_sons(&self) {
+        unsafe { ffi::TCOD_bsp_remove_sons(self.bsp) }
+    }
 }
 
 impl Drop for BSP {
