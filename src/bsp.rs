@@ -43,6 +43,24 @@ impl BSP {
     pub fn resize(&self, x: i32, y: i32, w: i32, h: i32) {
         unsafe { ffi::TCOD_bsp_resize(self.bsp, x, y, w, h) }
     }
+
+    pub fn left(&self) -> Self {
+        BSP {
+            bsp: unsafe { ffi::TCOD_bsp_left(self.bsp) }
+        }
+    }
+
+    pub fn right(&self) -> Self {
+        BSP {
+            bsp: unsafe { ffi::TCOD_bsp_right(self.bsp) }
+        }
+    }
+
+    pub fn father(&self) -> Self {
+        BSP {
+            bsp: unsafe { ffi::TCOD_bsp_father(self.bsp) }
+        }
+    }
 }
 
 impl Drop for BSP {
