@@ -3,8 +3,10 @@ use bindings::AsNative;
 use random::Rng;
 use std::ops::{Deref, DerefMut};
 
+#[derive(Debug)]
 pub struct BSP {
     bsp: *mut ffi::TCOD_bsp_t,
+    root: bool
 }
 
 impl Deref for BSP {
@@ -26,7 +28,7 @@ impl BSP {
         let bsp = unsafe {
             ffi::TCOD_bsp_new_with_size(x, y, w, h)
         };
-        BSP { bsp: bsp }
+        BSP { bsp: bsp, root: true }
     }
 
     pub fn remove_sons(&self) {
@@ -61,19 +63,22 @@ impl BSP {
 
     pub fn left(&self) -> Self {
         BSP {
-            bsp: unsafe { ffi::TCOD_bsp_left(self.bsp) }
+            bsp: unsafe { ffi::TCOD_bsp_left(self.bsp) },
+            root: false
         }
     }
 
     pub fn right(&self) -> Self {
         BSP {
-            bsp: unsafe { ffi::TCOD_bsp_right(self.bsp) }
+            bsp: unsafe { ffi::TCOD_bsp_right(self.bsp) },
+            root:false
         }
     }
 
     pub fn father(&self) -> Self {
         BSP {
-            bsp: unsafe { ffi::TCOD_bsp_father(self.bsp) }
+            bsp: unsafe { ffi::TCOD_bsp_father(self.bsp) },
+            root: false,
         }
     }
 
@@ -87,7 +92,8 @@ impl BSP {
 
     pub fn find_node(&self, cx: i32, cy: i32) -> Self {
         BSP {
-            bsp: unsafe { ffi::TCOD_bsp_find_node(self.bsp, cx, cy) }
+            bsp: unsafe { ffi::TCOD_bsp_find_node(self.bsp, cx, cy) },
+            root: false
         }
     }
 
@@ -102,7 +108,9 @@ impl BSP {
 
 impl Drop for BSP {
     fn drop(&mut self) {
-        unsafe { ffi::TCOD_bsp_delete(self.bsp) }
+        if self.root {
+            unsafe { ffi::TCOD_bsp_delete(self.bsp) }
+        }
     }
 }
 
@@ -114,6 +122,7 @@ mod test {
     #[allow(unused_variables)]
     fn created_destroyed_no_panic() {
         let bsp = BSP::new_with_size(0, 0, 50, 50);
+        let left = bsp.left(); // left has null .bsp
     }
 
     #[test]
@@ -131,5 +140,41 @@ mod test {
         assert_eq!(bsp.x, 10);
         assert_eq!(bsp.y, 20);
         assert_eq!(bsp.horizontal(), true);
+    }
+
+    #[test]
+    fn split() {
+        let bsp = BSP::new_with_size(0, 0, 50, 50);
+
+        assert_eq!(bsp.position, 0);
+        assert_eq!(bsp.horizontal(), false);
+
+        bsp.split_once(true, 20);
+        assert_eq!(bsp.position, 20);
+        assert_eq!(bsp.horizontal(), true);
+    }
+
+    #[test]
+    fn children() {
+        let bsp = BSP::new_with_size(0, 0, 50, 50);
+
+        assert!(bsp.left().bsp.is_null());
+        assert_eq!(bsp.level, 0);
+
+        bsp.split_once(false, 20);
+        assert!(!bsp.left().bsp.is_null());
+        assert!(!bsp.right().bsp.is_null());
+        assert_eq!(bsp.left().level, 1);
+        assert_eq!(bsp.right().level, 1);
+    }
+
+    #[test]
+    fn father() {
+        let bsp = BSP::new_with_size(0, 0, 50, 50);
+        assert!(bsp.father().bsp.is_null());
+
+        bsp.split_once(false, 30);
+        assert!(!bsp.left().father().bsp.is_null());
+        assert!(!bsp.right().father().bsp.is_null());
     }
 }
