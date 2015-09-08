@@ -39,6 +39,10 @@ impl BSP {
                                           max_v_ratio)
         }
     }
+
+    pub fn resize(&self, x: i32, y: i32, w: i32, h: i32) {
+        unsafe { ffi::TCOD_bsp_resize(self.bsp, x, y, w, h) }
+    }
 }
 
 impl Drop for BSP {
