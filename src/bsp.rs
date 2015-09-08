@@ -61,6 +61,10 @@ impl BSP {
             bsp: unsafe { ffi::TCOD_bsp_father(self.bsp) }
         }
     }
+
+    pub fn is_leaf(&self) -> bool {
+        unsafe { ffi::TCOD_bsp_is_leaf(self.bsp) != 0 }
+    }
 }
 
 impl Drop for BSP {
