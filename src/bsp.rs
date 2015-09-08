@@ -69,6 +69,12 @@ impl BSP {
     pub fn contains(&self, cx: i32, cy: i32) -> bool {
         unsafe { ffi::TCOD_bsp_contains(self.bsp, cx, cy) != 0 }
     }
+
+    pub fn find_node(&self, cx: i32, cy: i32) -> Self {
+        BSP {
+            bsp: unsafe { ffi::TCOD_bsp_find_node(self.bsp, cx, cy) }
+        }
+    }
 }
 
 impl Drop for BSP {
