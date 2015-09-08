@@ -1,15 +1,30 @@
 use bindings::ffi;
 use bindings::AsNative;
 use random::Rng;
+use std::ops::{Deref, DerefMut};
 
 pub struct BSP {
     bsp: *mut ffi::TCOD_bsp_t,
 }
 
+impl Deref for BSP {
+    type Target = ffi::TCOD_bsp_t;
+
+    fn deref(&self) -> &Self::Target {
+        unsafe { &*self.bsp }
+    }
+}
+
+impl DerefMut for BSP {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        unsafe { &mut *self.bsp }
+    }
+}
+
 impl BSP {
     pub fn new_with_size(x: i32, y: i32, w: i32, h: i32) -> Self {
         let bsp = unsafe {
-            ffi::TCOD_bsp_new_with_size(x, y, w,  h)
+            ffi::TCOD_bsp_new_with_size(x, y, w, h)
         };
         BSP { bsp: bsp }
     }
@@ -75,6 +90,14 @@ impl BSP {
             bsp: unsafe { ffi::TCOD_bsp_find_node(self.bsp, cx, cy) }
         }
     }
+
+    pub fn horizontal(&self) -> bool {
+        self.horizontal != 0
+    }
+
+    pub fn set_horizontal(&mut self, h: bool) {
+        self.horizontal = h as u8;
+    }
 }
 
 impl Drop for BSP {
@@ -91,5 +114,22 @@ mod test {
     #[allow(unused_variables)]
     fn created_destroyed_no_panic() {
         let bsp = BSP::new_with_size(0, 0, 50, 50);
+    }
+
+    #[test]
+    fn accessors() {
+        let mut bsp = BSP::new_with_size(0, 0, 50, 60);
+
+        assert_eq!(bsp.x, 0);
+        assert_eq!(bsp.y, 0);
+        assert_eq!(bsp.w, 50);
+        assert_eq!(bsp.h, 60);
+        assert_eq!(bsp.horizontal(), false);
+        bsp.x = 10;
+        bsp.y = 20;
+        bsp.set_horizontal(true);
+        assert_eq!(bsp.x, 10);
+        assert_eq!(bsp.y, 20);
+        assert_eq!(bsp.horizontal(), true);
     }
 }
