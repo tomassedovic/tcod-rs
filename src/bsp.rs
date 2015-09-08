@@ -1,4 +1,6 @@
 use bindings::ffi;
+use bindings::AsNative;
+use random::Rng;
 
 pub struct BSP {
     bsp: *mut ffi::TCOD_bsp_t,
@@ -14,6 +16,28 @@ impl BSP {
 
     pub fn remove_sons(&self) {
         unsafe { ffi::TCOD_bsp_remove_sons(self.bsp) }
+    }
+
+    pub fn split_once(&self, horizontal: bool, position: i32) {
+        unsafe { ffi::TCOD_bsp_split_once(self.bsp, horizontal as u8, position) }
+    }
+
+    pub fn split_recursive(&self,
+                           randomizer: Rng,
+                           nb: i32,
+                           min_h_size: i32,
+                           min_v_size: i32,
+                           max_h_ratio: f32,
+                           max_v_ratio: f32) {
+        unsafe {
+            ffi::TCOD_bsp_split_recursive(self.bsp,
+                                          *randomizer.as_native(),
+                                          nb,
+                                          min_h_size,
+                                          min_v_size,
+                                          max_h_ratio,
+                                          max_v_ratio)
+        }
     }
 }
 
