@@ -65,6 +65,10 @@ impl BSP {
     pub fn is_leaf(&self) -> bool {
         unsafe { ffi::TCOD_bsp_is_leaf(self.bsp) != 0 }
     }
+
+    pub fn contains(&self, cx: i32, cy: i32) -> bool {
+        unsafe { ffi::TCOD_bsp_contains(self.bsp, cx, cy) != 0 }
+    }
 }
 
 impl Drop for BSP {
