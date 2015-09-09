@@ -15,6 +15,7 @@ use tcod::namegen::Namegen;
 use tcod::line::Line;
 use tcod::noise::{Noise, NoiseType, DEFAULT_HURST, DEFAULT_LACUNARITY, MAX_OCTAVES};
 use tcod::image::{Image, blit_2x};
+use tcod::bsp::BSP;
 use rand::Rng;
 use rand::ThreadRng;
 use std::char::from_u32;
@@ -994,6 +995,46 @@ impl<'a> Render for PathSample<'a> {
     }
 }
 
+struct BspListener;
+
+impl BspListener {
+    fn node(bsp: &BSP) {
+    }
+}
+
+struct BspSample {
+    bsp: BSP,
+    generate: bool,
+    refresh: bool,
+    map: Map,
+    dark_wall: colors::Color,
+    dark_ground: colors::Color,
+    listener: BspListener,
+}
+
+impl BspSample {
+    fn new() -> Self {
+        BspSample {
+            bsp: BSP::new_with_size(0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
+            generate: true,
+            refresh: false,
+            map: Map::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
+            dark_wall: colors::Color::new(0, 0, 100),
+            dark_ground: colors::Color::new(50, 50, 150),
+            listener: BspListener
+        }
+    }
+}
+
+impl Render for BspSample {
+    fn initialize(&mut self, console: &mut Offscreen) {
+    }
+
+    fn render(&mut self, console: &mut Offscreen, root: &Root,
+              event: Option<(EventFlags, Event)>) {
+    }
+}
+
 struct ImageSample {
     img: image::Image,
     circle: image::Image,
@@ -1301,13 +1342,14 @@ fn main() {
     let mut names = NameSample::new();
     let mut line = LineSample::new();
     let mut noise = NoiseSample::new();
+    let mut bsp = BspSample::new();
     let mut samples = vec![MenuItem::new("  True colors      ", &mut colors),
                            MenuItem::new("  Offscreen console", &mut offscreen),
                            MenuItem::new("  Line drawing     ", &mut line),
                            MenuItem::new("  Noise            ", &mut noise),
                            MenuItem::new("  Field of view    ", &mut fov),
                            MenuItem::new("  Path finding     ", &mut path_sample),
-                           // MenuItem::new("  Bsp toolkit      ", &mut ),
+                           MenuItem::new("  Bsp toolkit      ", &mut bsp),
                            MenuItem::new("  Image toolkit    ", &mut image_sample),
                            MenuItem::new("  Mouse support    ", &mut mouse),
                            MenuItem::new("  Name generator   ", &mut names),

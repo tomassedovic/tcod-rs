@@ -360,4 +360,17 @@ mod test {
             true
         });
     }
+
+    #[test]
+    fn break_traverse() {
+        let bsp = BSP::new_with_size(0, 0, 100,100);
+        let mut counter = 0;
+
+        bsp.split_recursive(None, 2, 5, 5, 1.5, 1.5);
+        bsp.traverse(TraverseOrder::PreOrder, |node| {
+            counter += 1;
+            false
+        });
+        assert_eq!(counter, 1);
+    }
 }
