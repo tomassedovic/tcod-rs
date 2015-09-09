@@ -1079,6 +1079,43 @@ impl Render for BspSample {
                                             BackgroundFlag::Set);
             }
         }
+
+        if let Some((_, Event::Key(key))) = event {
+            match key {
+                Key { code: KeyCode::Enter, .. } | Key { code: KeyCode::NumPadEnter, ..} =>
+                    self.generate = true,
+                Key { code: KeyCode::Spacebar, .. } =>
+                    self.refresh = true,
+                Key { printable: '+', .. } => {
+                    self.bsp_depth += 1;
+                    self.generate = true
+                },
+                Key { printable: '-', .. } if self.bsp_depth > 1 => {
+                    self.bsp_depth -= 1;
+                    self.generate = true
+                },
+                Key { printable: '*', .. } => {
+                    self.min_room_size += 1;
+                    self.generate = true
+                },
+                Key { printable: '/', .. } if self.min_room_size > 2 => {
+                    self.min_room_size -= 1;
+                    self.generate = true
+                },
+                Key { printable: '1', .. } | Key { code: KeyCode::Number1, .. } |
+                Key { code: KeyCode::NumPad1, .. } => {
+                    self.random_room = !self.random_room;
+                    if !self.random_room { self.room_walls = true }
+                    self.refresh = true
+                },
+                Key { printable: '2', .. } | Key { code: KeyCode::Number2, .. } |
+                Key { code: KeyCode::NumPad2, .. } => {
+                    self.room_walls = !self.room_walls;
+                    self.refresh = true
+                },
+                _ => { /* ignore */ }
+            }
+        }
     }
 }
 
