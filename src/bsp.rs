@@ -40,15 +40,16 @@ impl BSP {
     }
 
     pub fn split_recursive(&self,
-                           randomizer: Rng,
+                           randomizer: Option<Rng>,
                            nb: i32,
                            min_h_size: i32,
                            min_v_size: i32,
                            max_h_ratio: f32,
                            max_v_ratio: f32) {
+        let rnd = randomizer.unwrap_or(Rng::get_instance());
         unsafe {
             ffi::TCOD_bsp_split_recursive(self.bsp,
-                                          *randomizer.as_native(),
+                                          *rnd.as_native(),
                                           nb,
                                           min_h_size,
                                           min_v_size,
