@@ -15,7 +15,7 @@ use tcod::namegen::Namegen;
 use tcod::line::Line;
 use tcod::noise::{Noise, NoiseType, DEFAULT_HURST, DEFAULT_LACUNARITY, MAX_OCTAVES};
 use tcod::image::{Image, blit_2x};
-use tcod::bsp::BSP;
+use tcod::bsp::{BSP, TraverseOrder};
 use rand::Rng;
 use rand::ThreadRng;
 use std::char::from_u32;
@@ -995,21 +995,17 @@ impl<'a> Render for PathSample<'a> {
     }
 }
 
-struct BspListener;
-
-impl BspListener {
-    fn node(bsp: &BSP) {
-    }
-}
-
 struct BspSample {
     bsp: BSP,
     generate: bool,
     refresh: bool,
-    map: Map,
+    map: [[char; SAMPLE_SCREEN_WIDTH as usize]; SAMPLE_SCREEN_HEIGHT as usize],
     dark_wall: colors::Color,
     dark_ground: colors::Color,
-    listener: BspListener,
+    bsp_depth: i32,
+    min_room_size: i32,
+    random_room: bool,
+    room_walls: bool,
 }
 
 impl BspSample {
@@ -1018,11 +1014,39 @@ impl BspSample {
             bsp: BSP::new_with_size(0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
             generate: true,
             refresh: false,
-            map: Map::new(SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
+            map: [['#'; SAMPLE_SCREEN_WIDTH as usize]; SAMPLE_SCREEN_HEIGHT as usize],
             dark_wall: colors::Color::new(0, 0, 100),
             dark_ground: colors::Color::new(50, 50, 150),
-            listener: BspListener
+            bsp_depth: 8,
+            min_room_size: 4,
+            random_room: false,
+            room_walls: true,
         }
+    }
+
+    fn rebuild(&mut self) {
+        self.bsp.resize(0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
+        for row in &mut self.map {
+            for item in &mut row[..] {
+                *item = '#';
+            }
+        }
+        if self.generate {
+            self.bsp.remove_sons();
+            let rw = if self.room_walls { 1 } else { 0 };
+            self.bsp.split_recursive(None,
+                                     self.bsp_depth,
+                                     self.min_room_size + rw,
+                                     self.min_room_size + rw,
+                                     1.5, 1.5);
+        }
+        self.bsp.traverse(TraverseOrder::InvertedLevelOrder, |node| self.visit(node));
+        self.generate = false;
+        self.refresh  = false;
+    }
+
+    fn visit(&self, node: &BSP) -> bool {
+        true
     }
 }
 
@@ -1030,8 +1054,31 @@ impl Render for BspSample {
     fn initialize(&mut self, console: &mut Offscreen) {
     }
 
-    fn render(&mut self, console: &mut Offscreen, root: &Root,
+    fn render(&mut self, console: &mut Offscreen, _root: &Root,
               event: Option<(EventFlags, Event)>) {
+        if self.generate || self.refresh {
+            self.rebuild()
+        }
+
+        console.clear();
+        console.set_default_foreground(colors::WHITE);
+        console.print(1, 1, format!("ENTER : rebuild bsp\nSPACE : rebuild dungeon\n+-: bsp depth {}\n*/: room size {}\n1 : random room size {}",
+                                    self.bsp_depth,
+                                    self.min_room_size,
+                                    if self.random_room { "ON" } else { "OFF" }));
+        if self.random_room {
+            console.print(1, 6, format!("2 : room walls {}",
+                                        if self.room_walls { "ON" } else { "OFF" }));
+        }
+
+        for x in 0..SAMPLE_SCREEN_HEIGHT {
+            for y in 0..SAMPLE_SCREEN_WIDTH {
+                let wall = self.map[x as usize][y as usize] == '#';
+                console.set_char_background(x, y,
+                                            if wall { self.dark_wall } else {self.dark_ground },
+                                            BackgroundFlag::Set);
+            }
+        }
     }
 }
 
