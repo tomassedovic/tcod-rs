@@ -1,3 +1,5 @@
+//! Port of BSP toolkit.
+
 use bindings::ffi;
 use bindings::AsNative;
 use bindings::{c_void, c_bool};
@@ -13,6 +15,25 @@ pub enum TraverseOrder {
     InvertedLevelOrder,
 }
 
+/// This struct encapsulates `TCOD_bsp_t`. It mirrors original's fields (`x`, `y`, etc.)
+/// with the exception of `horizontal`. See example.
+///
+/// # Examples
+///
+/// ```no_run
+/// # use tcod::bsp::*;
+/// let mut bsp = BSP::new_with_size(0, 0, 50, 60);
+///
+/// assert_eq!(bsp.x, 0);
+/// assert_eq!(bsp.y, 0);
+/// assert_eq!(bsp.w, 50);
+/// assert_eq!(bsp.h, 60);
+/// assert_eq!(bsp.horizontal(), false);
+///
+/// bsp.x = 10;
+/// bsp.y = 20;
+/// bsp.set_horizontal(true);
+/// ```
 pub struct BSP {
     bsp: *mut ffi::TCOD_bsp_t,
     root: bool
@@ -126,6 +147,22 @@ impl BSP {
         self.horizontal = h as u8;
     }
 
+    /// Instead of 5 `traverse*` functions as in original API, Rust binding
+    /// provides a single `traverse` function with an `order` parameter.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    ///    # use tcod::bsp::*;
+    ///    let bsp = BSP::new_with_size(0, 0, 50, 50);
+    ///    let mut counter = 0;
+    ///
+    ///    bsp.traverse(TraverseOrder::PreOrder, |node| {
+    ///        counter += 1;
+    ///        true
+    ///    });
+    ///    assert_eq!(counter, 1);
+    /// ```
     pub fn traverse<F>(&self, order: TraverseOrder, mut callback: F) -> bool
         where F: FnMut(&mut BSP) -> bool
     {
