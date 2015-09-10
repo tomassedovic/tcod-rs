@@ -33,14 +33,14 @@ impl DerefMut for BSP {
 }
 
 extern "C" fn callback_wrapper<T>(node: *mut ffi::TCOD_bsp_t, user_data: *mut c_void) -> c_bool
-    where T: FnMut(&BSP) -> bool
+    where T: FnMut(&mut BSP) -> bool
 {
     let callback_ptr = user_data as *mut T;
     let cb: &mut T = unsafe {
         &mut *callback_ptr
     };
-    let bsp = BSP { bsp: node, root: false };
-    cb(&bsp) as c_bool
+    let mut bsp = BSP { bsp: node, root: false };
+    cb(&mut bsp) as c_bool
 }
 
 impl BSP {
@@ -127,29 +127,30 @@ impl BSP {
     }
 
     pub fn traverse<F>(&self, order: TraverseOrder, mut callback: F) -> bool
-        where F: FnMut(&BSP) -> bool
+        where F: FnMut(&mut BSP) -> bool
     {
-        let cb: &mut FnMut(&BSP) -> bool = &mut callback;
+        let bsp = self.bsp;
+        let mut cb: &mut FnMut(&mut BSP) -> bool = &mut callback;
         let retval = unsafe {
             match order {
                 TraverseOrder::PreOrder =>
-                    ffi::TCOD_bsp_traverse_pre_order(self.bsp,
+                    ffi::TCOD_bsp_traverse_pre_order(bsp,
                                                      Some(callback_wrapper::<F>),
                                                      cb as *mut _ as *mut c_void),
                 TraverseOrder::InOrder =>
-                    ffi::TCOD_bsp_traverse_in_order(self.bsp,
+                    ffi::TCOD_bsp_traverse_in_order(bsp,
                                                     Some(callback_wrapper::<F>),
                                                     cb as *mut _ as *mut c_void),
                 TraverseOrder::PostOrder =>
-                    ffi::TCOD_bsp_traverse_post_order(self.bsp,
+                    ffi::TCOD_bsp_traverse_post_order(bsp,
                                                       Some(callback_wrapper::<F>),
                                                       cb as *mut _ as *mut c_void),
                 TraverseOrder::LevelOrder =>
-                    ffi::TCOD_bsp_traverse_level_order(self.bsp,
+                    ffi::TCOD_bsp_traverse_level_order(bsp,
                                                        Some(callback_wrapper::<F>),
                                                        cb as *mut _ as *mut c_void),
                 TraverseOrder::InvertedLevelOrder =>
-                    ffi::TCOD_bsp_traverse_inverted_level_order(self.bsp,
+                    ffi::TCOD_bsp_traverse_inverted_level_order(bsp,
                                                                 Some(callback_wrapper::<F>),
                                                                 cb as *mut _ as *mut c_void),
             }
@@ -249,10 +250,11 @@ mod test {
     #[test]
     fn traverse() {
         let bsp = BSP::new_with_size(0, 0, 50, 50);
+        let b = bsp.bsp;
         let mut counter = 0;
 
         bsp.traverse(TraverseOrder::PreOrder, |node| {
-            assert_eq!(node.bsp, bsp.bsp);
+            assert_eq!(node.bsp, b);
             counter += 1;
             true
         });
@@ -270,6 +272,7 @@ mod test {
     #[test]
     fn traverse_orders() {
         let root = BSP::new_with_size(0, 0, 100,100);
+        let bsp = root.bsp;
         let mut counter = 0;
 
         root.split_recursive(None, 2, 5, 5, 1.5, 1.5);
@@ -283,7 +286,7 @@ mod test {
 
         root.traverse(TraverseOrder::PreOrder, |node| {
             match counter {
-                0 => assert_eq!(node.bsp, root.bsp),
+                0 => assert_eq!(node.bsp, bsp),
                 1 => assert_eq!(node.bsp, middle_left.bsp),
                 2 => assert_eq!(node.bsp, leaf1.bsp),
                 3 => assert_eq!(node.bsp, leaf2.bsp),
@@ -302,7 +305,7 @@ mod test {
                 0 => assert_eq!(node.bsp, leaf1.bsp),
                 1 => assert_eq!(node.bsp, middle_left.bsp),
                 2 => assert_eq!(node.bsp, leaf2.bsp),
-                3 => assert_eq!(node.bsp, root.bsp),
+                3 => assert_eq!(node.bsp, bsp),
                 4 => assert_eq!(node.bsp, leaf3.bsp),
                 5 => assert_eq!(node.bsp, middle_right.bsp),
                 6 => assert_eq!(node.bsp, leaf4.bsp),
@@ -321,7 +324,7 @@ mod test {
                 3 => assert_eq!(node.bsp, leaf3.bsp),
                 4 => assert_eq!(node.bsp, leaf4.bsp),
                 5 => assert_eq!(node.bsp, middle_right.bsp),
-                6 => assert_eq!(node.bsp, root.bsp),
+                6 => assert_eq!(node.bsp, bsp),
                 _ => panic!("Wrong number of nodes in the tree"),
             };
             counter += 1;
@@ -331,7 +334,7 @@ mod test {
         counter = 0;
         root.traverse(TraverseOrder::LevelOrder, |node| {
             match counter {
-                0 => assert_eq!(node.bsp, root.bsp),
+                0 => assert_eq!(node.bsp, bsp),
                 1 => assert_eq!(node.bsp, middle_left.bsp),
                 2 => assert_eq!(node.bsp, middle_right.bsp),
                 3 => assert_eq!(node.bsp, leaf1.bsp),
@@ -353,7 +356,7 @@ mod test {
                 3 => assert_eq!(node.bsp, leaf1.bsp),
                 4 => assert_eq!(node.bsp, middle_right.bsp),
                 5 => assert_eq!(node.bsp, middle_left.bsp),
-                6 => assert_eq!(node.bsp, root.bsp),
+                6 => assert_eq!(node.bsp, bsp),
                 _ => panic!("Wrong number of nodes in the tree"),
             };
             counter += 1;
@@ -367,7 +370,7 @@ mod test {
         let mut counter = 0;
 
         bsp.split_recursive(None, 2, 5, 5, 1.5, 1.5);
-        bsp.traverse(TraverseOrder::PreOrder, |node| {
+        bsp.traverse(TraverseOrder::PreOrder, |_node| {
             counter += 1;
             false
         });
