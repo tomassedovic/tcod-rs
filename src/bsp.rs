@@ -103,24 +103,42 @@ impl BSP {
         unsafe { ffi::TCOD_bsp_resize(self.bsp, x, y, w, h) }
     }
 
-    pub fn left(&self) -> Self {
-        BSP {
-            bsp: unsafe { ffi::TCOD_bsp_left(self.bsp) },
-            root: false
+    /// Returns `Some(BSP)` with left subtree, or `None` if the BSP has not been split.
+    pub fn left(&self) -> Option<Self> {
+        let left = unsafe { ffi::TCOD_bsp_left(self.bsp) };
+        if left.is_null() {
+            None
+        } else {
+            Some(BSP {
+                bsp: left,
+                root: false
+            })
         }
     }
 
-    pub fn right(&self) -> Self {
-        BSP {
-            bsp: unsafe { ffi::TCOD_bsp_right(self.bsp) },
-            root:false
+    /// Returns `Some(BSP)` with right subtree, or `None` if the BSP has not been split.
+    pub fn right(&self) -> Option<Self> {
+        let right = unsafe { ffi::TCOD_bsp_right(self.bsp) };
+        if right.is_null() {
+            None
+        } else {
+            Some(BSP {
+                bsp: right,
+                root:false
+            })
         }
     }
 
-    pub fn father(&self) -> Self {
-        BSP {
-            bsp: unsafe { ffi::TCOD_bsp_father(self.bsp) },
-            root: false,
+    /// Returns `Some(BSP)` with father, or `None` if the node is root.
+    pub fn father(&self) -> Option<Self> {
+        let father = unsafe { ffi::TCOD_bsp_father(self.bsp) };
+        if father.is_null() {
+            None
+        } else {
+            Some(BSP {
+                bsp: father,
+                root: false,
+            })
         }
     }
 
@@ -264,24 +282,24 @@ mod test {
     fn children() {
         let bsp = BSP::new_with_size(0, 0, 50, 50);
 
-        assert!(bsp.left().bsp.is_null());
+        assert!(bsp.left().is_none());
         assert_eq!(bsp.level, 0);
 
         bsp.split_once(false, 20);
-        assert!(!bsp.left().bsp.is_null());
-        assert!(!bsp.right().bsp.is_null());
-        assert_eq!(bsp.left().level, 1);
-        assert_eq!(bsp.right().level, 1);
+        assert!(bsp.left().is_some());
+        assert!(bsp.right().is_some());
+        assert_eq!(bsp.left().unwrap().level, 1);
+        assert_eq!(bsp.right().unwrap().level, 1);
     }
 
     #[test]
     fn father() {
         let bsp = BSP::new_with_size(0, 0, 50, 50);
-        assert!(bsp.father().bsp.is_null());
+        assert!(bsp.father().is_none());
 
         bsp.split_once(false, 30);
-        assert!(!bsp.left().father().bsp.is_null());
-        assert!(!bsp.right().father().bsp.is_null());
+        assert!(bsp.left().unwrap().father().is_some());
+        assert!(bsp.right().unwrap().father().is_some());
     }
 
     #[test]
@@ -314,12 +332,12 @@ mod test {
 
         root.split_recursive(None, 2, 5, 5, 1.5, 1.5);
 
-        let middle_left = root.left();
-        let middle_right = root.right();
-        let leaf1 = middle_left.left();
-        let leaf2 = middle_left.right();
-        let leaf3 = middle_right.left();
-        let leaf4 = middle_right.right();
+        let middle_left = root.left().unwrap();
+        let middle_right = root.right().unwrap();
+        let leaf1 = middle_left.left().unwrap();
+        let leaf2 = middle_left.right().unwrap();
+        let leaf3 = middle_right.left().unwrap();
+        let leaf4 = middle_right.right().unwrap();
 
         root.traverse(TraverseOrder::PreOrder, |node| {
             match counter {

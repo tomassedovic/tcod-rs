@@ -1099,8 +1099,8 @@ impl BspSample {
     }
 
     fn visit_node(&self, node: &mut BSP, map: &mut CharMap) {
-        let left = node.left();
-        let right = node.right();
+        let left = node.left().unwrap();
+        let right = node.right().unwrap();
 
         node.x = min(left.x, right.x);
         node.y = min(left.y, right.y);
