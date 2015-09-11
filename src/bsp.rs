@@ -22,7 +22,7 @@ pub enum TraverseOrder {
 ///
 /// ```no_run
 /// # use tcod::bsp::*;
-/// let mut bsp = BSP::new_with_size(0, 0, 50, 60);
+/// let mut bsp = Bsp::new_with_size(0, 0, 50, 60);
 ///
 /// assert_eq!(bsp.x, 0);
 /// assert_eq!(bsp.y, 0);
@@ -34,12 +34,12 @@ pub enum TraverseOrder {
 /// bsp.y = 20;
 /// bsp.set_horizontal(true);
 /// ```
-pub struct BSP {
+pub struct Bsp {
     bsp: *mut ffi::TCOD_bsp_t,
     root: bool
 }
 
-impl Deref for BSP {
+impl Deref for Bsp {
     type Target = ffi::TCOD_bsp_t;
 
     fn deref(&self) -> &Self::Target {
@@ -47,29 +47,29 @@ impl Deref for BSP {
     }
 }
 
-impl DerefMut for BSP {
+impl DerefMut for Bsp {
     fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe { &mut *self.bsp }
     }
 }
 
 extern "C" fn callback_wrapper<T>(node: *mut ffi::TCOD_bsp_t, user_data: *mut c_void) -> c_bool
-    where T: FnMut(&mut BSP) -> bool
+    where T: FnMut(&mut Bsp) -> bool
 {
     let callback_ptr = user_data as *mut T;
     let cb: &mut T = unsafe {
         &mut *callback_ptr
     };
-    let mut bsp = BSP { bsp: node, root: false };
+    let mut bsp = Bsp { bsp: node, root: false };
     cb(&mut bsp) as c_bool
 }
 
-impl BSP {
+impl Bsp {
     pub fn new_with_size(x: i32, y: i32, w: i32, h: i32) -> Self {
         let bsp = unsafe {
             ffi::TCOD_bsp_new_with_size(x, y, w, h)
         };
-        BSP { bsp: bsp, root: true }
+        Bsp { bsp: bsp, root: true }
     }
 
     pub fn remove_sons(&self) {
@@ -103,39 +103,39 @@ impl BSP {
         unsafe { ffi::TCOD_bsp_resize(self.bsp, x, y, w, h) }
     }
 
-    /// Returns `Some(BSP)` with left subtree, or `None` if the BSP has not been split.
+    /// Returns `Some(Bsp)` with left subtree, or `None` if the BSP has not been split.
     pub fn left(&self) -> Option<Self> {
         let left = unsafe { ffi::TCOD_bsp_left(self.bsp) };
         if left.is_null() {
             None
         } else {
-            Some(BSP {
+            Some(Bsp {
                 bsp: left,
                 root: false
             })
         }
     }
 
-    /// Returns `Some(BSP)` with right subtree, or `None` if the BSP has not been split.
+    /// Returns `Some(Bsp)` with right subtree, or `None` if the BSP has not been split.
     pub fn right(&self) -> Option<Self> {
         let right = unsafe { ffi::TCOD_bsp_right(self.bsp) };
         if right.is_null() {
             None
         } else {
-            Some(BSP {
+            Some(Bsp {
                 bsp: right,
                 root:false
             })
         }
     }
 
-    /// Returns `Some(BSP)` with father, or `None` if the node is root.
+    /// Returns `Some(Bsp)` with father, or `None` if the node is root.
     pub fn father(&self) -> Option<Self> {
         let father = unsafe { ffi::TCOD_bsp_father(self.bsp) };
         if father.is_null() {
             None
         } else {
-            Some(BSP {
+            Some(Bsp {
                 bsp: father,
                 root: false,
             })
@@ -151,7 +151,7 @@ impl BSP {
     }
 
     pub fn find_node(&self, cx: i32, cy: i32) -> Self {
-        BSP {
+        Bsp {
             bsp: unsafe { ffi::TCOD_bsp_find_node(self.bsp, cx, cy) },
             root: false
         }
@@ -172,7 +172,7 @@ impl BSP {
     ///
     /// ```no_run
     ///    # use tcod::bsp::*;
-    ///    let bsp = BSP::new_with_size(0, 0, 50, 50);
+    ///    let bsp = Bsp::new_with_size(0, 0, 50, 50);
     ///    let mut counter = 0;
     ///
     ///    bsp.traverse(TraverseOrder::PreOrder, |node| {
@@ -182,10 +182,10 @@ impl BSP {
     ///    assert_eq!(counter, 1);
     /// ```
     pub fn traverse<F>(&self, order: TraverseOrder, mut callback: F) -> bool
-        where F: FnMut(&mut BSP) -> bool
+        where F: FnMut(&mut Bsp) -> bool
     {
         let bsp = self.bsp;
-        let mut cb: &mut FnMut(&mut BSP) -> bool = &mut callback;
+        let mut cb: &mut FnMut(&mut Bsp) -> bool = &mut callback;
         let retval = unsafe {
             match order {
                 TraverseOrder::PreOrder =>
@@ -214,7 +214,7 @@ impl BSP {
     }
 }
 
-impl Drop for BSP {
+impl Drop for Bsp {
     fn drop(&mut self) {
         if self.root {
             unsafe { ffi::TCOD_bsp_delete(self.bsp) }
@@ -224,19 +224,19 @@ impl Drop for BSP {
 
 #[cfg(test)]
 mod test {
-    use super::BSP;
+    use super::Bsp;
     use super::TraverseOrder;
 
     #[test]
     #[allow(unused_variables)]
     fn created_destroyed_no_panic() {
-        let bsp = BSP::new_with_size(0, 0, 50, 50);
+        let bsp = Bsp::new_with_size(0, 0, 50, 50);
         let left = bsp.left(); // left has null .bsp
     }
 
     #[test]
     fn accessors() {
-        let mut bsp = BSP::new_with_size(0, 0, 50, 60);
+        let mut bsp = Bsp::new_with_size(0, 0, 50, 60);
 
         assert_eq!(bsp.x, 0);
         assert_eq!(bsp.y, 0);
@@ -253,7 +253,7 @@ mod test {
 
     #[test]
     fn split() {
-        let bsp = BSP::new_with_size(0, 0, 50, 50);
+        let bsp = Bsp::new_with_size(0, 0, 50, 50);
 
         assert_eq!(bsp.position, 0);
         assert_eq!(bsp.horizontal(), false);
@@ -265,7 +265,7 @@ mod test {
 
     #[test]
     fn split_recursive() {
-        let bsp = BSP::new_with_size(0, 0, 100,100);
+        let bsp = Bsp::new_with_size(0, 0, 100,100);
         let mut counter = 0;
 
         bsp.split_recursive(None, 2, 5, 5, 1.5, 1.5);
@@ -280,7 +280,7 @@ mod test {
 
     #[test]
     fn children() {
-        let bsp = BSP::new_with_size(0, 0, 50, 50);
+        let bsp = Bsp::new_with_size(0, 0, 50, 50);
 
         assert!(bsp.left().is_none());
         assert_eq!(bsp.level, 0);
@@ -294,7 +294,7 @@ mod test {
 
     #[test]
     fn father() {
-        let bsp = BSP::new_with_size(0, 0, 50, 50);
+        let bsp = Bsp::new_with_size(0, 0, 50, 50);
         assert!(bsp.father().is_none());
 
         bsp.split_once(false, 30);
@@ -304,7 +304,7 @@ mod test {
 
     #[test]
     fn traverse() {
-        let bsp = BSP::new_with_size(0, 0, 50, 50);
+        let bsp = Bsp::new_with_size(0, 0, 50, 50);
         let b = bsp.bsp;
         let mut counter = 0;
 
@@ -326,7 +326,7 @@ mod test {
 
     #[test]
     fn traverse_orders() {
-        let root = BSP::new_with_size(0, 0, 100,100);
+        let root = Bsp::new_with_size(0, 0, 100,100);
         let bsp = root.bsp;
         let mut counter = 0;
 
@@ -421,7 +421,7 @@ mod test {
 
     #[test]
     fn break_traverse() {
-        let bsp = BSP::new_with_size(0, 0, 100,100);
+        let bsp = Bsp::new_with_size(0, 0, 100,100);
         let mut counter = 0;
 
         bsp.split_recursive(None, 2, 5, 5, 1.5, 1.5);

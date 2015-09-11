@@ -15,7 +15,7 @@ use tcod::namegen::Namegen;
 use tcod::line::Line;
 use tcod::noise::{Noise, NoiseType, DEFAULT_HURST, DEFAULT_LACUNARITY, MAX_OCTAVES};
 use tcod::image::{Image, blit_2x};
-use tcod::bsp::{BSP, TraverseOrder};
+use tcod::bsp::{Bsp, TraverseOrder};
 use rand::Rng;
 use rand::ThreadRng;
 use std::char::from_u32;
@@ -999,7 +999,7 @@ impl<'a> Render for PathSample<'a> {
 type CharMap = [[char; SAMPLE_SCREEN_WIDTH as usize]; SAMPLE_SCREEN_HEIGHT as usize];
 
 struct BspSample {
-    bsp: BSP,
+    bsp: Bsp,
     generate: bool,
     refresh: bool,
     map: CharMap,
@@ -1021,7 +1021,7 @@ fn random_val(mut low: i32, high: i32) -> i32 {
 impl BspSample {
     fn new() -> Self {
         BspSample {
-            bsp: BSP::new_with_size(0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
+            bsp: Bsp::new_with_size(0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
             generate: true,
             refresh: false,
             map: [['#'; SAMPLE_SCREEN_WIDTH as usize]; SAMPLE_SCREEN_HEIGHT as usize],
@@ -1058,7 +1058,7 @@ impl BspSample {
         self.refresh  = false;
     }
 
-    fn visit(&self, node: &mut BSP, map: &mut CharMap) -> bool {
+    fn visit(&self, node: &mut Bsp, map: &mut CharMap) -> bool {
         if node.is_leaf() {
             self.visit_leaf(node, map);
         } else {
@@ -1067,7 +1067,7 @@ impl BspSample {
         true
     }
 
-    fn visit_leaf(&self, node: &mut BSP, map: &mut CharMap) {
+    fn visit_leaf(&self, node: &mut Bsp, map: &mut CharMap) {
         let mut min_x = node.x + 1;
         let mut max_x = node.x + node.w - 1;
         let mut min_y = node.y + 1;
@@ -1098,7 +1098,7 @@ impl BspSample {
         }
     }
 
-    fn visit_node(&self, node: &mut BSP, map: &mut CharMap) {
+    fn visit_node(&self, node: &mut Bsp, map: &mut CharMap) {
         let left = node.left().unwrap();
         let right = node.right().unwrap();
 
