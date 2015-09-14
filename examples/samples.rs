@@ -1037,7 +1037,7 @@ impl BspSample {
     fn rebuild(&mut self) {
         self.bsp.resize(0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
         for row in &mut self.map {
-            for item in &mut row[..] {
+            for item in &mut row.iter_mut() {
                 *item = '#';
             }
         }
