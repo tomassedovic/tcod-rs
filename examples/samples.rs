@@ -998,8 +998,8 @@ impl<'a> Render for PathSample<'a> {
 
 type CharMap = [[char; SAMPLE_SCREEN_WIDTH as usize]; SAMPLE_SCREEN_HEIGHT as usize];
 
-struct BspSample {
-    bsp: Bsp,
+struct BspSample<'a> {
+    bsp: Bsp<'a>,
     generate: bool,
     refresh: bool,
     map: CharMap,
@@ -1018,7 +1018,7 @@ fn random_val(mut low: i32, high: i32) -> i32 {
     rnd.gen_range(low, high)
 }
 
-impl BspSample {
+impl<'a> BspSample<'a> {
     fn new() -> Self {
         BspSample {
             bsp: Bsp::new_with_size(0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
@@ -1197,7 +1197,7 @@ impl BspSample {
     }
 }
 
-impl Render for BspSample {
+impl<'a> Render for BspSample<'a> {
     fn initialize(&mut self, _console: &mut Offscreen) {
     }
 

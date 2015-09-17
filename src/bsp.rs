@@ -5,6 +5,8 @@ use bindings::AsNative;
 use bindings::{c_void, c_bool};
 use random::Rng;
 use std::ops::{Deref, DerefMut};
+use std::fmt;
+use std::mem;
 
 #[derive(Copy, Clone, Debug)]
 pub enum TraverseOrder {
@@ -34,24 +36,32 @@ pub enum TraverseOrder {
 /// bsp.y = 20;
 /// bsp.set_horizontal(true);
 /// ```
-pub struct Bsp {
-    bsp: *mut ffi::TCOD_bsp_t,
+pub struct Bsp<'a> {
+    bsp: &'a mut ffi::TCOD_bsp_t,
     root: bool
 }
 
-impl Deref for Bsp {
+impl<'a> Deref for Bsp<'a> {
     type Target = ffi::TCOD_bsp_t;
 
     fn deref(&self) -> &Self::Target {
-        unsafe { &*self.bsp }
+        self.bsp
     }
 }
 
-impl DerefMut for Bsp {
+impl<'a> DerefMut for Bsp<'a> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        unsafe { &mut *self.bsp }
+        &mut self.bsp
     }
 }
+
+impl<'a> fmt::Debug for Bsp<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "Bsp{{x: {}, y:{}, w: {}, h: {}, position: {}, level: {}, horizontal: {} }}",
+               self.x, self.y, self.w, self.h, self.position, self.level, self.horizontal)
+    }
+}
+
 
 extern "C" fn callback_wrapper<T>(node: *mut ffi::TCOD_bsp_t, user_data: *mut c_void) -> c_bool
     where T: FnMut(&mut Bsp) -> bool
@@ -60,27 +70,34 @@ extern "C" fn callback_wrapper<T>(node: *mut ffi::TCOD_bsp_t, user_data: *mut c_
     let cb: &mut T = unsafe {
         &mut *callback_ptr
     };
-    let mut bsp = Bsp { bsp: node, root: false };
+    if node.is_null() { panic!("Null node when traversing a BSP.") }
+    let mut bsp = Bsp { bsp: unsafe { &mut *node }, root: false };
     cb(&mut bsp) as c_bool
 }
 
-impl Bsp {
+impl<'a> Bsp<'a> {
     pub fn new_with_size(x: i32, y: i32, w: i32, h: i32) -> Self {
         let bsp = unsafe {
-            ffi::TCOD_bsp_new_with_size(x, y, w, h)
+            let pointer = ffi::TCOD_bsp_new_with_size(x, y, w, h);
+            if pointer.is_null() {
+                panic!("TCOD_bsp_new_with_size returned a NULL BSP.");
+            }
+            &mut *pointer
         };
         Bsp { bsp: bsp, root: true }
     }
 
-    pub fn remove_sons(&self) {
-        unsafe { ffi::TCOD_bsp_remove_sons(self.bsp) }
+    pub fn remove_sons(&mut self) {
+        unsafe { ffi::TCOD_bsp_remove_sons(self.bsp as *mut ffi::TCOD_bsp_t) }
     }
 
-    pub fn split_once(&self, horizontal: bool, position: i32) {
-        unsafe { ffi::TCOD_bsp_split_once(self.bsp, horizontal as u8, position) }
+    pub fn split_once(&mut self, horizontal: bool, position: i32) {
+        unsafe { ffi::TCOD_bsp_split_once(self.bsp as *mut ffi::TCOD_bsp_t,
+                                          horizontal as u8,
+                                          position) }
     }
 
-    pub fn split_recursive(&self,
+    pub fn split_recursive(&mut self,
                            randomizer: Option<Rng>,
                            nb: i32,
                            min_h_size: i32,
@@ -89,7 +106,7 @@ impl Bsp {
                            max_v_ratio: f32) {
         let rnd = randomizer.unwrap_or(Rng::get_instance());
         unsafe {
-            ffi::TCOD_bsp_split_recursive(self.bsp,
+            ffi::TCOD_bsp_split_recursive(self.bsp as *mut ffi::TCOD_bsp_t,
                                           *rnd.as_native(),
                                           nb,
                                           min_h_size,
@@ -99,61 +116,75 @@ impl Bsp {
         }
     }
 
-    pub fn resize(&self, x: i32, y: i32, w: i32, h: i32) {
-        unsafe { ffi::TCOD_bsp_resize(self.bsp, x, y, w, h) }
+    pub fn resize(&mut self, x: i32, y: i32, w: i32, h: i32) {
+        unsafe { ffi::TCOD_bsp_resize(self.bsp as *mut ffi::TCOD_bsp_t, x, y, w, h) }
     }
 
     /// Returns `Some(Bsp)` with left subtree, or `None` if the BSP has not been split.
     pub fn left(&self) -> Option<Self> {
-        let left = unsafe { ffi::TCOD_bsp_left(self.bsp) };
-        if left.is_null() {
-            None
-        } else {
-            Some(Bsp {
-                bsp: left,
-                root: false
-            })
+        unsafe {
+            let left = ffi::TCOD_bsp_left(self.bsp as *const ffi::TCOD_bsp_t);
+            if left.is_null() {
+                None
+            } else {
+                Some(Bsp {
+                    bsp: &mut *left,
+                    root: false
+                })
+            }
         }
     }
 
     /// Returns `Some(Bsp)` with right subtree, or `None` if the BSP has not been split.
     pub fn right(&self) -> Option<Self> {
-        let right = unsafe { ffi::TCOD_bsp_right(self.bsp) };
-        if right.is_null() {
-            None
-        } else {
-            Some(Bsp {
-                bsp: right,
-                root:false
-            })
+        unsafe {
+            let right = ffi::TCOD_bsp_right(self.bsp as *const ffi::TCOD_bsp_t) ;
+            if right.is_null() {
+                None
+            } else {
+                Some(Bsp {
+                    bsp: &mut *right,
+                    root:false
+                })
+            }
         }
     }
 
     /// Returns `Some(Bsp)` with father, or `None` if the node is root.
     pub fn father(&self) -> Option<Self> {
-        let father = unsafe { ffi::TCOD_bsp_father(self.bsp) };
-        if father.is_null() {
-            None
-        } else {
-            Some(Bsp {
-                bsp: father,
-                root: false,
-            })
+        unsafe {
+            let father = ffi::TCOD_bsp_father(self.bsp as *const ffi::TCOD_bsp_t);
+            if father.is_null() {
+                None
+            } else {
+                Some(Bsp {
+                    bsp: &mut *father,
+                    root: false,
+                })
+            }
         }
     }
 
     pub fn is_leaf(&self) -> bool {
-        unsafe { ffi::TCOD_bsp_is_leaf(self.bsp) != 0 }
+        unsafe { ffi::TCOD_bsp_is_leaf(self.bsp as *const ffi::TCOD_bsp_t) != 0 }
     }
 
     pub fn contains(&self, cx: i32, cy: i32) -> bool {
-        unsafe { ffi::TCOD_bsp_contains(self.bsp, cx, cy) != 0 }
+        unsafe { ffi::TCOD_bsp_contains(self.bsp as *const ffi::TCOD_bsp_t, cx, cy) != 0 }
     }
 
-    pub fn find_node(&self, cx: i32, cy: i32) -> Self {
-        Bsp {
-            bsp: unsafe { ffi::TCOD_bsp_find_node(self.bsp, cx, cy) },
-            root: false
+    pub fn find_node(&self, cx: i32, cy: i32) -> Option<Self> {
+        unsafe {
+            let pointer = ffi::TCOD_bsp_find_node(self.bsp as *const ffi::TCOD_bsp_t,
+                                                  cx, cy);
+            if pointer.is_null() {
+                None
+            } else {
+                Some(Bsp {
+                    bsp: &mut *pointer,
+                    root: false
+                })
+            }
         }
     }
 
@@ -184,9 +215,9 @@ impl Bsp {
     pub fn traverse<F>(&self, order: TraverseOrder, mut callback: F) -> bool
         where F: FnMut(&mut Bsp) -> bool
     {
-        let bsp = self.bsp;
         let mut cb: &mut FnMut(&mut Bsp) -> bool = &mut callback;
         let retval = unsafe {
+            let bsp = mem::transmute(self.bsp as *const ffi::TCOD_bsp_t);
             match order {
                 TraverseOrder::PreOrder =>
                     ffi::TCOD_bsp_traverse_pre_order(bsp,
@@ -214,10 +245,10 @@ impl Bsp {
     }
 }
 
-impl Drop for Bsp {
+impl<'a> Drop for Bsp<'a> {
     fn drop(&mut self) {
         if self.root {
-            unsafe { ffi::TCOD_bsp_delete(self.bsp) }
+            unsafe { ffi::TCOD_bsp_delete(self.bsp as *mut ffi::TCOD_bsp_t) }
         }
     }
 }
@@ -226,6 +257,7 @@ impl Drop for Bsp {
 mod test {
     use super::Bsp;
     use super::TraverseOrder;
+    use bindings::ffi;
 
     #[test]
     #[allow(unused_variables)]
@@ -253,7 +285,7 @@ mod test {
 
     #[test]
     fn split() {
-        let bsp = Bsp::new_with_size(0, 0, 50, 50);
+        let mut bsp = Bsp::new_with_size(0, 0, 50, 50);
 
         assert_eq!(bsp.position, 0);
         assert_eq!(bsp.horizontal(), false);
@@ -265,7 +297,7 @@ mod test {
 
     #[test]
     fn split_recursive() {
-        let bsp = Bsp::new_with_size(0, 0, 100,100);
+        let mut bsp = Bsp::new_with_size(0, 0, 100,100);
         let mut counter = 0;
 
         bsp.split_recursive(None, 2, 5, 5, 1.5, 1.5);
@@ -280,7 +312,7 @@ mod test {
 
     #[test]
     fn children() {
-        let bsp = Bsp::new_with_size(0, 0, 50, 50);
+        let mut bsp = Bsp::new_with_size(0, 0, 50, 50);
 
         assert!(bsp.left().is_none());
         assert_eq!(bsp.level, 0);
@@ -294,7 +326,7 @@ mod test {
 
     #[test]
     fn father() {
-        let bsp = Bsp::new_with_size(0, 0, 50, 50);
+        let mut bsp = Bsp::new_with_size(0, 0, 50, 50);
         assert!(bsp.father().is_none());
 
         bsp.split_once(false, 30);
@@ -304,12 +336,11 @@ mod test {
 
     #[test]
     fn traverse() {
-        let bsp = Bsp::new_with_size(0, 0, 50, 50);
-        let b = bsp.bsp;
+        let mut bsp = Bsp::new_with_size(0, 0, 50, 50);
         let mut counter = 0;
 
         bsp.traverse(TraverseOrder::PreOrder, |node| {
-            assert_eq!(node.bsp, b);
+            assert!(cmp(node, &bsp));
             counter += 1;
             true
         });
@@ -324,10 +355,19 @@ mod test {
         assert_eq!(counter, 3);
     }
 
+    fn cmp(a: &ffi::TCOD_bsp_t, b: &ffi::TCOD_bsp_t) -> bool {
+        a.x == b.x
+            && a.y == b.y
+            && a.w == b.w
+            && a.h == b.h
+            && a.position == b.position
+            && a.level == b.level
+            && a.horizontal == b.horizontal
+    }
+
     #[test]
     fn traverse_orders() {
-        let root = Bsp::new_with_size(0, 0, 100,100);
-        let bsp = root.bsp;
+        let mut root = Bsp::new_with_size(0, 0, 100,100);
         let mut counter = 0;
 
         root.split_recursive(None, 2, 5, 5, 1.5, 1.5);
@@ -341,13 +381,13 @@ mod test {
 
         root.traverse(TraverseOrder::PreOrder, |node| {
             match counter {
-                0 => assert_eq!(node.bsp, bsp),
-                1 => assert_eq!(node.bsp, middle_left.bsp),
-                2 => assert_eq!(node.bsp, leaf1.bsp),
-                3 => assert_eq!(node.bsp, leaf2.bsp),
-                4 => assert_eq!(node.bsp, middle_right.bsp),
-                5 => assert_eq!(node.bsp, leaf3.bsp),
-                6 => assert_eq!(node.bsp, leaf4.bsp),
+                0 => assert!(cmp(node.bsp, root.bsp)),
+                1 => assert!(cmp(node.bsp, middle_left.bsp)),
+                2 => assert!(cmp(node.bsp, leaf1.bsp)),
+                3 => assert!(cmp(node.bsp, leaf2.bsp)),
+                4 => assert!(cmp(node.bsp, middle_right.bsp)),
+                5 => assert!(cmp(node.bsp, leaf3.bsp)),
+                6 => assert!(cmp(node.bsp, leaf4.bsp)),
                 _ => panic!("Wrong number of nodes in the tree"),
             };
             counter += 1;
@@ -357,13 +397,13 @@ mod test {
         counter = 0;
         root.traverse(TraverseOrder::InOrder, |node| {
             match counter {
-                0 => assert_eq!(node.bsp, leaf1.bsp),
-                1 => assert_eq!(node.bsp, middle_left.bsp),
-                2 => assert_eq!(node.bsp, leaf2.bsp),
-                3 => assert_eq!(node.bsp, bsp),
-                4 => assert_eq!(node.bsp, leaf3.bsp),
-                5 => assert_eq!(node.bsp, middle_right.bsp),
-                6 => assert_eq!(node.bsp, leaf4.bsp),
+                0 => assert!(cmp(node.bsp, leaf1.bsp)),
+                1 => assert!(cmp(node.bsp, middle_left.bsp)),
+                2 => assert!(cmp(node.bsp, leaf2.bsp)),
+                3 => assert!(cmp(node.bsp, root.bsp)),
+                4 => assert!(cmp(node.bsp, leaf3.bsp)),
+                5 => assert!(cmp(node.bsp, middle_right.bsp)),
+                6 => assert!(cmp(node.bsp, leaf4.bsp)),
                 _ => panic!("Wrong number of nodes in the tree"),
             };
             counter += 1;
@@ -373,13 +413,13 @@ mod test {
         counter = 0;
         root.traverse(TraverseOrder::PostOrder, |node| {
             match counter {
-                0 => assert_eq!(node.bsp, leaf1.bsp),
-                1 => assert_eq!(node.bsp, leaf2.bsp),
-                2 => assert_eq!(node.bsp, middle_left.bsp),
-                3 => assert_eq!(node.bsp, leaf3.bsp),
-                4 => assert_eq!(node.bsp, leaf4.bsp),
-                5 => assert_eq!(node.bsp, middle_right.bsp),
-                6 => assert_eq!(node.bsp, bsp),
+                0 => assert!(cmp(node.bsp, leaf1.bsp)),
+                1 => assert!(cmp(node.bsp, leaf2.bsp)),
+                2 => assert!(cmp(node.bsp, middle_left.bsp)),
+                3 => assert!(cmp(node.bsp, leaf3.bsp)),
+                4 => assert!(cmp(node.bsp, leaf4.bsp)),
+                5 => assert!(cmp(node.bsp, middle_right.bsp)),
+                6 => assert!(cmp(node.bsp, root.bsp)),
                 _ => panic!("Wrong number of nodes in the tree"),
             };
             counter += 1;
@@ -389,13 +429,13 @@ mod test {
         counter = 0;
         root.traverse(TraverseOrder::LevelOrder, |node| {
             match counter {
-                0 => assert_eq!(node.bsp, bsp),
-                1 => assert_eq!(node.bsp, middle_left.bsp),
-                2 => assert_eq!(node.bsp, middle_right.bsp),
-                3 => assert_eq!(node.bsp, leaf1.bsp),
-                4 => assert_eq!(node.bsp, leaf2.bsp),
-                5 => assert_eq!(node.bsp, leaf3.bsp),
-                6 => assert_eq!(node.bsp, leaf4.bsp),
+                0 => assert!(cmp(node.bsp, root.bsp)),
+                1 => assert!(cmp(node.bsp, middle_left.bsp)),
+                2 => assert!(cmp(node.bsp, middle_right.bsp)),
+                3 => assert!(cmp(node.bsp, leaf1.bsp)),
+                4 => assert!(cmp(node.bsp, leaf2.bsp)),
+                5 => assert!(cmp(node.bsp, leaf3.bsp)),
+                6 => assert!(cmp(node.bsp, leaf4.bsp)),
                 _ => panic!("Wrong number of nodes in the tree"),
             };
             counter += 1;
@@ -405,13 +445,13 @@ mod test {
         counter = 0;
         root.traverse(TraverseOrder::InvertedLevelOrder, |node| {
             match counter {
-                0 => assert_eq!(node.bsp, leaf4.bsp),
-                1 => assert_eq!(node.bsp, leaf3.bsp),
-                2 => assert_eq!(node.bsp, leaf2.bsp),
-                3 => assert_eq!(node.bsp, leaf1.bsp),
-                4 => assert_eq!(node.bsp, middle_right.bsp),
-                5 => assert_eq!(node.bsp, middle_left.bsp),
-                6 => assert_eq!(node.bsp, bsp),
+                0 => assert!(cmp(node.bsp, leaf4.bsp)),
+                1 => assert!(cmp(node.bsp, leaf3.bsp)),
+                2 => assert!(cmp(node.bsp, leaf2.bsp)),
+                3 => assert!(cmp(node.bsp, leaf1.bsp)),
+                4 => assert!(cmp(node.bsp, middle_right.bsp)),
+                5 => assert!(cmp(node.bsp, middle_left.bsp)),
+                6 => assert!(cmp(node.bsp, root.bsp)),
                 _ => panic!("Wrong number of nodes in the tree"),
             };
             counter += 1;
@@ -421,7 +461,7 @@ mod test {
 
     #[test]
     fn break_traverse() {
-        let bsp = Bsp::new_with_size(0, 0, 100,100);
+        let mut bsp = Bsp::new_with_size(0, 0, 100,100);
         let mut counter = 0;
 
         bsp.split_recursive(None, 2, 5, 5, 1.5, 1.5);

@@ -1682,10 +1682,10 @@ extern "C" {
                                   w: ::libc::c_int, h: ::libc::c_int)
      -> *mut TCOD_bsp_t;
     pub fn TCOD_bsp_delete(node: *mut TCOD_bsp_t);
-    pub fn TCOD_bsp_left(node: *mut TCOD_bsp_t) -> *mut TCOD_bsp_t;
-    pub fn TCOD_bsp_right(node: *mut TCOD_bsp_t) -> *mut TCOD_bsp_t;
-    pub fn TCOD_bsp_father(node: *mut TCOD_bsp_t) -> *mut TCOD_bsp_t;
-    pub fn TCOD_bsp_is_leaf(node: *mut TCOD_bsp_t) -> _bool;
+    pub fn TCOD_bsp_left(node: *const TCOD_bsp_t) -> *mut TCOD_bsp_t;
+    pub fn TCOD_bsp_right(node: *const TCOD_bsp_t) -> *mut TCOD_bsp_t;
+    pub fn TCOD_bsp_father(node: *const TCOD_bsp_t) -> *mut TCOD_bsp_t;
+    pub fn TCOD_bsp_is_leaf(node: *const TCOD_bsp_t) -> _bool;
     pub fn TCOD_bsp_traverse_pre_order(node: *mut TCOD_bsp_t,
                                        listener: TCOD_bsp_callback_t,
                                        userData: *mut ::libc::c_void)
@@ -1707,9 +1707,9 @@ extern "C" {
                                                   userData:
                                                       *mut ::libc::c_void)
      -> _bool;
-    pub fn TCOD_bsp_contains(node: *mut TCOD_bsp_t, x: ::libc::c_int,
+    pub fn TCOD_bsp_contains(node: *const TCOD_bsp_t, x: ::libc::c_int,
                              y: ::libc::c_int) -> _bool;
-    pub fn TCOD_bsp_find_node(node: *mut TCOD_bsp_t, x: ::libc::c_int,
+    pub fn TCOD_bsp_find_node(node: *const TCOD_bsp_t, x: ::libc::c_int,
                               y: ::libc::c_int) -> *mut TCOD_bsp_t;
     pub fn TCOD_bsp_resize(node: *mut TCOD_bsp_t, x: ::libc::c_int,
                            y: ::libc::c_int, w: ::libc::c_int,
