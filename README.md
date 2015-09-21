@@ -195,7 +195,7 @@ bindgen -builtins -l tcod include/libtcod.h -o src/ffi.rs
 * Jonny Gilchrist, @jgilchrist
 * LaylConway <laylconway@live.com>
 * Moredread <code@andre-bubel.de>
-* Nikita Pekin <contact@nikitapek.in>
+* Nikita Pekin
 * Paul Sanford, @pmsanford, <me@paulsanford.net>
 * Pranz, <jesper.fridefors@gmail.com>
 * Tomas Sedovic, @tomassedovic, <tomas@sedovic.cz>
