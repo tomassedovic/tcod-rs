@@ -471,4 +471,17 @@ mod test {
         });
         assert_eq!(counter, 1);
     }
+
+    #[test]
+    fn safe_tree_pointer() {
+        let mut bsp1 = Bsp::new_with_size(0, 0, 100,100);
+        bsp1.split_recursive(None, 2, 5, 5, 1.5, 1.5);
+        let mut bsp2 = Bsp::new_with_size(0, 0, 100,100);
+        bsp2.split_recursive(None, 2, 5, 5, 1.5, 1.5);
+
+        unsafe {
+            assert!(bsp1.left().unwrap().tree().father != bsp2.left().unwrap().tree().father);
+            assert!(bsp1.left().unwrap().tree().father == bsp1.right().unwrap().tree().father);
+        }
+    }
 }

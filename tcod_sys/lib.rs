@@ -484,7 +484,7 @@ pub struct Struct_Unnamed23 {
 }
 impl ::std::clone::Clone for Struct_Unnamed23 {
     fn clone(&self) -> Struct_Unnamed23 {
-        *self 
+        *self
     }
 }
 impl ::std::default::Default for Struct_Unnamed23 {
@@ -598,7 +598,7 @@ pub struct Struct_Unnamed26 {
 }
 impl Clone for Struct_Unnamed26 {
     fn clone(&self) -> Struct_Unnamed26 {
-        *self 
+        *self
     }
 }
 impl ::std::default::Default for Struct_Unnamed26 {
@@ -652,7 +652,7 @@ pub type TCOD_tree_t = Struct__TCOD_tree_t;
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct Struct_Unnamed29 {
-    pub tree: TCOD_tree_t,
+    tree: TCOD_tree_t,
     pub x: ::libc::c_int,
     pub y: ::libc::c_int,
     pub w: ::libc::c_int,
@@ -663,6 +663,11 @@ pub struct Struct_Unnamed29 {
 }
 impl ::std::default::Default for Struct_Unnamed29 {
     fn default() -> Struct_Unnamed29 { unsafe { ::std::mem::zeroed() } }
+}
+impl Struct_Unnamed29 {
+    pub unsafe fn tree(&mut self) -> &mut TCOD_tree_t {
+        &mut self.tree
+    }
 }
 pub type TCOD_bsp_t = Struct_Unnamed29;
 pub type TCOD_bsp_callback_t =
