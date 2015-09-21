@@ -58,6 +58,7 @@ yet complete, however.
 * _Image toolkit_
 * _Line toolkit_
 * _Noise_
+* _BSP toolkit_
 
 ### Probably Won't Ever Be Implemented Because Rust Provides This Already
 * Filesystem utilities
@@ -198,6 +199,7 @@ bindgen -builtins -l tcod include/libtcod.h -o src/ffi.rs
 * Paul Sanford, @pmsanford, <me@paulsanford.net>
 * Pranz, <jesper.fridefors@gmail.com>
 * Tomas Sedovic, @tomassedovic, <tomas@sedovic.cz>
+* Tomasz Barański, <yubizume@gmail.com>
 
 
 ### License

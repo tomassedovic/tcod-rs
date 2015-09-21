@@ -15,10 +15,12 @@ use tcod::namegen::Namegen;
 use tcod::line::Line;
 use tcod::noise::{Noise, NoiseType, DEFAULT_HURST, DEFAULT_LACUNARITY, MAX_OCTAVES};
 use tcod::image::{Image, blit_2x};
+use tcod::bsp::{Bsp, TraverseOrder};
 use rand::Rng;
 use rand::ThreadRng;
 use std::char::from_u32;
 use std::fs::read_dir;
+use std::cmp::{min, max};
 
 const SAMPLE_SCREEN_WIDTH : i32 = 46;
 const SAMPLE_SCREEN_HEIGHT : i32 = 20;
@@ -994,6 +996,276 @@ impl<'a> Render for PathSample<'a> {
     }
 }
 
+type CharMap = [[char; SAMPLE_SCREEN_WIDTH as usize]; SAMPLE_SCREEN_HEIGHT as usize];
+
+struct BspSample<'a> {
+    bsp: Bsp<'a>,
+    generate: bool,
+    refresh: bool,
+    map: CharMap,
+    dark_wall: colors::Color,
+    dark_ground: colors::Color,
+    bsp_depth: i32,
+    min_room_size: i32,
+    random_room: bool,
+    room_walls: bool,
+}
+
+fn random_val(mut low: i32, high: i32) -> i32 {
+    let mut rnd = rand::thread_rng();
+
+    if low >= high { low -= 1 }
+    rnd.gen_range(low, high)
+}
+
+impl<'a> BspSample<'a> {
+    fn new() -> Self {
+        BspSample {
+            bsp: Bsp::new_with_size(0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
+            generate: true,
+            refresh: false,
+            map: [['#'; SAMPLE_SCREEN_WIDTH as usize]; SAMPLE_SCREEN_HEIGHT as usize],
+            dark_wall: colors::Color::new(0, 0, 100),
+            dark_ground: colors::Color::new(50, 50, 150),
+            bsp_depth: 8,
+            min_room_size: 4,
+            random_room: false,
+            room_walls: true,
+        }
+    }
+
+    fn rebuild(&mut self) {
+        self.bsp.resize(0, 0, SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT);
+        for row in &mut self.map {
+            for item in &mut row.iter_mut() {
+                *item = '#';
+            }
+        }
+        if self.generate {
+            self.bsp.remove_sons();
+            let rw = if self.room_walls { 1 } else { 0 };
+            self.bsp.split_recursive(None,
+                                     self.bsp_depth,
+                                     self.min_room_size + rw,
+                                     self.min_room_size + rw,
+                                     1.5, 1.5);
+        }
+        let mut map = self.map;
+        self.bsp.traverse(TraverseOrder::InvertedLevelOrder,
+                          |mut node| self.visit(&mut node, &mut map));
+        self.map = map;
+        self.generate = false;
+        self.refresh  = false;
+    }
+
+    fn visit(&self, node: &mut Bsp, map: &mut CharMap) -> bool {
+        if node.is_leaf() {
+            self.visit_leaf(node, map);
+        } else {
+            self.visit_node(node, map);
+        }
+        true
+    }
+
+    fn visit_leaf(&self, node: &mut Bsp, map: &mut CharMap) {
+        let mut min_x = node.x + 1;
+        let mut max_x = node.x + node.w - 1;
+        let mut min_y = node.y + 1;
+        let mut max_y = node.y + node.h - 1;
+
+        if !self.room_walls {
+            if min_x > 1 { min_x -= 1 }
+            if min_y > 1 { min_y -= 1 }
+        }
+        if max_x == SAMPLE_SCREEN_WIDTH - 1  { max_x -= 1}
+        if max_y == SAMPLE_SCREEN_HEIGHT - 1 { max_y -= 1}
+        if self.random_room {
+            min_x = random_val(min_x, max_x - self.min_room_size + 2);
+            min_y = random_val(min_y, max_y - self.min_room_size + 2);
+            max_x = random_val(min_x + self.min_room_size - 1, max_x + 1);
+            max_y = random_val(min_y + self.min_room_size - 1, max_y + 1);
+        }
+
+        node.x = min_x;
+        node.y = min_y;
+        node.w = max_x - min_x + 1;
+        node.h = max_y - min_y + 1;
+
+        for x in min_x..(max_x+1) {
+            for y in min_y..(max_y+1) {
+                map[y as usize][x as usize] = ' ';
+            }
+        }
+    }
+
+    fn visit_node(&self, node: &mut Bsp, map: &mut CharMap) {
+        let left = node.left().unwrap();
+        let right = node.right().unwrap();
+
+        node.x = min(left.x, right.x);
+        node.y = min(left.y, right.y);
+        node.w = max(left.x + left.w, right.x + right.w) - node.x;
+        node.h = max(left.y + left.h, right.y + right.h) - node.y;
+
+        if node.horizontal() {
+            // vertical corridor
+            if left.x + left.w - 1 < right.x || right.x + right.w - 1 < left.x {
+                // no overlap
+                let x1 = random_val(left.x, left.x + left.w);
+                let x2 = random_val(right.x, right.x + right.w);
+                let y  = random_val(left.y + left.h, right.y + 1);
+                self.vline_up(map, x1, y - 1);
+                self.hline(map, x1, y, x2);
+                self.vline_down(map, x2, y + 1);
+            } else {
+                // straight vertical corridor
+                let min_x = max(left.x, right.x);
+                let max_x = min(left.x + left.w - 1, right.x + right.w - 1);
+                let x = random_val(min_x, max_x + 1);
+                self.vline_down(map, x, right.y);
+                self.vline_up(map, x, right.y - 1);
+            }
+        } else {
+            // horizontal corridor
+            if left.y + left.h - 1 < right.y || right.y + right.h - 1 < left.y {
+                let y1 = random_val(left.y, left.y + left.h);
+                let y2 = random_val(right.y, right.y + right.h);
+                let x  = random_val(left.x + left.w, right.x + 1);
+                self.hline_left(map, x-1, y1);
+                self.vline(map, x, y1, y2);
+                self.hline_right(map, x+1, y2);
+            } else {
+                let min_y = max(left.y, right.y);
+                let max_y = min(left.y + left.h - 1, right.y + right.h - 1);
+                let y = random_val(min_y, max_y + 1);
+                self.hline_left(map, right.x - 1, y);
+                self.hline_right(map, right.x, y);
+            }
+        }
+    }
+
+    fn vline_up(&self, map: &mut CharMap, x: i32, mut y: i32) {
+        while y >= 0 && map[y as usize][x as usize] != ' ' {
+            map[y as usize][x as usize] = ' ';
+            y -= 1;
+        }
+    }
+
+    fn vline_down(&self, map: &mut CharMap, x: i32, mut y: i32) {
+        while y < SAMPLE_SCREEN_HEIGHT && map[y as usize][x as usize] != ' ' {
+            map[y as usize][x as usize] = ' ';
+            y += 1;
+        }
+    }
+
+    fn vline(&self, map: &mut CharMap, x: i32, y1: i32, y2: i32) {
+        let mut y = y1;
+        let dy = if y1 > y2 { -1 } else { 1 };
+        map[y as usize][x as usize] = ' ';
+        if y1 == y2 { return }
+        loop {
+            y += dy;
+            map[y as usize][x as usize] = ' ';
+            if y as i32 == y2 { break }
+        }
+    }
+
+    fn hline(&self, map: &mut CharMap, x1: i32, y: i32, x2: i32) {
+        let mut x = x1;
+        let dx = if x1 > x2 { -1 } else { 1 };
+        map[y as usize][x as usize] = ' ';
+        if x1 == x2 { return };
+        loop {
+            x += dx;
+            map[y as usize][x as usize] = ' ';
+            if x as i32 == x2 { break }
+        }
+    }
+
+    fn hline_left(&self, map: &mut CharMap, mut x: i32, y: i32) {
+        while x >= 0 && map[y as usize][x as usize] != ' ' {
+            map[y as usize][x as usize] = ' ';
+            x -= 1;
+        }
+    }
+
+    fn hline_right(&self, map: &mut CharMap, mut x: i32, y: i32) {
+        while x < SAMPLE_SCREEN_WIDTH && map[y as usize][x as usize] != ' ' {
+            map[y as usize][x as usize] = ' ';
+            x += 1;
+        }
+    }
+}
+
+impl<'a> Render for BspSample<'a> {
+    fn initialize(&mut self, _console: &mut Offscreen) {
+    }
+
+    fn render(&mut self, console: &mut Offscreen, _root: &Root,
+              event: Option<(EventFlags, Event)>) {
+        if self.generate || self.refresh {
+            self.rebuild()
+        }
+
+        console.clear();
+        console.set_default_foreground(colors::WHITE);
+        console.print(1, 1, format!("ENTER : rebuild bsp\nSPACE : rebuild dungeon\n+-: bsp depth {}\n*/: room size {}\n1 : random room size {}",
+                                    self.bsp_depth,
+                                    self.min_room_size,
+                                    if self.random_room { "ON" } else { "OFF" }));
+        if self.random_room {
+            console.print(1, 6, format!("2 : room walls {}",
+                                        if self.room_walls { "ON" } else { "OFF" }));
+        }
+
+        for x in 0..SAMPLE_SCREEN_WIDTH {
+            for y in 0..SAMPLE_SCREEN_HEIGHT {
+                let wall = self.map[y as usize][x as usize] == '#';
+                console.set_char_background(x, y,
+                                            if wall { self.dark_wall } else {self.dark_ground },
+                                            BackgroundFlag::Set);
+            }
+        }
+
+        if let Some((_, Event::Key(key))) = event {
+            match key {
+                Key { code: KeyCode::Enter, .. } | Key { code: KeyCode::NumPadEnter, ..} =>
+                    self.generate = true,
+                Key { code: KeyCode::Spacebar, .. } =>
+                    self.refresh = true,
+                Key { printable: '+', .. } => {
+                    self.bsp_depth += 1;
+                    self.generate = true
+                },
+                Key { printable: '-', .. } if self.bsp_depth > 1 => {
+                    self.bsp_depth -= 1;
+                    self.generate = true
+                },
+                Key { printable: '*', .. } => {
+                    self.min_room_size += 1;
+                    self.generate = true
+                },
+                Key { printable: '/', .. } if self.min_room_size > 2 => {
+                    self.min_room_size -= 1;
+                    self.generate = true
+                },
+                Key { printable: '1', .. } | Key { code: KeyCode::Number1, .. } |
+                Key { code: KeyCode::NumPad1, .. } => {
+                    self.random_room = !self.random_room;
+                    if !self.random_room { self.room_walls = true }
+                    self.refresh = true
+                },
+                Key { printable: '2', .. } | Key { code: KeyCode::Number2, .. } |
+                Key { code: KeyCode::NumPad2, .. } => {
+                    self.room_walls = !self.room_walls;
+                    self.refresh = true
+                },
+                _ => { /* ignore */ }
+            }
+        }
+    }
+}
+
 struct ImageSample {
     img: image::Image,
     circle: image::Image,
@@ -1301,13 +1573,14 @@ fn main() {
     let mut names = NameSample::new();
     let mut line = LineSample::new();
     let mut noise = NoiseSample::new();
+    let mut bsp = BspSample::new();
     let mut samples = vec![MenuItem::new("  True colors      ", &mut colors),
                            MenuItem::new("  Offscreen console", &mut offscreen),
                            MenuItem::new("  Line drawing     ", &mut line),
                            MenuItem::new("  Noise            ", &mut noise),
                            MenuItem::new("  Field of view    ", &mut fov),
                            MenuItem::new("  Path finding     ", &mut path_sample),
-                           // MenuItem::new("  Bsp toolkit      ", &mut ),
+                           MenuItem::new("  Bsp toolkit      ", &mut bsp),
                            MenuItem::new("  Image toolkit    ", &mut image_sample),
                            MenuItem::new("  Mouse support    ", &mut mouse),
                            MenuItem::new("  Name generator   ", &mut names),

@@ -484,7 +484,7 @@ pub struct Struct_Unnamed23 {
 }
 impl ::std::clone::Clone for Struct_Unnamed23 {
     fn clone(&self) -> Struct_Unnamed23 {
-        *self 
+        *self
     }
 }
 impl ::std::default::Default for Struct_Unnamed23 {
@@ -598,7 +598,7 @@ pub struct Struct_Unnamed26 {
 }
 impl Clone for Struct_Unnamed26 {
     fn clone(&self) -> Struct_Unnamed26 {
-        *self 
+        *self
     }
 }
 impl ::std::default::Default for Struct_Unnamed26 {
@@ -652,7 +652,7 @@ pub type TCOD_tree_t = Struct__TCOD_tree_t;
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct Struct_Unnamed29 {
-    pub tree: TCOD_tree_t,
+    tree: TCOD_tree_t,
     pub x: ::libc::c_int,
     pub y: ::libc::c_int,
     pub w: ::libc::c_int,
@@ -663,6 +663,11 @@ pub struct Struct_Unnamed29 {
 }
 impl ::std::default::Default for Struct_Unnamed29 {
     fn default() -> Struct_Unnamed29 { unsafe { ::std::mem::zeroed() } }
+}
+impl Struct_Unnamed29 {
+    pub unsafe fn tree(&mut self) -> &mut TCOD_tree_t {
+        &mut self.tree
+    }
 }
 pub type TCOD_bsp_t = Struct_Unnamed29;
 pub type TCOD_bsp_callback_t =
@@ -1682,10 +1687,10 @@ extern "C" {
                                   w: ::libc::c_int, h: ::libc::c_int)
      -> *mut TCOD_bsp_t;
     pub fn TCOD_bsp_delete(node: *mut TCOD_bsp_t);
-    pub fn TCOD_bsp_left(node: *mut TCOD_bsp_t) -> *mut TCOD_bsp_t;
-    pub fn TCOD_bsp_right(node: *mut TCOD_bsp_t) -> *mut TCOD_bsp_t;
-    pub fn TCOD_bsp_father(node: *mut TCOD_bsp_t) -> *mut TCOD_bsp_t;
-    pub fn TCOD_bsp_is_leaf(node: *mut TCOD_bsp_t) -> _bool;
+    pub fn TCOD_bsp_left(node: *const TCOD_bsp_t) -> *mut TCOD_bsp_t;
+    pub fn TCOD_bsp_right(node: *const TCOD_bsp_t) -> *mut TCOD_bsp_t;
+    pub fn TCOD_bsp_father(node: *const TCOD_bsp_t) -> *mut TCOD_bsp_t;
+    pub fn TCOD_bsp_is_leaf(node: *const TCOD_bsp_t) -> _bool;
     pub fn TCOD_bsp_traverse_pre_order(node: *mut TCOD_bsp_t,
                                        listener: TCOD_bsp_callback_t,
                                        userData: *mut ::libc::c_void)
@@ -1707,9 +1712,9 @@ extern "C" {
                                                   userData:
                                                       *mut ::libc::c_void)
      -> _bool;
-    pub fn TCOD_bsp_contains(node: *mut TCOD_bsp_t, x: ::libc::c_int,
+    pub fn TCOD_bsp_contains(node: *const TCOD_bsp_t, x: ::libc::c_int,
                              y: ::libc::c_int) -> _bool;
-    pub fn TCOD_bsp_find_node(node: *mut TCOD_bsp_t, x: ::libc::c_int,
+    pub fn TCOD_bsp_find_node(node: *const TCOD_bsp_t, x: ::libc::c_int,
                               y: ::libc::c_int) -> *mut TCOD_bsp_t;
     pub fn TCOD_bsp_resize(node: *mut TCOD_bsp_t, x: ::libc::c_int,
                            y: ::libc::c_int, w: ::libc::c_int,
