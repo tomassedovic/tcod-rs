@@ -29,7 +29,6 @@ path = "src/lib.rs"
 [dependencies]
 bitflags = "0.1"
 libc = "0.1"
-time = "0.1"
 lazy_static = "0.1"
 rustc-serialize = { optional = true, version = "0.3" }
 serde = { optional = true, version = "0.6" }

@@ -21,6 +21,7 @@ use rand::ThreadRng;
 use std::char::from_u32;
 use std::fs::read_dir;
 use std::cmp::{min, max};
+use std::time::Duration;
 
 const SAMPLE_SCREEN_WIDTH : i32 = 46;
 const SAMPLE_SCREEN_HEIGHT : i32 = 20;
@@ -284,6 +285,10 @@ impl LineSample {
     }
 }
 
+fn seconds_from_duration(duration: Duration) -> f32 {
+    duration.as_secs() as f32 + (duration.subsec_nanos() as f32 / 1_000_000_000.0)
+}
+
 impl Render for LineSample {
     fn initialize(&mut self, console: &mut Offscreen) {
         system::set_fps(30);
@@ -294,7 +299,7 @@ impl Render for LineSample {
               console: &mut Offscreen,
               _root: &Root,
               event: Option<(EventFlags, Event)>) {
-        let elapsed_seconds: f32 = (system::get_elapsed_time().num_milliseconds() as f32) / 1000.0;
+        let elapsed_seconds = seconds_from_duration(system::get_elapsed_time());
         let flag_byte = self.bk_flag as i32 & 0xff;
         if flag_byte == BackgroundFlag::Alph as i32 {
             self.set_alpha(elapsed_seconds, BackgroundFlag::Alph);
@@ -1302,13 +1307,15 @@ impl Render for ImageSample {
         console.set_default_background(colors::BLACK);
         console.clear();
 
-        let elapsed_seconds: f32 = (system::get_elapsed_time().num_milliseconds() as f32) / 1000.0;
+        let elapsed_seconds = seconds_from_duration(system::get_elapsed_time());
         let x = (SAMPLE_SCREEN_WIDTH/2) as f32 + (elapsed_seconds as f32).cos() * 10.0;
         let y = (SAMPLE_SCREEN_HEIGHT/2) as f32;
         let scale_x = 0.2 + 1.8 * (1.0 + (elapsed_seconds / 2.0).cos()) / 2.0;
         let scale_y = scale_x;
         let angle = elapsed_seconds;
-        let elapsed = system::get_elapsed_time().num_milliseconds() / 2000;
+        let duration = system::get_elapsed_time();
+        let elapsed_milliseconds = duration.as_secs() as u32 * 1000 + duration.subsec_nanos() / 1_000_000;
+        let elapsed = elapsed_milliseconds / 2000;
 
         if elapsed % 2 != 0 {
             // split the color channels of circle.png
@@ -1679,10 +1686,11 @@ fn print_help_message(root: &mut Root) {
                           system::get_fps()));
 
     let time = system::get_elapsed_time();
+    let millis = time.as_secs() as u32 * 1000 + time.subsec_nanos() / 1_000_000;
     root.print_ex(79, 47, BackgroundFlag::None, TextAlignment::Right,
                   format!("elapsed {:8}ms {:4.2}s",
-                          time.num_milliseconds(),
-                          time.num_milliseconds() as f32/ 1000.0));
+                          millis,
+                          millis as f32/ 1000.0));
 
     root.print(2, 47, format!("{}{} : select a sample",
                               chars::ARROW_N, chars::ARROW_S));

@@ -1,13 +1,10 @@
-extern crate time;
-
 use std::str;
 use std::ptr;
+use std::time::Duration;
 
 use std::ffi::{CStr, CString};
 use std::path::Path;
 use bindings::ffi;
-
-use self::time::Duration;
 
 pub fn set_fps(fps: i32) {
     assert!(fps >= 0);
@@ -31,8 +28,9 @@ pub fn get_last_frame_length() -> f32 {
 }
 
 pub fn sleep(time: Duration) {
+    let duration_ms = (time.as_secs() * 1000) as u32 + (time.subsec_nanos() / 1_000_000);
     unsafe {
-        ffi::TCOD_sys_sleep_milli(time.num_milliseconds() as u32);
+        ffi::TCOD_sys_sleep_milli(duration_ms);
     }
 }
 
@@ -40,7 +38,7 @@ pub fn get_elapsed_time() -> Duration {
     let ms: u32 = unsafe {
         ffi::TCOD_sys_elapsed_milli()
     };
-    Duration::milliseconds(ms as i64)
+    Duration::from_millis(ms as u64)
 }
 
 pub fn save_screenshot<P>(path: P) where P: AsRef<Path> {
