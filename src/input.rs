@@ -100,19 +100,19 @@ pub struct Key {
     pub ctrl: bool,
 }
 
-impl Into<Key> for ffi::TCOD_key_t {
-    fn into(self) -> Key {
+impl From<ffi::TCOD_key_t> for Key {
+    fn from(tcod_key: ffi::TCOD_key_t) -> Key {
         Key {
-            code: keycode_from_u32(self.vk).unwrap(),
-            printable: self.c as u8 as char,
-            pressed: self.pressed != 0,
-            left_alt: self.lalt != 0,
-            left_ctrl: self.lctrl != 0,
-            right_alt: self.ralt != 0,
-            right_ctrl: self.rctrl != 0,
-            shift: self.shift != 0,
-            alt: self.lalt != 0 || self.ralt != 0,
-            ctrl: self.lctrl != 0 || self.rctrl != 0,
+            code: keycode_from_u32(tcod_key.vk).unwrap(),
+            printable: tcod_key.c as u8 as char,
+            pressed: tcod_key.pressed != 0,
+            left_alt: tcod_key.lalt != 0,
+            left_ctrl: tcod_key.lctrl != 0,
+            right_alt: tcod_key.ralt != 0,
+            right_ctrl: tcod_key.rctrl != 0,
+            shift: tcod_key.shift != 0,
+            alt: tcod_key.lalt != 0 || tcod_key.ralt != 0,
+            ctrl: tcod_key.lctrl != 0 || tcod_key.rctrl != 0,
         }
     }
 }

@@ -23,7 +23,7 @@ impl Drop for Namegen {
             let _lock = NAMEGEN_MUTEX.lock()
                 .ok()
                 .expect("Namegen mutex could not be locked");
-            if self.rng.len() > 0 {
+            if self.rng.is_empty() {
                 ffi::TCOD_namegen_destroy();
             }
             NAMEGEN_FREE = true;
