@@ -476,14 +476,14 @@ impl<'a> RootInitializer<'a> {
 
         match self.font_dimensions {
             (horizontal, vertical) => {
-                Root::set_custom_font(self.font_path.as_ref(),
+                Root::set_custom_font((*self.font_path).as_ref(),
                                       self.font_layout, self.font_type,
                                       horizontal, vertical)
             }
         }
 
         unsafe {
-            let c_title = CString::new(self.title.as_ref().as_bytes()).unwrap();
+            let c_title = CString::new((*self.title).as_ref().as_bytes()).unwrap();
             ffi::TCOD_console_init_root(self.width, self.height,
                                         c_title.as_ptr(),
                                         self.is_fullscreen as c_bool,
