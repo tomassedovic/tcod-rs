@@ -8,6 +8,9 @@ repository = "https://github.com/tomassedovic/tcod-rs/tree/master/tcod-sys"
 authors = ["tomas@sedovic.cz"]
 links = "tcod"
 build = "build.rs"
+exclude = [
+    "libtcod/lib/libz.a"
+]
 
 [lib]
 name = "tcod_sys"
