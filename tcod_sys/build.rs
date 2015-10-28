@@ -3,6 +3,12 @@ use std::path::Path;
 use std::process::Command;
 
 fn main() {
+    let is_crater = option_env!("CRATER_TASK_TYPE");
+
+    if is_crater.is_some() {
+        return;
+    }
+
     let src_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let dst_dir = env::var("OUT_DIR").unwrap();
 
