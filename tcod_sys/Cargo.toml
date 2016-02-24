@@ -18,3 +18,7 @@ path = "lib.rs"
 
 [dependencies]
 libc = "0.1"
+
+[build-dependencies]
+gcc = "0.3"
+pkg-config = "0.3"
