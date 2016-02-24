@@ -84,7 +84,7 @@ To use `tcod-rs`, add this to your game's `Cargo.toml`:
 
 ```toml
 [dependencies]
-tcod = "0.8"
+tcod = "0.9"
 ```
 
 ### Building on Linux
