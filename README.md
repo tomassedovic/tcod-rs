@@ -94,8 +94,8 @@ Run the equivalent of:
 ```sh
 $ sudo apt-get install gcc g++ make libsdl1.2-dev
 $ cd yourgame
-$ cargo build
-$ cargo run
+$ cargo build --release
+$ cargo run --release
 ```
 
 on your distro.
@@ -103,23 +103,35 @@ on your distro.
 You can also check the [official libtcod build instructions for Linux](http://roguecentral.org/doryen/data/libtcod/doc/1.5.2/html2/compile_libtcod_linux.html?c=true).
 
 
+### Building on Windows (with MSVC)
+
+Make sure you have Visual Studio 2013 or later **with the C++ tools
+option** installed. You also need the "MSVC ABI" version of the Rust
+compiler (as opposed to the "GNU ABI" one).
+
+Then, set up the compilation environment, make sure Rust is in your
+`PATH` and run Cargo:
+
+```
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat amd64
+set PATH=%PATH%;C:\Program Files (x86)\Rust\bin
+cd yourgame
+cargo build --release
+cargo run --release
+```
+
+
 ### Building on Windows (with MinGW)
 
-The Windows version of `libtcod` relies on MinGW and MSYS so you have to install
-them:
+You have to [download and install MinGW](http://www.mingw.org/). Then,
+add Rust's and MinGW's bin directories to your path and compile your
+game:
 
-1. [Download and run MinGW](http://sourceforge.net/projects/mingw/files/)
-2. In the MinGW installer, mark the following sections for installation:
-   * C compiler (gcc)
-   * C++ compiler (g++)
-   * MSYS Basic System
-3. Open the Command prompt (cmd.exe)
-4. Run:
-
-```sh
+```
+set PATH=%PATH%;C:\Program Files (x86)\Rust\bin;C:\MinGW\bin
 cd yourgame
-cargo build
-cargo run
+cargo build --release
+cargo run --release
 ```
 
 You can also check the [official libtcod build instructions for Windows](http://roguecentral.org/doryen/data/libtcod/doc/1.5.2/html2/compile_libtcod_mingw.html?c=true).
@@ -131,10 +143,10 @@ You can also check the [official libtcod build instructions for Windows](http://
 2. Run:
 
 ```sh
-$ brew install sdl wget
+$ brew install sdl
 $ cd yourgame
-$ cargo build
-$ cargo run
+$ cargo build --release
+$ cargo run --release
 ```
 
 This is based on the instructions from [Jared McFarland's roguelike tutorial](http://jaredonline.svbtle.com/roguelike-tutorial-in-rust-part-1).
