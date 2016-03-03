@@ -524,7 +524,7 @@ impl<'a> TcodString for &'a String {
     }
 }
 
-trait AsciiLiteral {}
+pub trait AsciiLiteral {}
 impl AsciiLiteral for [u8] {}
 
 // AsciiLiteral is implemented for fixed-size arrays up to length 32, same as the current
