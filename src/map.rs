@@ -28,6 +28,8 @@ impl Map {
 
     pub fn set(&mut self, x: i32, y: i32, transparent: bool, walkable: bool) {
         assert!(x >= 0 && y >= 0);
+        let (width, height) = self.size();
+        assert!(x < width && y < height);
         unsafe {
             ffi::TCOD_map_set_properties(self.tcod_map, x, y,
                                          transparent as c_bool,
@@ -47,6 +49,8 @@ impl Map {
 
     pub fn is_in_fov(&self, x: i32, y: i32) -> bool {
         assert!(x >= 0 && y >= 0);
+        let (width, height) = self.size();
+        assert!(x < width && y < height);
         unsafe {
             ffi::TCOD_map_is_in_fov(self.tcod_map, x, y) != 0
         }
@@ -54,6 +58,8 @@ impl Map {
 
     pub fn is_walkable(&self, x: i32, y: i32) -> bool {
         assert!(x >= 0 && y >= 0);
+        let (width, height) = self.size();
+        assert!(x < width && y < height);
         unsafe {
             ffi::TCOD_map_is_walkable(self.tcod_map, x, y) != 0
         }
