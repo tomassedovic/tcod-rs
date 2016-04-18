@@ -1,5 +1,6 @@
+pub extern crate tcod_sys as ffi;
+
 extern crate libc;
-extern crate tcod_sys as ffi;
 
 pub use std::ffi::CString;
 pub use self::libc::{c_char, c_int, c_float, c_uint, c_void, uint8_t};
