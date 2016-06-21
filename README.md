@@ -1,6 +1,8 @@
 libtcod bindings for Rust [![Build Status](https://travis-ci.org/tomassedovic/tcod-rs.svg?branch=master)](https://travis-ci.org/tomassedovic/tcod-rs)
 -------------------------
 
+test
+
 [libtcod a.k.a. "The Doryen Library"](http://roguecentral.org/doryen/libtcod/)
 is a smallish library designed for writing roguelikes. It provides a bunch of
 useful functionality such as:
