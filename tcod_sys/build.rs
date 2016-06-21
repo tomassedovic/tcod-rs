@@ -208,7 +208,7 @@ fn main() {
         compile_config(config);
         assert!(dst.join("libtcod.dll").is_file());
 
-        println!("cargo:rustc-link-lib=dylib={}", "SDL.dll");
+        println!("cargo:rustc-link-lib=dylib={}", "SDL");
         println!("cargo:rustc-link-lib=dylib={}", "opengl32");
         println!("cargo:rustc-link-search=native={}", sdl_lib_dir.display());
         println!("cargo:rustc-link-search=native={}", dst.display());
