@@ -894,8 +894,12 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
             width: i32, height: i32,
             clear: bool,
             background_flag: BackgroundFlag) {
-        assert!(x >= 0 && y >= 0 && width >= 0 && height >= 0);
-        assert!(x + width < self.width() && y + height < self.height());
+        assert!(x >= 0);
+        assert!(y >= 0);
+        assert!(width >= 0);
+        assert!(height >= 0);
+        assert!(x + width <= self.width());
+        assert!(y + height <= self.height());
         unsafe {
             ffi::TCOD_console_rect(*self.as_native(), x, y, width, height, clear as c_bool, background_flag as u32);
         }
