@@ -143,7 +143,7 @@ You can also check the [official libtcod build instructions for Windows](http://
 2. Run:
 
 ```sh
-$ brew install sdl
+$ brew install pkg-config sdl
 $ cd yourgame
 $ cargo build --release
 $ cargo run --release
