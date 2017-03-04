@@ -64,12 +64,6 @@ impl Map {
             ffi::TCOD_map_is_walkable(self.tcod_map, x, y) != 0
         }
     }
-    
-    pub fn clear(&mut self, transparent: bool, walkable: bool) {
-        unsafe {
-            ffi::TCOD_map_clear(self.tcod_map, transparent as c_bool, walkable as c_bool);
-        }
-    }
 }
 
 impl Drop for Map {
