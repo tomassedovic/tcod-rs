@@ -3,7 +3,7 @@ extern crate pkg_config;
 
 use std::env;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 
 fn build_libtcod_objects(mut config: gcc::Config, sources: &[&str]) {
@@ -68,7 +68,6 @@ fn main() {
 	    "libtcod/src/zlib/gzread.c",
 	    "libtcod/src/zlib/gzwrite.c",
     ];
-    gcc::compile_library("libz.a", libz_sources);
 
     let libtcod_sources = &[
  	    "libtcod/src/bresenham_c.c",
@@ -103,6 +102,8 @@ fn main() {
     ];
 
     if target.contains("linux") {
+        gcc::compile_library("libz.a", libz_sources);
+
         // Build the *.o files:
         {
             let mut config = gcc::Config::new();
@@ -136,6 +137,8 @@ fn main() {
         pkg_config::find_library("x11").unwrap();
 
     } else if target.contains("darwin") {
+        gcc::compile_library("libz.a", libz_sources);
+
         // Build the *.o files
         {
             let mut config = gcc::Config::new();
@@ -175,6 +178,8 @@ fn main() {
         assert!(sdl_lib_dir.is_dir());
         assert!(sdl_include_dir.is_dir());
         fs::copy(&sdl_lib_dir.join("SDL.dll"), &dst.join("SDL.dll")).unwrap();
+
+        gcc::compile_library("libz.a", libz_sources);
 
         // Build the *.o files:
         {
@@ -217,36 +222,36 @@ fn main() {
         assert!(sdl_lib_dir.is_dir());
         assert!(sdl_include_dir.is_dir());
         fs::copy(&sdl_lib_dir.join("SDL.dll"), &dst.join("SDL.dll")).unwrap();
-        fs::copy(&sdl_lib_dir.join("SDL.lib"), &dst.join("SDL.dll.lib")).unwrap();
-
-        // Build the *.o files
-        {
-            let mut config = gcc::Config::new();
-            config.include(sdl_include_dir.to_str().unwrap());
-            config.define("LIBTCOD_EXPORTS", None);
-            config.define("NO_OPENGL", None);
-            build_libtcod_objects(config, libtcod_sources);
-        }
+        fs::copy(&sdl_lib_dir.join("SDL.lib"), &dst.join("SDL.lib")).unwrap();
+        fs::copy(&sdl_lib_dir.join("SDLmain.lib"), &dst.join("SDLmain.lib")).unwrap();
 
         // Build the DLL
         let mut config = gcc::Config::new();
-        for c_file in libtcod_sources {
-            config.flag(dst.join(c_file).with_extension("o").to_str().unwrap());
+        config.flag("/DLIBTCOD_EXPORTS");
+        config.flag("/DNO_OPENGL");
+        config.include(sdl_include_dir.to_str().unwrap());
+        config.include(Path::new("libtcod").join("src").join("zlib"));
+        config.include(Path::new("libtcod").join("include"));
+        for c_file in libz_sources.iter().chain(libtcod_sources) {
+            // Make sure the path is in the Windows format. This
+            // shouldn't matter but it's distracting when debugging
+            // build script issues.
+            let path = c_file.split('/').fold(PathBuf::new(), |path, segment| path.join(segment));
+            config.flag(src.join(path).to_str().unwrap());
         }
-        config.flag(dst.join("libz.a").to_str().unwrap());
         config.flag("User32.lib");
-        config.flag("SDL.dll.lib");
-        config.flag("/LD");
+        config.flag("SDL.lib");
+        config.flag("SDLmain.lib");
         config.flag("/link");
         config.flag(&format!("/LIBPATH:{}", dst.to_str().unwrap()));
         config.flag("/DLL");
-        config.flag(&format!("/OUT:{}", dst.join("libtcod.dll").display()));
+        config.flag(&format!("/OUT:{}", dst.join("tcod.dll").display()));
 
         compile_config(config);
-        assert!(dst.join("libtcod.dll").is_file());
+        assert!(dst.join("tcod.dll").is_file());
 
         println!("cargo:rustc-link-search={}", dst.display());
-        println!("cargo:rustc-link-lib=dylib=SDL.dll");
+        println!("cargo:rustc-link-lib=dylib=SDL");
         println!("cargo:rustc-link-lib=User32");
     }
 
