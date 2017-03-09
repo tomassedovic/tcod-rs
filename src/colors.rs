@@ -3,6 +3,7 @@ use bindings::{AsNative, FromNative, ffi};
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, Default, PartialEq)]
+#[cfg_attr(feature = "serialization", derive(Serialize, Deserialize))]
 pub struct Color {
     pub r: u8,
     pub g: u8,
@@ -333,3 +334,22 @@ pub const GOLD: Color = Color{r: 229, g: 191, b: 0};
 pub const SILVER: Color = Color{r: 203, g: 203, b: 203};
 pub const CELADON: Color = Color{r: 172, g: 255, b: 175};
 pub const PEACH: Color = Color{r: 255, g: 159, b: 127};
+
+
+#[cfg(all(feature = "serialization", test))]
+mod test_serialization {
+    use colors::Color;
+    use serde_json;
+
+    #[test]
+    fn color_encode() {
+        let encoded = serde_json::to_string(&Color{r: 1, g: 2, b: 3}).unwrap();
+        assert_eq!("{\"r\":1,\"g\":2,\"b\":3}", encoded);
+    }
+
+    #[test]
+    fn color_decode() {
+        let decoded: Color = serde_json::from_str("{\"r\":1,\"g\":2,\"b\":3}").unwrap();
+        assert_eq!(Color{r: 1, g: 2, b: 3}, decoded);
+    }
+}

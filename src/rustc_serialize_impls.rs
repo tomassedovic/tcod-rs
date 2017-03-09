@@ -1,5 +1,3 @@
-#![cfg(feature = "rustc-serialize")]
-
 use super::Color;
 use rustc_serialize::{Encodable, Encoder, Decodable, Decoder};
 
