@@ -950,16 +950,22 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
                      clear: bool, background_flag: BackgroundFlag, title: Option<T>) where Self: Sized, T: AsRef<str> {
         assert!(x >= 0 && y >= 0 && width >= 0 && height >= 0);
         assert!(x + width <= self.width() && y + height <= self.height());
-        let c_title: *const c_char = match title {
-            Some(s) => {
+        // NOTE: we need to run `CString::new` and `as_ptr` in two
+        // separate steps. If we did it all at once, the `CString`
+        // would get dropped too early and we'd get a dangling
+        // pointer.
+        let title = title.map(|s| {
                 assert!(s.as_ref().is_ascii());
-                CString::new(s.as_ref()).unwrap().as_ptr()
-            },
-            None => ptr::null(),
-        };
+                CString::new(s.as_ref().as_bytes()).unwrap()
+        });
+        // NOTE: `map_or` takes the option by value, which would cause
+        // a premature drop again. The `as_ref` here prevents that
+        // from happening.
+        let c_title = title.as_ref().map_or(ptr::null(), |s| s.as_ptr());
         unsafe {
             ffi::TCOD_console_print_frame(*self.as_native(), x, y, width, height,
-                                          clear as c_bool, background_flag as u32, c_title);
+                                          clear as c_bool, background_flag as u32,
+                                          c_title);
         }
     }
 }
