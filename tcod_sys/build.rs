@@ -6,6 +6,15 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 
+fn build_libz(libz_sources: &[&str]) {
+    let mut config = gcc::Config::new();
+    for c_file in libz_sources {
+        config.file(c_file);
+    }
+    config.flag("-w");
+    config.compile("libz.a");
+}
+
 fn build_libtcod_objects(mut config: gcc::Config, sources: &[&str]) {
     config.include("libtcod/include");
     config.include("libtcod/src/zlib");
@@ -13,6 +22,7 @@ fn build_libtcod_objects(mut config: gcc::Config, sources: &[&str]) {
         config.file(c_file);
     }
     config.cargo_metadata(false);
+    config.flag("-w");
     config.compile("libtcod.a");
 }
 
@@ -102,7 +112,7 @@ fn main() {
     ];
 
     if target.contains("linux") {
-        gcc::compile_library("libz.a", libz_sources);
+        build_libz(libz_sources);
 
         // Build the *.o files:
         {
@@ -137,7 +147,7 @@ fn main() {
         pkg_config::find_library("x11").unwrap();
 
     } else if target.contains("darwin") {
-        gcc::compile_library("libz.a", libz_sources);
+        build_libz(libz_sources);
 
         // Build the *.o files
         {
@@ -179,7 +189,7 @@ fn main() {
         assert!(sdl_include_dir.is_dir());
         fs::copy(&sdl_lib_dir.join("SDL.dll"), &dst.join("SDL.dll")).unwrap();
 
-        gcc::compile_library("libz.a", libz_sources);
+        build_libz(libz_sources);
 
         // Build the *.o files:
         {
