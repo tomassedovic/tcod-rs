@@ -8,19 +8,23 @@ fn main() {
         .title("Example of libtcod's special chars")
         .init();
 
-    root.set_default_background(Color{r: 255, g: 0, b: 255});
+    while !root.window_closed() {
+        root.set_default_background(tcod::colors::BLACK);
 
-    root.clear();
+        root.clear();
 
-    root.rect(5, 5, 10, 5, false, BackgroundFlag::Set);
+        root.set_default_background(Color{r: 255, g: 0, b: 255});
 
-    root.horizontal_line(30, 2, 15, BackgroundFlag::Default);
-    root.vertical_line(28, 4, 9, BackgroundFlag::Default);
-    root.horizontal_line(30, 14, 15, BackgroundFlag::Set);
-    root.vertical_line(46, 4, 9, BackgroundFlag::Set);
+        root.rect(5, 5, 10, 5, false, BackgroundFlag::Set);
 
-    root.print_frame(15, 25, 35, 10, false, BackgroundFlag::Set, Some("Hello World!"));
+        root.horizontal_line(30, 2, 15, BackgroundFlag::Default);
+        root.vertical_line(28, 4, 9, BackgroundFlag::Default);
+        root.horizontal_line(30, 14, 15, BackgroundFlag::Set);
+        root.vertical_line(46, 4, 9, BackgroundFlag::Set);
 
-    root.flush();
-    root.wait_for_keypress(true);
+        root.print_frame(15, 25, 35, 10, false, BackgroundFlag::Set, Some("Hello World!"));
+
+        root.flush();
+        root.wait_for_keypress(true);
+    }
 }
