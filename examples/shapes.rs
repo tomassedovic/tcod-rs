@@ -8,9 +8,9 @@ fn main() {
         .title("Example of libtcod's special chars")
         .init();
 
-    root.clear();
-
     root.set_default_background(Color{r: 255, g: 0, b: 255});
+
+    root.clear();
 
     root.rect(5, 5, 10, 5, false, BackgroundFlag::Set);
 
