@@ -62,7 +62,7 @@ use std::mem::transmute;
 use std::path::Path;
 
 use bindings::ffi;
-use bindings::{AsNative, FromNative, c_bool, c_char, CString};
+use bindings::{AsNative, FromNative, c_bool, CString};
 
 use colors::Color;
 use input::{Key, KeyPressFlags};
