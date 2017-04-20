@@ -5,6 +5,10 @@ os:
 rust:
 - nightly
 - stable
+matrix:
+  allow_failures:
+  - os: osx
+    rust: stable
 before_install:
 - '[ "$TRAVIS_OS_NAME" = linux ] && sudo apt-get update -qq || brew update'
 install:
