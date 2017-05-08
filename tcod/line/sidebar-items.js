@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Line","tcod-rs uses libtcod's multithreaded line API, therefore more then one line can be created and drawn. The `Line` struct represents a line."]]});

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Image` struct in crate `tcod`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Image">
+
+    <title>tcod::image::Image - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc struct">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>tcod</a>::<wbr><a href='index.html'>image</a></p><script>window.sidebarCurrent = {name: 'Image', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>tcod</a>::<wbr><a href='index.html'>image</a>::<wbr><a class="struct" href=''>Image</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../../src/tcod/image.rs.html#9-13' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Image { /* fields omitted */ }</pre><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl <a class="struct" href="../../tcod/image/struct.Image.html" title="struct tcod::image::Image">Image</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/tcod/image.rs.html#36-190' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.new' class="method"><span id='new.v' class='invisible'><code>fn <a href='#method.new' class='fnname'>new</a>(width: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, height: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>) -&gt; <a class="struct" href="../../tcod/image/struct.Image.html" title="struct tcod::image::Image">Image</a></code></span></h4>
+<h4 id='method.from_file' class="method"><span id='from_file.v' class='invisible'><code>fn <a href='#method.from_file' class='fnname'>from_file</a>&lt;T&gt;(path: T) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="../../tcod/image/struct.Image.html" title="struct tcod::image::Image">Image</a>, <a class="struct" href="https://doc.rust-lang.org/nightly/std/io/error/struct.Error.html" title="struct std::io::error::Error">Error</a>&gt; <span class="where fmt-newline">where T: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/std/path/struct.Path.html" title="struct std::path::Path">Path</a>&gt;</span></code></span></h4>
+<h4 id='method.from_console' class="method"><span id='from_console.v' class='invisible'><code>fn <a href='#method.from_console' class='fnname'>from_console</a>&lt;T&gt;(console: &amp;T) -&gt; <a class="struct" href="../../tcod/image/struct.Image.html" title="struct tcod::image::Image">Image</a> <span class="where fmt-newline">where T: <a class="trait" href="../../tcod/console/trait.Console.html" title="trait tcod::console::Console">Console</a></span></code></span></h4>
+<h4 id='method.refresh_console' class="method"><span id='refresh_console.v' class='invisible'><code>fn <a href='#method.refresh_console' class='fnname'>refresh_console</a>&lt;T&gt;(&amp;mut self, console: &amp;T) <span class="where fmt-newline">where T: <a class="trait" href="../../tcod/console/trait.Console.html" title="trait tcod::console::Console">Console</a></span></code></span></h4>
+<h4 id='method.save' class="method"><span id='save.v' class='invisible'><code>fn <a href='#method.save' class='fnname'>save</a>&lt;T&gt;(&amp;self, path: T) <span class="where fmt-newline">where T: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/std/path/struct.Path.html" title="struct std::path::Path">Path</a>&gt;</span></code></span></h4>
+<h4 id='method.width' class="method"><span id='width.v' class='invisible'><code>fn <a href='#method.width' class='fnname'>width</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a></code></span></h4>
+<h4 id='method.height' class="method"><span id='height.v' class='invisible'><code>fn <a href='#method.height' class='fnname'>height</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a></code></span></h4>
+<h4 id='method.get_size' class="method"><span id='get_size.v' class='invisible'><code>fn <a href='#method.get_size' class='fnname'>get_size</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a></code></span></h4>
+<h4 id='method.get_pixel' class="method"><span id='get_pixel.v' class='invisible'><code>fn <a href='#method.get_pixel' class='fnname'>get_pixel</a>(&amp;self, x: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, y: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>) -&gt; <a class="struct" href="../../tcod/colors/struct.Color.html" title="struct tcod::colors::Color">Color</a></code></span></h4>
+<h4 id='method.get_alpha' class="method"><span id='get_alpha.v' class='invisible'><code>fn <a href='#method.get_alpha' class='fnname'>get_alpha</a>(&amp;self, x: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, y: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a></code></span></h4>
+<h4 id='method.is_pixel_transparent' class="method"><span id='is_pixel_transparent.v' class='invisible'><code>fn <a href='#method.is_pixel_transparent' class='fnname'>is_pixel_transparent</a>(&amp;self, x: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, y: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span></h4>
+<h4 id='method.get_mipmap_pixel' class="method"><span id='get_mipmap_pixel.v' class='invisible'><code>fn <a href='#method.get_mipmap_pixel' class='fnname'>get_mipmap_pixel</a>(&amp;self, (x0, y0): <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a>, (x1, y1): <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a>) -&gt; <a class="struct" href="../../tcod/colors/struct.Color.html" title="struct tcod::colors::Color">Color</a></code></span></h4>
+<h4 id='method.set_key_color' class="method"><span id='set_key_color.v' class='invisible'><code>fn <a href='#method.set_key_color' class='fnname'>set_key_color</a>(&amp;mut self, color: <a class="struct" href="../../tcod/colors/struct.Color.html" title="struct tcod::colors::Color">Color</a>)</code></span></h4>
+<h4 id='method.clear' class="method"><span id='clear.v' class='invisible'><code>fn <a href='#method.clear' class='fnname'>clear</a>(&amp;mut self, color: <a class="struct" href="../../tcod/colors/struct.Color.html" title="struct tcod::colors::Color">Color</a>)</code></span></h4>
+<h4 id='method.put_pixel' class="method"><span id='put_pixel.v' class='invisible'><code>fn <a href='#method.put_pixel' class='fnname'>put_pixel</a>(&amp;mut self, x: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, y: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, color: <a class="struct" href="../../tcod/colors/struct.Color.html" title="struct tcod::colors::Color">Color</a>)</code></span></h4>
+<h4 id='method.scale' class="method"><span id='scale.v' class='invisible'><code>fn <a href='#method.scale' class='fnname'>scale</a>(&amp;mut self, width: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, height: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>)</code></span></h4>
+<h4 id='method.hflip' class="method"><span id='hflip.v' class='invisible'><code>fn <a href='#method.hflip' class='fnname'>hflip</a>(&amp;mut self)</code></span></h4>
+<h4 id='method.vflip' class="method"><span id='vflip.v' class='invisible'><code>fn <a href='#method.vflip' class='fnname'>vflip</a>(&amp;mut self)</code></span></h4>
+<h4 id='method.rotate90' class="method"><span id='rotate90.v' class='invisible'><code>fn <a href='#method.rotate90' class='fnname'>rotate90</a>(&amp;mut self, num_rotations: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>)</code></span></h4>
+<h4 id='method.invert' class="method"><span id='invert.v' class='invisible'><code>fn <a href='#method.invert' class='fnname'>invert</a>(&amp;mut self)</code></span></h4>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="../../tcod/trait.AsNative.html" title="trait tcod::AsNative">AsNative</a>&lt;<a class="type" href="../../tcod_sys/type.TCOD_image_t.html" title="type tcod_sys::TCOD_image_t">TCOD_image_t</a>&gt; for <a class="struct" href="../../tcod/image/struct.Image.html" title="struct tcod::image::Image">Image</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/tcod/image.rs.html#15-19' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.as_native' class="method"><span id='as_native.v' class='invisible'><code>unsafe fn <a href='../../tcod/trait.AsNative.html#tymethod.as_native' class='fnname'>as_native</a>(&amp;self) -&gt; &amp;<a class="type" href="../../tcod_sys/type.TCOD_image_t.html" title="type tcod_sys::TCOD_image_t">TCOD_image_t</a></code></span></h4>
+</div><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="../../tcod/trait.FromNative.html" title="trait tcod::FromNative">FromNative</a>&lt;<a class="type" href="../../tcod_sys/type.TCOD_image_t.html" title="type tcod_sys::TCOD_image_t">TCOD_image_t</a>&gt; for <a class="struct" href="../../tcod/image/struct.Image.html" title="struct tcod::image::Image">Image</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/tcod/image.rs.html#21-27' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.from_native' class="method"><span id='from_native.v' class='invisible'><code>unsafe fn <a href='../../tcod/trait.FromNative.html#tymethod.from_native' class='fnname'>from_native</a>(image: <a class="type" href="../../tcod_sys/type.TCOD_image_t.html" title="type tcod_sys::TCOD_image_t">TCOD_image_t</a>) -&gt; <a class="struct" href="../../tcod/image/struct.Image.html" title="struct tcod::image::Image">Image</a></code></span></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "tcod";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

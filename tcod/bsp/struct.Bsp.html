@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Bsp` struct in crate `tcod`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Bsp">
+
+    <title>tcod::bsp::Bsp - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc struct">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>tcod</a>::<wbr><a href='index.html'>bsp</a></p><script>window.sidebarCurrent = {name: 'Bsp', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>tcod</a>::<wbr><a href='index.html'>bsp</a>::<wbr><a class="struct" href=''>Bsp</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../../src/tcod/bsp.rs.html#39-42' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Bsp&lt;'a&gt; { /* fields omitted */ }</pre><div class='docblock'><p>This struct encapsulates <code>TCOD_bsp_t</code>. It mirrors original&#39;s fields (<code>x</code>, <code>y</code>, etc.)
+with the exception of <code>horizontal</code>. See example.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<pre class="rust rust-example-rendered">
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bsp</span> <span class="op">=</span> <span class="ident">Bsp</span>::<span class="ident">new_with_size</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">50</span>, <span class="number">60</span>);
+
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">bsp</span>.<span class="ident">x</span>, <span class="number">0</span>);
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">bsp</span>.<span class="ident">y</span>, <span class="number">0</span>);
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">bsp</span>.<span class="ident">w</span>, <span class="number">50</span>);
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">bsp</span>.<span class="ident">h</span>, <span class="number">60</span>);
+<span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">bsp</span>.<span class="ident">horizontal</span>(), <span class="bool-val">false</span>);
+
+<span class="ident">bsp</span>.<span class="ident">x</span> <span class="op">=</span> <span class="number">10</span>;
+<span class="ident">bsp</span>.<span class="ident">y</span> <span class="op">=</span> <span class="number">20</span>;
+<span class="ident">bsp</span>.<span class="ident">set_horizontal</span>(<span class="bool-val">true</span>);</pre>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl&lt;'a&gt; <a class="struct" href="../../tcod/bsp/struct.Bsp.html" title="struct tcod::bsp::Bsp">Bsp</a>&lt;'a&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/tcod/bsp.rs.html#78-246' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.new_with_size' class="method"><span id='new_with_size.v' class='invisible'><code>fn <a href='#method.new_with_size' class='fnname'>new_with_size</a>(x: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, y: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, w: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, h: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>) -&gt; Self</code></span></h4>
+<h4 id='method.remove_sons' class="method"><span id='remove_sons.v' class='invisible'><code>fn <a href='#method.remove_sons' class='fnname'>remove_sons</a>(&amp;mut self)</code></span></h4>
+<h4 id='method.split_once' class="method"><span id='split_once.v' class='invisible'><code>fn <a href='#method.split_once' class='fnname'>split_once</a>(&amp;mut self, horizontal: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>, position: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>)</code></span></h4>
+<h4 id='method.split_recursive' class="method"><span id='split_recursive.v' class='invisible'><code>fn <a href='#method.split_recursive' class='fnname'>split_recursive</a>(&amp;mut self,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; randomizer: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="../../tcod/random/struct.Rng.html" title="struct tcod::random::Rng">Rng</a>&gt;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; nb: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; min_h_size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; min_v_size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; max_h_ratio: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; max_v_ratio: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.f32.html">f32</a>)</code></span></h4>
+<h4 id='method.resize' class="method"><span id='resize.v' class='invisible'><code>fn <a href='#method.resize' class='fnname'>resize</a>(&amp;mut self, x: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, y: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, w: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, h: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>)</code></span></h4>
+<h4 id='method.left' class="method"><span id='left.v' class='invisible'><code>fn <a href='#method.left' class='fnname'>left</a>(&amp;self) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;Self&gt;</code></span></h4>
+<div class='docblock'><p>Returns <code>Some(Bsp)</code> with left subtree, or <code>None</code> if the BSP has not been split.</p>
+</div><h4 id='method.right' class="method"><span id='right.v' class='invisible'><code>fn <a href='#method.right' class='fnname'>right</a>(&amp;self) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;Self&gt;</code></span></h4>
+<div class='docblock'><p>Returns <code>Some(Bsp)</code> with right subtree, or <code>None</code> if the BSP has not been split.</p>
+</div><h4 id='method.father' class="method"><span id='father.v' class='invisible'><code>fn <a href='#method.father' class='fnname'>father</a>(&amp;self) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;Self&gt;</code></span></h4>
+<div class='docblock'><p>Returns <code>Some(Bsp)</code> with father, or <code>None</code> if the node is root.</p>
+</div><h4 id='method.is_leaf' class="method"><span id='is_leaf.v' class='invisible'><code>fn <a href='#method.is_leaf' class='fnname'>is_leaf</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span></h4>
+<h4 id='method.contains' class="method"><span id='contains.v' class='invisible'><code>fn <a href='#method.contains' class='fnname'>contains</a>(&amp;self, cx: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, cy: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span></h4>
+<h4 id='method.find_node' class="method"><span id='find_node.v' class='invisible'><code>fn <a href='#method.find_node' class='fnname'>find_node</a>(&amp;self, cx: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>, cy: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;Self&gt;</code></span></h4>
+<h4 id='method.horizontal' class="method"><span id='horizontal.v' class='invisible'><code>fn <a href='#method.horizontal' class='fnname'>horizontal</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span></h4>
+<h4 id='method.set_horizontal' class="method"><span id='set_horizontal.v' class='invisible'><code>fn <a href='#method.set_horizontal' class='fnname'>set_horizontal</a>(&amp;mut self, h: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>)</code></span></h4>
+<h4 id='method.traverse' class="method"><span id='traverse.v' class='invisible'><code>fn <a href='#method.traverse' class='fnname'>traverse</a>&lt;F&gt;(&amp;self, order: <a class="enum" href="../../tcod/bsp/enum.TraverseOrder.html" title="enum tcod::bsp::TraverseOrder">TraverseOrder</a>, callback: F) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a> <span class="where fmt-newline">where F: <a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html" title="trait core::ops::FnMut">FnMut</a>(&amp;mut <a class="struct" href="../../tcod/bsp/struct.Bsp.html" title="struct tcod::bsp::Bsp">Bsp</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></span></code></span></h4>
+<div class='docblock'><p>Instead of 5 <code>traverse*</code> functions as in original API, Rust binding
+provides a single <code>traverse</code> function with an <code>order</code> parameter.</p>
+
+<h1 id='examples-1' class='section-header'><a href='#examples-1'>Examples</a></h1>
+<pre class="rust rust-example-rendered">
+   <span class="kw">let</span> <span class="ident">bsp</span> <span class="op">=</span> <span class="ident">Bsp</span>::<span class="ident">new_with_size</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">50</span>, <span class="number">50</span>);
+   <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counter</span> <span class="op">=</span> <span class="number">0</span>;
+
+   <span class="ident">bsp</span>.<span class="ident">traverse</span>(<span class="ident">TraverseOrder</span>::<span class="ident">PreOrder</span>, <span class="op">|</span><span class="ident">node</span><span class="op">|</span> {
+       <span class="ident">counter</span> <span class="op">+=</span> <span class="number">1</span>;
+       <span class="bool-val">true</span>
+   });
+   <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">counter</span>, <span class="number">1</span>);</pre>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl&lt;'a&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.Deref.html" title="trait core::ops::Deref">Deref</a> for <a class="struct" href="../../tcod/bsp/struct.Bsp.html" title="struct tcod::bsp::Bsp">Bsp</a>&lt;'a&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/tcod/bsp.rs.html#44-50' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='associatedtype.Target' class="type"><span id='Target.t' class='invisible'><code>type <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Deref.html#associatedtype.Target' class="type">Target</a> = <a class="type" href="../../tcod_sys/type.TCOD_bsp_t.html" title="type tcod_sys::TCOD_bsp_t">TCOD_bsp_t</a></code></span></h4>
+<div class='docblock'><p>The resulting type after dereferencing</p>
+</div><h4 id='method.deref' class="method"><span id='deref.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Deref.html#tymethod.deref' class='fnname'>deref</a>(&amp;self) -&gt; &amp;Self::<a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.Deref.html" title="trait core::ops::Deref">Target</a></code></span></h4>
+<div class='docblock'><p>The method called to dereference a value</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl&lt;'a&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.DerefMut.html" title="trait core::ops::DerefMut">DerefMut</a> for <a class="struct" href="../../tcod/bsp/struct.Bsp.html" title="struct tcod::bsp::Bsp">Bsp</a>&lt;'a&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/tcod/bsp.rs.html#52-56' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.deref_mut' class="method"><span id='deref_mut.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.DerefMut.html#tymethod.deref_mut' class='fnname'>deref_mut</a>(&amp;mut self) -&gt; &amp;mut Self::<a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.Deref.html" title="trait core::ops::Deref">Target</a></code></span></h4>
+<div class='docblock'><p>The method called to mutably dereference a value</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl&lt;'a&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> for <a class="struct" href="../../tcod/bsp/struct.Bsp.html" title="struct tcod::bsp::Bsp">Bsp</a>&lt;'a&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/tcod/bsp.rs.html#58-63' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.fmt' class="method"><span id='fmt.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>, <a class="struct" href="https://doc.rust-lang.org/nightly/core/fmt/struct.Error.html" title="struct core::fmt::Error">Error</a>&gt;</code></span></h4>
+<div class='docblock'><p>Formats the value using the given formatter.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl&lt;'a&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html" title="trait core::ops::Drop">Drop</a> for <a class="struct" href="../../tcod/bsp/struct.Bsp.html" title="struct tcod::bsp::Bsp">Bsp</a>&lt;'a&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/tcod/bsp.rs.html#248-254' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.drop' class="method"><span id='drop.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html#tymethod.drop' class='fnname'>drop</a>(&amp;mut self)</code></span></h4>
+<div class='docblock'><p>A method called when the value goes out of scope. <a href="https://doc.rust-lang.org/nightly/core/ops/trait.Drop.html#tymethod.drop">Read more</a></p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "tcod";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["force_fullscreen_resolution",""],["get_char_size",""],["get_clipboard",""],["get_current_resolution",""],["get_elapsed_time",""],["get_fps",""],["get_fullscreen_offset",""],["get_last_frame_length",""],["save_screenshot",""],["save_screenshot_auto",""],["set_clipboard",""],["set_fps",""],["sleep",""]]});

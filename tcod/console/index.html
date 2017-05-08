@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `console` mod in crate `tcod`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, console">
+
+    <title>tcod::console - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc mod">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>tcod</a></p><script>window.sidebarCurrent = {name: 'console', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>tcod</a>::<wbr><a class="mod" href=''>console</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../../src/tcod/console.rs.html#1-1143' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>The console emulator handles the rendering of the game screen and the keyboard input</p>
+
+<p>It provides the necessary traits and types for working with the different console types,
+including the <a href="./trait.Console.html">Console</a> trait and the
+<a href="./struct.Root.html">Root</a> and <a href="./struct.Offscreen.html">Offscreen</a> console types.
+It&#39;s worth mentioning that only one <code>Root</code> console may exist at any given time, and it has to
+be initialized at the start of the program.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1>
+<p>Initializing the <code>Root</code> console and creating an <code>Offscreen</code> console:</p>
+
+<pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">tcod</span>::<span class="ident">console</span>::{<span class="ident">Root</span>, <span class="ident">Offscreen</span>};
+
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">root</span> <span class="op">=</span> <span class="ident">Root</span>::<span class="ident">initializer</span>().<span class="ident">init</span>();
+<span class="kw">let</span> (<span class="ident">width</span>, <span class="ident">height</span>) <span class="op">=</span> (<span class="number">80</span>, <span class="number">30</span>);
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">offscreen</span> <span class="op">=</span> <span class="ident">Offscreen</span>::<span class="ident">new</span>(<span class="ident">width</span>, <span class="ident">height</span>);</pre>
+
+<p>A typical <code>tcod-rs</code> program&#39;s basic structure would look something like this:</p>
+
+<pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">tcod</span>::<span class="ident">console</span>::<span class="ident">Root</span>;
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">root</span> <span class="op">=</span> <span class="ident">Root</span>::<span class="ident">initializer</span>().<span class="ident">init</span>(); <span class="comment">// Replace with custom initialization code</span>
+
+    <span class="kw">while</span> <span class="op">!</span><span class="ident">root</span>.<span class="ident">window_closed</span>() {
+        <span class="comment">// Handling user input</span>
+        <span class="comment">// Updating the gamestate</span>
+        <span class="comment">// Rendering the results</span>
+    }
+}</pre>
+
+<p>For detailed examples on the user input handling and rendering see the
+<a href="./struct.Root.html">Root</a> struct&#39;s documentation.</p>
+
+<h2 id='additional-information' class='section-header'><a href='#additional-information'>Additional Information</a></h2>
+<p>The <code>Root</code> and <code>Console</code> types are also reexported in the root module (<code>tcod</code>) under the names
+<code>RootConsole</code> and <code>OffscreenConsole</code>, making the following code sample equivalent to the
+previous one:</p>
+
+<pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">tcod</span>::{<span class="ident">RootConsole</span>, <span class="ident">OffscreenConsole</span>};
+
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">root</span> <span class="op">=</span> <span class="ident">RootConsole</span>::<span class="ident">initializer</span>().<span class="ident">init</span>();
+<span class="kw">let</span> (<span class="ident">width</span>, <span class="ident">height</span>) <span class="op">=</span> (<span class="number">80</span>, <span class="number">30</span>);
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">offscreen</span> <span class="op">=</span> <span class="ident">OffscreenConsole</span>::<span class="ident">new</span>(<span class="ident">width</span>, <span class="ident">height</span>);</pre>
+
+<p>This applies to all the examples in the rest of the modules documentation.</p>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.Offscreen.html"
+                                  title='struct tcod::console::Offscreen'>Offscreen</a></td>
+                           <td class='docblock-short'>
+                                <p>A type representing secondary consoles</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.Root.html"
+                                  title='struct tcod::console::Root'>Root</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.RootInitializer.html"
+                                  title='struct tcod::console::RootInitializer'>RootInitializer</a></td>
+                           <td class='docblock-short'>
+                                <p>Helper struct for the <code>Root</code> console initialization</p>
+                           </td>
+                       </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="enum" href="enum.BackgroundFlag.html"
+                                  title='enum tcod::console::BackgroundFlag'>BackgroundFlag</a></td>
+                           <td class='docblock-short'>
+                                <p>This flag determines how a cell&#39;s existing background color will be modified by a new one</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="enum" href="enum.FontLayout.html"
+                                  title='enum tcod::console::FontLayout'>FontLayout</a></td>
+                           <td class='docblock-short'>
+                                <p>All the possible font layouts that can be used for custom bitmap fonts</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="enum" href="enum.FontType.html"
+                                  title='enum tcod::console::FontType'>FontType</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="enum" href="enum.Renderer.html"
+                                  title='enum tcod::console::Renderer'>Renderer</a></td>
+                           <td class='docblock-short'>
+                                <p>All the possible renderers used by the <code>Root</code> console</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="enum" href="enum.TextAlignment.html"
+                                  title='enum tcod::console::TextAlignment'>TextAlignment</a></td>
+                           <td class='docblock-short'>
+                                <p>Represents the text alignment in console instances.</p>
+                           </td>
+                       </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="trait" href="trait.AsciiLiteral.html"
+                                  title='trait tcod::console::AsciiLiteral'>AsciiLiteral</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="trait" href="trait.Console.html"
+                                  title='trait tcod::console::Console'>Console</a></td>
+                           <td class='docblock-short'>
+                                <p>Defines the common functionality between <code>Root</code> and <code>Offscreen</code> consoles</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="trait" href="trait.TcodString.html"
+                                  title='trait tcod::console::TcodString'>TcodString</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="fn" href="fn.blit.html"
+                                  title='fn tcod::console::blit'>blit</a></td>
+                           <td class='docblock-short'>
+                                <p>Blits the contents of one console onto an other</p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "tcod";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>
