@@ -346,7 +346,7 @@ impl Root {
     }
 
     /// Maps a single ASCII code to a character in a bitmap font.
-    pub fn map_ascii_code_to_font(&self,
+    pub fn map_ascii_code_to_font(&mut self,
                                   ascii_code: i32,
                                   font_char_x: i32,
                                   font_char_y: i32) {
@@ -360,7 +360,7 @@ impl Root {
     }
 
     /// Maps consecutive ASCII codes to consecutive characters in a bitmap font.
-    pub fn map_ascii_codes_to_font(&self,
+    pub fn map_ascii_codes_to_font(&mut self,
                                    ascii_code: i32,
                                    nb_codes: i32,
                                    font_char_x: i32,
@@ -376,8 +376,8 @@ impl Root {
     }
 
     /// Maps ASCII codes from a string to consecutive characters in a bitmap font.
-    pub fn map_string_to_font(&self,
-                              s: &'static str,
+    pub fn map_string_to_font(&mut self,
+                              s: &str,
                               font_char_x: i32,
                               font_char_y: i32) {
         unsafe {
