@@ -346,6 +346,12 @@ impl Root {
     }
 
     /// Maps a single ASCII code to a character in a bitmap font.
+    ///
+    /// # Arguments
+    ///
+    /// * `ascii_code`: The ASCII code to map
+    /// * `font_char_x/font_char_y`: The coordinate of the character in the
+    /// bitmap font (in characters, not pixels)
     pub fn map_ascii_code_to_font(&mut self,
                                   ascii_code: i32,
                                   font_char_x: i32,
@@ -360,6 +366,14 @@ impl Root {
     }
 
     /// Maps consecutive ASCII codes to consecutive characters in a bitmap font.
+    ///
+    /// # Arguments
+    ///
+    /// * `ascii_code`: The first ASCII code to map
+    /// * 'nb_codes`: Number of conescutive ASCII codes to map
+    /// * `font_char_x/font_char_y`: The coordinate of the character in the
+    /// bitmap font (in characters, not pixels) corresponding to the first ASCII
+    /// code
     pub fn map_ascii_codes_to_font(&mut self,
                                    ascii_code: i32,
                                    nb_codes: i32,
@@ -376,6 +390,13 @@ impl Root {
     }
 
     /// Maps ASCII codes from a string to consecutive characters in a bitmap font.
+    ///
+    /// # Arguments
+    ///
+    /// * `s`: String containing ASCII codes to map
+    /// * `font_char_x/font_char_y`: The coordinate of the character in the
+    /// bitmap font (in characters, not pixels) corresponding to the first ASCII
+    /// code in the string
     pub fn map_string_to_font(&mut self,
                               s: &str,
                               font_char_x: i32,
