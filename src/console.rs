@@ -61,7 +61,7 @@ use std::marker::PhantomData;
 use std::mem::transmute;
 use std::path::Path;
 
-use bindings::ffi;
+use bindings::ffi::{self, TCOD_bkgnd_flag_t, TCOD_renderer_t, TCOD_font_flags_t, TCOD_alignment_t};
 use bindings::{AsNative, FromNative, c_bool, CString};
 
 use colors::Color;
@@ -232,24 +232,6 @@ impl Root {
         }
     }
 
-    /// This function changes the keyboard repeat times. The initial delay determines the
-    /// number of milliseconds between the keypress and the time the keyboard repeat begins.
-    /// The interval sets the time between the keyboard repeat events.
-    /// With an initial delay of 0, the keyboard repeat feature is completely disabled.
-    pub fn set_keyboard_repeat(&mut self, initial_delay: i32, interval: i32) {
-        unsafe {
-            ffi::TCOD_console_set_keyboard_repeat(initial_delay, interval);
-        }
-    }
-
-    /// Disables the keyboard repeat feature. Equivalent to `set_keyboard_repeat` with an
-    /// initial delay of 0.
-    pub fn disable_keyboard_repeat(&mut self) {
-        unsafe {
-            ffi::TCOD_console_disable_keyboard_repeat()
-        }
-    }
-
     /// Returns true if the `Root` console is currently active.
     pub fn is_active(&self) -> bool {
         unsafe {
@@ -306,7 +288,7 @@ impl Root {
         let tcod_key = unsafe {
             ffi::TCOD_console_check_for_keypress(status.bits() as i32)
         };
-        if tcod_key.vk == ffi::TCODK_NONE {
+        if tcod_key.vk == ffi::TCOD_keycode_t::TCODK_NONE {
             return None;
         }
         Some(tcod_key.into())
@@ -554,7 +536,7 @@ impl<'a> RootInitializer<'a> {
             ffi::TCOD_console_init_root(self.width, self.height,
                                         c_title.as_ptr(),
                                         self.is_fullscreen as c_bool,
-                                        self.console_renderer as u32);
+                                        self.console_renderer.into());
         }
         Root { _blocker: PhantomData }
     }
@@ -683,7 +665,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
     /// [TextAlignment](./enum.TextAlignment.html).
     fn set_alignment(&mut self, alignment: TextAlignment) {
         unsafe {
-            ffi::TCOD_console_set_alignment(*self.as_native(), alignment as u32);
+            ffi::TCOD_console_set_alignment(*self.as_native(), alignment.into());
         }
     }
 
@@ -763,7 +745,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
     fn set_background_flag(&mut self, background_flag: BackgroundFlag) {
         unsafe {
             ffi::TCOD_console_set_background_flag(*self.as_native(),
-                                                  background_flag as u32);
+                                                  background_flag.into());
         }
     }
 
@@ -793,7 +775,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
             ffi::TCOD_console_set_char_background(*self.as_native(),
                                                   x, y,
                                                   *color.as_native(),
-                                                  background_flag as u32)
+                                                  background_flag.into())
         }
     }
 
@@ -820,7 +802,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
         unsafe {
             ffi::TCOD_console_put_char(*self.as_native(),
                                        x, y, glyph as i32,
-                                       background_flag as u32);
+                                       background_flag.into());
         }
     }
 
@@ -900,16 +882,16 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
             let c_text = CString::new(text).unwrap();
             unsafe {
                 ffi::TCOD_console_print_ex(*self.as_native(), x, y,
-                                           background_flag as u32,
-                                           alignment as u32,
+                                           background_flag.into(),
+                                           alignment.into(),
                                            c_text.as_ptr());
             }
         } else {
             let c_text = to_wstring(text.as_ref());
             unsafe {
                 ffi::TCOD_console_print_ex_utf(*self.as_native(), x, y,
-                                               background_flag as u32,
-                                               alignment as u32,
+                                               background_flag.into(),
+                                               alignment.into(),
                                                c_text.as_ptr() as *const i32);
             }
         }
@@ -927,14 +909,14 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
             let c_text = CString::new(text).unwrap();
             unsafe {
                 ffi::TCOD_console_print_rect_ex(*self.as_native(), x, y, width, height,
-                                                background_flag as u32, alignment as u32,
+                                                background_flag.into(), alignment.into(),
                                                 c_text.as_ptr());
             }
         } else {
             let c_text = to_wstring(text.as_ref());
             unsafe {
                 ffi::TCOD_console_print_rect_ex_utf(*self.as_native(), x, y, width, height,
-                                                    background_flag as u32, alignment as u32,
+                                                    background_flag.into(), alignment.into(),
                                                     c_text.as_ptr() as *const i32);
             }
         }
@@ -977,7 +959,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
         assert!(x + width <= self.width());
         assert!(y + height <= self.height());
         unsafe {
-            ffi::TCOD_console_rect(*self.as_native(), x, y, width, height, clear as c_bool, background_flag as u32);
+            ffi::TCOD_console_rect(*self.as_native(), x, y, width, height, clear as c_bool, background_flag.into());
         }
     }
 
@@ -989,7 +971,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
         assert!(x >= 0 && y >= 0 && y < self.height());
         assert!(length >= 1 && length + x <= self.width());
         unsafe {
-            ffi::TCOD_console_hline(*self.as_native(), x, y, length, background_flag as u32);
+            ffi::TCOD_console_hline(*self.as_native(), x, y, length, background_flag.into());
         }
     }
 
@@ -1001,7 +983,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
         assert!(x >= 0, y >= 0 && x < self.width());
         assert!(length >= 1 && length + y <= self.height());
         unsafe {
-            ffi::TCOD_console_vline(*self.as_native(), x, y, length, background_flag as u32);
+            ffi::TCOD_console_vline(*self.as_native(), x, y, length, background_flag.into());
         }
     }
 
@@ -1031,7 +1013,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
         let c_title = title.as_ref().map_or(ptr::null(), |s| s.as_ptr());
         unsafe {
             ffi::TCOD_console_print_frame(*self.as_native(), x, y, width, height,
-                                          clear as c_bool, background_flag as u32,
+                                          clear as c_bool, background_flag.into(),
                                           c_title);
         }
     }
@@ -1121,61 +1103,66 @@ impl Console for Root {}
 impl Console for Offscreen {}
 
 /// Represents the text alignment in console instances.
-#[repr(C)]
+#[repr(u32)]
 #[derive(Copy, Clone)]
 pub enum TextAlignment {
-    Left = ffi::TCOD_LEFT as isize,
-    Right = ffi::TCOD_RIGHT as isize,
-    Center = ffi::TCOD_CENTER as isize,
+    Left   = ffi::TCOD_alignment_t::TCOD_LEFT as u32,
+    Right  = ffi::TCOD_alignment_t::TCOD_RIGHT as u32,
+    Center = ffi::TCOD_alignment_t::TCOD_CENTER as u32,
 }
+native_enum_convert!(TextAlignment, TCOD_alignment_t);
 
 /// This flag determines how a cell's existing background color will be modified by a new one
 ///
 /// See [libtcod's documentation](http://doryen.eptalys.net/data/libtcod/doc/1.5.2/html2/console_bkgnd_flag_t.html)
 /// for a detailed description of the different values.
-#[repr(C)]
+#[repr(u32)]
 #[derive(Copy, Clone, Debug)]
 pub enum BackgroundFlag {
-    None = ffi::TCOD_BKGND_NONE as isize,
-    Set = ffi::TCOD_BKGND_SET as isize,
-    Multiply = ffi::TCOD_BKGND_MULTIPLY as isize,
-    Lighten = ffi::TCOD_BKGND_LIGHTEN as isize,
-    Darken = ffi::TCOD_BKGND_DARKEN as isize,
-    Screen = ffi::TCOD_BKGND_SCREEN as isize,
-    ColorDodge = ffi::TCOD_BKGND_COLOR_DODGE as isize,
-    ColorBurn = ffi::TCOD_BKGND_COLOR_BURN as isize,
-    Add = ffi::TCOD_BKGND_ADD as isize,
-    AddA = ffi::TCOD_BKGND_ADDA as isize,
-    Burn = ffi::TCOD_BKGND_BURN as isize,
-    Overlay = ffi::TCOD_BKGND_OVERLAY as isize,
-    Alph = ffi::TCOD_BKGND_ALPH as isize,
-    Default = ffi::TCOD_BKGND_DEFAULT as isize
+    None = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_NONE as u32,
+    Set = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_SET as u32,
+    Multiply = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_MULTIPLY as u32,
+    Lighten = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_LIGHTEN as u32,
+    Darken = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_DARKEN as u32,
+    Screen = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_SCREEN as u32,
+    ColorDodge = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_COLOR_DODGE as u32,
+    ColorBurn = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_COLOR_BURN as u32,
+    Add = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_ADD as u32,
+    AddA = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_ADDA as u32,
+    Burn = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_BURN as u32,
+    Overlay = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_OVERLAY as u32,
+    Alph = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_ALPH as u32,
+    Default = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_DEFAULT as u32
 }
+native_enum_convert!(BackgroundFlag, TCOD_bkgnd_flag_t);
 
 /// All the possible renderers used by the `Root` console
-#[repr(C)]
+#[repr(u32)]
 #[derive(Copy, Clone)]
 pub enum Renderer {
-    GLSL = ffi::TCOD_RENDERER_GLSL as isize,
-    OpenGL = ffi::TCOD_RENDERER_OPENGL as isize,
-    SDL = ffi::TCOD_RENDERER_SDL as isize,
+    GLSL   = ffi::TCOD_renderer_t::TCOD_RENDERER_GLSL as u32,
+    OpenGL = ffi::TCOD_renderer_t::TCOD_RENDERER_OPENGL as u32,
+    SDL    = ffi::TCOD_renderer_t::TCOD_RENDERER_SDL as u32,
 }
+native_enum_convert!(Renderer, TCOD_renderer_t);
 
 /// All the possible font layouts that can be used for custom bitmap fonts
-#[repr(C)]
+#[repr(u32)]
 #[derive(Copy, Clone)]
 pub enum FontLayout {
-    AsciiInCol = ffi::TCOD_FONT_LAYOUT_ASCII_INCOL as isize,
-    AsciiInRow = ffi::TCOD_FONT_LAYOUT_ASCII_INROW as isize,
-    Tcod = ffi::TCOD_FONT_LAYOUT_TCOD as isize,
+    AsciiInCol = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_ASCII_INCOL as u32,
+    AsciiInRow = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_ASCII_INROW as u32,
+    Tcod       = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_TCOD as u32,
 }
+native_enum_convert!(FontLayout, TCOD_font_flags_t);
 
-#[repr(C)]
+#[repr(u32)]
 #[derive(Copy, Clone)]
 pub enum FontType {
     Default = 0,
-    Greyscale = ffi::TCOD_FONT_TYPE_GREYSCALE as isize,
+    Greyscale = ffi::TCOD_font_flags_t::TCOD_FONT_TYPE_GREYSCALE as u32,
 }
+native_enum_convert!(FontType, TCOD_font_flags_t);
 
 
 

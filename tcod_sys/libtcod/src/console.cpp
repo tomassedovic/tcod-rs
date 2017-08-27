@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -240,6 +240,16 @@ void TCODConsole::vline(int x,int y, int l, TCOD_bkgnd_flag_t flag) {
 	TCOD_console_vline(data,x,y,l,flag);
 }
 
+/*
+TCODImage *TCODConsole::getForegroundColorImage() {
+	return new TCODImage(TCOD_console_get_foreground_color_image(data));
+}
+
+TCODImage *TCODConsole::getBackgroundColorImage() {
+	return new TCODImage(TCOD_console_get_background_color_image(data));
+}
+*/
+
 void TCODConsole::printFrame(int x,int y,int w,int h, bool empty, TCOD_bkgnd_flag_t flag, const char *fmt , ...) {
 	if ( fmt ) {
 		va_list ap;
@@ -319,14 +329,6 @@ int TCODConsole::getHeightRect(int x, int y, int w, int h, const char *fmt, ...)
 	return ret;
 }
 
-void TCODConsole::setKeyboardRepeat(int initialDelay,int interval) {
-	TCOD_console_set_keyboard_repeat(initialDelay,interval);
-}
-
-void TCODConsole::disableKeyboardRepeat() {
-	TCOD_console_disable_keyboard_repeat();
-}
-
 bool TCODConsole::isKeyPressed(TCOD_keycode_t key) {
 	return TCOD_console_is_key_pressed(key) != 0;
 }
@@ -397,7 +399,7 @@ int TCODConsole::getHeightRect(int x, int y, int w, int h, const wchar_t *fmt, .
 	return ret;
 }
 
-// color control string formating utilities for swigged language
+// color control string formatting utilities for swigged language
 
 // ctrl = TCOD_COLCTRL_1...TCOD_COLCTRL_5 or TCOD_COLCTRL_STOP
 #define NB_BUFFERS 10

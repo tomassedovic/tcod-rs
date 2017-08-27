@@ -1,4 +1,4 @@
-use bindings::ffi;
+use bindings::ffi::{self, TCOD_fov_algorithm_t};
 use bindings::{AsNative, c_bool};
 
 pub struct Map {
@@ -43,7 +43,7 @@ impl Map {
         unsafe {
             ffi::TCOD_map_compute_fov(self.tcod_map, origin_x, origin_y, max_radius,
                                      light_walls as c_bool,
-                                     algo as u32);
+                                     algo.into());
         }
     }
 
@@ -80,20 +80,21 @@ impl Drop for Map {
     }
 }
 
-#[repr(C)]
+#[repr(u32)]
 #[derive(Copy, Clone, Debug)]
 pub enum FovAlgorithm {
-    Basic       = ffi::FOV_BASIC as isize,
-    Diamond     = ffi::FOV_DIAMOND as isize,
-    Shadow      = ffi::FOV_SHADOW as isize,
-    Permissive0 = ffi::FOV_PERMISSIVE_0 as isize,
-    Permissive1 = ffi::FOV_PERMISSIVE_1 as isize,
-    Permissive2 = ffi::FOV_PERMISSIVE_2 as isize,
-    Permissive3 = ffi::FOV_PERMISSIVE_3 as isize,
-    Permissive4 = ffi::FOV_PERMISSIVE_4 as isize,
-    Permissive5 = ffi::FOV_PERMISSIVE_5 as isize,
-    Permissive6 = ffi::FOV_PERMISSIVE_6 as isize,
-    Permissive7 = ffi::FOV_PERMISSIVE_7 as isize,
-    Permissive8 = ffi::FOV_PERMISSIVE_8 as isize,
-    Restrictive = ffi::FOV_RESTRICTIVE as isize,
+    Basic       = ffi::TCOD_fov_algorithm_t::FOV_BASIC as u32,
+    Diamond     = ffi::TCOD_fov_algorithm_t::FOV_DIAMOND as u32,
+    Shadow      = ffi::TCOD_fov_algorithm_t::FOV_SHADOW as u32,
+    Permissive0 = ffi::TCOD_fov_algorithm_t::FOV_PERMISSIVE_0 as u32,
+    Permissive1 = ffi::TCOD_fov_algorithm_t::FOV_PERMISSIVE_1 as u32,
+    Permissive2 = ffi::TCOD_fov_algorithm_t::FOV_PERMISSIVE_2 as u32,
+    Permissive3 = ffi::TCOD_fov_algorithm_t::FOV_PERMISSIVE_3 as u32,
+    Permissive4 = ffi::TCOD_fov_algorithm_t::FOV_PERMISSIVE_4 as u32,
+    Permissive5 = ffi::TCOD_fov_algorithm_t::FOV_PERMISSIVE_5 as u32,
+    Permissive6 = ffi::TCOD_fov_algorithm_t::FOV_PERMISSIVE_6 as u32,
+    Permissive7 = ffi::TCOD_fov_algorithm_t::FOV_PERMISSIVE_7 as u32,
+    Permissive8 = ffi::TCOD_fov_algorithm_t::FOV_PERMISSIVE_8 as u32,
+    Restrictive = ffi::TCOD_fov_algorithm_t::FOV_RESTRICTIVE as u32,
 }
+native_enum_convert!(FovAlgorithm, TCOD_fov_algorithm_t);

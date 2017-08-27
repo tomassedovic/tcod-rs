@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -38,7 +38,7 @@ typedef struct {
 	int offset; /* current reading position */
 } zip_data_t;
 
-TCOD_zip_t TCOD_zip_new() {
+TCOD_zip_t TCOD_zip_new(void) {
 	zip_data_t *ret=(zip_data_t *)calloc(sizeof(zip_data_t),1);
 	return (TCOD_zip_t)ret;
 }
@@ -157,7 +157,7 @@ void TCOD_zip_put_console(TCOD_zip_t zip, const TCOD_console_t val) {
 int TCOD_zip_save_to_file(TCOD_zip_t pzip, const char *filename) {
 	zip_data_t *zip=(zip_data_t *)pzip;
 	gzFile f=gzopen(filename,"wb");
-	int l=zip->bsize;
+	int l=zip->bsize, ret;
 	void *buf;
 	if (!f) return 0;
 	gzwrite(f,&l,sizeof(int));
@@ -169,11 +169,18 @@ int TCOD_zip_save_to_file(TCOD_zip_t pzip, const char *filename) {
 		/* send remaining bytes from ibuffer to buffer */
 		if (!zip->buffer) zip->buffer=TCOD_list_new();
 		TCOD_list_push(zip->buffer,(void *)zip->ibuffer);
-		zip->isize=zip->ibuffer=0;
+		zip->isize = 0;
+		zip->ibuffer = 0;
 	}
 	buf=(void *)TCOD_list_begin(zip->buffer);
-	l=gzwrite(f,buf,l);
-	gzclose(f);
+	ret=gzwrite(f,buf,l);
+	if (ret != l) {
+		gzclose(f);
+		return 0;
+	}
+	ret=gzclose(f);
+	if (ret != Z_OK)
+		return 0;
 	return l;
 }
 

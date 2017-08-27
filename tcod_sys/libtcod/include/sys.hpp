@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -233,7 +233,7 @@ public :
 	@PageName system_filesystem
 	@PageFather system
 	@PageTitle Filesystem utilities
-	@PageDesc Those are a few function that cannot be easily implemented in a portable way in C/C++. They have no python wrapper since python provides its own builtin functions. All those functions return false if an error occured.
+	@PageDesc Those are a few function that cannot be easily implemented in a portable way in C/C++. They have no Python wrapper since Python provides its own builtin functions. All those functions return false if an error occurred.
 	@FuncTitle Create a directory
 	@Cpp static bool TCODSystem::createDirectory(const char *path)
 	@C bool TCOD_sys_create_directory(const char *path)
@@ -384,7 +384,7 @@ public :
 	/**
 	@PageName system_sdlcbk
 	@FuncTitle Managing screen redraw
-	@FuncDesc libtcod is not aware of the part of the screen your SDL renderer has updated. If no change occured in the console, it won't redraw them except if you tell him to do so with this function
+	@FuncDesc libtcod is not aware of the part of the screen your SDL renderer has updated. If no change occurred in the console, it won't redraw them except if you tell him to do so with this function
 	@Cpp void TCODConsole::setDirty(int x, int y, int w, int h)
 	@C void TCOD_console_set_dirty(int x, int y, int w, int h)
 	@Py TCOD_console_set_dirty(x, y, w, h)
@@ -498,20 +498,24 @@ public :
 	/**
 	@PageName system_clipboard
 	@PageTitle Clipboard integration
-	@PageDesc With these functions, you can copy data in your OS' clipboard from the game or retrieve data from the clipboard.
+	@PageDesc With these functions, you can copy data in your operating system's clipboard from the game or retrieve data from the clipboard.
 	@PageFather system
-	@FuncTitle Copy data to the clipboard
-	@Cpp static void TCODSystem::setClipboard(const char *value)
-	@C void TCOD_sys_clipboard_set(const char *value)
-	@Param value Text to copy in the clipboard
+	@FuncTitle Set current clipboard contents
+	@FuncDesc Takes UTF-8 text and copies it into the system clipboard.  On Linux, because an application cannot access the system clipboard unless a window is open, if no window is open the call will do nothing.
+	@Cpp static bool TCODSystem::setClipboard(const char *value)
+	@C bool TCOD_sys_clipboard_set(const char *value)
+	@Py sys_clipboard_set(value)
+	@Param value UTF-8 text to copy into the clipboard
 	*/
-	static void setClipboard(const char *value);
+	static bool setClipboard(const char *value);
 
 	/**
 	@PageName system_clipboard
-	@FuncTitle Paste data from the clipboard
+	@FuncTitle Get current clipboard contents
+	@FuncDesc Returns the UTF-8 text currently in the system clipboard.  On Linux, because an application cannot access the system clipboard unless a window is open, if no window is open an empty string will be returned.  For C and C++, note that the pointer is borrowed, and libtcod will take care of freeing the memory.
 	@Cpp static char *TCODSystem::getClipboard()
 	@C char *TCOD_sys_clipboard_get()
+	@Py sys_clipboard_get() # Returns UTF-8 string
 	*/
 	static char *getClipboard();
 

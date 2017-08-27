@@ -49,6 +49,9 @@
 
 #[cfg(test)] extern crate serde_json;
 
+#[macro_use]
+mod macros;
+
 pub use bindings::{AsNative, FromNative};
 pub use colors::Color;
 pub use console::{Console, RootInitializer, BackgroundFlag, Renderer, FontLayout, FontType, TextAlignment};
@@ -69,6 +72,7 @@ pub mod random;
 pub mod system;
 
 mod bindings;
+#[macro_use]
 mod console_macros;
 #[cfg(feature = "rustc-serialize")]
 mod rustc_serialize_impls;

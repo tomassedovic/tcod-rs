@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -28,6 +28,9 @@
 #ifndef _TCOD_CONSOLE_HPP
 #define _TCOD_CONSOLE_HPP
 
+class TCODConsole;
+
+#include "image.hpp"
 #include "console_types.h"
 
 /**
@@ -44,7 +47,7 @@ Classic real time game loop:
 			TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS,&key,NULL);
 			updateWorld (key, TCODSystem::getLastFrameLength());
 			// updateWorld(TCOD_key_t key, float elapsed) (using key if key.vk != TCODK_NONE)
-			// use elapsed to scale any update that is time dependant.
+			// use elapsed to scale any update that is time dependent.
 			// ... draw world+GUI on TCODConsole::root
 			TCODConsole::flush();
 		}
@@ -104,7 +107,7 @@ public :
 		You can change the font by calling TCODConsole::setCustomFont before calling initRoot.
 	@Param title title of the window. It's not visible when you are in fullscreen.
 		Note 1 : you can dynamically change the window title with TCODConsole::setWindowTitle
-	@Param fullscreen wether you start in windowed or fullscreen mode.
+	@Param fullscreen whether you start in windowed or fullscreen mode.
 		Note 1 : you can dynamically change this mode with TCODConsole::setFullscreen
 		Note 2 : you can get current mode with TCODConsole::isFullscreen
 	@Param renderer which renderer to use. Possible values are :
@@ -113,7 +116,7 @@ public :
     * TCOD_RENDERER_SDL : should work everywhere!
 		Note 1: if you select a renderer that is not supported by the player's machine, libtcod scan the lower renderers until it finds a working one.
 		Note 2: on recent video cards, GLSL results in up to 900% increase of framerates in the true color sample compared to SDL renderer.
-		Note 3: whatever renderer you use, it can always be overriden by the player through the libtcod.cfg file.
+		Note 3: whatever renderer you use, it can always be overridden by the player through the libtcod.cfg file.
 		Note 4: you can dynamically change the renderer after calling initRoot with TCODSystem::setRenderer.
 		Note 5: you can get current renderer with TCODSystem::getRenderer. It might be different from the one you set in initRoot in case it's not supported on the player's computer.
 	@CppEx TCODConsole::initRoot(80, 50, "The Chronicles Of Doryen v0.1");
@@ -174,7 +177,7 @@ public :
 		TCOD_FONT_LAYOUT_ASCII_INROW : characters in ASCII order, code 0-15 in the first row
 		TCOD_FONT_LAYOUT_TCOD : simplified layout. See examples below.
 		TCOD_FONT_TYPE_GREYSCALE : create an anti-aliased font from a greyscale bitmap
-		For python, remove TCOD _ :
+		For Python, remove TCOD _ :
 		libtcod.FONT_LAYOUT_ASCII_INCOL
 	@Param nbCharHoriz,nbCharVertic Number of characters in the font.
 		Should be 16x16 for ASCII layouts, 32x8 for TCOD layout.
@@ -311,7 +314,7 @@ public :
 	/**
 	@PageName console_window
 	@FuncTitle Handling "close window" events
-	@FuncDesc When you start the program, this returns false. Once a "close window" event has been sent by the window manager, it will allways return true. You're supposed to exit cleanly the game.
+	@FuncDesc When you start the program, this returns false. Once a "close window" event has been sent by the window manager, it will always return true. You're supposed to exit cleanly the game.
 	@Cpp static bool TCODConsole::isWindowClosed()
 	@C bool TCOD_console_is_window_closed()
 	@Py console_is_window_closed()
@@ -410,7 +413,7 @@ public :
 	/**
 	@PageName console_credits
 	@FuncTitle Restart the credits animation
-	@FuncDesc When using rederCredits, you can restart the credits animation from the begining before it's finished by calling this function.
+	@FuncDesc When using rederCredits, you can restart the credits animation from the beginning before it's finished by calling this function.
 	@Cpp static void TCODConsole::resetCredits()
 	@C void TCOD_console_credits_reset()
 	@Py console_credits_reset()
@@ -601,7 +604,7 @@ public :
 		TCOD_BKGND_ALPHA(alpha) : newbk = (1.0f-alpha)*oldbk + alpha*(curbk-oldbk)
 		TCOD_BKGND_DEFAULT : use the console's default background flag
 		Note that TCOD_BKGND_ALPHA and TCOD_BKGND_ADDALPHA are MACROS that needs a float parameter between (0.0 and 1.0). TCOD_BKGND_ALPH and TCOD_BKGND_ADDA should not be used directly (else they will have the same effect as TCOD_BKGND_NONE).
-		For python, remove TCOD_ : libtcod.BKGND_NONE
+		For Python, remove TCOD_ : libtcod.BKGND_NONE
 		For C# : None, Set, Multiply, Lighten, Darken, Screen, ColodDodge, ColorBurn, Add, Burn Overlay, Default
 		With lua, use tcod.None, ..., tcod.Default, BUT tcod.console.Alpha(value) and tcod.console.AddAlpha(value)
 	*/
@@ -642,7 +645,7 @@ public :
 	@FuncTitle Setting the default alignment
 	@FuncDesc This function defines the default alignment (see TCOD_alignment_t) for the console.
 		This default alignment is used by several functions (print, printRect, ...).
-		Values for alignment : TCOD_LEFT, TCOD_CENTER, TCOD_RIGHT (in python, remove TCOD_ : libtcod.LEFT).
+		Values for alignment : TCOD_LEFT, TCOD_CENTER, TCOD_RIGHT (in Python, remove TCOD_ : libtcod.LEFT).
 		For C# and Lua : LeftAlignment, RightAlignment, CenterAlignment
 	@Cpp void TCODConsole::setAlignment(TCOD_alignment_t alignment)
 	@C void TCOD_console_set_alignment(TCOD_console_t con,TCOD_bkgnd_flag_t alignment)
@@ -659,7 +662,7 @@ public :
 	@FuncTitle Getting the default alignment
 	@FuncDesc This function returns the default alignment (see TCOD_alignment_t) for the console.
 		This default mode is used by several functions (print, printRect, ...).
-		Values for alignment : TCOD_LEFT, TCOD_CENTER, TCOD_RIGHT (in python, remove TCOD_ : libtcod.LEFT).
+		Values for alignment : TCOD_LEFT, TCOD_CENTER, TCOD_RIGHT (in Python, remove TCOD_ : libtcod.LEFT).
 		For C# and Lua : LeftAlignment, RightAlignment, CenterAlignment
 	@Cpp TCOD_alignment_t TCODConsole::getAlignment() const
 	@C TCOD_alignment_t TCOD_console_get_alignment(TCOD_console_t con)
@@ -784,7 +787,7 @@ public :
 		The TCOD library offers a simpler way to do this, allowing you to draw a string using different colors in a single call. For this, you have to insert color control codes in your string.
 		A color control code is associated with a color set (a foreground color and a background color). If you insert this code in your string, the next characters will use the colors associated with the color control code.
 		There are 5 predefined color control codes :
-		For python, remove TCOD_ : libtcod.COLCTRL_1
+		For Python, remove TCOD_ : libtcod.COLCTRL_1
 			TCOD_COLCTRL_1
 			TCOD_COLCTRL_2
 			TCOD_COLCTRL_3
@@ -849,7 +852,7 @@ public :
 	@PageName console_print
 	@FuncTitle Unicode functions
 	@FuncDesc those functions are similar to their ASCII equivalent, but work with unicode strings (wchar_t in C/C++).
-		Note that unicode is not supported in the python wrapper.
+		Note that unicode is not supported in the Python wrapper.
 	@Cpp static void TCODConsole::mapStringToFont(const wchar_t *s, int fontCharX, int fontCharY)
 	@C void TCOD_console_map_string_to_font_utf(const wchar_t *s, int fontCharX, int fontCharY)
 	*/
@@ -989,10 +992,30 @@ public :
 	@Param clear if true, all characters inside the rectangle are set to ASCII code 32 (space).
 		If false, only the background color is modified
 	@Param flag this flag defines how the cell's background color is modified. See TCOD_bkgnd_flag_t
-	@Param fmt if NULL, the funtion only draws a rectangle.
+	@Param fmt if NULL, the function only draws a rectangle.
 		Else, printf-like format string, eventually followed by parameters. You can use control codes to change the colors inside the string.
 	*/
 	void printFrame(int x,int y,int w,int h, bool clear=true, TCOD_bkgnd_flag_t flag = TCOD_BKGND_DEFAULT, const char *fmt=NULL, ...);
+
+	/**
+	@PageName console_advanced
+	@FuncTitle Manipulating foreground colors as an image
+	@FuncDesc This function obtains the image containing the console foreground colors.
+	@Cpp TCODImage *TCODConsole::getForegroundImage()
+	@C TCOD_image_t TCOD_console_get_foreground_color_image(TCOD_console_t con)
+	@Py console_get_foreground_image(con)
+	*/
+	TCODImage *getForegroundColorImage();
+
+	/**
+	@PageName console_advanced
+	@FuncTitle Manipulating background colors as an image
+	@FuncDesc This function obtains the image containing the console background colors.
+	@Cpp TCODImage *TCODConsole::getBackgroundImage()
+	@C TCOD_image_t TCOD_console_get_background_color_image(TCOD_console_t con)
+	@Py console_get_background_image(con)
+	*/
+	TCODImage *getBackgroundColorImage();
 
 	/**
 	@PageName console_read
@@ -1175,7 +1198,7 @@ public :
 	@PageName console_ascii
 	@PageTitle ASCII constants
 	@PageFather console_draw
-	@FuncDesc Some useful graphic characters in the terminal.bmp font. For the python version, remove TCOD_ from the constants. C# and Lua is in parenthesis :
+	@FuncDesc Some useful graphic characters in the terminal.bmp font. For the Python version, remove TCOD_ from the constants. C# and Lua is in parenthesis :
 		Single line walls:
 		TCOD_CHAR_HLINE=196 (HorzLine)
 		TCOD_CHAR_VLINE=179 (VertLine)
@@ -1305,7 +1328,7 @@ public :
 	@PageName console_non_blocking_input
 	@PageTitle Non blocking user input
 	@PageFather console_input
-	@FuncDesc The prefered way to check for user input is to use checkForEvent below, but you can also get the status of any special key at any time with :
+	@FuncDesc The preferred way to check for user input is to use checkForEvent below, but you can also get the status of any special key at any time with :
 	@Cpp static bool TCODConsole::isKeyPressed(TCOD_keycode_t key)
 	@C bool TCOD_console_is_key_pressed(TCOD_keycode_t key)
 	@Py console_is_key_pressed(key)
@@ -1314,30 +1337,6 @@ public :
 	@Param key Any key code defined in keycode_t except TCODK_CHAR (Char) and TCODK_NONE (NoKey)
 	*/
 	static bool isKeyPressed(TCOD_keycode_t key);
-	/**
-	@PageName console_keyboard_repeat
-	@PageTitle Changing keyboard repeat delay
-	@PageFather console_input
-	@FuncDesc This function changes the keyboard repeat times.
-	@Cpp static void TCODConsole::setKeyboardRepeat(int initialDelay, int interval)
-	@C void TCOD_console_set_keyboard_repeat(int initial_delay, int interval)
-	@Py console_set_keyboard_repeat(initial_delay, interval)
-	@C# static void TCODConsole::setKeyboardRepeat(int initialDelay, int interval)
-	@Lua tcod.console.setKeyboardRepeat(initialDelay, interval)
-	@Param initialDelay delay in millisecond between the time when a key is pressed, and keyboard repeat begins. If 0, keyboard repeat is disabled
-	@Param interval interval in millisecond between keyboard repeat events
-	*/
-	static void setKeyboardRepeat(int initialDelay,int interval);
-	/**
-	@PageName console_keyboard_repeat
-	@FuncDesc You can also disable the keyboard repeat feature with this function (it's equivalent to setKeyboardRepeat(0,0) ).
-	@Cpp static void TCODConsole::disableKeyboardRepeat()
-	@C void TCOD_console_disable_keyboard_repeat()
-	@Py console_disable_keyboard_repeat()
-	@C# static void TCODConsole::disableKeyboardRepeat()
-	@Lua tcod.console.disableKeyboardRepeat()
-	*/
-	static void disableKeyboardRepeat();
 
 	/**
 	@PageName console_key_t
@@ -1348,29 +1347,38 @@ public :
 		typedef struct {
 			TCOD_keycode_t vk;
 			char c;
+			char text[32];
 			bool pressed;
 			bool lalt;
 			bool lctrl;
+			bool lmeta;
 			bool ralt;
 			bool rctrl;
+			bool rmeta;
 			bool shift;
 		} TCOD_key_t;
 	@Lua
 		key.KeyCode
 		key.Character
+		key.Text
 		key.Pressed
 		key.LeftAlt
 		key.LeftControl
+		key.LeftMeta
 		key.RightAlt
 		key.RightControl
+		key.RightMeta
 		key.Shift
 	@Param vk An arbitrary value representing the physical key on the keyboard. Possible values are stored in the TCOD_keycode_t enum. If no key was pressed, the value is TCODK_NONE
 	@Param c If the key correspond to a printable character, the character is stored in this field. Else, this field contains 0.
+	@Param text If vk is TCODK_TEXT, this will contain the text entered by the user.
 	@Param pressed true if the event is a key pressed, or false for a key released.
 	@Param lalt This field represents the status of the left Alt key : true => pressed, false => released.
 	@Param lctrl This field represents the status of the left Control key : true => pressed, false => released.
+	@Param lmeta This field represents the status of the left Meta (Windows/Command/..) key : true => pressed, false => released.
 	@Param ralt This field represents the status of the right Alt key : true => pressed, false => released.
 	@Param rctrl This field represents the status of the right Control key : true => pressed, false => released.
+	@Param rmeta This field represents the status of the right Meta (Windows/Command/..) key : true => pressed, false => released.
 	@Param shift This field represents the status of the shift key : true => pressed, false => released.
 	*/
 
@@ -1378,7 +1386,7 @@ public :
 	@PageName console_mouse_t
 	@PageTitle Mouse event structure
 	@PageFather console_input
-	@PageDesc This tructure contains information about a mouse move/press/release event.
+	@PageDesc This structure contains information about a mouse move/press/release event.
 	@C
 		typedef struct {
 		  int x,y;
@@ -1413,7 +1421,7 @@ public :
 	@PageTitle 	Key codes
 	@PageFather console_input
 	@PageDesc TCOD_keycode_t is a libtcod specific code representing a key on the keyboard.
-		For python, replace TCODK by KEY: libtcod.KEY_NONE. C# and Lua, the value is in parenthesis. Possible values are :
+		For Python, replace TCODK by KEY: libtcod.KEY_NONE. C# and Lua, the value is in parenthesis. Possible values are :
 		When no key was pressed (see checkForEvent) : TCOD_NONE (NoKey)
 		Special keys :
 		TCODK_ESCAPE (Escape)

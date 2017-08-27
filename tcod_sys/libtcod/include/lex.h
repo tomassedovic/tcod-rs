@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -75,7 +75,7 @@ typedef struct {
 	bool savept; /* is this object a savepoint (no free in destructor) */	
 } TCOD_lex_t;
 
-TCODLIB_API TCOD_lex_t *TCOD_lex_new_intern();
+TCODLIB_API TCOD_lex_t *TCOD_lex_new_intern(void);
 TCODLIB_API TCOD_lex_t *TCOD_lex_new(const char **symbols, const char **keywords, const char *simpleComment, 
 		const char *commentStart, const char *commentStop, const char *javadocCommentStart, const char *stringDelim, int flags);
 TCODLIB_API void TCOD_lex_delete(TCOD_lex_t *lex);
@@ -94,7 +94,7 @@ TCODLIB_API void TCOD_lex_savepoint(TCOD_lex_t *lex,TCOD_lex_t *savept);
 TCODLIB_API void TCOD_lex_restore(TCOD_lex_t *lex,TCOD_lex_t *savept);
 TCODLIB_API char *TCOD_lex_get_last_javadoc(TCOD_lex_t *lex);
 TCODLIB_API const char *TCOD_lex_get_token_name(int token_type);
-TCODLIB_API char *TCOD_lex_get_last_error();
+TCODLIB_API char *TCOD_lex_get_last_error(void);
 
 TCODLIB_API int TCOD_lex_hextoint(char c);
 

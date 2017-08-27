@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -320,7 +320,7 @@ coef should be between 0.0 and 1.0 but you can as well use other values
 	@Py color_set_hsv(c,h,s,v)
 	@C# void TCODColor::setHSV(float h, float s, float v)
 	@Lua Color:setHSV( h, s ,v )
-	@Param c In the C and python versions, the color to modify
+	@Param c In the C and Python versions, the color to modify
 	@Param h,s,v Color components in the HSV space
 		0.0 <= h < 360.0
 		0.0 <= s <= 1.0
@@ -345,7 +345,7 @@ coef should be between 0.0 and 1.0 but you can as well use other values
 		Color:setSaturation(s)
 		Color:setValue(v)
 	@Param h,s,v	Color components in the HSV space
-	@Param c	In the C and python versions, the color to modify
+	@Param c	In the C and Python versions, the color to modify
 	*/
 	void setHue (float h);
 	void setSaturation (float s);
@@ -359,7 +359,7 @@ coef should be between 0.0 and 1.0 but you can as well use other values
 	@Py color_get_HSV(c) # returns [h,s,v]
 	@C# void TCODColor::getHSV(out float h, out float s, out float v)
 	@Lua Color:getHSV() -- returns h,s,v
-	@Param c	In the C and python versions, the TCOD_color_t from which to read.
+	@Param c	In the C and Python versions, the TCOD_color_t from which to read.
 	@Param  h,s,v	Color components in the HSV space
 		0.0 <= h < 360.0
 		0.0 <= s <= 1.0

@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -24,6 +24,7 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -31,11 +32,8 @@
 #include <sys/stat.h>
 #include <string.h>
 
-#if defined (__linux) && ! defined (__ANDROID__) || defined (__FreeBSD__)
-/* X11 stuff for clipboard support */
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#elif defined (__APPLE__) && defined (__MACH__)
+#if defined (__APPLE__) && defined (__MACH__)
+/* Is this necessary now the custom clipboard stuff is gone? */
 #include <ApplicationServices/ApplicationServices.h>
 #endif
 #include "libtcod.h"
@@ -184,7 +182,7 @@ static DWORD CountSetBits(ULONG_PTR bitMask)
 }
 #endif
 
-int TCOD_sys_get_num_cores() {
+int TCOD_sys_get_num_cores(void) {
 #ifdef TCOD_WINDOWS
 	/* what a crap !!! works only on xp sp3 & vista */
 	typedef enum _PROCESSOR_CACHE_TYPE {
@@ -407,7 +405,7 @@ void TCOD_semaphore_delete( TCOD_semaphore_t sem)
 }
 
 #ifdef TCOD_WINDOWS
-/* poor win32 api has no thread conditions */
+/* poor win32 API has no thread conditions */
 typedef struct {
 	int nbSignals;
 	int nbWaiting;
@@ -417,7 +415,7 @@ typedef struct {
 } cond_t;
 #endif
 
-TCOD_cond_t TCOD_condition_new() {
+TCOD_cond_t TCOD_condition_new(void) {
 #ifdef TCOD_WINDOWS
 	cond_t *ret = (cond_t *)calloc(sizeof(cond_t),1);
 	ret->mutex = TCOD_mutex_new();
@@ -520,151 +518,19 @@ void TCOD_condition_delete( TCOD_cond_t pcond) {
 #endif
 }
 
-/*clipboard stuff */
-#ifdef TCOD_WINDOWS
-void TCOD_sys_clipboard_set(const char *value)
-{
-    HGLOBAL clipbuffer;
-    char * buffer;
-	if (!OpenClipboard(0) || ! value) return;
-    EmptyClipboard();
-    clipbuffer = GlobalAlloc(GMEM_DDESHARE, strlen(value)+1);
-    buffer = (char*)GlobalLock(clipbuffer);
-	strcpy(buffer, value);
-    GlobalUnlock(clipbuffer);
-    SetClipboardData(CF_TEXT, clipbuffer);
-    CloseClipboard();
-}
-
-char *TCOD_sys_clipboard_get()
-{
-    char * buffer = NULL;
-    HANDLE hData;
-	if (!OpenClipboard(NULL)) return 0;
-    hData = GetClipboardData( CF_TEXT );
-    buffer = (char*)GlobalLock( hData );
-    GlobalUnlock( hData );
-    CloseClipboard();
-    return buffer;
-}
-#elif defined(TCOD_MACOSX)
-void TCOD_sys_clipboard_set(const char *value)
-{
-	PasteboardRef clipboard;
-  if (PasteboardCreate(kPasteboardClipboard, &clipboard) != noErr) return;
-  if (PasteboardClear(clipboard) != noErr) {
-      CFRelease(clipboard);
-      return;
-  }
-	size_t len = strlen(value);
-  CFDataRef data = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
-																					(const UInt8 *)value,
-                                          len, kCFAllocatorNull);
-  if (data == NULL) {
-      CFRelease(clipboard);
-      return;
-  }
-  OSStatus err;
-  err = PasteboardPutItemFlavor(clipboard, NULL, kUTTypePlainText, data, 0);
-  CFRelease(clipboard);
-  CFRelease(data);
-}
-
-char clipboardText[256];
-
-char *TCOD_sys_clipboard_get()
-{
-	PasteboardSyncFlags syncFlags;
-	ItemCount itemCount;
-	PasteboardRef clipboard;
-	UInt32 itemIndex;
-	if (PasteboardCreate(kPasteboardClipboard, &clipboard) != noErr) return NULL;
-	syncFlags = PasteboardSynchronize(clipboard);
-	if (PasteboardGetItemCount(clipboard, &itemCount) != noErr) return NULL;
-	if (itemCount == 0) return NULL;
-	for(itemIndex = 1; itemIndex <= itemCount; itemIndex++) {
-		PasteboardItemID itemID;
-		CFArrayRef flavorTypeArray;
-		CFIndex flavorCount;
-		CFIndex flavorIndex;
-		if (PasteboardGetItemIdentifier(clipboard, itemIndex, &itemID ) != noErr) return NULL;
-		if (PasteboardCopyItemFlavors(clipboard, itemID, &flavorTypeArray) != noErr) return NULL;
-		flavorCount = CFArrayGetCount(flavorTypeArray);
-		for(flavorIndex = 0; flavorIndex < flavorCount; flavorIndex++) {
-        CFStringRef flavorType;
-        CFDataRef flavorData;
-        CFIndex flavorDataSize;
-				flavorType = (CFStringRef)CFArrayGetValueAtIndex(flavorTypeArray, flavorIndex);
-				if (UTTypeConformsTo(flavorType, CFSTR("public.plain-text"))) {
-						if (PasteboardCopyItemFlavorData(clipboard, itemID, flavorType, &flavorData) != noErr) {
-							CFRelease(flavorData);
-							return NULL;
-						}
-						flavorDataSize = CFDataGetLength( flavorData );
-						flavorDataSize = (flavorDataSize<254) ? flavorDataSize : 254;
-						short dataIndex;
-	          for(dataIndex = 0; dataIndex <= flavorDataSize; dataIndex++) {
-	             clipboardText[dataIndex] = *(CFDataGetBytePtr(flavorData) + dataIndex);
-	          }
-	          clipboardText[flavorDataSize] = '\0';
-	          clipboardText[flavorDataSize+1] = '\n';
-						CFRelease (flavorData);
-	     }
-		}
-	}
-	return clipboardText;
-}
-#elif defined(TCOD_HAIKU) || defined(__ANDROID__)
-/* TODO */
-void TCOD_sys_clipboard_set(const char *value)
-{
-}
-char *TCOD_sys_clipboard_get()
-{
-	return "";
-}
-#else
-static Display *dpy=NULL;
-void TCOD_sys_clipboard_set(const char *value)
-{
-	if ( ! value ) return;
-	if (!dpy ) dpy = XOpenDisplay(NULL);
-	XStoreBytes(dpy,value,strlen(value)+1);
-	/* doesn't seem to work without this... */
-	int len;
-	char *xbuf = XFetchBytes(dpy,&len);
-	XFree(xbuf);
-}
-
-char *TCOD_sys_clipboard_get()
-{
-	int len;
-	if (!dpy ) dpy = XOpenDisplay(NULL);
-	char *xbuf = XFetchBytes(dpy,&len);
-	if (! xbuf ) return NULL;
-	char *ret=strdup(xbuf);
-	XFree(xbuf);
-	return ret;
-}
-#endif
-
-
 /* library initialization function */
 #ifdef TCOD_WINDOWS
 BOOL APIENTRY DllMain( HINSTANCE hModule, DWORD reason, LPVOID reserved) {
 	switch (reason ) {
-		/* case DLL_PROCESS_ATTACH : TCOD_sys_startup(); break;  -- not safe, locks up in SDL2/RegisterClass call */
+		case DLL_PROCESS_ATTACH : TCOD_sys_startup(); break;
 		default : break;
 	}
 	return TRUE;
 }
 #else
-/* JBR03202012 Presumably there was a reason for this being if !MACOSOX, but it works fine for me
-	#ifndef TCOD_MACOSX */
-	void __attribute__ ((constructor)) DllMain() {
-		/* TCOD_sys_startup(); */
+	void __attribute__ ((constructor)) DllMain(void) {
+		TCOD_sys_startup();
 	}
-/*	#endif */
 #endif
 
 /* dynamic library support */

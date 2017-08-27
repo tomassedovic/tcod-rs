@@ -2,20 +2,22 @@
 //!
 //! Rust bindings follow the original API pretty closely.
 
-use bindings::ffi;
+use bindings::ffi::{self, TCOD_noise_type_t};
 use bindings::AsNative;
 
 use random::Rng;
 
 /// Available noise types.
-#[repr(C)]
+#[repr(u32)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum NoiseType {
-    Default = ffi::TCOD_NOISE_DEFAULT as isize,
-    Perlin  = ffi::TCOD_NOISE_PERLIN as isize,
-    Simplex = ffi::TCOD_NOISE_SIMPLEX as isize,
-    Wavelet = ffi::TCOD_NOISE_WAVELET as isize,
+    Default = ffi::TCOD_noise_type_t::TCOD_NOISE_DEFAULT as u32,
+    Perlin  = ffi::TCOD_noise_type_t::TCOD_NOISE_PERLIN as u32,
+    Simplex = ffi::TCOD_noise_type_t::TCOD_NOISE_SIMPLEX as u32,
+    Wavelet = ffi::TCOD_noise_type_t::TCOD_NOISE_WAVELET as u32,
 }
+native_enum_convert!(NoiseType, TCOD_noise_type_t);
+
 
 /// Noise object encapsulates a noise generator.
 #[derive(Debug)]
@@ -42,7 +44,7 @@ impl Noise {
 
     pub fn set_type(&self, noise_type: NoiseType) {
         unsafe {
-            ffi::TCOD_noise_set_type(self.noise, noise_type as u32)
+            ffi::TCOD_noise_set_type(self.noise, noise_type.into())
         }
     }
 
@@ -58,7 +60,7 @@ impl Noise {
         unsafe {
             ffi::TCOD_noise_get_ex(self.noise,
                                    coords.as_mut().as_mut_ptr(),
-                                   noise_type as u32)
+                                   noise_type.into())
         }
     }
 
@@ -79,7 +81,7 @@ impl Noise {
             ffi::TCOD_noise_get_fbm_ex(self.noise,
                                        coords.as_mut().as_mut_ptr(),
                                        octaves as f32,
-                                       noise_type as u32)
+                                       noise_type.into())
         }
     }
 
@@ -102,7 +104,7 @@ impl Noise {
             ffi::TCOD_noise_get_turbulence_ex(self.noise,
                                               coords.as_mut().as_mut_ptr(),
                                               octaves as f32,
-                                              noise_type as u32)
+                                              noise_type.into())
         }
     }
 }
@@ -167,7 +169,7 @@ impl NoiseInitializer {
                                            self.lacunarity, *self.random.as_native()),
                 dimensions: self.dimensions,
             };
-            ffi::TCOD_noise_set_type(noise.noise, self.noise_type as u32);
+            ffi::TCOD_noise_set_type(noise.noise, self.noise_type.into());
             noise
         }
     }

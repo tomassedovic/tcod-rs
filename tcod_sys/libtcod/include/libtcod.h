@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -37,7 +37,7 @@
 /* os identification
    TCOD_WINDOWS : OS is windows
    TCOD_LINUX : OS is Linux
-   TCOD_MACOSX : OS is Mac OS X 
+   TCOD_MACOSX : OS is Mac OS X
    TCOD_HAIKU : OS is Haiku */
 
 /* compiler identification
@@ -66,7 +66,12 @@
 #elif defined( __MINGW32__ )
 #  define TCOD_WINDOWS
 #  define TCOD_MINGW32
-#  define TCOD_WIN32
+#  ifdef _WIN64
+#    define TCOD_WIN64
+#    define TCOD_64BITS
+#  else
+#    define TCOD_WIN32
+#  endif
 #elif defined( __HAIKU__ )
 #  define TCOD_HAIKU
 #  define TCOD_GCC
@@ -104,25 +109,35 @@
 /* This is a hack. SDL by default want you to rename your main statement, and insert it's own first
    It does that to handle some init code. However, libtcod handles that for you. If we did this
    wrappers like libtcod-net would be hosed, since there is no main statement there. */
-#ifdef TCOD_MACOSX 
+/* This hack is no longer needed when using SDL2 */
+#ifndef TCOD_SDL2
+#ifdef TCOD_MACOSX
 #define _SDL_main_h
 #include "SDL/SDL.h"
 #endif
+#endif
 
 /* base types */
+#ifndef TCOD_NOBASETYPES
 typedef unsigned char uint8;
 typedef char int8;
 typedef unsigned short uint16;
 typedef short int16;
 typedef unsigned int uint32;
 typedef int int32;
+#endif
 /* int with the same size as a pointer (32 or 64 depending on OS) */
+#ifdef TCOD_WIN64
+typedef long long intptr;
+typedef unsigned long long uintptr;
+#else
 typedef long intptr;
 typedef unsigned long uintptr;
+#endif
 
-#define TCOD_HEXVERSION 0x010502
-#define TCOD_STRVERSION "1.5.2"
-#define TCOD_TECHVERSION 0x01050200
+#define TCOD_HEXVERSION 0x010603
+#define TCOD_STRVERSION "1.6.3"
+#define TCOD_TECHVERSION 0x01060300
 
 /* bool support for C */
 #ifndef __cplusplus
@@ -137,6 +152,7 @@ typedef uint8 bool;
 #endif
 
 /* DLL export */
+#ifndef TCODLIB_API
 #ifdef TCOD_WINDOWS
 #ifdef LIBTCOD_EXPORTS
 #define TCODLIB_API __declspec(dllexport)
@@ -145,6 +161,7 @@ typedef uint8 bool;
 #endif
 #else
 #define TCODLIB_API
+#endif
 #endif
 
 #ifdef __cplusplus

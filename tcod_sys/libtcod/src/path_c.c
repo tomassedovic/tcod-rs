@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -296,7 +296,6 @@ void TCOD_path_reverse(TCOD_path_t p) {
 
 bool TCOD_path_walk(TCOD_path_t p, int *x, int *y, bool recalculate_when_needed) {
 	int newx,newy;
-	float can_walk;
 	int d;
 	TCOD_path_data_t *path=(TCOD_path_data_t *)p;
 	TCOD_IFNOT(p != NULL) return false;
@@ -305,8 +304,8 @@ bool TCOD_path_walk(TCOD_path_t p, int *x, int *y, bool recalculate_when_needed)
 	newx=path->ox + dirx[d];
 	newy=path->oy + diry[d];
 	/* check if the path is still valid */
-	can_walk = TCOD_path_walk_cost(path,path->ox,path->oy,newx,newy);
-	if ( can_walk == 0.0f ) {
+	if ( TCOD_path_walk_cost(path,path->ox,path->oy,newx,newy) <= 0.0f ) {
+		/* path is blocked */
 		if (! recalculate_when_needed ) return false; /* don't walk */
 		/* calculate a new path */
 		if (! TCOD_path_compute(path, path->ox,path->oy, path->dx,path->dy) ) return false ; /* cannot find a new path */
@@ -521,23 +520,24 @@ void TCOD_dijkstra_compute (TCOD_dijkstra_t dijkstra, int root_x, int root_y) {
 	unsigned int * distances = data->distances;
 	TCOD_IFNOT(data != NULL) return;
 	TCOD_IFNOT((unsigned)root_x < (unsigned)mx && (unsigned)root_y < (unsigned)my) return;
-	memset(distances, 0xFFFFFFFF, mmax*sizeof(int));
-	memset(nodes, 0xFFFFFFFF, mmax * sizeof(int));
+	memset(distances,0xFFFFFFFF,mmax*sizeof(int));
+	memset(nodes,0xFFFFFFFF,mmax*sizeof(int));
 	/* data for root node is known... */
 	distances[root] = 0;
 	nodes[index] = root; /*set starting note to root */
 	/* and the loop */
 	do {
+		unsigned int x, y;
+		int i;
 		if (nodes[index] == 0xFFFFFFFF) {
 			continue;
 		}
 
 		/* coordinates of currently processed node */
-		unsigned int x = nodes[index] % mx;
-		unsigned int y = nodes[index] / mx;
+		x = nodes[index] % mx;
+		y = nodes[index] / mx;
 
 		/* check adjacent nodes */
-		int i;
 		for(i=0;i<imax;i++) {
 			/* checked node's coordinates */
 			unsigned int tx = x + dx[i];
@@ -606,7 +606,7 @@ bool TCOD_dijkstra_path_set (TCOD_dijkstra_t dijkstra, int x, int y) {
 	int px = x, py = y;
 	static int dx[9] = { -1, 0, 1, 0, -1, 1, 1, -1, 0 };
 	static int dy[9] = { 0, -1, 0, 1, -1, -1, 1, 1, 0 };
-	unsigned int distances[8];
+	unsigned int distances[8] = {0};
 	int lowest_index;
 	int imax = (data->diagonal_cost == 0 ? 4 : 8);
 	TCOD_IFNOT(data != NULL) return false;

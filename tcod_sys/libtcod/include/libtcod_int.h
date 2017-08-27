@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -29,6 +29,11 @@
 #define _TCODLIB_INT_H
 #include <stdarg.h>
 #include <assert.h>
+#if defined(__ANDROID__)
+#include <android/log.h>
+#endif
+#include <SDL.h>
+
 /* tcodlib internal stuff */
 #ifdef __cplusplus
 extern "C" {
@@ -38,25 +43,29 @@ extern "C" {
 typedef struct {
 	int c;		/* character ascii code */
 	int cf;		/* character number in font */
-	TCOD_color_t fore;	/* foreground color */
-	TCOD_color_t back;	/* background color */
-	uint8 dirt;	/* cell modified since last flush ? */
+	uint8 dirty;	/* cell modified since last flush ? */
 } char_t;
 
 /* TCODConsole non public data */
 typedef struct {
+	TCOD_image_t fg_colors, fg_colors_prev;
+	TCOD_image_t bg_colors, bg_colors_prev;
 	char_t *buf; /* current console */
 	char_t *oldbuf; /* console for last frame */
+	uint8 clear_screen;
+} TCOD_render_state_t;
+
+typedef struct {
+	TCOD_render_state_t state;
 	/* console width and height (in characters,not pixels) */
 	int w,h;
 	/* default background operator for print & print_rect functions */
 	TCOD_bkgnd_flag_t bkgnd_flag;
 	/* default alignment for print & print_rect functions */
 	TCOD_alignment_t alignment;
-	/* foreground (text), background and key colors */
-	TCOD_color_t fore,back,key;
+	/* foreground (text), background colors */
+	TCOD_color_t fore, back;
 	uint8 fade;
-	bool haskey; /* a key color has been defined */
 } TCOD_console_data_t;
 
 /* fov internal stuff */
@@ -65,6 +74,7 @@ typedef struct {
 	bool walkable:1;
 	bool fov:1;
 } cell_t;
+
 typedef struct {
 	int width;
 	int height;
@@ -125,6 +135,7 @@ typedef struct {
 	/* fading data */
 	TCOD_color_t fading_color;
 	uint8 fade;
+	TCOD_key_t key_state;
 	/* application window was closed */
 	bool is_window_closed;
 	/* application has mouse focus */
@@ -166,13 +177,20 @@ extern TCOD_internal_context_t TCOD_ctx;
 
 #ifndef NO_OPENGL
 /* opengl utilities */
-void TCOD_opengl_init_attributes();
+void TCOD_opengl_init_attributes(void);
 bool TCOD_opengl_init_state(int conw, int conh, void *font_tex);
-bool TCOD_opengl_init_shaders();
+bool TCOD_opengl_init_shaders(void);
 bool TCOD_opengl_render(int oldFade, bool *ascii_updated, char_t *console_buffer, char_t *prev_console_buffer);
-void TCOD_opengl_swap();
-void * TCOD_opengl_get_screen();
+void TCOD_opengl_swap(void);
+void * TCOD_opengl_get_screen(void);
 #endif
+
+/* image internal stuff */
+
+bool TCOD_image_mipmap_copy_internal(TCOD_image_t srcImage, TCOD_image_t dstImage);
+TCOD_color_t *TCOD_image_get_colors(TCOD_image_t *image);
+void TCOD_image_invalidate_mipmaps(TCOD_image_t *image);
+void TCOD_image_get_key_data(TCOD_image_t image, bool *has_key_color, TCOD_color_t *key_color);
 
 /* fov internal stuff */
 void TCOD_map_compute_fov_circular_raycasting(TCOD_map_t map, int player_x, int player_y, int max_radius, bool light_walls);
@@ -188,29 +206,28 @@ int TCOD_console_print_internal(TCOD_console_t con,int x,int y, int w, int h, TC
 int TCOD_console_stringLength(const unsigned char *s);
 unsigned char * TCOD_console_forward(unsigned char *s,int l);
 char *TCOD_console_vsprint(const char *fmt, va_list ap);
-char_t *TCOD_console_get_buf(TCOD_console_t con);
+TCOD_render_state_t *TCOD_console_get_render_state(TCOD_console_t con);
 /* fatal errors */
 void TCOD_fatal(const char *fmt, ...);
 void TCOD_fatal_nopar(const char *msg);
 
 /* TCODSystem non public methods */
-TCODLIB_API void TCOD_sys_startup();
-bool TCOD_sys_init(int w,int h, char_t *buf, char_t *oldbuf, bool fullscreen);
+bool TCOD_sys_init(int w,int h, TCOD_render_state_t *render_state, bool fullscreen);
+void TCOD_sys_uninit(void);
 void TCOD_sys_set_custom_font(const char *font_name,int nb_ch, int nb_cv,int flags);
 void TCOD_sys_map_ascii_to_font(int asciiCode, int fontCharX, int fontCharY);
 void *TCOD_sys_create_bitmap_for_console(TCOD_console_t console);
 void TCOD_sys_save_bitmap(void *bitmap, const char *filename);
 void *TCOD_sys_create_bitmap(int width, int height, TCOD_color_t *buf);
 void TCOD_sys_delete_bitmap(void *bitmap);
-void TCOD_sys_console_to_bitmap(void *bitmap, int console_width, int console_height, char_t *console_buffer, char_t *prev_console_buffer);
-void TCOD_sys_set_keyboard_repeat(int initial_delay, int interval);
+void TCOD_sys_console_to_bitmap(void *bitmap, int console_width, int console_height, TCOD_render_state_t *render_state);
 TCODLIB_API void *TCOD_sys_get_surface(int width, int height, bool alpha);
-void TCOD_sys_save_fps();
-void TCOD_sys_restore_fps();
+void TCOD_sys_save_fps(void);
+void TCOD_sys_restore_fps(void);
 
 /* switch fullscreen mode */
 void TCOD_sys_set_fullscreen(bool fullscreen);
-void TCOD_sys_set_clear_screen();
+void TCOD_sys_set_clear_screen(void);
 void TCOD_sys_set_scale_factor(float value);
 void TCOD_sys_convert_console_to_screen_coords(int cx, int cy, int *sx, int *sy);
 void TCOD_sys_convert_screen_to_console_coords(int sx, int sy, int *cx, int *cy);
@@ -219,8 +236,6 @@ TCOD_key_t TCOD_sys_check_for_keypress(int flags);
 TCOD_key_t TCOD_sys_wait_for_keypress(bool flush);
 bool TCOD_sys_is_key_pressed(TCOD_keycode_t key);
 void TCOD_sys_set_window_title(const char *title);
-/* close the window */
-void TCOD_sys_term();
 
 /* UTF-8 stuff */
 #ifndef NO_UNICODE
@@ -238,6 +253,75 @@ bool TCOD_sys_check_magic_number(const char *filename, int size, uint8 *data);
 
 /* TCOD_list nonpublic methods */
 void TCOD_list_set_size(TCOD_list_t l, int size);
+
+/*
+	SDL12/SDL2 abstraction layer
+*/
+typedef struct {
+	/* get a fullscreen mode suitable for the console */
+	void (*get_closest_mode)(int *w, int *h);
+	/* render the console on a surface/texture */
+	void (*render)(void *vbitmap, int console_width, int console_height, TCOD_render_state_t *render_state);
+	/* create a new surface */
+	SDL_Surface *(*create_surface) (int width, int height, bool with_alpha);
+	/* create the game window */
+	void (*create_window)(int w, int h, bool fullscreen);
+	/* destroy the game window */
+	void (*destroy_window)();
+	/* switch fullscreen on/off */
+	void (*set_fullscreen)(bool fullscreen);
+	/* change the game window title */
+	void (*set_window_title)(const char *title);
+	/* save game screenshot */
+	void (*save_screenshot)(const char *filename);
+	/* get desktop resolution */
+	void (*get_current_resolution)(int *w, int *h);
+	/* change the mouse cursor position */
+	void (*set_mouse_position)(int x, int y);
+	/* clipboard */
+	char *(*get_clipboard_text)();
+	bool (*set_clipboard_text)(char *text);
+	/* android compatible file access functions */
+	bool (*file_read)(const char *filename, unsigned char **buf, size_t *size);
+	bool (*file_exists)(const char * filename);
+	bool (*file_write)(const char *filename, unsigned char *buf, uint32 size);
+	/* clean stuff */
+	void (*shutdown)(void);
+} TCOD_SDL_driver_t;
+
+/* defined in TCOD_sys_sdl12_c.c and TCOD_sys_sdl2_c.c */
+TCOD_SDL_driver_t *SDL_implementation_factory(void);
+void find_resolution(void);
+void TCOD_sys_init_screen_offset(void);
+extern SDL_Surface* screen;
+extern int oldFade;
+extern bool *ascii_updated;
+extern bool any_ascii_updated;
+extern SDL_Surface* charmap;
+typedef struct {
+	float force_recalc;
+	float last_scale_xc, last_scale_yc;
+	float last_scale_factor;
+	float last_fullscreen;
+
+	float min_scale_factor;
+
+	float src_height_width_ratio;
+	float dst_height_width_ratio;
+	int src_x0, src_y0;
+	int src_copy_width, src_copy_height;
+	int src_proportionate_width, src_proportionate_height;
+	int dst_display_width, dst_display_height;
+	int dst_offset_x, dst_offset_y;
+	int surface_width, surface_height;
+} scale_data_t;
+extern scale_data_t scale_data;
+#ifdef TCOD_SDL2
+extern float scale_factor;
+extern SDL_Window* window;
+extern SDL_Renderer* renderer;
+extern char *last_clipboard_text;
+#endif
 
 /* color values */
 #define TCOD_BLACK 0,0,0

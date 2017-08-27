@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -124,7 +124,7 @@ bool _CheckGL_Error(const char* GLcall, const char* file, const int line)
 }
 
 /* called before creating window */
-void TCOD_opengl_init_attributes() {
+void TCOD_opengl_init_attributes(void) {
 	static bool first=true;
 	if ( first ) {
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -351,7 +351,7 @@ static bool loadProgram(const char *vertShaderCode, const char *fragShaderCode,
 	return true;
 }
 
-bool TCOD_opengl_init_shaders() {
+bool TCOD_opengl_init_shaders(void) {
 	int i;
 	TCOD_color_t *fCol;
 	if ( TCOD_ctx.renderer == TCOD_RENDERER_GLSL ) {
@@ -467,14 +467,14 @@ bool TCOD_opengl_render( int oldFade, bool *ascii_updated, char_t *console_buffe
 			if ( c->cf == -1 ) c->cf = TCOD_ctx.ascii_to_tcod[c->c];
 			if ( track_changes ) {
 				changed=false;
-				if ( c->dirt || ascii_updated[ c->c ] || c->back.r != oc->back.r || c->back.g != oc->back.g
+				if ( c->dirty || ascii_updated[ c->c ] || c->back.r != oc->back.r || c->back.g != oc->back.g
 					|| c->back.b != oc->back.b || c->fore.r != oc->fore.r
 					|| c->fore.g != oc->fore.g || c->fore.b != oc->fore.b
 					|| c->c != oc->c || c->cf != oc->cf) {
 					changed=true;
 				}
 			}
-			c->dirt=0;
+			c->dirty=0;
 			if ( changed ) {
 				TCOD_opengl_putchar_ex(x,y,c->cf,c->fore,c->back);
 			}
@@ -614,11 +614,11 @@ bool TCOD_opengl_render( int oldFade, bool *ascii_updated, char_t *console_buffe
 	return true;
 }
 
-void TCOD_opengl_swap() {
+void TCOD_opengl_swap(void) {
 	SDL_GL_SwapBuffers();
 }
 
-void * TCOD_opengl_get_screen() {
+void * TCOD_opengl_get_screen(void) {
 	SDL_Surface *surf;
 	int pixw,pixh,offx=0,offy=0,x,y;
 	Uint32 mask,nmask;
