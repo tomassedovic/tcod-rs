@@ -10,17 +10,20 @@ keywords = ["gamedev", "roguelike", "libtcod"]
 license = "WTFPL"
 authors = ["Tomas Sedovic <tomas@sedovic.cz>",
            "Bastien Léonard <bastien.leonard@gmail.com>",
+           "Dale Karp <dale@dale.io>",
            "Darren Kaste <darrenkaste@gmail.com>",
            "Edu Garcia <arcnorj@gmail.com>",
            "Guillermo Galizzi <galizzi.guillermo@gmail.com>",
            "Gustorn <gustorn@gmail.com>",
+           "Hans W. Uhlig <hans.uhlig@ibm.com>",
            "Jared McFarland <jared.online@gmail.com>",
            "Jonny Gilchrist (@jgilchrist)",
            "LaylConway <laylconway@live.com>",
            "Moredread <code@andre-bubel.de>",
            "Nikita Pekin",
            "Paul Sanford <me@paulsanford.net>",
-           "Pranz <jesper.fridefors@gmail.com>"]
+           "Pranz <jesper.fridefors@gmail.com>",
+           "Tomasz Barański, <yubizume@gmail.com>"]
 
 [lib]
 name = "tcod"
