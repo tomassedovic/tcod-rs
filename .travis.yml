@@ -17,6 +17,7 @@ script:
 - cargo build --verbose
 - cargo test --verbose
 - cargo test --features "rustc-serialize serde" --verbose
+- cargo test --release
 after_success: ! '[ $TRAVIS_BRANCH = master ] &&
 
   [ "$TRAVIS_OS_NAME" = linux ] &&
