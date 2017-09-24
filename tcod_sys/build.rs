@@ -1,4 +1,4 @@
-extern crate gcc;
+extern crate cc;
 extern crate pkg_config;
 
 use std::env;
@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 
 
 fn build_libz(libz_sources: &[&str]) {
-    let mut build_config = gcc::Build::new();
+    let mut build_config = cc::Build::new();
     for c_file in libz_sources {
         build_config.file(c_file);
     }
@@ -15,7 +15,7 @@ fn build_libz(libz_sources: &[&str]) {
     build_config.compile("libz.a");
 }
 
-fn build_libtcod_objects(mut build_config: gcc::Build, sources: &[&str]) {
+fn build_libtcod_objects(mut build_config: cc::Build, sources: &[&str]) {
     build_config.include("libtcod/include");
     build_config.include("libtcod/src/zlib");
     for c_file in sources {
@@ -27,7 +27,7 @@ fn build_libtcod_objects(mut build_config: gcc::Build, sources: &[&str]) {
 }
 
 
-fn compile_build_config(build_config: gcc::Build) {
+fn compile_build_config(build_config: cc::Build) {
     let mut cmd = build_config.get_compiler().to_command();
     println!("Compiling: {:?}", cmd);
     match cmd.output() {
@@ -116,14 +116,14 @@ fn main() {
 
         // Build the *.o files:
         {
-            let mut build_config = gcc::Build::new();
+            let mut build_config = cc::Build::new();
             build_config.flag("-fno-strict-aliasing");
             build_config.flag("-ansi");
             build_libtcod_objects(build_config, libtcod_sources);
         }
 
         // Build the DLL
-        let mut build_config = gcc::Build::new();
+        let mut build_config = cc::Build::new();
         build_config.flag("-shared");
         build_config.flag("-Wl,-soname,libtcod.so");
         build_config.flag("-o");
@@ -150,14 +150,14 @@ fn main() {
 
         // Build the *.o files
         {
-            let mut build_config = gcc::Build::new();
+            let mut build_config = cc::Build::new();
             build_config.flag("-fno-strict-aliasing");
             build_config.flag("-ansi");
             build_libtcod_objects(build_config, libtcod_sources);
         }
 
         // Build the DLL
-        let mut build_config = gcc::Build::new();
+        let mut build_config = cc::Build::new();
         build_config.flag("-shared");
         build_config.flag("-o");
         build_config.flag(dst.join("libtcod.dylib").to_str().unwrap());
@@ -191,7 +191,7 @@ fn main() {
 
         // Build the *.o files:
         {
-            let mut build_config = gcc::Build::new();
+            let mut build_config = cc::Build::new();
             build_config.include(sdl_include_dir.to_str().unwrap());
             build_config.flag("-fno-strict-aliasing");
             build_config.flag("-ansi");
@@ -200,7 +200,7 @@ fn main() {
         }
 
         // Build the DLL
-        let mut build_config = gcc::Build::new();
+        let mut build_config = cc::Build::new();
         build_config.flag("-o");
         build_config.flag(dst.join("libtcod.dll").to_str().unwrap());
         build_config.flag("-shared");
@@ -233,7 +233,7 @@ fn main() {
         fs::copy(&sdl_lib_dir.join("SDLmain.lib"), &dst.join("SDLmain.lib")).unwrap();
 
         // Build the DLL
-        let mut build_config = gcc::Build::new();
+        let mut build_config = cc::Build::new();
         build_config.flag("/DLIBTCOD_EXPORTS");
         build_config.flag("/DNO_OPENGL");
         build_config.include(sdl_include_dir.to_str().unwrap());
