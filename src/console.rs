@@ -987,7 +987,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
     /// console's default background and foreground colours.
     fn horizontal_line(&mut self, x: i32, y: i32, length: i32, background_flag: BackgroundFlag) {
         assert!(x >= 0 && y >= 0 && y < self.height());
-        assert!(length >= 1 && length + x < self.width());
+        assert!(length >= 1 && length + x <= self.width());
         unsafe {
             ffi::TCOD_console_hline(*self.as_native(), x, y, length, background_flag as u32);
         }
@@ -999,7 +999,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
     /// console's default background and foreground colours.
     fn vertical_line(&mut self, x: i32, y: i32, length: i32, background_flag: BackgroundFlag) {
         assert!(x >= 0, y >= 0 && x < self.width());
-        assert!(length >= 1 && length + y < self.height());
+        assert!(length >= 1 && length + y <= self.height());
         unsafe {
             ffi::TCOD_console_vline(*self.as_native(), x, y, length, background_flag as u32);
         }
