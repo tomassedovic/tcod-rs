@@ -200,6 +200,7 @@ bindgen -builtins -l tcod include/libtcod.h -o src/ffi.rs
 
 
 * Bastien Léonard, @bastienleonard, <bastien.leonard@gmail.com>
+* Darren Kaste, @dkaste, <darrenkaste@gmail.com>
 * Edu Garcia, @Arcnor, <arcnorj@gmail.com>
 * Guillermo Galizzi <galizzi.guillermo@gmail.com>
 * Gustorn <gustorn@gmail.com>
