@@ -215,7 +215,7 @@ impl<'a> Bsp<'a> {
     pub fn traverse<F>(&self, order: TraverseOrder, mut callback: F) -> bool
         where F: FnMut(&mut Bsp) -> bool
     {
-        let mut cb: &mut FnMut(&mut Bsp) -> bool = &mut callback;
+        let cb: &mut FnMut(&mut Bsp) -> bool = &mut callback;
         let retval = unsafe {
             let bsp = mem::transmute(self.bsp as *const ffi::TCOD_bsp_t);
             match order {
