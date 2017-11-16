@@ -1,4 +1,4 @@
-extern crate gcc;
+extern crate cc;
 extern crate pkg_config;
 
 use std::env;
@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 
 
 fn build_libz(libz_sources: &[&str]) {
-    let mut config = gcc::Build::new();
+    let mut config = cc::Build::new();
     for c_file in libz_sources {
         config.file(c_file);
     }
@@ -15,7 +15,7 @@ fn build_libz(libz_sources: &[&str]) {
     config.compile("libz.a");
 }
 
-fn build_libtcod_objects(mut config: gcc::Build, sources: &[&str]) {
+fn build_libtcod_objects(mut config: cc::Build, sources: &[&str]) {
     config.include("libtcod/include");
     config.include("libtcod/src/zlib");
     for c_file in sources {
@@ -27,7 +27,7 @@ fn build_libtcod_objects(mut config: gcc::Build, sources: &[&str]) {
 }
 
 
-fn compile_config(config: gcc::Build) {
+fn compile_config(config: cc::Build) {
     let mut cmd = config.get_compiler().to_command();
     println!("Compiling: {:?}", cmd);
     match cmd.output() {
@@ -133,7 +133,7 @@ fn main() {
 
         // Build the *.o files:
         {
-            let mut config = gcc::Build::new();
+            let mut config = cc::Build::new();
             for include_path in &pkg_config::find_library("sdl2").unwrap().include_paths {
                 config.include(include_path);
             }
@@ -145,7 +145,7 @@ fn main() {
         }
 
         // Build the DLL
-        let mut config = gcc::Build::new();
+        let mut config = cc::Build::new();
         config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
         config.flag("-shared");
@@ -174,7 +174,7 @@ fn main() {
 
         // Build the *.o files
         {
-            let mut config = gcc::Build::new();
+            let mut config = cc::Build::new();
             for include_path in &pkg_config::find_library("sdl2").unwrap().include_paths {
                 config.include(include_path);
             }
@@ -186,7 +186,7 @@ fn main() {
         }
 
         // Build the DLL
-        let mut config = gcc::Build::new();
+        let mut config = cc::Build::new();
         config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
         config.flag("-shared");
@@ -222,7 +222,7 @@ fn main() {
 
         // Build the *.o files:
         {
-            let mut config = gcc::Build::new();
+            let mut config = cc::Build::new();
             config.include(sdl_include_dir.to_str().unwrap());
             config.flag("-fno-strict-aliasing");
             config.flag("-ansi");
@@ -233,7 +233,7 @@ fn main() {
         }
 
         // Build the DLL
-        let mut config = gcc::Build::new();
+        let mut config = cc::Build::new();
         config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
         config.flag("-o");
@@ -250,7 +250,7 @@ fn main() {
         config.flag(sdl_lib_dir.to_str().unwrap());
         config.flag("-lSDL2.dll");
         config.flag("-lopengl32");
-        config.flag("-static-libgcc");
+        config.flag("-static-libcc");
         config.flag("-static-libstdc++");
 
         compile_config(config);
@@ -269,7 +269,7 @@ fn main() {
         fs::copy(&sdl_lib_dir.join("SDL2main.lib"), &dst.join("SDL2main.lib")).unwrap();
 
         // Build the DLL
-        let mut config = gcc::Build::new();
+        let mut config = cc::Build::new();
         config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
         config.flag("/DLIBTCOD_EXPORTS");
