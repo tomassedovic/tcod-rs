@@ -40,5 +40,5 @@ pub fn keycode_from_native(input: self::ffi::TCOD_keycode_t) -> Option<KeyCode> 
 fn test_keycodes() {
     assert!(keycode_from_native(self::ffi::TCOD_keycode_t::TCODK_NONE).unwrap() == KeyCode::NoKey);
     assert!(keycode_from_native(self::ffi::TCOD_keycode_t::TCODK_6).unwrap() == KeyCode::Number6);
-    assert!(keycode_from_native(self::ffi::TCOD_keycode_t::TCODK_TEXT).unwrap() == KeyCode::TEXT);
+    assert!(keycode_from_native(self::ffi::TCOD_keycode_t::TCODK_TEXT).unwrap() == KeyCode::Text);
 }
