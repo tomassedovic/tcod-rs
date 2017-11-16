@@ -29,6 +29,16 @@
 #ifndef _TCOD_TEXT_H_
 #define _TCOD_TEXT_H_
 
+#include "libtcod_portability.h"
+
+#ifdef TCOD_CONSOLE_SUPPORT
+
+#include "color.h"
+#include "console_types.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 typedef void * TCOD_text_t;
 
 TCODLIB_API TCOD_text_t TCOD_text_init(int x, int y, int w, int h, int max_chars);
@@ -41,5 +51,10 @@ TCODLIB_API void TCOD_text_render(TCOD_text_t txt, TCOD_console_t con);
 TCODLIB_API const char * TCOD_text_get(TCOD_text_t txt);
 TCODLIB_API void TCOD_text_reset(TCOD_text_t txt);
 TCODLIB_API void TCOD_text_delete(TCOD_text_t txt);
-
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* TCOD_CONSOLE_SUPPORT */
+
+#endif /* _TCOD_TEXT_H_ */

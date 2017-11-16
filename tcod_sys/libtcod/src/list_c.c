@@ -24,9 +24,12 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include <list.h>
+
 #include <stdlib.h> /* calloc */
 #include <string.h> /* NULL/memcpy */
-#include "libtcod.h"
+
+#include <libtcod_utility.h>
 
 #define LIST(l) ((TCOD_list_int_t *)l)
 
@@ -120,7 +123,7 @@ void ** TCOD_list_end(TCOD_list_t l) {
 }
 void TCOD_list_reverse(TCOD_list_t l) {
 	void **head=TCOD_list_begin(l);
-	void **tail=TCOD_list_end(l);
+	void **tail=TCOD_list_end(l) - 1;
 	while ( head < tail ) {
 		void *tmp=*head;
 		*head=*tail;

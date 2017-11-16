@@ -28,7 +28,11 @@
 #ifndef _TCOD_SYS_HPP
 #define _TCOD_SYS_HPP
 
+#include "image.hpp"
+#include "mouse.hpp"
+#include "sys.h"
 /**
+
 	@PageName system
 	@PageCategory Core
 	@PageTitle System layer
@@ -108,30 +112,31 @@ public :
 	*/
 	static float getLastFrameLength();
 
+#ifdef TCOD_OSUTIL_SUPPORT
 	/**
 	@PageName system_time
 	@FuncTitle Pause the program
 	@FuncDesc Use this function to stop the program execution for a specified number of milliseconds.
-	@Cpp static void TCODSystem::sleepMilli(uint32 val)
-	@C void TCOD_sys_sleep_milli(uint32 val)
+	@Cpp static void TCODSystem::sleepMilli(uint32_t val)
+	@C void TCOD_sys_sleep_milli(uint32_t val)
 	@Py sys_sleep_milli(val)
 	@C# static void TCODSystem::sleepMilli(uint val)
 	@Lua tcod.system.sleepMilli(val)
 	@Param val number of milliseconds before the function returns
 	*/
-	static void sleepMilli(uint32 val);
+	static void sleepMilli(uint32_t val);
 
 	/**
 	@PageName system_time
 	@FuncTitle Get global timer in milliseconds
 	@FuncDesc This function returns the number of milliseconds since the program has started.
-	@Cpp static uint32 TCODSystem::getElapsedMilli()
-	@C uint32 TCOD_sys_elapsed_milli()
+	@Cpp static uint32_t TCODSystem::getElapsedMilli()
+	@C uint32_t TCOD_sys_elapsed_milli()
 	@Py sys_elapsed_milli()
 	@C# static uint TCODSystem::getElapsedMilli()
 	@Lua tcod.system.getElapsedMilli()
 	*/
-	static uint32 getElapsedMilli();
+	static uint32_t getElapsedMilli();
 
 	/**
 	@PageName system_time
@@ -144,7 +149,9 @@ public :
 	@Lua tcod.system.getElapsedSeconds()
 	*/
 	static float getElapsedSeconds();
+#endif
 
+#ifdef TCOD_CONSOLE_SUPPORT
 	/**
 	@PageName console_blocking_input
 	@FuncTitle Waiting for any event (mouse or keyboard)
@@ -215,6 +222,9 @@ public :
 		if ( ev == TCOD_EVENT_KEY_PRESS && key.c == 'i' ) { ... open inventory ... }	
 	*/
 	static TCOD_event_t checkForEvent(int eventMask, TCOD_key_t *key, TCOD_mouse_t *mouse);
+#endif
+
+#ifdef TCOD_SDL2
 	/**
 	@PageName system_screenshots
 	@PageFather system
@@ -228,6 +238,7 @@ public :
 	@Param filename Name of the file. If NULL, a filename is automatically generated with the form "./screenshotNNN.png", NNN being the first free number (if a file named screenshot000.png already exist, screenshot001.png will be used, and so on...).
 	*/
 	static void saveScreenshot(const char *filename);
+#endif
 
 	/**
 	@PageName system_filesystem
@@ -303,14 +314,14 @@ public :
 	@FuncTitle Read the content of a file into memory
 	@FuncDesc This is a portable function to read the content of a file from disk or from the application apk (android).
 		buf must be freed with free(buf).
-	@Cpp static bool TCODSystem::readFile(const char *filename, unsigned char **buf, uint32 *size)
-	@C bool TCOD_sys_read_file(const char *filename, unsigned char **buf, uint32 *size)
+	@Cpp static bool TCODSystem::readFile(const char *filename, unsigned char **buf, uint32_t *size)
+	@C bool TCOD_sys_read_file(const char *filename, unsigned char **buf, uint32_t *size)
 	@Param filename the file name
 	@Param buf a buffer to be allocated and filled with the file content
 	@Param size the size of the allocated buffer.
 	@CppEx
 		unsigned char *buf;
-		uint32 size;
+		uint32_t size;
 		if (TCODSystem::readFile("myfile.dat",&buf,&size)) {
 		    // do something with buf
 		    free(buf);
@@ -326,8 +337,8 @@ public :
 	@PageName system_filesystem
 	@FuncTitle Write the content of a memory buffer to a file
 	@FuncDesc This is a portable function to write some data to a file.
-	@Cpp static bool TCODSystem::writeFile(const char *filename, unsigned char *buf, uint32 size)
-	@C bool TCOD_sys_write_file(const char *filename, unsigned char *buf, uint32 size)
+	@Cpp static bool TCODSystem::writeFile(const char *filename, unsigned char *buf, uint32_t size)
+	@C bool TCOD_sys_write_file(const char *filename, unsigned char *buf, uint32_t size)
 	@Param filename the file name
 	@Param buf a buffer containing the data to write
 	@Param size the number of bytes to write.
@@ -336,7 +347,7 @@ public :
 	@CEx
 		TCOD_sys_write_file("myfile.dat",buf,size));
 	*/		
-	static bool writeFile(const char *filename, unsigned char *buf, uint32 size);
+	static bool writeFile(const char *filename, unsigned char *buf, uint32_t size);
 	/**
 	@PageName system_sdlcbk
 	@PageFather system
@@ -391,6 +402,7 @@ public :
 	@Param x,y,w,h Part of the root console you want to redraw even if nothing has changed in the console back/fore/char.
 	*/
 
+#ifdef TCOD_SDL2
 	/**
 	@PageName system_misc
 	@PageFather system
@@ -443,6 +455,7 @@ public :
 	@Param offx,offy contains the position of the console on the screen when using fullscreen mode.
 	*/
 	static void getFullscreenOffsets(int *offx, int *offy);
+
 	/**
 	@PageName system_misc
 	@FuncTitle Get the font size
@@ -468,7 +481,9 @@ public :
 	@Param x,y position in pixels of the top-left corner of the character in the image
 	*/
 	static void updateChar(int asciiCode, int fontx, int fonty,const TCODImage *img,int x,int y);
+#endif
 
+#ifdef TCOD_SDL2
 	/**
 	@PageName system_misc
 	@FuncTitle Dynamically change libtcod's internal renderer
@@ -518,6 +533,7 @@ public :
 	@Py sys_clipboard_get() # Returns UTF-8 string
 	*/
 	static char *getClipboard();
+#endif
 
 	// thread stuff
 	static int getNumCores();

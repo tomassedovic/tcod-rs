@@ -24,6 +24,7 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include <sys.h>
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -36,8 +37,8 @@
 /* Is this necessary now the custom clipboard stuff is gone? */
 #include <ApplicationServices/ApplicationServices.h>
 #endif
-#include "libtcod.h"
 #include "libtcod_int.h"
+#include "libtcod_version.h"
 #ifdef TCOD_WINDOWS
 #include <windows.h>
 #else
@@ -72,10 +73,12 @@ char *strcasestr (const char *haystack, const char *needle) {
 }
 #endif
 
+#ifdef TCOD_SDL2
 void TCOD_sys_get_fullscreen_offsets(int *offx, int *offy) {
 	if ( offx ) *offx = TCOD_ctx.fullscreen_offsetx;
 	if ( offy ) *offy = TCOD_ctx.fullscreen_offsety;
 }
+#endif
 
 bool TCOD_sys_create_directory(const char *path) {
 #ifdef TCOD_WINDOWS
@@ -518,20 +521,42 @@ void TCOD_condition_delete( TCOD_cond_t pcond) {
 #endif
 }
 
-/* library initialization function */
-#ifdef TCOD_WINDOWS
-BOOL APIENTRY DllMain( HINSTANCE hModule, DWORD reason, LPVOID reserved) {
-	switch (reason ) {
-		case DLL_PROCESS_ATTACH : TCOD_sys_startup(); break;
-		default : break;
-	}
-	return TRUE;
+#ifdef TCOD_BARE
+
+void TCOD_sys_startup(void) {
+	//TCOD_ctx.max_font_chars = 256;
+	//alloc_ascii_tables();
 }
-#else
-	void __attribute__ ((constructor)) DllMain(void) {
-		TCOD_sys_startup();
-	}
-#endif
+
+void TCOD_sys_shutdown(void) {
+}
+
+bool TCOD_sys_read_file(const char *filename, unsigned char **buf, size_t *size) {
+	return false;
+}
+
+bool TCOD_sys_write_file(const char *filename, unsigned char *buf, uint32_t size) {
+	return false;
+}
+
+#endif /* TCOD_BARE */
+
+void TCOD_fatal(const char *fmt, ...) {
+	va_list ap;
+	TCOD_sys_shutdown();
+	printf("%s\n", TCOD_STRVERSIONNAME);
+	va_start(ap, fmt);
+	vprintf(fmt, ap);
+	va_end(ap);
+	printf("\n");
+	exit(1);
+}
+
+void TCOD_fatal_nopar(const char *msg) {
+	TCOD_sys_shutdown();
+	printf("%s\n%s\n", TCOD_STRVERSIONNAME, msg);
+	exit(1);
+}
 
 /* dynamic library support */
 #ifdef TCOD_WINDOWS

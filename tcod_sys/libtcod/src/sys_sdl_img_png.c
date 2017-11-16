@@ -24,18 +24,22 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#ifdef TCOD_SDL2
+
+#include <sys.h>
 
 #if !defined (__HAIKU__) && !defined (__ANDROID__)
 #include <stdlib.h>
 #include <stdio.h>
 #endif
 #include <SDL.h>
+
 #include "png/lodepng.h"
-#include "libtcod.h"
-#include "libtcod_int.h"
+
+#include <libtcod_int.h>
 
 bool TCOD_sys_check_png(const char *filename) {
-	static uint8 magic_number[]={137, 80, 78, 71, 13, 10, 26, 10};
+	static uint8_t magic_number[]={137, 80, 78, 71, 13, 10, 26, 10};
 	return TCOD_sys_check_magic_number(filename,sizeof(magic_number),magic_number);
 }
 
@@ -79,7 +83,7 @@ SDL_Surface *TCOD_sys_read_png(const char *filename) {
 	source=image;
 	rowsize=width*bpp/8;
 	for (y=0; y<  height; y++ ) {
-		Uint8 *row_pointer=(Uint8 *)(bitmap->pixels) + y * bitmap->pitch;
+		uint8_t*row_pointer=(uint8_t*)(bitmap->pixels) + y * bitmap->pitch;
 		memcpy(row_pointer,source,rowsize);
 		source+=rowsize;
 	}
@@ -99,7 +103,7 @@ void TCOD_sys_write_png(const SDL_Surface *surf, const char *filename) {
 	image=dest;
 	for (y=0; y<  surf->h; y++ ) {
 		for (x=0; x < surf->w; x++ ) {
-			Uint8 *pixel=(Uint8 *)(surf->pixels) + y * surf->pitch + x * surf->format->BytesPerPixel;
+			uint8_t*pixel=(uint8_t*)(surf->pixels) + y * surf->pitch + x * surf->format->BytesPerPixel;
 			*dest++=*((pixel)+surf->format->Rshift/8);
 			*dest++=*((pixel)+surf->format->Gshift/8);
 			*dest++=*((pixel)+surf->format->Bshift/8);
@@ -108,10 +112,11 @@ void TCOD_sys_write_png(const SDL_Surface *surf, const char *filename) {
 	error=lodepng_encode_memory(&buf,&size,image,surf->w,surf->h,LCT_RGB,8);
 	free(image);
 	if ( ! error ) {
-		TCOD_sys_write_file(filename,buf,size);
+		TCOD_sys_write_file(filename,buf,(uint32_t)size);
 		free(buf);
 	} else {
 		printf("error %u: %s\n", error, lodepng_error_text(error));
 	}
 }
 
+#endif /* TCOD_SDL2 */

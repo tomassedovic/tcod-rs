@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 
 
 fn build_libz(libz_sources: &[&str]) {
-    let mut config = gcc::Config::new();
+    let mut config = gcc::Build::new();
     for c_file in libz_sources {
         config.file(c_file);
     }
@@ -15,7 +15,7 @@ fn build_libz(libz_sources: &[&str]) {
     config.compile("libz.a");
 }
 
-fn build_libtcod_objects(mut config: gcc::Config, sources: &[&str]) {
+fn build_libtcod_objects(mut config: gcc::Build, sources: &[&str]) {
     config.include("libtcod/include");
     config.include("libtcod/src/zlib");
     for c_file in sources {
@@ -27,7 +27,7 @@ fn build_libtcod_objects(mut config: gcc::Config, sources: &[&str]) {
 }
 
 
-fn compile_config(config: gcc::Config) {
+fn compile_config(config: gcc::Build) {
     let mut cmd = config.get_compiler().to_command();
     println!("Compiling: {:?}", cmd);
     match cmd.output() {
@@ -84,6 +84,7 @@ fn main() {
 	    "libtcod/src/bsp_c.c",
 	    "libtcod/src/color_c.c",
 	    "libtcod/src/console_c.c",
+        "libtcod/src/console_rexpaint.c",
 	    "libtcod/src/fov_c.c",
 	    "libtcod/src/fov_circular_raycasting.c",
 	    "libtcod/src/fov_diamond_raycasting.c",
@@ -109,6 +110,22 @@ fn main() {
 	    "libtcod/src/wrappers.c",
 	    "libtcod/src/zip_c.c",
 	    "libtcod/src/png/lodepng.c",
+        /*
+        "libtcod/src/gui/button.cpp",
+        "libtcod/src/gui/container.cpp",
+        "libtcod/src/gui/flatlist.cpp",
+        "libtcod/src/gui/hbox.cpp",
+        "libtcod/src/gui/image.cpp",
+        "libtcod/src/gui/label.cpp",
+        "libtcod/src/gui/radiobutton.cpp",
+        "libtcod/src/gui/slider.cpp",
+        "libtcod/src/gui/statusbar.cpp",
+        "libtcod/src/gui/textbox.cpp",
+        "libtcod/src/gui/togglebutton.cpp",
+        "libtcod/src/gui/toolbar.cpp",
+        "libtcod/src/gui/vbox.cpp",
+        "libtcod/src/gui/widget.cpp",
+        */
     ];
 
     if target.contains("linux") {
@@ -116,7 +133,7 @@ fn main() {
 
         // Build the *.o files:
         {
-            let mut config = gcc::Config::new();
+            let mut config = gcc::Build::new();
             for include_path in &pkg_config::find_library("sdl2").unwrap().include_paths {
                 config.include(include_path);
             }
@@ -128,7 +145,7 @@ fn main() {
         }
 
         // Build the DLL
-        let mut config = gcc::Config::new();
+        let mut config = gcc::Build::new();
         config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
         config.flag("-shared");
@@ -157,7 +174,7 @@ fn main() {
 
         // Build the *.o files
         {
-            let mut config = gcc::Config::new();
+            let mut config = gcc::Build::new();
             for include_path in &pkg_config::find_library("sdl2").unwrap().include_paths {
                 config.include(include_path);
             }
@@ -169,7 +186,7 @@ fn main() {
         }
 
         // Build the DLL
-        let mut config = gcc::Config::new();
+        let mut config = gcc::Build::new();
         config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
         config.flag("-shared");
@@ -205,7 +222,7 @@ fn main() {
 
         // Build the *.o files:
         {
-            let mut config = gcc::Config::new();
+            let mut config = gcc::Build::new();
             config.include(sdl_include_dir.to_str().unwrap());
             config.flag("-fno-strict-aliasing");
             config.flag("-ansi");
@@ -216,7 +233,7 @@ fn main() {
         }
 
         // Build the DLL
-        let mut config = gcc::Config::new();
+        let mut config = gcc::Build::new();
         config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
         config.flag("-o");
@@ -252,7 +269,7 @@ fn main() {
         fs::copy(&sdl_lib_dir.join("SDL2main.lib"), &dst.join("SDL2main.lib")).unwrap();
 
         // Build the DLL
-        let mut config = gcc::Config::new();
+        let mut config = gcc::Build::new();
         config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
         config.flag("/DLIBTCOD_EXPORTS");

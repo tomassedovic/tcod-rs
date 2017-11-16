@@ -24,16 +24,20 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "libtcod.h"
-#include "libtcod_int.h"
+#ifdef TCOD_SDL2
+
+#include <sys.h>
 
 #include <stdio.h>
 #include <string.h>
 
+#include <console.h>
+#include <libtcod_int.h>
+#include <libtcod_utility.h>
+
 static SDL_Surface* scale_screen=NULL;
-static float scale_xc=0.5f;
-static float scale_yc=0.5f;
 static bool clear_screen=false;
+static TCOD_console_data_t *root_console_cache; /* cache for previous values */
 
 /* This just forces a complete redraw, bypassing the usual rendering of changes. */
 void TCOD_sys_set_clear_screen(void) {
@@ -83,19 +87,31 @@ static void actual_rendering(void) {
 	SDL_DestroyTexture(texture);
 }
 
+/* Return an up-to-date cache for the root console, create or resize the cache
+   if needed */
+static TCOD_console_data_t *ensure_cache(TCOD_console_data_t* root) {
+	if (!root_console_cache ||
+			root_console_cache->w != root->w ||
+			root_console_cache->h != root->h) {
+		if (root_console_cache) { TCOD_console_delete(root_console_cache); }
+		root_console_cache = TCOD_console_new(root->w, root->h);
+	}
+	return root_console_cache;
+}
+
 /* In order to avoid rendering race conditions and the ensuing segmentation
  * faults, this should only be called when it would normally be and not
  * specifically to force screen refreshes.  To this end, and to avoid
  * threading complications it takes care of special cases internally.  */
-static void render(void *vbitmap, int console_width, int console_height, TCOD_render_state_t *render_state) {
+static void render(TCOD_SDL_driver_t *sdl, void *vbitmap, TCOD_console_data_t *console) {
 	if ( TCOD_ctx.renderer == TCOD_RENDERER_SDL ) {
-		int console_width_p = console_width*TCOD_ctx.font_width;
-		int console_height_p = console_height*TCOD_ctx.font_height;
+		int console_width_p = console->w * TCOD_ctx.font_width;
+		int console_height_p = console->h * TCOD_ctx.font_height;
 
 		/* Make a bitmap of exact rendering size and correct format. */
 		if (scale_screen == NULL) {
 			int bpp;
-			Uint32 rmask, gmask, bmask, amask;
+			uint32_t rmask, gmask, bmask, amask;
 			if (SDL_PixelFormatEnumToMasks(SDL_GetWindowPixelFormat(window), &bpp, &rmask, &gmask, &bmask, &amask) == SDL_FALSE) {
 				TCOD_fatal("SDL : failed to create scaling surface : indeterminate window pixel format");
 				return;
@@ -109,19 +125,19 @@ static void render(void *vbitmap, int console_width, int console_height, TCOD_re
 			clear_screen=false;
 			SDL_FillRect(scale_screen,0,0);
 			/* Implicitly do complete console redraw, not just tracked changes. */
-			render_state->clear_screen = true;
+			TCOD_console_set_dirty(0, 0, console->w, console->h);
 		}
 
-		TCOD_sys_console_to_bitmap(scale_screen, console_width, console_height, render_state);
+		TCOD_sys_console_to_bitmap(scale_screen, console, ensure_cache(console));
 
 		/* Scale the rendered bitmap to the screen, preserving aspect ratio, and blit it.
 		 * This data is also used for console coordinate resolution.. */
-		if (scale_data.last_scale_factor != scale_factor || scale_data.last_scale_xc != scale_xc || scale_data.last_scale_yc != scale_yc ||
+		if (scale_data.last_scale_factor != scale_factor || scale_data.last_scale_xc != sdl->scale_xc || scale_data.last_scale_yc != sdl->scale_yc ||
 				scale_data.last_fullscreen != TCOD_ctx.fullscreen || scale_data.force_recalc) {
 			/* Preserve old value of input variables, to enable recalculation if they change. */
 			scale_data.last_scale_factor = scale_factor;
-			scale_data.last_scale_xc = scale_xc;
-			scale_data.last_scale_yc = scale_yc;
+			scale_data.last_scale_xc = sdl->scale_xc;
+			scale_data.last_scale_yc = sdl->scale_yc;
 			scale_data.last_fullscreen = TCOD_ctx.fullscreen;
 			scale_data.force_recalc = 0;
 
@@ -142,7 +158,7 @@ static void render(void *vbitmap, int console_width, int console_height, TCOD_re
 			scale_data.src_proportionate_height = (int)((console_width_p * scale_data.dst_height_width_ratio) / scale_factor);
 
 			/* Work out how much of the console to copy. */
-			scale_data.src_x0 = (scale_xc * console_width_p) - (0.5f * scale_data.src_proportionate_width);
+			scale_data.src_x0 = (int)((sdl->scale_xc * console_width_p) - (0.5f * scale_data.src_proportionate_width));
 			if (scale_data.src_x0 + scale_data.src_proportionate_width > console_width_p)
 				scale_data.src_x0 = console_width_p - scale_data.src_proportionate_width;
 			if (scale_data.src_x0 < 0)
@@ -151,7 +167,7 @@ static void render(void *vbitmap, int console_width, int console_height, TCOD_re
 			if (scale_data.src_x0 + scale_data.src_copy_width > console_width_p)
 				scale_data.src_copy_width = console_width_p - scale_data.src_x0;
 
-			scale_data.src_y0 = (scale_yc * console_height_p) - (0.5f * scale_data.src_proportionate_height);
+			scale_data.src_y0 = (int)((sdl->scale_yc * console_height_p) - (0.5f * scale_data.src_proportionate_height));
 			if (scale_data.src_y0 + scale_data.src_proportionate_height > console_height_p)
 				scale_data.src_y0 = console_height_p - scale_data.src_proportionate_height;
 			if (scale_data.src_y0 < 0)
@@ -172,19 +188,20 @@ static void render(void *vbitmap, int console_width, int console_height, TCOD_re
 	}
 #ifndef NO_OPENGL
 	else {
-		TCOD_opengl_render(oldFade, ascii_updated, console_buffer, prev_console_buffer);
+		TCOD_opengl_render(oldFade, NULL, console, ensure_cache(console));
 		TCOD_opengl_swap();
 	}  
 #endif
 	oldFade=(int)TCOD_console_get_fade();
-	if ( any_ascii_updated ) {
-		memset(ascii_updated,0,sizeof(bool)*TCOD_ctx.max_font_chars);
-		any_ascii_updated=false;
-	}
+}
+
+/* Return the current root console cache if it exists, or NULL. */
+static TCOD_console_data_t *get_root_console_cache(void){
+	return root_console_cache;
 }
 
 static SDL_Surface *create_surface(int width, int height, bool with_alpha) {
-	Uint32 rmask,gmask,bmask,amask;
+	uint32_t rmask,gmask,bmask,amask;
 	SDL_Surface *bitmap;
 	int flags=SDL_SWSURFACE;
 
@@ -222,7 +239,7 @@ static SDL_Surface *create_surface(int width, int height, bool with_alpha) {
 }
 
 static void create_window(int w, int h, bool fullscreen) {
-	Uint32 winflags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
+	uint32_t winflags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
 #if defined(TCOD_ANDROID)
 	/* Android should always be fullscreen. */
 	TCOD_ctx.fullscreen = fullscreen = true;
@@ -281,7 +298,12 @@ static void create_window(int w, int h, bool fullscreen) {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 }
 
-static void destroy_window() {
+static void destroy_window(void) {
+#ifndef NO_OPENGL	
+	if (TCOD_ctx.renderer == TCOD_RENDERER_OPENGL || TCOD_ctx.renderer == TCOD_RENDERER_GLSL) {
+		TCOD_opengl_uninit_state();
+	}
+#endif
 	if (scale_screen) {
 		SDL_FreeSurface(scale_screen);
 		scale_screen = NULL;
@@ -322,7 +344,7 @@ static void save_screenshot(const char *filename) {
 	if ( TCOD_ctx.renderer == TCOD_RENDERER_SDL ) {
 		/* This would be a lot easier if image saving could do textures. */
 	    SDL_Rect rect;
-		Uint32 format;
+		uint32_t format;
 		SDL_Texture *texture;
 		SDL_RenderGetViewport(renderer, &rect);
 		format = SDL_GetWindowPixelFormat(window);
@@ -339,7 +361,7 @@ static void save_screenshot(const char *filename) {
 				if (-1 != SDL_QueryTexture(texture, &format, &access, &rect.w, &rect.h) &&
 						-1 != SDL_LockTexture(texture, NULL, &pixels, &pitch)) {
 					int depth;
-					Uint32 rmask, gmask, bmask, amask;
+					uint32_t rmask, gmask, bmask, amask;
 					if (SDL_TRUE == SDL_PixelFormatEnumToMasks(format, &depth, &rmask, &gmask, &bmask, &amask)) {
 						SDL_Surface *surface = SDL_CreateRGBSurfaceFrom(pixels, rect.w, rect.h, depth, pitch, rmask, gmask, bmask, amask);
 						TCOD_sys_save_bitmap((void *)surface,filename);
@@ -382,10 +404,10 @@ static void get_current_resolution(int *w, int *h) {
 }
 
 static void set_mouse_position(int x, int y) {
-  SDL_WarpMouseInWindow(window, (Uint16)x,(Uint16)y);
+  SDL_WarpMouseInWindow(window, (uint16_t)x,(uint16_t)y);
 }
 
-static char *get_clipboard_text() {
+static char *get_clipboard_text(void) {
 #ifdef TCOD_LINUX
 	/*
 		X11 clipboard is inaccessible without an open window.
@@ -408,7 +430,7 @@ static char *get_clipboard_text() {
 	return last_clipboard_text;
 }
 
-static bool set_clipboard_text(char *text) {
+static bool set_clipboard_text(const char *text) {
 #ifdef TCOD_LINUX
 	/*
 	X11 clipboard is inaccessible without an open window.
@@ -423,7 +445,7 @@ static bool set_clipboard_text(char *text) {
 
 /* android compatible file access functions */
 static bool file_read(const char *filename, unsigned char **buf, size_t *size) {
-	uint32 filesize;
+	int64_t filesize;
 	/* get file size */
 	SDL_RWops *rwops= SDL_RWFromFile(filename,"rb");
 	if (!rwops) return false;
@@ -453,7 +475,7 @@ static bool file_exists(const char * filename) {
 	return false;
 }
 
-static bool file_write(const char *filename, unsigned char *buf, uint32 size) {
+static bool file_write(const char *filename, unsigned char *buf, uint32_t size) {
 	SDL_RWops *rwops= SDL_RWFromFile(filename,"wb");
 	if (!rwops) return false;
 	SDL_RWwrite(rwops,buf,sizeof(unsigned char),size);
@@ -466,11 +488,18 @@ static void shutdown(void) {
 		SDL_free(last_clipboard_text);
 		last_clipboard_text = NULL;
 	}
+	if (root_console_cache) {
+		TCOD_console_delete(root_console_cache);
+		root_console_cache = NULL;
+		}
 }
 
 TCOD_SDL_driver_t *SDL_implementation_factory(void) {
 	TCOD_SDL_driver_t *ret=(TCOD_SDL_driver_t *)calloc(1,sizeof(TCOD_SDL_driver_t));
-	ret->get_closest_mode = get_closest_mode;
+    ret->scale_xc = 0.5f;
+    ret->scale_yc = 0.5f;
+
+    ret->get_closest_mode = get_closest_mode;
 	ret->render = render;
 	ret->create_surface = create_surface;
 	ret->create_window = create_window;
@@ -486,6 +515,8 @@ TCOD_SDL_driver_t *SDL_implementation_factory(void) {
 	ret->file_exists = file_exists;
 	ret->file_write = file_write;
 	ret->shutdown = shutdown;
+	ret->get_root_console_cache = get_root_console_cache;
 	return ret;
 }
 
+#endif /* TCOD_SDL2 */

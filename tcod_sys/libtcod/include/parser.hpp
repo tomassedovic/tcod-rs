@@ -28,6 +28,9 @@
 #ifndef _TCOD_PARSER_HPP
 #define _TCOD_PARSER_HPP
 
+#include "color.hpp"
+#include "list.hpp"
+#include "parser.h"
 /**
 @PageName parser
 @PageTitle File parser
@@ -623,7 +626,7 @@ The code in the example below will result in your error callback called with the
 	typedef union {
 		bool b;
 		char c;
-		int32 i;
+		int32_t i;
 		float f;
 		char *s;
 		TCOD_color_t col;

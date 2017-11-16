@@ -24,7 +24,9 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "libtcod.hpp"
+#include <mouse.hpp>
+
+#ifdef TCOD_CONSOLE_SUPPORT
 
 void TCODMouse::showCursor(bool visible) {
 	TCOD_mouse_show_cursor(visible);
@@ -42,3 +44,4 @@ TCOD_mouse_t TCODMouse::getStatus() {
 	return TCOD_mouse_get_status();
 }
 
+#endif

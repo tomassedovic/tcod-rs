@@ -28,6 +28,10 @@
 #ifndef _TCOD_ZIP_HPP
 #define _TCOD_ZIP_HPP
 
+#include "color.hpp"
+#include "console.hpp"
+#include "image.hpp"
+#include "zip.h"
 /**
  @PageName zip
  @PageCategory Base toolkits
@@ -131,6 +135,7 @@ public :
 	*/
 	void putColor(const TCODColor *val);
 
+#ifdef TCOD_IMAGE_SUPPORT
 	/**
 	@PageName zip_put
 	@FuncTitle Putting an image in the buffer
@@ -140,7 +145,9 @@ public :
 	@Param val	An image to store in the buffer
 	*/
 	void putImage(const TCODImage *val);
+#endif
 
+#ifdef TCOD_CONSOLE_SUPPORT
 	/**
 	@PageName zip_put
 	@FuncTitle Putting a console in the buffer
@@ -150,6 +157,7 @@ public :
 	@Param val	A console to store in the buffer
 	*/
 	void putConsole(const TCODConsole *val);
+#endif
 
 	/**
 	@PageName zip_put
@@ -165,11 +173,11 @@ public :
 	/**
 	@PageName zip_put
 	@FuncTitle Reading the number of (uncompressed) bytes in the buffer
-	@Cpp uint32 TCODZip::getCurrentBytes()
-	@C uint32 TCOD_zip_get_current_bytes(TCOD_zip_t zip)
+	@Cpp uint32_t TCODZip::getCurrentBytes()
+	@C uint32_t TCOD_zip_get_current_bytes(TCOD_zip_t zip)
 	@Param zip	In the C version, the buffer handler, returned by the constructor.
 	*/	
-	uint32 getCurrentBytes() const;
+	uint32_t getCurrentBytes() const;
 	
 	/**
 	@PageName zip_put
@@ -258,7 +266,8 @@ public :
 	@Param zip	In the C version, the buffer handler, returned by the constructor.
 	*/	
 	TCODColor getColor();
-	
+
+#ifdef TCOD_IMAGE_SUPPORT
 	/**
 	@PageName zip_load
 	@FuncTitle Reading a color from the buffer
@@ -267,7 +276,9 @@ public :
 	@Param zip	In the C version, the buffer handler, returned by the constructor.
 	*/	
 	TCODImage *getImage();
-	
+#endif
+
+#ifdef TCOD_CONSOLE_SUPPORT
 	/**
 	@PageName zip_load
 	@FuncTitle Reading a console from the buffer
@@ -276,6 +287,7 @@ public :
 	@Param zip	In the C version, the buffer handler, returned by the constructor.
 	*/	
 	TCODConsole *getConsole();
+#endif
 	
 	/**
 	@PageName zip_load
@@ -309,21 +321,21 @@ public :
 	/**
 	@PageName zip_load
 	@FuncTitle Getting the number of remaining bytes in the buffer
-	@Cpp uint32 TCODZip::getRemainingBytes() const
-	@C uint32 TCOD_zip_get_remaining_bytes(TCOD_zip_t zip)
+	@Cpp uint32_t TCODZip::getRemainingBytes() const
+	@C uint32_t TCOD_zip_get_remaining_bytes(TCOD_zip_t zip)
 	@Param zip	In the C version, the buffer handler, returned by the constructor.
 	*/	
-	uint32 getRemainingBytes() const;
+	uint32_t getRemainingBytes() const;
 
 	/**
 	@PageName zip_load
 	@FuncTitle Skipping some bytes in the buffer
-	@Cpp void TCODZip::skipBytes(uint32 nbBytes)
-	@C void TCOD_zip_skip_bytes(TCOD_zip_t zip, uint32 nbBytes)
+	@Cpp void TCODZip::skipBytes(uint32_t nbBytes)
+	@C void TCOD_zip_skip_bytes(TCOD_zip_t zip, uint32_t nbBytes)
 	@Param zip	In the C version, the buffer handler, returned by the constructor.
 	@Param nbBytes number of uncompressed bytes to skip
 	*/	
-	void skipBytes(uint32 nbBytes);
+	void skipBytes(uint32_t nbBytes);
 protected :
 	TCOD_zip_t data;
 };

@@ -27,6 +27,15 @@
 #ifndef WRAPPERS_H
 #define WRAPPERS_H
 
+#include "libtcod_portability.h"
+#include "console_types.h"
+#include "image.h"
+#include "mouse.h"
+#include "parser.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* wrappers to ease other languages integration */
 typedef unsigned int colornum_t;
 
@@ -48,6 +57,7 @@ TCODLIB_API float TCOD_color_get_hue_wrapper (colornum_t c);
 TCODLIB_API float TCOD_color_get_saturation_wrapper (colornum_t c);
 TCODLIB_API float TCOD_color_get_value_wrapper(colornum_t c);
 
+#ifdef TCOD_CONSOLE_SUPPORT
 /* console module */
 /* TCODLIB_API void TCOD_console_set_custom_font_wrapper(const char *fontFile,
                         int char_width, int char_height, int nb_char_horiz,
@@ -71,7 +81,7 @@ TCODLIB_API void TCOD_console_set_char_foreground_wrapper(TCOD_console_t con,int
                                       colornum_t col);
 TCODLIB_API void TCOD_console_put_char_ex_wrapper(TCOD_console_t con, int x,
 	int y, int c, colornum_t fore, colornum_t back);
-TCODLIB_API void TCOD_console_set_fade_wrapper(uint8 val, colornum_t fade);
+TCODLIB_API void TCOD_console_set_fade_wrapper(uint8_t val, colornum_t fade);
 TCODLIB_API colornum_t TCOD_console_get_fading_color_wrapper(void);
 TCODLIB_API void TCOD_console_set_color_control_wrapper(TCOD_colctrl_t con,
 						colornum_t fore,
@@ -100,7 +110,9 @@ TCODLIB_API char *TCOD_console_print_return_string(TCOD_console_t con,int x,
 						   bool can_split,
 						   bool count_only);
 TCODLIB_API void TCOD_console_set_key_color_wrapper (TCOD_console_t con, colornum_t c);
+#endif
 
+#ifdef TCOD_IMAGE_SUPPORT
 /* image module */
 
 TCODLIB_API void TCOD_image_clear_wrapper(TCOD_image_t image,
@@ -113,9 +125,12 @@ TCODLIB_API void TCOD_image_put_pixel_wrapper(TCOD_image_t image,int x, int y,
 				      colornum_t col);
 TCODLIB_API void TCOD_image_set_key_color_wrapper(TCOD_image_t image,
 					  colornum_t key_color);
+#endif
 
+#ifdef TCOD_CONSOLE_SUPPORT
 /* mouse module */
 TCODLIB_API void TCOD_mouse_get_status_wrapper(TCOD_mouse_t *holder);
+#endif
 
 /* parser module */
 TCODLIB_API colornum_t TCOD_parser_get_color_property_wrapper(TCOD_parser_t parser, const char *name);
@@ -127,6 +142,7 @@ TCODLIB_API void TCOD_namegen_get_sets_wrapper(char **sets);
 /* sys module */
 TCODLIB_API int TCOD_sys_get_current_resolution_x(void);
 TCODLIB_API int TCOD_sys_get_current_resolution_y(void);
-
+#ifdef __cplusplus
+}
+#endif
 #endif	/* WRAPPERS_H */
-

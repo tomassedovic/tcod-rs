@@ -24,12 +24,16 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include <console.hpp>
 
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include "libtcod.hpp"
-#include "libtcod_int.h"
+
+#include <libtcod_int.h>
+#include <image.hpp>
+
+#ifdef TCOD_CONSOLE_SUPPORT
 
 TCODConsole * TCODConsole::root = NULL;
 
@@ -128,9 +132,11 @@ void TCODConsole::setDefaultForeground(TCODColor fore) {
 	TCOD_console_set_default_foreground(data,b);
 }
 
+#ifndef TCOD_BARE
 void TCODConsole::setWindowTitle(const char *title) {
 	TCOD_sys_set_window_title(title);
 }
+#endif
 
 void TCODConsole::initRoot(int w, int h, const char *title, bool fullscreen, TCOD_renderer_t renderer) {
 	TCODConsole *con=new TCODConsole();
@@ -177,12 +183,12 @@ void TCODConsole::flush() {
 	TCOD_console_flush();
 }
 
-void TCODConsole::setFade(uint8 val, const TCODColor &fade) {
+void TCODConsole::setFade(uint8_t val, const TCODColor &fade) {
 	TCOD_color_t f= {fade.r,fade.g,fade.b};
 	TCOD_console_set_fade(val,f);
 }
 
-uint8 TCODConsole::getFade() {
+uint8_t TCODConsole::getFade() {
 	return TCOD_console_get_fade();
 }
 
@@ -431,4 +437,4 @@ const char *TCODConsole::getRGBColorControlString( TCOD_colctrl_t ctrl, const TC
 
 #endif
 
-
+#endif /* TCOD_CONSOLE_SUPPORT */

@@ -24,9 +24,11 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include <mersenne.hpp>
+
 #include <stdlib.h>
-#include "libtcod.hpp"
-#include "libtcod_int.h"
+
+#include <libtcod_int.h>
 
 static TCODRandom *instance=(TCODRandom *)NULL;
 
@@ -41,7 +43,7 @@ TCODRandom::TCODRandom(TCOD_random_algo_t algo, bool allocate) {
 	if ( allocate ) data = TCOD_random_new(algo);
 }
 
-TCODRandom::TCODRandom(uint32 seed, TCOD_random_algo_t algo) {
+TCODRandom::TCODRandom(uint32_t seed, TCOD_random_algo_t algo) {
 	data=TCOD_random_new_from_seed(algo, seed);
 }
 

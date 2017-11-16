@@ -28,12 +28,14 @@
 * Mingos' NameGen
 * This file was written by Dominik "Mingos" Marczuk.
 */
+#include <namegen.h>
 
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
-#include "libtcod.h"
+
+#include <parser.h>
 
 /* ------------ *
  * the typedefs *
@@ -414,9 +416,9 @@ void namegen_word_prune_spaces (char * str) {
 /* prune repeated "syllables", such as Arnarn */
 bool namegen_word_prune_syllables (char *str) {
     char * data = TCOD_strdup(str);
-    int len = strlen(data); /* length of the string */
+    size_t len = strlen(data); /* length of the string */
     char check[8];
-    int i; /* iteration in for loops */
+    size_t i; /* iteration in for loops */
     /* change to lowercase */
     for (i = 0; i < len; i++) data[i] = (char)(tolower(data[i]));
     /* start pruning */

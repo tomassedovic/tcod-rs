@@ -24,12 +24,14 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include <parser.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include "libtcod.h"
-#include "libtcod_int.h"
+
+#include <libtcod_int.h>
 
 #define BIG_NAME_LEN 128
 
@@ -211,7 +213,7 @@ TCOD_value_t TCOD_parse_string_value(void) {
 	TCOD_list_t l;
 	bool end=false;
 	char **s;
-	int slen=0;
+	size_t slen=0;
 	l=TCOD_list_new();
 	if ( lex->token_type != TCOD_LEX_STRING ) TCOD_parser_error("parseStringValue : string constant expected instead of '%s'",lex->tok);
 	while ( !end ) {

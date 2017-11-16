@@ -28,12 +28,18 @@
 #ifndef _TCOD_COLOR_H
 #define _TCOD_COLOR_H
 
+#include "libtcod_portability.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
-	uint8 r,g,b;
+	uint8_t r,g,b;
 } TCOD_color_t;
 
 /* constructors */
-TCODLIB_API TCOD_color_t TCOD_color_RGB(uint8 r, uint8 g, uint8 b);
+TCODLIB_API TCOD_color_t TCOD_color_RGB(uint8_t r, uint8_t g, uint8_t b);
 TCODLIB_API TCOD_color_t TCOD_color_HSV(float h, float s, float v);
 /* basic operations */
 TCODLIB_API bool TCOD_color_equals (TCOD_color_t c1, TCOD_color_t c2);
@@ -319,4 +325,7 @@ extern TCODLIB_API const TCOD_color_t TCOD_silver;
 extern TCODLIB_API const TCOD_color_t TCOD_celadon;
 extern TCODLIB_API const TCOD_color_t TCOD_peach;
 
+#ifdef __cplusplus
+}
+#endif
 #endif

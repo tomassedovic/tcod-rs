@@ -28,14 +28,21 @@
 #ifndef _TCOD_CONSOLE_H
 #define _TCOD_CONSOLE_H
 
+#include "libtcod_portability.h"
+
+#ifdef TCOD_CONSOLE_SUPPORT
+
+#include "color.h"
 #include "console_types.h"
-
-#define TCOD_BKGND_ALPHA(alpha) ((TCOD_bkgnd_flag_t)(TCOD_BKGND_ALPH|(((uint8)(alpha*255))<<8)))
-#define TCOD_BKGND_ADDALPHA(alpha) ((TCOD_bkgnd_flag_t)(TCOD_BKGND_ADDA|(((uint8)(alpha*255))<<8)))
-
-typedef void * TCOD_console_t;
-
 #include "image.h"
+#include "list.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define TCOD_BKGND_ALPHA(alpha) ((TCOD_bkgnd_flag_t)(TCOD_BKGND_ALPH|(((uint8_t)(alpha*255))<<8)))
+#define TCOD_BKGND_ADDALPHA(alpha) ((TCOD_bkgnd_flag_t)(TCOD_BKGND_ADDA|(((uint8_t)(alpha*255))<<8)))
 
 TCODLIB_API void TCOD_console_init_root(int w, int h, const char * title, bool fullscreen, TCOD_renderer_t renderer);
 TCODLIB_API void TCOD_console_set_window_title(const char *title);
@@ -95,8 +102,8 @@ TCODLIB_API int TCOD_console_get_char(TCOD_console_t con,int x, int y);
 TCODLIB_API TCOD_image_t TCOD_console_get_background_color_image(TCOD_console_t con);
 TCODLIB_API TCOD_image_t TCOD_console_get_foreground_color_image(TCOD_console_t con);
 
-TCODLIB_API void TCOD_console_set_fade(uint8 val, TCOD_color_t fade);
-TCODLIB_API uint8 TCOD_console_get_fade(void);
+TCODLIB_API void TCOD_console_set_fade(uint8_t val, TCOD_color_t fade);
+TCODLIB_API uint8_t TCOD_console_get_fade(void);
 TCODLIB_API TCOD_color_t TCOD_console_get_fading_color(void);
 
 TCODLIB_API void TCOD_console_flush(void);
@@ -125,4 +132,16 @@ TCODLIB_API void TCOD_console_credits(void);
 TCODLIB_API void TCOD_console_credits_reset(void);
 TCODLIB_API bool TCOD_console_credits_render(int x, int y, bool alpha);
 
+/* REXPaint support */
+TCODLIB_API TCOD_console_t TCOD_console_from_xp(const char *filename);
+TCODLIB_API bool TCOD_console_load_xp(TCOD_console_t con, const char *filename);
+TCODLIB_API bool TCOD_console_save_xp(TCOD_console_t con, const char *filename, int compress_level);
+TCODLIB_API TCOD_list_t TCOD_console_list_from_xp(const char *filename);
+TCODLIB_API bool TCOD_console_list_save_xp(TCOD_list_t console_list, const char *filename, int compress_level);
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* TCOD_CONSOLE_SUPPORT */
+
+#endif /* _TCOD_CONSOLE_H */

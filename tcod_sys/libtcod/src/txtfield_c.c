@@ -24,11 +24,16 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include <txtfield.h>
+
+#ifdef TCOD_CONSOLE_SUPPORT
 
 #include <stdlib.h>
 #include <string.h>
-#include "libtcod.h"
-#include "libtcod_int.h"
+
+#include <console.h>
+#include <libtcod_int.h>
+#include <libtcod_utility.h>
 
 #define MAX_INT 0x7FFFFFFF
 
@@ -582,7 +587,7 @@ bool TCOD_text_update (TCOD_text_t txt, TCOD_key_t key) {
 /* renders the textfield */
 void TCOD_text_render (TCOD_text_t txt, TCOD_console_t con) {
     text_t * data = (text_t*)txt;
-    uint32 time;
+    uint32_t time;
 	bool cursor_on;
 	char back=0;
 	int curx,cury,cursorx,cursory, curpos;
@@ -679,3 +684,5 @@ void TCOD_text_delete (TCOD_text_t txt) {
     TCOD_console_delete(data->con);
     free(data);
 }
+
+#endif /* TCOD_CONSOLE_SUPPORT */

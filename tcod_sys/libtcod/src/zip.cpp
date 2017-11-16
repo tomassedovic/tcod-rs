@@ -24,7 +24,7 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "libtcod.hpp"
+#include <zip.hpp>
 
 TCODZip::TCODZip() {
 	data=TCOD_zip_new();
@@ -62,13 +62,17 @@ void TCODZip::putColor(const TCODColor *val) {
 	TCOD_zip_put_color(data,col);
 }
 
+#ifdef TCOD_IMAGE_SUPPORT
 void TCODZip::putImage(const TCODImage *val) {
 	TCOD_zip_put_image(data,val->data);
 }
+#endif
 
+#ifdef TCOD_CONSOLE_SUPPORT
 void TCODZip::putConsole(const TCODConsole *val) {
 	TCOD_zip_put_console(data,val->data);
 }
+#endif
 
 int TCODZip::saveToFile(const char *filename) {
 	return TCOD_zip_save_to_file(data,filename);
@@ -102,22 +106,26 @@ TCODColor TCODZip::getColor() {
 	return TCODColor(TCOD_zip_get_color(data));
 }
 
+#ifdef TCOD_IMAGE_SUPPORT
 TCODImage *TCODZip::getImage() {
 	return new TCODImage(TCOD_zip_get_image(data));
 }
+#endif
 
+#ifdef TCOD_CONSOLE_SUPPORT
 TCODConsole *TCODZip::getConsole() {
 	return new TCODConsole(TCOD_zip_get_console(data));
 }
+#endif
 
-uint32 TCODZip::getCurrentBytes() const {
+uint32_t TCODZip::getCurrentBytes() const {
 	return TCOD_zip_get_current_bytes(data);
 }
 
-uint32 TCODZip::getRemainingBytes() const {
+uint32_t TCODZip::getRemainingBytes() const {
 	return TCOD_zip_get_remaining_bytes(data);
 }
 
-void TCODZip::skipBytes(uint32 nbBytes) {
+void TCODZip::skipBytes(uint32_t nbBytes) {
 	TCOD_zip_skip_bytes(data,nbBytes);
 }
