@@ -56,6 +56,7 @@
 use std::ptr;
 use std::str;
 
+use std::ascii::AsciiExt;
 use std::marker::PhantomData;
 use std::mem::transmute;
 use std::path::Path;
