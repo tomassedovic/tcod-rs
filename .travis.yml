@@ -12,7 +12,7 @@ matrix:
 before_install:
 - '[ "$TRAVIS_OS_NAME" = linux ] && sudo apt-get update -qq || brew update'
 install:
-- '[ "$TRAVIS_OS_NAME" = linux ] && sudo apt-get install -y libsdl2-dev || brew install sdl'
+- '[ "$TRAVIS_OS_NAME" = linux ] && sudo apt-get install -y libsdl2-dev libegl1-mesa-dev libgles2-mesa-dev || brew install sdl2'
 script:
 - cargo build --verbose
 - cargo test --verbose
