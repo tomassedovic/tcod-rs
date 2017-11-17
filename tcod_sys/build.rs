@@ -196,7 +196,6 @@ fn main() {
             config.flag(dst.join(c_file).with_extension("o").to_str().unwrap());
         }
         config.flag(dst.join("libz.a").to_str().unwrap());
-        config.flag(src.join("libtcod/osx/macsupport.m").to_str().unwrap());
         config.flag("-lSDL2");
         config.flag("-lSDL2main");
         config.flag("-framework");
