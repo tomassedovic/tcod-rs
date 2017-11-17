@@ -58,8 +58,8 @@ fn main() {
 
     let src = Path::new(&src_dir);
     let dst = Path::new(&dst_dir);
-    let sdl_lib_dir = src.join("libtcod/dependencies/SDL2-2.0.5/lib").join(&target);
-    let sdl_include_dir = src.join("libtcod/dependencies/SDL2-2.0.5/include").join(&target);
+    let sdl_lib_dir = src.join("libtcod").join("dependencies").join("SDL2-2.0.5").join("lib").join(&target);
+    let sdl_include_dir = src.join("libtcod").join("dependencies").join("SDL2-2.0.5").join("include");
 
     let libz_sources = &[
         "libtcod/src/zlib/adler32.c",
@@ -110,22 +110,6 @@ fn main() {
 	    "libtcod/src/wrappers.c",
 	    "libtcod/src/zip_c.c",
 	    "libtcod/src/png/lodepng.c",
-        /*
-        "libtcod/src/gui/button.cpp",
-        "libtcod/src/gui/container.cpp",
-        "libtcod/src/gui/flatlist.cpp",
-        "libtcod/src/gui/hbox.cpp",
-        "libtcod/src/gui/image.cpp",
-        "libtcod/src/gui/label.cpp",
-        "libtcod/src/gui/radiobutton.cpp",
-        "libtcod/src/gui/slider.cpp",
-        "libtcod/src/gui/statusbar.cpp",
-        "libtcod/src/gui/textbox.cpp",
-        "libtcod/src/gui/togglebutton.cpp",
-        "libtcod/src/gui/toolbar.cpp",
-        "libtcod/src/gui/vbox.cpp",
-        "libtcod/src/gui/widget.cpp",
-        */
     ];
 
     if target.contains("linux") {
@@ -269,10 +253,10 @@ fn main() {
 
         // Build the DLL
         let mut config = cc::Build::new();
-        config.define("TCOD_SDL2", None);
-        config.define("NO_OPENGL", None);
-        config.flag("/DLIBTCOD_EXPORTS");
+        config.flag("/DTCOD_SDL2");
         config.flag("/DNO_OPENGL");
+        config.flag("/DLIBTCOD_EXPORTS");
+        config.flag(&format!("/Fo:{}\\", dst.to_str().unwrap()));
         config.include(sdl_include_dir.to_str().unwrap());
         config.include(Path::new("libtcod").join("src").join("zlib"));
         config.include(Path::new("libtcod").join("include"));
