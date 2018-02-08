@@ -233,7 +233,7 @@ fn main() {
         config.flag(sdl_lib_dir.to_str().unwrap());
         config.flag("-lSDL2.dll");
         config.flag("-lopengl32");
-        config.flag("-static-libcc");
+        config.flag("-static-libgcc");
         config.flag("-static-libstdc++");
 
         compile_config(config);
