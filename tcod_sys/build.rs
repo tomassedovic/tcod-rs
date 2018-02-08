@@ -58,8 +58,8 @@ fn main() {
 
     let src = Path::new(&src_dir);
     let dst = Path::new(&dst_dir);
-    let sdl_lib_dir = src.join("libtcod").join("dependencies").join("SDL2-2.0.5").join("lib").join(&target);
-    let sdl_include_dir = src.join("libtcod").join("dependencies").join("SDL2-2.0.5").join("include");
+    let sdl_lib_dir = src.join("libtcod").join("dependencies").join("SDL2-2.0.7").join("lib").join(&target);
+    let sdl_include_dir = src.join("libtcod").join("dependencies").join("SDL2-2.0.7").join("include");
 
     let libz_sources = &[
         "libtcod/src/zlib/adler32.c",
@@ -199,7 +199,7 @@ fn main() {
     } else if target.contains("windows-gnu") {
         assert!(sdl_lib_dir.is_dir());
         assert!(sdl_include_dir.is_dir());
-        fs::copy(&sdl_lib_dir.join("SDL2.dll"), &dst.join("SDL2.dll")).unwrap();
+        fs::copy(&sdl_lib_dir.join("libSDL2.dll.a"), &dst.join("libSDL2.dll.a")).unwrap();
 
         build_libz(libz_sources);
 
