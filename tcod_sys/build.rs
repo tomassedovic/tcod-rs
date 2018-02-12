@@ -58,8 +58,8 @@ fn main() {
 
     let src = Path::new(&src_dir);
     let dst = Path::new(&dst_dir);
-    let sdl_lib_dir = src.join("libtcod").join("dependencies").join("SDL2-2.0.5").join("lib").join(&target);
-    let sdl_include_dir = src.join("libtcod").join("dependencies").join("SDL2-2.0.5").join("include");
+    let sdl_lib_dir = src.join("libtcod").join("dependencies").join("SDL2-2.0.7").join("lib").join(&target);
+    let sdl_include_dir = src.join("libtcod").join("dependencies").join("SDL2-2.0.7").join("include");
 
     let libz_sources = &[
         "libtcod/src/zlib/adler32.c",
@@ -200,40 +200,36 @@ fn main() {
         assert!(sdl_lib_dir.is_dir());
         assert!(sdl_include_dir.is_dir());
         fs::copy(&sdl_lib_dir.join("SDL2.dll"), &dst.join("SDL2.dll")).unwrap();
+        fs::copy(&sdl_lib_dir.join("libSDL2.a"), &dst.join("libSDL2.a")).unwrap();
+        fs::copy(&sdl_lib_dir.join("libSDL2main.a"), &dst.join("libSDL2main.a")).unwrap();
 
-        build_libz(libz_sources);
-
-        // Build the *.o files:
-        {
-            let mut config = cc::Build::new();
-            config.include(sdl_include_dir.to_str().unwrap());
-            config.flag("-fno-strict-aliasing");
-            config.flag("-ansi");
-            config.define("TCOD_SDL2", None);
-            config.define("NO_OPENGL", None);
-            config.define("LIBTCOD_EXPORTS", None);
-            build_libtcod_objects(config, libtcod_sources);
-        }
 
         // Build the DLL
         let mut config = cc::Build::new();
+        config.flag("-fno-strict-aliasing");
+        config.flag("-ansi");
         config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
+        config.define("LIBTCOD_EXPORTS", None);
         config.flag("-o");
         config.flag(dst.join("libtcod.dll").to_str().unwrap());
         config.flag("-shared");
         fs::create_dir(dst.join("lib")).unwrap();
         config.flag(&format!("-Wl,--out-implib,{}", dst.join("lib/libtcod.a").display()));
-        for c_file in libtcod_sources {
-            config.flag(dst.join(c_file).with_extension("o").to_str().unwrap());
+        config.include(Path::new("libtcod").join("src").join("zlib"));
+        config.include(Path::new("libtcod").join("include"));
+        for c_file in libz_sources.iter().chain(libtcod_sources) {
+            let path = c_file.split('/').fold(PathBuf::new(), |path, segment| path.join(segment));
+            config.flag(src.join(path).to_str().unwrap());
         }
-        config.flag(dst.join("libz.a").to_str().unwrap());
         config.flag("-mwindows");
         config.flag("-L");
         config.flag(sdl_lib_dir.to_str().unwrap());
-        config.flag("-lSDL2.dll");
+        config.flag("-lSDL2");
+        config.flag("-lSDL2main");
         config.flag("-lopengl32");
-        config.flag("-static-libcc");
+        config.flag(&format!("-I{}", sdl_include_dir.to_str().unwrap()));
+        config.flag("-static-libgcc");
         config.flag("-static-libstdc++");
 
         compile_config(config);
