@@ -123,6 +123,7 @@ fn main() {
             }
             config.define("TCOD_SDL2", None);
             config.define("NO_OPENGL", None);
+            config.define("NDEBUG", None);
             config.flag("-fno-strict-aliasing");
             config.flag("-ansi");
             build_libtcod_objects(config, libtcod_sources);
