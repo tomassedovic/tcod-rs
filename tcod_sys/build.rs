@@ -133,6 +133,7 @@ fn main() {
         let mut config = cc::Build::new();
         config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
+        config.define("NDEBUG", None);
         config.flag("-shared");
         config.flag("-Wl,-soname,libtcod.so");
         config.flag("-o");
@@ -165,6 +166,7 @@ fn main() {
             }
             config.define("TCOD_SDL2", None);
             config.define("NO_OPENGL", None);
+            config.define("NDEBUG", None);
             config.flag("-fno-strict-aliasing");
             config.flag("-ansi");
             build_libtcod_objects(config, libtcod_sources);
@@ -174,6 +176,7 @@ fn main() {
         let mut config = cc::Build::new();
         config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
+        config.define("NDEBUG", None);
         config.flag("-shared");
         config.flag("-o");
         config.flag(dst.join("libtcod.dylib").to_str().unwrap());
@@ -211,6 +214,7 @@ fn main() {
         config.flag("-ansi");
         config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
+        config.define("NDEBUG", None);
         config.define("LIBTCOD_EXPORTS", None);
         config.flag("-o");
         config.flag(dst.join("libtcod.dll").to_str().unwrap());
@@ -252,6 +256,7 @@ fn main() {
         let mut config = cc::Build::new();
         config.flag("/DTCOD_SDL2");
         config.flag("/DNO_OPENGL");
+        config.flag("/DNDEBUG");
         config.flag("/DLIBTCOD_EXPORTS");
         config.flag(&format!("/Fo:{}\\", dst.to_str().unwrap()));
         config.include(sdl_include_dir.to_str().unwrap());
