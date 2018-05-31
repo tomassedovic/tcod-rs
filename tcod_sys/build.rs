@@ -185,7 +185,6 @@ fn main() {
         config.flag("-lSDL2");
         config.flag("-lSDL2main");
         config.flag("-framework");
-        config.flag("-framework");
         config.flag("Cocoa");
         config.flag("-lm");
         config.flag("-ldl");
