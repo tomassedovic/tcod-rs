@@ -133,6 +133,7 @@ fn main() {
         let mut config = cc::Build::new();
         config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
+        config.define("NDEBUG", None);
         config.flag("-shared");
         config.flag("-Wl,-soname,libtcod.so");
         config.flag("-o");
@@ -142,7 +143,6 @@ fn main() {
         }
         config.flag(dst.join("libz.a").to_str().unwrap());
         config.flag("-lSDL2");
-        config.flag("-lGL");
         config.flag("-lX11");
         config.flag("-lm");
         config.flag("-ldl");
@@ -151,7 +151,6 @@ fn main() {
         compile_config(config);
         assert!(dst.join("libtcod.so").is_file());
 
-        pkg_config::find_library("gl").unwrap();
         pkg_config::find_library("x11").unwrap();
 
     } else if target.contains("darwin") {
@@ -165,6 +164,7 @@ fn main() {
             }
             config.define("TCOD_SDL2", None);
             config.define("NO_OPENGL", None);
+            config.define("NDEBUG", None);
             config.flag("-fno-strict-aliasing");
             config.flag("-ansi");
             build_libtcod_objects(config, libtcod_sources);
@@ -174,6 +174,7 @@ fn main() {
         let mut config = cc::Build::new();
         config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
+        config.define("NDEBUG", None);
         config.flag("-shared");
         config.flag("-o");
         config.flag(dst.join("libtcod.dylib").to_str().unwrap());
@@ -184,7 +185,6 @@ fn main() {
         config.flag("-lSDL2");
         config.flag("-lSDL2main");
         config.flag("-framework");
-        config.flag("OpenGL");
         config.flag("-framework");
         config.flag("Cocoa");
         config.flag("-lm");
@@ -194,7 +194,6 @@ fn main() {
         compile_config(config);
         assert!(dst.join("libtcod.dylib").is_file());
 
-        println!("cargo:rustc-link-lib=framework=OpenGL");
         println!("cargo:rustc-link-lib=framework=Cocoa");
 
     } else if target.contains("windows-gnu") {
@@ -211,6 +210,7 @@ fn main() {
         config.flag("-ansi");
         config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
+        config.define("NDEBUG", None);
         config.define("LIBTCOD_EXPORTS", None);
         config.flag("-o");
         config.flag(dst.join("libtcod.dll").to_str().unwrap());
@@ -228,7 +228,6 @@ fn main() {
         config.flag(sdl_lib_dir.to_str().unwrap());
         config.flag("-lSDL2");
         config.flag("-lSDL2main");
-        config.flag("-lopengl32");
         config.flag(&format!("-I{}", sdl_include_dir.to_str().unwrap()));
         config.flag("-static-libgcc");
         config.flag("-static-libstdc++");
@@ -237,7 +236,6 @@ fn main() {
         assert!(dst.join("libtcod.dll").is_file());
 
         println!("cargo:rustc-link-lib=dylib={}", "SDL2");
-        println!("cargo:rustc-link-lib=dylib={}", "opengl32");
         println!("cargo:rustc-link-search=native={}", sdl_lib_dir.display());
         println!("cargo:rustc-link-search=native={}", dst.display());
 
@@ -252,6 +250,7 @@ fn main() {
         let mut config = cc::Build::new();
         config.flag("/DTCOD_SDL2");
         config.flag("/DNO_OPENGL");
+        config.flag("/DNDEBUG");
         config.flag("/DLIBTCOD_EXPORTS");
         config.flag(&format!("/Fo:{}\\", dst.to_str().unwrap()));
         config.include(sdl_include_dir.to_str().unwrap());
