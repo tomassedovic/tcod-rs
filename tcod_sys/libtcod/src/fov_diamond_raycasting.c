@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -24,11 +24,13 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include <fov.h>
 
 #include <stdlib.h>
-#include "libtcod.h"
-#include "libtcod_int.h"
 #include <string.h>
+
+#include <libtcod_int.h>
+#include <libtcod_utility.h>
 
 typedef struct _ray_data_t {
 	int xloc,yloc; /* position */

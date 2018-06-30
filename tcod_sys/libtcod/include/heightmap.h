@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -27,6 +27,13 @@
 #ifndef _TCOD_HEIGHTMAP_H
 #define _TCOD_HEIGHTMAP_H
 
+#include "libtcod_portability.h"
+#include "mersenne_types.h"
+#include "noise.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 typedef struct {
 	int w,h;
 	float *values;
@@ -65,6 +72,7 @@ TCODLIB_API void TCOD_heightmap_mid_point_displacement(TCOD_heightmap_t *hm, TCO
 TCODLIB_API void TCOD_heightmap_add_fbm(TCOD_heightmap_t *hm, TCOD_noise_t noise,float mulx, float muly, float addx, float addy, float octaves, float delta, float scale); 
 TCODLIB_API void TCOD_heightmap_scale_fbm(TCOD_heightmap_t *hm, TCOD_noise_t noise,float mulx, float muly, float addx, float addy, float octaves, float delta, float scale); 
 TCODLIB_API void TCOD_heightmap_islandify(TCOD_heightmap_t *hm, float seaLevel,TCOD_random_t rnd);
-
+#ifdef __cplusplus
+}
 #endif
-
+#endif

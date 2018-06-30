@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -28,6 +28,8 @@
 #ifndef _TCOD_COLOR_HPP
 #define _TCOD_COLOR_HPP
 
+#include "color.h"
+#include "libtcod_utility.h"
 // color constants uses to generate @ColorTable
 /**
 	@ColorCategory STANDARD COLORS
@@ -125,7 +127,7 @@ You can use the following predefined colors (hover over a color to see its full 
 
 class TCODLIB_API TCODColor {
 public :
-	uint8 r,g,b;
+	uint8_t r,g,b;
 
 	TCODColor() : r(0),g(0),b(0) {}
 	/**
@@ -144,7 +146,7 @@ public :
 	     TCODColor myColor = new TCODColor(321.0f,0.7f,1.0f); //HSV
 	@LuaEx myColor = tcod.Color(24,24,255)
 	*/
-	TCODColor(uint8 r, uint8 g, uint8 b): r(r), g(g), b(b) {}
+	TCODColor(uint8_t r, uint8_t g, uint8_t b): r(r), g(g), b(b) {}
 	TCODColor(int r, int g, int b): r(r), g(g), b(b) {}
 	TCODColor(const TCOD_color_t &col): r(col.r), g(col.g), b(col.b) {}
 	TCODColor(float h, float s, float v);
@@ -191,9 +193,9 @@ public :
 	*/
 	TCODColor operator * (const TCODColor & a) const {
 		TCODColor ret;
-		ret.r=(uint8)(((int)r)*a.r/255);
-		ret.g=(uint8)(((int)g)*a.g/255);
-		ret.b=(uint8)(((int)b)*a.b/255);
+		ret.r=(uint8_t)(((int)r)*a.r/255);
+		ret.g=(uint8_t)(((int)g)*a.g/255);
+		ret.b=(uint8_t)(((int)b)*a.b/255);
 		return ret;
 	}
 
@@ -222,9 +224,9 @@ public :
 		r = CLAMP(0,255,r);
 		g = CLAMP(0,255,g);
 		b = CLAMP(0,255,b);
-		ret.r=(uint8)r;
-		ret.g=(uint8)g;
-		ret.b=(uint8)b;
+		ret.r=(uint8_t)r;
+		ret.g=(uint8_t)g;
+		ret.b=(uint8_t)b;
 		return ret;
 	}
 
@@ -250,9 +252,9 @@ public :
 		r = MIN(255,r);
 		g = MIN(255,g);
 		b = MIN(255,b);
-		ret.r=(uint8)r;
-		ret.g=(uint8)g;
-		ret.b=(uint8)b;
+		ret.r=(uint8_t)r;
+		ret.g=(uint8_t)g;
+		ret.b=(uint8_t)b;
 		return ret;
 	}
 
@@ -278,9 +280,9 @@ public :
 		r = MAX(0,r);
 		g = MAX(0,g);
 		b = MAX(0,b);
-		ret.r=(uint8)r;
-		ret.g=(uint8)g;
-		ret.b=(uint8)b;
+		ret.r=(uint8_t)r;
+		ret.g=(uint8_t)g;
+		ret.b=(uint8_t)b;
 		return ret;
 	}
 
@@ -305,9 +307,9 @@ coef should be between 0.0 and 1.0 but you can as well use other values
 	*/
 	static TCODColor lerp(const TCODColor &a, const TCODColor &b, float coef) {
 		TCODColor ret;
-		ret.r=(uint8)(a.r+(b.r-a.r)*coef);
-		ret.g=(uint8)(a.g+(b.g-a.g)*coef);
-		ret.b=(uint8)(a.b+(b.b-a.b)*coef);
+		ret.r=(uint8_t)(a.r+(b.r-a.r)*coef);
+		ret.g=(uint8_t)(a.g+(b.g-a.g)*coef);
+		ret.b=(uint8_t)(a.b+(b.b-a.b)*coef);
 		return ret;
 	}
 
@@ -320,7 +322,7 @@ coef should be between 0.0 and 1.0 but you can as well use other values
 	@Py color_set_hsv(c,h,s,v)
 	@C# void TCODColor::setHSV(float h, float s, float v)
 	@Lua Color:setHSV( h, s ,v )
-	@Param c In the C and python versions, the color to modify
+	@Param c In the C and Python versions, the color to modify
 	@Param h,s,v Color components in the HSV space
 		0.0 <= h < 360.0
 		0.0 <= s <= 1.0
@@ -345,7 +347,7 @@ coef should be between 0.0 and 1.0 but you can as well use other values
 		Color:setSaturation(s)
 		Color:setValue(v)
 	@Param h,s,v	Color components in the HSV space
-	@Param c	In the C and python versions, the color to modify
+	@Param c	In the C and Python versions, the color to modify
 	*/
 	void setHue (float h);
 	void setSaturation (float s);
@@ -359,7 +361,7 @@ coef should be between 0.0 and 1.0 but you can as well use other values
 	@Py color_get_HSV(c) # returns [h,s,v]
 	@C# void TCODColor::getHSV(out float h, out float s, out float v)
 	@Lua Color:getHSV() -- returns h,s,v
-	@Param c	In the C and python versions, the TCOD_color_t from which to read.
+	@Param c	In the C and Python versions, the TCOD_color_t from which to read.
 	@Param  h,s,v	Color components in the HSV space
 		0.0 <= h < 360.0
 		0.0 <= s <= 1.0

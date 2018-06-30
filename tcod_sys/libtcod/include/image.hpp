@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -24,6 +24,22 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
+#ifndef _TCOD_IMAGE_HPP
+#define _TCOD_IMAGE_HPP
+
+#include "color.hpp"
+
+#ifdef TCOD_IMAGE_SUPPORT
+
+#ifdef TCOD_CONSOLE_SUPPORT
+#include "console.hpp"
+#endif
+#include "image.h"
+
+#ifdef TCOD_CONSOLE_SUPPORT
+class TCODConsole;
+#endif
 
 class TCODLIB_API TCODImage {
 public :
@@ -67,6 +83,7 @@ public :
 	*/	
 	TCODImage(const char *filename);
 	
+#ifdef TCOD_CONSOLE_SUPPORT
 	/**
 	@PageName image_create
 	@FuncTitle Creating an image from a console
@@ -83,7 +100,7 @@ public :
 	@PyEx pix = libtcod.image_from_console(0)
 	*/	
 	TCODImage(const TCODConsole *console);
-	
+
 	/**
 	@PageName image_create
 	@FuncTitle refreshing an image created from a console
@@ -108,6 +125,7 @@ public :
 		libtcod.image_refresh_console(pix,0)
 	*/
 	void refreshConsole(const TCODConsole *console);
+#endif
 
 	/**
 	@PageName image_read
@@ -144,7 +162,7 @@ public :
 	@C TCOD_color_t TCOD_image_get_pixel(TCOD_image_t image,int x, int y)
 	@Py image_get_pixel(image, x, y)
 	@C# TCODColor TCODImage::getPixel(int x, int y)
-	@Param image In the C and python version, the image handler, obtained with the load function.
+	@Param image In the C and Python version, the image handler, obtained with the load function.
 	@Param x,y The pixel coordinates inside the image.
 		0 <= x < width
 		0 <= y < height
@@ -168,7 +186,7 @@ public :
 	@C int TCOD_image_get_alpha(TCOD_image_t image, int x, int y)
 	@Py image_get_alpha(image, x, y)
 	@C# int TCODImage::getAlpha(int x, int y)
-	@Param image In the C and python version, the image handler, obtained with the load function.
+	@Param image In the C and Python version, the image handler, obtained with the load function.
 	@Param x,y The pixel coordinates inside the image.
 		0 <= x < width
 		0 <= y < height
@@ -183,7 +201,7 @@ public :
 	@C bool TCOD_image_is_pixel_transparent(TCOD_image_t image,int x, int y)
 	@Py image_is_pixel_transparent(image, x, y)
 	@C# bool TCODImage::isPixelTransparent(int x,int y)
-	@Param image In the C and python version, the image handler, obtained with the load function.
+	@Param image In the C and Python version, the image handler, obtained with the load function.
 	@Param x,y The pixel coordinates inside the image.
 		0 <= x < width
 		0 <= y < height
@@ -229,7 +247,7 @@ public :
 	@C void TCOD_image_clear(TCOD_image_t image, TCOD_color_t color)
 	@Py image_clear(image,color)
 	@C# void TCODImage::clear(TCODColor color)
-	@Param image	In the C and python version, the image to fill.
+	@Param image	In the C and Python version, the image to fill.
 	@Param color	The color to use.
 	*/
 	void clear(const TCODColor col);
@@ -257,7 +275,7 @@ public :
 	@C void TCOD_image_scale(TCOD_image_t image,int neww, int newh)
 	@Py image_scale(image, neww,newh)
 	@C# void TCODImage::scale(int neww, int newh)
-	@Param image	In the C and python version, the image handler, obtained with the load function.
+	@Param image	In the C and Python version, the image handler, obtained with the load function.
 	@Param neww,newh	The new size of the image.
 	*/
 	void scale(int neww, int newh);
@@ -269,7 +287,7 @@ public :
 	@C void TCOD_image_hflip(TCOD_image_t image)
 	@Py image_hflip(image)
 	@C# void TCODImage::hflip()
-	@Param image	In the C and python version, the image handler, obtained with the load function.
+	@Param image	In the C and Python version, the image handler, obtained with the load function.
 	*/
 	void hflip();
 
@@ -280,7 +298,7 @@ public :
 	@C void TCOD_image_vflip(TCOD_image_t image)
 	@Py image_vflip(image)
 	@C# void TCODImage::vflip()
-	@Param image	In the C and python version, the image handler, obtained with the load function.
+	@Param image	In the C and Python version, the image handler, obtained with the load function.
 	*/
 	void vflip();
 
@@ -292,7 +310,7 @@ public :
 	@C void TCOD_image_rotate90(TCOD_image_t image, int numRotations)
 	@Py image_rotate90(image, num=1)
 	@C# void TCODImage::rotate90(int numRotations)
-	@Param image	In the C and python version, the image handler, obtained with the load function.
+	@Param image	In the C and Python version, the image handler, obtained with the load function.
 	@Param numRotations	Number of 90 degrees rotations. Should be between 1 and 3.
 	*/
 	void rotate90(int numRotations=1);
@@ -304,7 +322,7 @@ public :
 	@C void TCOD_image_invert(TCOD_image_t image)
 	@Py image_invert(image)
 	@C# void TCODImage::invert()
-	@Param image	In the C and python version, the image handler, obtained with the load function.
+	@Param image	In the C and Python version, the image handler, obtained with the load function.
 	*/
 	void invert();
 
@@ -331,6 +349,7 @@ public :
 	  */	
 	void save(const char *filename) const;
 
+#ifdef TCOD_CONSOLE_SUPPORT
 	/**
 	@PageName image_blit
 	@PageFather image
@@ -375,6 +394,8 @@ public :
 	@Param angle	Rotation angle in radians.
 	*/	
 	void blit(TCODConsole *console, float x, float y, TCOD_bkgnd_flag_t bkgnd_flag = TCOD_BKGND_SET, float scalex=1.0f, float scaley=1.0f, float angle=0.0f) const;
+#endif
+
 	/**
 	@PageName image_blit
 	@FuncTitle Blitting with a mask
@@ -383,7 +404,7 @@ public :
 	@C void TCOD_image_set_key_color(TCOD_image_t image, TCOD_color_t keyColor)
 	@Py image_set_key_color(image, keyColor)
 	@C# void TCODImage::setKeyColor(TCODColor keyColor)
-	@Param image	In the C and python version, the image handler, obtained with the load function.
+	@Param image	In the C and Python version, the image handler, obtained with the load function.
 	@Param color	Pixels with this color will be skipped by blitting functions.
 	@CppEx 
 		TCODImage *pix = TCODImage("mypix.bmp");
@@ -400,7 +421,8 @@ public :
 		libtcod.image_blit_rect(pix,0,40,25,5,5,libtcod.BKGND_SET)
 	*/	
 	void setKeyColor(const TCODColor keyColor);
-	
+
+#ifdef TCOD_CONSOLE_SUPPORT
 	/**
 	@PageName image_blit
 	@FuncTitle Blitting with subcell resolution
@@ -421,12 +443,13 @@ public :
 		void TCODImage::blit2x(TCODConsole dest, int dx, int dy, int sx, int sy);
 		void TCODImage::blit2x(TCODConsole dest, int dx, int dy, int sx, int sy, int w);
 		void TCODImage::blit2x(TCODConsole dest, int dx, int dy, int sx, int sy, int w, int h);
-	@Param image	In the C and python version, the image handler, obtained with the load function.
+	@Param image	In the C and Python version, the image handler, obtained with the load function.
 	@Param dest	The console of which the image will be blited. Foreground, background and character data will be overwritten.
 	@Param dx,dy	Coordinate of the console cell where the upper left corner of the blitted image will be.
 	@Param sx,sy,w,h	Part of the image to blit. Use -1 in w and h to blit the whole image.
 	*/	
 	void blit2x(TCODConsole *dest, int dx, int dy, int sx=0, int sy=0, int w=-1, int h=-1) const;
+#endif
 
 	TCODImage(TCOD_image_t img) : data(img), deleteData(false) {}
 	virtual ~TCODImage();
@@ -438,3 +461,6 @@ protected :
 	bool deleteData;
 };
 
+#endif /* TCOD_IMAGE_SUPPORT */
+
+#endif /* _TCOD_IMAGE_HPP */

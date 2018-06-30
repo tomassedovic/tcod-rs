@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -24,9 +24,12 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include <list.h>
+
 #include <stdlib.h> /* calloc */
 #include <string.h> /* NULL/memcpy */
-#include "libtcod.h"
+
+#include <libtcod_utility.h>
 
 #define LIST(l) ((TCOD_list_int_t *)l)
 
@@ -53,7 +56,7 @@ void TCOD_list_set_size(TCOD_list_t l, int size) {
 	LIST(l)->fillSize=MIN(size,LIST(l)->allocSize);
 }
 
-TCOD_list_t TCOD_list_new() {
+TCOD_list_t TCOD_list_new(void) {
 	return (TCOD_list_t)calloc(1,sizeof(TCOD_list_int_t));
 }
 
@@ -120,7 +123,7 @@ void ** TCOD_list_end(TCOD_list_t l) {
 }
 void TCOD_list_reverse(TCOD_list_t l) {
 	void **head=TCOD_list_begin(l);
-	void **tail=TCOD_list_end(l);
+	void **tail=TCOD_list_end(l) - 1;
 	while ( head < tail ) {
 		void *tmp=*head;
 		*head=*tail;

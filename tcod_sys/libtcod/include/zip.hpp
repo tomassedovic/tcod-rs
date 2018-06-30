@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -28,12 +28,16 @@
 #ifndef _TCOD_ZIP_HPP
 #define _TCOD_ZIP_HPP
 
+#include "color.hpp"
+#include "console.hpp"
+#include "image.hpp"
+#include "zip.h"
 /**
  @PageName zip
  @PageCategory Base toolkits
  @PageTitle Compression toolkit
  @PageDesc This toolkit provides functions to save or read compressed data from a file. While the module is named Zip, it has nothing to do with the .zip format as it uses zlib compression (.gz format).
-	Note that this modules has no python wrapper. Use python built-in zip module instead.
+	Note that this modules has no Python wrapper. Use Python built-in zip module instead.
 	
 	You can use the compression buffer in two modes:
 	* put data in the buffer, then save it to a file,
@@ -54,7 +58,7 @@ public :
 	
 	/**
 	@PageName zip_init
-	@FuncDesc Once you don't need the buffer anymore, you can release resources. Note that the adresses returned by the getString function are no longer valid once the buffer has been destroyed.
+	@FuncDesc Once you don't need the buffer anymore, you can release resources. Note that the addresses returned by the getString function are no longer valid once the buffer has been destroyed.
 	@Cpp TCODZip::~TCODZip()
 	@C void TCOD_zip_delete(TCOD_zip_t zip)
 	@Param zip	In the C version, the buffer handler, returned by the constructor.
@@ -131,6 +135,7 @@ public :
 	*/
 	void putColor(const TCODColor *val);
 
+#ifdef TCOD_IMAGE_SUPPORT
 	/**
 	@PageName zip_put
 	@FuncTitle Putting an image in the buffer
@@ -140,7 +145,9 @@ public :
 	@Param val	An image to store in the buffer
 	*/
 	void putImage(const TCODImage *val);
+#endif
 
+#ifdef TCOD_CONSOLE_SUPPORT
 	/**
 	@PageName zip_put
 	@FuncTitle Putting a console in the buffer
@@ -150,6 +157,7 @@ public :
 	@Param val	A console to store in the buffer
 	*/
 	void putConsole(const TCODConsole *val);
+#endif
 
 	/**
 	@PageName zip_put
@@ -165,11 +173,11 @@ public :
 	/**
 	@PageName zip_put
 	@FuncTitle Reading the number of (uncompressed) bytes in the buffer
-	@Cpp uint32 TCODZip::getCurrentBytes()
-	@C uint32 TCOD_zip_get_current_bytes(TCOD_zip_t zip)
+	@Cpp uint32_t TCODZip::getCurrentBytes()
+	@C uint32_t TCOD_zip_get_current_bytes(TCOD_zip_t zip)
 	@Param zip	In the C version, the buffer handler, returned by the constructor.
 	*/	
-	uint32 getCurrentBytes() const;
+	uint32_t getCurrentBytes() const;
 	
 	/**
 	@PageName zip_put
@@ -205,7 +213,7 @@ public :
 	@PageFather zip
 	@FuncTitle Reading from a compressed file
 	@FuncDesc You can read data from a file (compressed or not) into the buffer.
-		The function returns the number of (uncompressed) bytes read or 0 if an error occured. 
+		The function returns the number of (uncompressed) bytes read or 0 if an error occurred.
 	@Cpp int TCODZip::loadFromFile(const char *filename)
 	@C int TCOD_zip_load_from_file(TCOD_zip_t zip, const char *filename)
 	@Param zip	In the C version, the buffer handler, returned by the constructor.
@@ -258,7 +266,8 @@ public :
 	@Param zip	In the C version, the buffer handler, returned by the constructor.
 	*/	
 	TCODColor getColor();
-	
+
+#ifdef TCOD_IMAGE_SUPPORT
 	/**
 	@PageName zip_load
 	@FuncTitle Reading a color from the buffer
@@ -267,7 +276,9 @@ public :
 	@Param zip	In the C version, the buffer handler, returned by the constructor.
 	*/	
 	TCODImage *getImage();
-	
+#endif
+
+#ifdef TCOD_CONSOLE_SUPPORT
 	/**
 	@PageName zip_load
 	@FuncTitle Reading a console from the buffer
@@ -276,6 +287,7 @@ public :
 	@Param zip	In the C version, the buffer handler, returned by the constructor.
 	*/	
 	TCODConsole *getConsole();
+#endif
 	
 	/**
 	@PageName zip_load
@@ -309,21 +321,21 @@ public :
 	/**
 	@PageName zip_load
 	@FuncTitle Getting the number of remaining bytes in the buffer
-	@Cpp uint32 TCODZip::getRemainingBytes() const
-	@C uint32 TCOD_zip_get_remaining_bytes(TCOD_zip_t zip)
+	@Cpp uint32_t TCODZip::getRemainingBytes() const
+	@C uint32_t TCOD_zip_get_remaining_bytes(TCOD_zip_t zip)
 	@Param zip	In the C version, the buffer handler, returned by the constructor.
 	*/	
-	uint32 getRemainingBytes() const;
+	uint32_t getRemainingBytes() const;
 
 	/**
 	@PageName zip_load
-	@FuncTitle Skiping some bytes in the buffer
-	@Cpp void TCODZip::skipBytes(uint32 nbBytes)
-	@C void TCOD_zip_skip_bytes(TCOD_zip_t zip, uint32 nbBytes)
+	@FuncTitle Skipping some bytes in the buffer
+	@Cpp void TCODZip::skipBytes(uint32_t nbBytes)
+	@C void TCOD_zip_skip_bytes(TCOD_zip_t zip, uint32_t nbBytes)
 	@Param zip	In the C version, the buffer handler, returned by the constructor.
 	@Param nbBytes number of uncompressed bytes to skip
 	*/	
-	void skipBytes(uint32 nbBytes);
+	void skipBytes(uint32_t nbBytes);
 protected :
 	TCOD_zip_t data;
 };

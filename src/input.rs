@@ -1,83 +1,85 @@
 use std::mem;
+use std::str;
 
 use bindings::ffi;
-use bindings::{c_bool, c_uint, keycode_from_u32};
+use bindings::{CStr, c_bool, c_char, c_uint, keycode_from_native};
 
 
 /// Deprecated. Use `tcod::input::Mouse` instead.
 pub type MouseState = Mouse;
 
-#[repr(C)]
+#[repr(u32)]
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum KeyCode {
-    NoKey = ffi::TCODK_NONE as isize,
-    Escape = ffi::TCODK_ESCAPE as isize,
-    Backspace = ffi::TCODK_BACKSPACE as isize,
-    Tab = ffi::TCODK_TAB as isize,
-    Enter = ffi::TCODK_ENTER as isize,
-    Shift = ffi::TCODK_SHIFT as isize,
-    Control = ffi::TCODK_CONTROL as isize,
-    Alt = ffi::TCODK_ALT as isize,
-    Pause = ffi::TCODK_PAUSE as isize,
-    CapsLock = ffi::TCODK_CAPSLOCK as isize,
-    PageUp = ffi::TCODK_PAGEUP as isize,
-    PageDown = ffi::TCODK_PAGEDOWN as isize,
-    End = ffi::TCODK_END as isize,
-    Home = ffi::TCODK_HOME as isize,
-    Up = ffi::TCODK_UP as isize,
-    Left = ffi::TCODK_LEFT as isize,
-    Right = ffi::TCODK_RIGHT as isize,
-    Down = ffi::TCODK_DOWN as isize,
-    PrintScreen = ffi::TCODK_PRINTSCREEN as isize,
-    Insert = ffi::TCODK_INSERT as isize,
-    Delete = ffi::TCODK_DELETE as isize,
-    LeftWin = ffi::TCODK_LWIN as isize,
-    RightWin = ffi::TCODK_RWIN as isize,
-    Apps = ffi::TCODK_APPS as isize,
+    NoKey = ffi::TCOD_keycode_t::TCODK_NONE as u32,
+    Escape = ffi::TCOD_keycode_t::TCODK_ESCAPE as u32,
+    Backspace = ffi::TCOD_keycode_t::TCODK_BACKSPACE as u32,
+    Tab = ffi::TCOD_keycode_t::TCODK_TAB as u32,
+    Enter = ffi::TCOD_keycode_t::TCODK_ENTER as u32,
+    Shift = ffi::TCOD_keycode_t::TCODK_SHIFT as u32,
+    Control = ffi::TCOD_keycode_t::TCODK_CONTROL as u32,
+    Alt = ffi::TCOD_keycode_t::TCODK_ALT as u32,
+    Pause = ffi::TCOD_keycode_t::TCODK_PAUSE as u32,
+    CapsLock = ffi::TCOD_keycode_t::TCODK_CAPSLOCK as u32,
+    PageUp = ffi::TCOD_keycode_t::TCODK_PAGEUP as u32,
+    PageDown = ffi::TCOD_keycode_t::TCODK_PAGEDOWN as u32,
+    End = ffi::TCOD_keycode_t::TCODK_END as u32,
+    Home = ffi::TCOD_keycode_t::TCODK_HOME as u32,
+    Up = ffi::TCOD_keycode_t::TCODK_UP as u32,
+    Left = ffi::TCOD_keycode_t::TCODK_LEFT as u32,
+    Right = ffi::TCOD_keycode_t::TCODK_RIGHT as u32,
+    Down = ffi::TCOD_keycode_t::TCODK_DOWN as u32,
+    PrintScreen = ffi::TCOD_keycode_t::TCODK_PRINTSCREEN as u32,
+    Insert = ffi::TCOD_keycode_t::TCODK_INSERT as u32,
+    Delete = ffi::TCOD_keycode_t::TCODK_DELETE as u32,
+    LeftWin = ffi::TCOD_keycode_t::TCODK_LWIN as u32,
+    RightWin = ffi::TCOD_keycode_t::TCODK_RWIN as u32,
+    Apps = ffi::TCOD_keycode_t::TCODK_APPS as u32,
     // The numbers on the alphanum section of the keyboard
-    Number0 = ffi::TCODK_0 as isize,
-    Number1 = ffi::TCODK_1 as isize,
-    Number2 = ffi::TCODK_2 as isize,
-    Number3 = ffi::TCODK_3 as isize,
-    Number4 = ffi::TCODK_4 as isize,
-    Number5 = ffi::TCODK_5 as isize,
-    Number6 = ffi::TCODK_6 as isize,
-    Number7 = ffi::TCODK_7 as isize,
-    Number8 = ffi::TCODK_8 as isize,
-    Number9 = ffi::TCODK_9 as isize,
+    Number0 = ffi::TCOD_keycode_t::TCODK_0 as u32,
+    Number1 = ffi::TCOD_keycode_t::TCODK_1 as u32,
+    Number2 = ffi::TCOD_keycode_t::TCODK_2 as u32,
+    Number3 = ffi::TCOD_keycode_t::TCODK_3 as u32,
+    Number4 = ffi::TCOD_keycode_t::TCODK_4 as u32,
+    Number5 = ffi::TCOD_keycode_t::TCODK_5 as u32,
+    Number6 = ffi::TCOD_keycode_t::TCODK_6 as u32,
+    Number7 = ffi::TCOD_keycode_t::TCODK_7 as u32,
+    Number8 = ffi::TCOD_keycode_t::TCODK_8 as u32,
+    Number9 = ffi::TCOD_keycode_t::TCODK_9 as u32,
     // The numbers on the numeric keypad
-    NumPad0 = ffi::TCODK_KP0 as isize,
-    NumPad1 = ffi::TCODK_KP1 as isize,
-    NumPad2 = ffi::TCODK_KP2 as isize,
-    NumPad3 = ffi::TCODK_KP3 as isize,
-    NumPad4 = ffi::TCODK_KP4 as isize,
-    NumPad5 = ffi::TCODK_KP5 as isize,
-    NumPad6 = ffi::TCODK_KP6 as isize,
-    NumPad7 = ffi::TCODK_KP7 as isize,
-    NumPad8 = ffi::TCODK_KP8 as isize,
-    NumPad9 = ffi::TCODK_KP9 as isize,
-    NumPadAdd = ffi::TCODK_KPADD as isize,
-    NumPadSubtract = ffi::TCODK_KPSUB as isize,
-    NumPadDivide = ffi::TCODK_KPDIV as isize,
-    NumPadMultiply = ffi::TCODK_KPMUL as isize,
-    NumPadDecimal = ffi::TCODK_KPDEC as isize,
-    NumPadEnter = ffi::TCODK_KPENTER as isize,
-    F1 = ffi::TCODK_F1 as isize,
-    F2 = ffi::TCODK_F2 as isize,
-    F3 = ffi::TCODK_F3 as isize,
-    F4 = ffi::TCODK_F4 as isize,
-    F5 = ffi::TCODK_F5 as isize,
-    F6 = ffi::TCODK_F6 as isize,
-    F7 = ffi::TCODK_F7 as isize,
-    F8 = ffi::TCODK_F8 as isize,
-    F9 = ffi::TCODK_F9 as isize,
-    F10 = ffi::TCODK_F10 as isize,
-    F11 = ffi::TCODK_F11 as isize,
-    F12 = ffi::TCODK_F12 as isize,
-    NumLock = ffi::TCODK_NUMLOCK as isize,
-    ScrollLock = ffi::TCODK_SCROLLLOCK as isize,
-    Spacebar = ffi::TCODK_SPACE as isize,
-    Char = ffi::TCODK_CHAR as isize,
+    NumPad0 = ffi::TCOD_keycode_t::TCODK_KP0 as u32,
+    NumPad1 = ffi::TCOD_keycode_t::TCODK_KP1 as u32,
+    NumPad2 = ffi::TCOD_keycode_t::TCODK_KP2 as u32,
+    NumPad3 = ffi::TCOD_keycode_t::TCODK_KP3 as u32,
+    NumPad4 = ffi::TCOD_keycode_t::TCODK_KP4 as u32,
+    NumPad5 = ffi::TCOD_keycode_t::TCODK_KP5 as u32,
+    NumPad6 = ffi::TCOD_keycode_t::TCODK_KP6 as u32,
+    NumPad7 = ffi::TCOD_keycode_t::TCODK_KP7 as u32,
+    NumPad8 = ffi::TCOD_keycode_t::TCODK_KP8 as u32,
+    NumPad9 = ffi::TCOD_keycode_t::TCODK_KP9 as u32,
+    NumPadAdd = ffi::TCOD_keycode_t::TCODK_KPADD as u32,
+    NumPadSubtract = ffi::TCOD_keycode_t::TCODK_KPSUB as u32,
+    NumPadDivide = ffi::TCOD_keycode_t::TCODK_KPDIV as u32,
+    NumPadMultiply = ffi::TCOD_keycode_t::TCODK_KPMUL as u32,
+    NumPadDecimal = ffi::TCOD_keycode_t::TCODK_KPDEC as u32,
+    NumPadEnter = ffi::TCOD_keycode_t::TCODK_KPENTER as u32,
+    F1 = ffi::TCOD_keycode_t::TCODK_F1 as u32,
+    F2 = ffi::TCOD_keycode_t::TCODK_F2 as u32,
+    F3 = ffi::TCOD_keycode_t::TCODK_F3 as u32,
+    F4 = ffi::TCOD_keycode_t::TCODK_F4 as u32,
+    F5 = ffi::TCOD_keycode_t::TCODK_F5 as u32,
+    F6 = ffi::TCOD_keycode_t::TCODK_F6 as u32,
+    F7 = ffi::TCOD_keycode_t::TCODK_F7 as u32,
+    F8 = ffi::TCOD_keycode_t::TCODK_F8 as u32,
+    F9 = ffi::TCOD_keycode_t::TCODK_F9 as u32,
+    F10 = ffi::TCOD_keycode_t::TCODK_F10 as u32,
+    F11 = ffi::TCOD_keycode_t::TCODK_F11 as u32,
+    F12 = ffi::TCOD_keycode_t::TCODK_F12 as u32,
+    NumLock = ffi::TCOD_keycode_t::TCODK_NUMLOCK as u32,
+    ScrollLock = ffi::TCOD_keycode_t::TCODK_SCROLLLOCK as u32,
+    Spacebar = ffi::TCOD_keycode_t::TCODK_SPACE as u32,
+    Char = ffi::TCOD_keycode_t::TCODK_CHAR as u32,
+    Text = ffi::TCOD_keycode_t::TCODK_TEXT as u32,
 }
 
 impl Default for KeyCode {
@@ -98,12 +100,23 @@ pub struct Key {
     pub shift: bool,
     pub alt: bool,
     pub ctrl: bool,
+
+    text: [c_char; 32],
+}
+
+impl Key {
+    pub fn text(&self) -> &str {
+        unsafe {
+            CStr::from_ptr(&self.text[0] as *const c_char).to_str().unwrap()
+        }
+    }
 }
 
 impl From<ffi::TCOD_key_t> for Key {
     fn from(tcod_key: ffi::TCOD_key_t) -> Key {
         Key {
-            code: keycode_from_u32(tcod_key.vk).unwrap(),
+            code: keycode_from_native(tcod_key.vk).unwrap(),
+            text: tcod_key.text,
             printable: tcod_key.c as u8 as char,
             pressed: tcod_key.pressed != 0,
             left_alt: tcod_key.lalt != 0,
@@ -158,21 +171,21 @@ pub fn move_cursor(x: i32, y: i32) {
 
 bitflags! {
     flags KeyPressFlags: c_uint {
-        const KEY_PRESSED = ffi::TCOD_KEY_PRESSED,
-        const KEY_RELEASED = ffi::TCOD_KEY_RELEASED,
+        const KEY_PRESSED  = ffi::TCOD_key_status_t::TCOD_KEY_PRESSED as c_uint,
+        const KEY_RELEASED = ffi::TCOD_key_status_t::TCOD_KEY_RELEASED as c_uint,
     }
 }
 
 bitflags! {
     flags EventFlags: c_uint {
-        const KEY_PRESS = ffi::TCOD_EVENT_KEY_PRESS,
-        const KEY_RELEASE = ffi::TCOD_EVENT_KEY_RELEASE,
-        const KEY = ffi::TCOD_EVENT_KEY,
-        const MOUSE_MOVE = ffi::TCOD_EVENT_MOUSE_MOVE,
-        const MOUSE_PRESS = ffi::TCOD_EVENT_MOUSE_PRESS,
-        const MOUSE_RELEASE = ffi::TCOD_EVENT_MOUSE_RELEASE,
-        const MOUSE = ffi::TCOD_EVENT_MOUSE,
-        const ANY = ffi::TCOD_EVENT_ANY,
+        const KEY_PRESS     = ffi::TCOD_event_t::TCOD_EVENT_KEY_PRESS as c_uint,
+        const KEY_RELEASE   = ffi::TCOD_event_t::TCOD_EVENT_KEY_RELEASE as c_uint,
+        const KEY           = ffi::TCOD_event_t::TCOD_EVENT_KEY as c_uint,
+        const MOUSE_MOVE    = ffi::TCOD_event_t::TCOD_EVENT_MOUSE_MOVE as c_uint,
+        const MOUSE_PRESS   = ffi::TCOD_event_t::TCOD_EVENT_MOUSE_PRESS as c_uint,
+        const MOUSE_RELEASE = ffi::TCOD_event_t::TCOD_EVENT_MOUSE_RELEASE as c_uint,
+        const MOUSE         = ffi::TCOD_event_t::TCOD_EVENT_MOUSE as c_uint,
+        const ANY           = ffi::TCOD_event_t::TCOD_EVENT_ANY as c_uint,
     }
 }
 
@@ -186,13 +199,13 @@ pub fn check_for_event(event_mask: EventFlags) -> Option<(EventFlags, Event)> {
     };
 
     let ret_flag = match event {
-        ffi::TCOD_EVENT_KEY_PRESS => KEY_PRESS,
-        ffi::TCOD_EVENT_KEY_RELEASE => KEY_RELEASE,
-        ffi::TCOD_EVENT_KEY => KEY,
-        ffi::TCOD_EVENT_MOUSE => MOUSE,
-        ffi::TCOD_EVENT_MOUSE_MOVE => MOUSE_MOVE,
-        ffi::TCOD_EVENT_MOUSE_PRESS => MOUSE_PRESS,
-        ffi::TCOD_EVENT_MOUSE_RELEASE => MOUSE_RELEASE,
+        ffi::TCOD_event_t::TCOD_EVENT_KEY_PRESS => KEY_PRESS,
+        ffi::TCOD_event_t::TCOD_EVENT_KEY_RELEASE => KEY_RELEASE,
+        ffi::TCOD_event_t::TCOD_EVENT_KEY => KEY,
+        ffi::TCOD_event_t::TCOD_EVENT_MOUSE => MOUSE,
+        ffi::TCOD_event_t::TCOD_EVENT_MOUSE_MOVE => MOUSE_MOVE,
+        ffi::TCOD_event_t::TCOD_EVENT_MOUSE_PRESS => MOUSE_PRESS,
+        ffi::TCOD_event_t::TCOD_EVENT_MOUSE_RELEASE => MOUSE_RELEASE,
         _ => ANY
     };
 

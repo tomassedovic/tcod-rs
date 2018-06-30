@@ -194,7 +194,7 @@ pub fn blit_rect<T>(src: &Image, (width, height): (i32, i32),
     assert!(width >= -1 && height >= -1 && width <= src.width && height <= src.height);
     assert!(x >= 0 && y >= 0 && x < dst.width() && y < dst.height());
     unsafe {
-        ffi::TCOD_image_blit_rect(src.tcod_image, *dst.as_native(), x, y, width, height, flag as u32);
+        ffi::TCOD_image_blit_rect(src.tcod_image, *dst.as_native(), x, y, width, height, flag.into());
     }
 }
 
@@ -203,7 +203,7 @@ pub fn blit<T>(src: &Image, (scale_x, scale_y): (f32, f32), angle: f32,
     assert!(scale_x > 0.0 && scale_y > 0.0);
     assert!(x >= 0.0 && y >= 0.0 && x < dst.width() as f32 && y < dst.height() as f32);
     unsafe {
-        ffi::TCOD_image_blit(src.tcod_image, *dst.as_native(), x, y, flag as u32, scale_x, scale_y, angle);
+        ffi::TCOD_image_blit(src.tcod_image, *dst.as_native(), x, y, flag.into(), scale_x, scale_y, angle);
     }
 }
 

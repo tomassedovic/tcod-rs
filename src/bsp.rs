@@ -215,7 +215,7 @@ impl<'a> Bsp<'a> {
     pub fn traverse<F>(&self, order: TraverseOrder, mut callback: F) -> bool
         where F: FnMut(&mut Bsp) -> bool
     {
-        let mut cb: &mut FnMut(&mut Bsp) -> bool = &mut callback;
+        let cb: &mut FnMut(&mut Bsp) -> bool = &mut callback;
         let retval = unsafe {
             let bsp = mem::transmute(self.bsp as *const ffi::TCOD_bsp_t);
             match order {
@@ -478,10 +478,7 @@ mod test {
         bsp1.split_recursive(None, 2, 5, 5, 1.5, 1.5);
         let mut bsp2 = Bsp::new_with_size(0, 0, 100,100);
         bsp2.split_recursive(None, 2, 5, 5, 1.5, 1.5);
-
-        unsafe {
-            assert!(bsp1.left().unwrap().tree().father != bsp2.left().unwrap().tree().father);
-            assert!(bsp1.left().unwrap().tree().father == bsp1.right().unwrap().tree().father);
-        }
+        assert!(bsp1.left().unwrap().tree.father != bsp2.left().unwrap().tree.father);
+        assert!(bsp1.left().unwrap().tree.father == bsp1.right().unwrap().tree.father);
     }
 }

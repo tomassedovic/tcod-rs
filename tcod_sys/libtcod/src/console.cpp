@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -24,12 +24,16 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include <console.hpp>
 
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include "libtcod.hpp"
-#include "libtcod_int.h"
+
+#include <libtcod_int.h>
+#include <image.hpp>
+
+#ifdef TCOD_CONSOLE_SUPPORT
 
 TCODConsole * TCODConsole::root = NULL;
 
@@ -128,9 +132,11 @@ void TCODConsole::setDefaultForeground(TCODColor fore) {
 	TCOD_console_set_default_foreground(data,b);
 }
 
+#ifndef TCOD_BARE
 void TCODConsole::setWindowTitle(const char *title) {
 	TCOD_sys_set_window_title(title);
 }
+#endif
 
 void TCODConsole::initRoot(int w, int h, const char *title, bool fullscreen, TCOD_renderer_t renderer) {
 	TCODConsole *con=new TCODConsole();
@@ -177,12 +183,12 @@ void TCODConsole::flush() {
 	TCOD_console_flush();
 }
 
-void TCODConsole::setFade(uint8 val, const TCODColor &fade) {
+void TCODConsole::setFade(uint8_t val, const TCODColor &fade) {
 	TCOD_color_t f= {fade.r,fade.g,fade.b};
 	TCOD_console_set_fade(val,f);
 }
 
-uint8 TCODConsole::getFade() {
+uint8_t TCODConsole::getFade() {
 	return TCOD_console_get_fade();
 }
 
@@ -239,6 +245,16 @@ void TCODConsole::hline(int x,int y, int l, TCOD_bkgnd_flag_t flag) {
 void TCODConsole::vline(int x,int y, int l, TCOD_bkgnd_flag_t flag) {
 	TCOD_console_vline(data,x,y,l,flag);
 }
+
+/*
+TCODImage *TCODConsole::getForegroundColorImage() {
+	return new TCODImage(TCOD_console_get_foreground_color_image(data));
+}
+
+TCODImage *TCODConsole::getBackgroundColorImage() {
+	return new TCODImage(TCOD_console_get_background_color_image(data));
+}
+*/
 
 void TCODConsole::printFrame(int x,int y,int w,int h, bool empty, TCOD_bkgnd_flag_t flag, const char *fmt , ...) {
 	if ( fmt ) {
@@ -319,14 +335,6 @@ int TCODConsole::getHeightRect(int x, int y, int w, int h, const char *fmt, ...)
 	return ret;
 }
 
-void TCODConsole::setKeyboardRepeat(int initialDelay,int interval) {
-	TCOD_console_set_keyboard_repeat(initialDelay,interval);
-}
-
-void TCODConsole::disableKeyboardRepeat() {
-	TCOD_console_disable_keyboard_repeat();
-}
-
 bool TCODConsole::isKeyPressed(TCOD_keycode_t key) {
 	return TCOD_console_is_key_pressed(key) != 0;
 }
@@ -397,7 +405,7 @@ int TCODConsole::getHeightRect(int x, int y, int w, int h, const wchar_t *fmt, .
 	return ret;
 }
 
-// color control string formating utilities for swigged language
+// color control string formatting utilities for swigged language
 
 // ctrl = TCOD_COLCTRL_1...TCOD_COLCTRL_5 or TCOD_COLCTRL_STOP
 #define NB_BUFFERS 10
@@ -429,4 +437,4 @@ const char *TCODConsole::getRGBColorControlString( TCOD_colctrl_t ctrl, const TC
 
 #endif
 
-
+#endif /* TCOD_CONSOLE_SUPPORT */

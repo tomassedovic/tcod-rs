@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -24,21 +24,37 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#ifdef TCOD_SDL2
+#include <mouse.h>
+#include <sys.h>
 
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#if defined (__HAIKU__) || defined(__ANDROID__)
-#include <SDL.h>
-#include <android/log.h>
-#elif defined (TCOD_SDL2)
-#include <SDL2/SDL.h>
+
+#include <console.h>
+#include <libtcod_int.h>
+#include <parser.h>
+
+static TCOD_SDL_driver_t *sdl=NULL;
+
+
+/* library initialization function */
+#ifdef TCOD_WINDOWS
+#include <windows.h>
+BOOL APIENTRY DllMain( HINSTANCE hModule, DWORD reason, LPVOID reserved) {
+	switch (reason ) {
+		case DLL_PROCESS_ATTACH : sdl = SDL_implementation_factory(); break;
+		default : break;
+	}
+	return TRUE;
+}
 #else
-#include <SDL/SDL.h>
+	void __attribute__ ((constructor)) DllMain(void) {
+		sdl = SDL_implementation_factory();
+	}
 #endif
-#include "libtcod.h"
-#include "libtcod_int.h"
 
 #if defined(__ANDROID__)
 #define TCOD_TOUCH_INPUT
@@ -46,7 +62,7 @@
 
 typedef struct {
   int nupdates; /* how many updates have happened since the first finger was pressed. */
-  Uint32 ticks0; /* current number of ticks at start of touch event sequence. */
+  uint32_t ticks0; /* current number of ticks at start of touch event sequence. */
   SDL_FingerID finger_id; /* the last finger which was pressed. */
   int coords[MAX_TOUCH_FINGERS][2]; /* absolute position of each finger. */
   int coords_delta[MAX_TOUCH_FINGERS][2]; /* absolute position of each finger. */
@@ -61,7 +77,6 @@ typedef struct {
 
 /* to enable bitmap locking. Is there any use ?? makes the OSX port renderer to fail */
 /*#define USE_SDL_LOCKS */
-
 
 /* image support stuff */
 bool TCOD_sys_check_bmp(const char *filename);
@@ -84,46 +99,19 @@ static image_support_t image_type[] = {
 	{ NULL, NULL, NULL, NULL },
 };
 
-typedef struct {
-	float force_recalc;
-	float last_scale_xc, last_scale_yc;
-	float last_scale_factor;
-	float last_fullscreen;
-
-	float min_scale_factor;
-
-	float src_height_width_ratio;
-	float dst_height_width_ratio;
-	int src_x0, src_y0;
-	int src_copy_width, src_copy_height;
-	int src_proportionate_width, src_proportionate_height;
-	int dst_display_width, dst_display_height;
-	int dst_offset_x, dst_offset_y;
-	int surface_width, surface_height;
-} scale_data_t;
-
-#if SDL_VERSION_ATLEAST(2,0,0)
-static SDL_Window* window=NULL;
-static SDL_Renderer* renderer=NULL;
-#else
-static SDL_Surface* screen=NULL;
-#endif
-static SDL_Surface* scale_screen=NULL;
-static SDL_Surface* charmap=NULL;
-static char_t *consoleBuffer=NULL;
-static char_t *prevConsoleBuffer=NULL;
+scale_data_t scale_data={0};
+SDL_Window* window=NULL;
+SDL_Renderer* renderer=NULL;
+float scale_factor=1.0f;
+SDL_Surface* charmap=NULL;
+char *last_clipboard_text = NULL;
 static bool has_startup=false;
-static bool clear_screen=false;
-static float scale_factor=1.0f;
-static float scale_xc=0.5f;
-static float scale_yc=0.5f;
-static scale_data_t scale_data={0};
 #define MAX_SCALE_FACTOR 5.0f
 
 /* font transparent color */
 static TCOD_color_t fontKeyCol={0,0,0};
 
-static Uint32 sdl_key=0, rgb_mask=0, nrgb_mask=0;
+static uint32_t sdl_key=0, rgb_mask=0, nrgb_mask=0;
 
 /* mouse stuff */
 static bool mousebl=false;
@@ -149,19 +137,15 @@ static float last_frame_length=0.0f;
 static TCOD_color_t *charcols=NULL;
 static bool *first_draw=NULL;
 static bool key_status[TCODK_CHAR+1];
-static int oldFade=-1;
+int oldFade=-1;
 
 /* convert SDL vk to a char (depends on the keyboard layout) */
-#if SDL_VERSION_ATLEAST(2,0,0)
 typedef struct {
 	SDL_Keycode	sdl_key;
 	int tcod_key;
 } vk_to_c_entry;
 #define NUM_VK_TO_C_ENTRIES 10
 static vk_to_c_entry vk_to_c[NUM_VK_TO_C_ENTRIES];
-#else
-static char vk_to_c[SDLK_LAST];
-#endif
 
 /* convert ASCII code to TCOD layout position */
 static int init_ascii_to_tcod[256] = {
@@ -183,25 +167,20 @@ static int init_ascii_to_tcod[256] = {
   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, /* ASCII 240 to 255 */
 };
 
-static bool *ascii_updated=NULL;
-static bool any_ascii_updated=false;
-
-static void alloc_ascii_tables() {
+static void alloc_ascii_tables(void) {
 	if ( TCOD_ctx.ascii_to_tcod ) free(TCOD_ctx.ascii_to_tcod);
-	if ( ascii_updated ) free(ascii_updated);
 	if ( charcols ) {
 		free(charcols);
 		free(first_draw);
 	}
 
 	TCOD_ctx.ascii_to_tcod = (int *)calloc(sizeof(int),TCOD_ctx.max_font_chars);
-	ascii_updated = (bool *)calloc(sizeof(bool),TCOD_ctx.max_font_chars);
 	charcols = (TCOD_color_t *)calloc(sizeof(TCOD_color_t),TCOD_ctx.max_font_chars);
 	first_draw =(bool *)calloc(sizeof(bool),TCOD_ctx.max_font_chars);
 	memcpy(TCOD_ctx.ascii_to_tcod,init_ascii_to_tcod,sizeof(int)*256);
 }
 
-static void check_ascii_to_tcod() {
+static void check_ascii_to_tcod(void) {
 	if ( TCOD_ctx.fontNbCharHoriz * TCOD_ctx.fontNbCharVertic != TCOD_ctx.max_font_chars ) {
 		TCOD_ctx.max_font_chars=TCOD_ctx.fontNbCharHoriz * TCOD_ctx.fontNbCharVertic;
 		alloc_ascii_tables();
@@ -212,12 +191,12 @@ void TCOD_sys_register_SDL_renderer(SDL_renderer_t renderer) {
 	TCOD_ctx.sdl_cbk=renderer;
 }
 
-void TCOD_sys_map_ascii_to_font(asciiCode, fontCharX, fontCharY) {
+void TCOD_sys_map_ascii_to_font(int asciiCode, int fontCharX, int fontCharY) {
 	if ( asciiCode > 0 && asciiCode < TCOD_ctx.max_font_chars )
 		TCOD_ctx.ascii_to_tcod[asciiCode] = fontCharX + fontCharY * TCOD_ctx.fontNbCharHoriz;
 }
 
-void TCOD_sys_load_font() {
+void TCOD_sys_load_font(void) {
 	int i;
 	bool hasTransparent=false;
 	int x,y;
@@ -240,8 +219,8 @@ void TCOD_sys_load_font() {
 		printf ("32bits font... checking for alpha layer... ");
 		for (x=0; !hasTransparent && x < charmap->w; x ++ ) {
 			for (y=0;!hasTransparent && y < charmap->h; y++ ) {
-				Uint8 *pixel=(Uint8 *)(charmap->pixels) + y * charmap->pitch + x * charmap->format->BytesPerPixel;
-				Uint8 alpha=*((pixel)+charmap->format->Ashift/8);
+				uint8_t*pixel=(uint8_t*)(charmap->pixels) + y * charmap->pitch + x * charmap->format->BytesPerPixel;
+				uint8_t alpha=*((pixel)+charmap->format->Ashift/8);
 				if ( alpha < 255 ) {
 					hasTransparent=true;
 				}
@@ -262,7 +241,7 @@ void TCOD_sys_load_font() {
 	if (! hasTransparent ) {
 		/* alpha layer not used */
 		int keyx,keyy;
-        Uint8 *pixel;
+        uint8_t*pixel;
 		/* the key color is found on the character corresponding to space ' ' */
 		if ( TCOD_ctx.font_tcod_layout ) {
 			keyx = TCOD_ctx.font_width/2;
@@ -274,7 +253,7 @@ void TCOD_sys_load_font() {
 			keyx = ((int)(' ') / TCOD_ctx.fontNbCharVertic ) * TCOD_ctx.font_width + TCOD_ctx.font_width/2;
 			keyy = ((int)(' ') % TCOD_ctx.fontNbCharVertic ) * TCOD_ctx.font_height + TCOD_ctx.font_height/2;
 		}
-		pixel=(Uint8 *)(charmap->pixels) + keyy * charmap->pitch + keyx * charmap->format->BytesPerPixel;
+		pixel=(uint8_t*)(charmap->pixels) + keyy * charmap->pitch + keyx * charmap->format->BytesPerPixel;
 		fontKeyCol.r=*((pixel)+charmap->format->Rshift/8);
 		fontKeyCol.g=*((pixel)+charmap->format->Gshift/8);
 		fontKeyCol.b=*((pixel)+charmap->format->Bshift/8);
@@ -297,11 +276,11 @@ void TCOD_sys_load_font() {
 		cy=(i/TCOD_ctx.fontNbCharHoriz);
 		for( px=0; !end && px < TCOD_ctx.font_width; px++ ) {
 			for (py=0; !end && py < TCOD_ctx.font_height; py++ ) {
-					Uint8 *pixel=(Uint8 *)(charmap->pixels) + (cy*TCOD_ctx.font_height+py) * charmap->pitch 
+					uint8_t*pixel=(uint8_t*)(charmap->pixels) + (cy*TCOD_ctx.font_height+py) * charmap->pitch 
 						+ (cx*TCOD_ctx.font_width+px) * charmap->format->BytesPerPixel;
-					Uint8 r=*((pixel)+charmap->format->Rshift/8);
-					Uint8 g=*((pixel)+charmap->format->Gshift/8);
-					Uint8 b=*((pixel)+charmap->format->Bshift/8);
+					uint8_t r=*((pixel)+charmap->format->Rshift/8);
+					uint8_t g=*((pixel)+charmap->format->Gshift/8);
+					uint8_t b=*((pixel)+charmap->format->Bshift/8);
 					if ( charmap->format->BytesPerPixel == 3 ) {
 						/* ignore key color */
 						if ( r == fontKeyCol.r  && g == fontKeyCol.g && b == fontKeyCol.b ) continue;
@@ -335,17 +314,17 @@ void TCOD_sys_load_font() {
 			for (x=cx*TCOD_ctx.font_width; x < (cx+1)*TCOD_ctx.font_width; x ++ ) {
 				for (y=cy*TCOD_ctx.font_height;y < (cy+1)*TCOD_ctx.font_height; y++ ) {
 					if ( ! TCOD_ctx.colored[i]) {
-						Uint8 *pixel=(Uint8 *)(charmap->pixels) + y * charmap->pitch + x * charmap->format->BytesPerPixel;
-						Uint8 r=*((pixel)+charmap->format->Rshift/8);
+						uint8_t*pixel=(uint8_t*)(charmap->pixels) + y * charmap->pitch + x * charmap->format->BytesPerPixel;
+						uint8_t r=*((pixel)+charmap->format->Rshift/8);
 						*((pixel)+charmap->format->Ashift/8) = (invert ? 255-r : r);
 						*((pixel)+charmap->format->Rshift/8)=255;
 						*((pixel)+charmap->format->Gshift/8)=255;
 						*((pixel)+charmap->format->Bshift/8)=255;
 					} else {
-						Uint8 *pixel=(Uint8 *)(charmap->pixels) + y * charmap->pitch + x * charmap->format->BytesPerPixel;
-						Uint8 r=*((pixel)+charmap->format->Rshift/8);
-						Uint8 g=*((pixel)+charmap->format->Gshift/8);
-						Uint8 b=*((pixel)+charmap->format->Bshift/8);
+						uint8_t*pixel=(uint8_t*)(charmap->pixels) + y * charmap->pitch + x * charmap->format->BytesPerPixel;
+						uint8_t r=*((pixel)+charmap->format->Rshift/8);
+						uint8_t g=*((pixel)+charmap->format->Gshift/8);
+						uint8_t b=*((pixel)+charmap->format->Bshift/8);
 						if ( r == fontKeyCol.r && g == fontKeyCol.g && b == fontKeyCol.b ) {
 							*((pixel)+charmap->format->Ashift/8) = 0;
 						} else {
@@ -360,11 +339,7 @@ void TCOD_sys_load_font() {
 	rgb_mask=charmap->format->Rmask|charmap->format->Gmask|charmap->format->Bmask;
 	nrgb_mask = ~ rgb_mask;
 	sdl_key &= rgb_mask; /* remove the alpha part */
-#if SDL_VERSION_ATLEAST(2,0,0)		
 	if ( charmap->format->BytesPerPixel == 3 ) SDL_SetColorKey(charmap,SDL_TRUE|SDL_RLEACCEL,sdl_key);
-#else
-	if ( charmap->format->BytesPerPixel == 3 ) SDL_SetColorKey(charmap,SDL_SRCCOLORKEY|SDL_RLEACCEL,sdl_key);
-#endif
 	for (i=0; i < TCOD_ctx.fontNbCharHoriz*TCOD_ctx.fontNbCharVertic; i++ ) {
 		charcols[i]=fontKeyCol;
 		first_draw[i]=true;
@@ -413,52 +388,10 @@ void TCOD_sys_set_custom_font(const char *fontFile,int nb_ch, int nb_cv, int fla
 	*/
 }
 
-static void find_resolution() {
-#if SDL_VERSION_ATLEAST(2,0,0)	
-	SDL_DisplayMode wantedmode, closestmode;
-#else
-	SDL_Rect **modes;
-	int i;
-#endif
-	int bestw,besth,wantedw,wantedh;
-	wantedw=TCOD_ctx.fullscreen_width>TCOD_ctx.root->w*TCOD_ctx.font_width?TCOD_ctx.fullscreen_width:TCOD_ctx.root->w*TCOD_ctx.font_width;
-	wantedh=TCOD_ctx.fullscreen_height>TCOD_ctx.root->h*TCOD_ctx.font_height?TCOD_ctx.fullscreen_height:TCOD_ctx.root->h*TCOD_ctx.font_height;
-	TCOD_ctx.actual_fullscreen_width=wantedw;
-	TCOD_ctx.actual_fullscreen_height=wantedh;
-
-#if SDL_VERSION_ATLEAST(2,0,0)
-	wantedmode.w = wantedw;
-	wantedmode.h = wantedh;
-	wantedmode.format = 0;  /* don't care for rest. */
-	wantedmode.refresh_rate = 0;
-	wantedmode.driverdata = 0;
-	if (SDL_GetClosestDisplayMode(window?SDL_GetWindowDisplayIndex(window):0, &wantedmode, &closestmode) == &closestmode) {
-		bestw=closestmode.w;
-		besth=closestmode.h;
-	} else {
-		bestw=99999;
-		besth=99999;
-	}
-#else
-	modes=SDL_ListModes(NULL, SDL_FULLSCREEN);
-
-	bestw=99999;
-	besth=99999;
-	if(modes != (SDL_Rect **)0 && modes != (SDL_Rect **)-1){
-		for(i=0;modes[i];++i) {
-			if (modes[i]->w >= wantedw && modes[i]->w <= bestw
-				&& modes[i]->h >= wantedh && modes[i]->h <= besth
-				&& SDL_VideoModeOK(modes[i]->w, modes[i]->h, 32, SDL_FULLSCREEN)) {
-				bestw=modes[i]->w;
-				besth=modes[i]->h;
-			}
-		}
-	}
-#endif
-	if ( bestw != 99999) {
-		TCOD_ctx.actual_fullscreen_width=bestw;
-		TCOD_ctx.actual_fullscreen_height=besth;
-	}
+void find_resolution(void) {
+	TCOD_ctx.actual_fullscreen_width=TCOD_ctx.fullscreen_width>TCOD_ctx.root->w*TCOD_ctx.font_width?TCOD_ctx.fullscreen_width:TCOD_ctx.root->w*TCOD_ctx.font_width;
+	TCOD_ctx.actual_fullscreen_height=TCOD_ctx.fullscreen_height>TCOD_ctx.root->h*TCOD_ctx.font_height?TCOD_ctx.fullscreen_height:TCOD_ctx.root->h*TCOD_ctx.font_height;
+	sdl->get_closest_mode(&TCOD_ctx.actual_fullscreen_width,&TCOD_ctx.actual_fullscreen_height);
 }
 
 void *TCOD_sys_create_bitmap_for_console(TCOD_console_t console) {
@@ -468,211 +401,59 @@ void *TCOD_sys_create_bitmap_for_console(TCOD_console_t console) {
 	return TCOD_sys_get_surface(w,h,false);
 }
 
-/*
- * Separate out the actual rendering, so that render to texture can be done.
- */
-static void actual_rendering() {
-	SDL_Rect srcRect, dstRect;
-#if SDL_VERSION_ATLEAST(2,0,0)
-	SDL_Texture *texture;
-#endif
-
-	if (scale_data.min_scale_factor - 1e-3f > scale_factor) {
-		/* Prepare for the unscaled and centered copy of the entire console. */
-		srcRect.x=0; srcRect.y=0; srcRect.w=scale_screen->w; srcRect.h=scale_screen->h;
-		if (TCOD_ctx.fullscreen) {
-			dstRect.x=TCOD_ctx.fullscreen_offsetx; dstRect.y=TCOD_ctx.fullscreen_offsety;
-		} else {
-			dstRect.x=0; dstRect.y=0;
-		}
-		dstRect.w=scale_screen->w; dstRect.h=scale_screen->h;
-	} else {
-		/* Prepare for the scaled copy of the displayed console area. */
-		srcRect.x=scale_data.src_x0; srcRect.y=scale_data.src_y0; srcRect.w=scale_data.src_copy_width; srcRect.h=scale_data.src_copy_height;
-		dstRect.x=scale_data.dst_offset_x; dstRect.y=scale_data.dst_offset_y;
-		dstRect.w=scale_data.dst_display_width; dstRect.h=scale_data.dst_display_height;
-	}
-#if SDL_VERSION_ATLEAST(2,0,0)
-	texture = SDL_CreateTextureFromSurface(renderer, scale_screen);
-	SDL_RenderCopy(renderer, texture, &srcRect, &dstRect);
-	SDL_DestroyTexture(texture);
-#else
-	SDL_SoftStretch(scale_screen, &srcRect, screen, &dstRect);
-#endif
-
-	if ( TCOD_ctx.sdl_cbk ) {
-#if SDL_VERSION_ATLEAST(2,0,0)
-		TCOD_ctx.sdl_cbk((void *)renderer);
-#else
-		TCOD_ctx.sdl_cbk((void *)screen);
-#endif
-	}
+static void TCOD_sys_render(void *vbitmap, TCOD_console_data_t* console) {
+	sdl->render(sdl, vbitmap, console);
 }
 
-/* In order to avoid rendering race conditions and the ensuing segmentation
- * faults, this should only be called when it would normally be and not
- * specifically to force screen refreshes.  To this end, and to avoid
- * threading complications it takes care of special cases internally.  */
-static void TCOD_sys_render(void *vbitmap, int console_width, int console_height, char_t *console_buffer, char_t *prev_console_buffer) {
-	char_t *prev_console_buffer_ptr = prev_console_buffer;
-	if ( TCOD_ctx.renderer == TCOD_RENDERER_SDL ) {
-		if (vbitmap == NULL) {
-			int console_width_p = console_width*TCOD_ctx.font_width;
-			int console_height_p = console_height*TCOD_ctx.font_height;
-
-			/* Make a bitmap of exact rendering size and correct format. */
-			if (scale_screen == NULL) {
-				int bpp;
-				Uint32 rmask, gmask, bmask, amask;
-#if SDL_VERSION_ATLEAST(2,0,0)
-				if (SDL_PixelFormatEnumToMasks(SDL_GetWindowPixelFormat(window), &bpp, &rmask, &gmask, &bmask, &amask) == SDL_FALSE) {
-					TCOD_fatal("SDL : failed to create scaling surface : indeterminate window pixel format");
-					return;
-				}
-#else
-				SDL_PixelFormat *fmt = screen->format;
-				bpp=fmt->BitsPerPixel; rmask=fmt->Rmask; gmask=fmt->Gmask; bmask=fmt->Bmask; amask=fmt->Amask;
-#endif
-				scale_screen=SDL_CreateRGBSurface(SDL_SWSURFACE,console_width_p,console_height_p,bpp,rmask,gmask,bmask,amask);
-				if (scale_screen == NULL) {
-					TCOD_fatal("SDL : failed to create scaling surface");
-					return;
-				}
-			} else if (clear_screen) {
-				clear_screen=false;
-				SDL_FillRect(scale_screen,0,0);
-				/* Implicitly do complete console redraw, not just tracked changes. */
-				prev_console_buffer_ptr = NULL;
-			}
-
-			TCOD_sys_console_to_bitmap(scale_screen, console_width, console_height, console_buffer, prev_console_buffer_ptr);
-
-			/* Scale the rendered bitmap to the screen, preserving aspect ratio, and blit it.
-			 * This data is also used for console coordinate resolution.. */
-			if (scale_data.last_scale_factor != scale_factor || scale_data.last_scale_xc != scale_xc || scale_data.last_scale_yc != scale_yc ||
-					scale_data.last_fullscreen != TCOD_ctx.fullscreen || scale_data.force_recalc) {
-				/* Preserve old value of input variables, to enable recalculation if they change. */
-				scale_data.last_scale_factor = scale_factor;
-				scale_data.last_scale_xc = scale_xc;
-				scale_data.last_scale_yc = scale_yc;
-				scale_data.last_fullscreen = TCOD_ctx.fullscreen;
-				scale_data.force_recalc = 0;
-
-				if (scale_data.last_fullscreen) {
-					scale_data.surface_width = TCOD_ctx.actual_fullscreen_width;
-					scale_data.surface_height = TCOD_ctx.actual_fullscreen_height;
-				} else {
-					scale_data.surface_width = console_width_p;
-					scale_data.surface_height = console_height_p;
-				}
-				scale_data.min_scale_factor = MAX((float)console_width_p/scale_data.surface_width, (float)console_height_p/scale_data.surface_height);
-				if (scale_data.min_scale_factor > 1.0f)
-					scale_data.min_scale_factor = 1.0f;
-				/*printf("min_scale_factor %0.3f = MAX(%d/%d, %d/%d)", scale_data.min_scale_factor, console_width_p, scale_data.surface_width, console_height_p, scale_data.surface_height);*/
-
-				scale_data.dst_height_width_ratio = (float)scale_data.surface_height/scale_data.surface_width;
-				scale_data.src_proportionate_width = (int)(console_width_p / scale_factor);
-				scale_data.src_proportionate_height = (int)((console_width_p * scale_data.dst_height_width_ratio) / scale_factor);
-
-				/* Work out how much of the console to copy. */
-				scale_data.src_x0 = (scale_xc * console_width_p) - (0.5f * scale_data.src_proportionate_width);
-				if (scale_data.src_x0 + scale_data.src_proportionate_width > console_width_p)
-					scale_data.src_x0 = console_width_p - scale_data.src_proportionate_width;
-				if (scale_data.src_x0 < 0)
-					scale_data.src_x0 = 0;
-				scale_data.src_copy_width = scale_data.src_proportionate_width;
-				if (scale_data.src_x0 + scale_data.src_copy_width > console_width_p)
-					scale_data.src_copy_width = console_width_p - scale_data.src_x0;
-
-				scale_data.src_y0 = (scale_yc * console_height_p) - (0.5f * scale_data.src_proportionate_height);
-				if (scale_data.src_y0 + scale_data.src_proportionate_height > console_height_p)
-					scale_data.src_y0 = console_height_p - scale_data.src_proportionate_height;
-				if (scale_data.src_y0 < 0)
-					scale_data.src_y0 = 0;
-				scale_data.src_copy_height = scale_data.src_proportionate_height;
-				if (scale_data.src_y0 + scale_data.src_copy_height > console_height_p)
-					scale_data.src_copy_height = console_height_p - scale_data.src_y0;
-
-				scale_data.dst_display_width = (scale_data.src_copy_width * scale_data.surface_width) / scale_data.src_proportionate_width;
-				scale_data.dst_display_height = (scale_data.src_copy_height * scale_data.surface_height) / scale_data.src_proportionate_height;
-				scale_data.dst_offset_x = (scale_data.surface_width - scale_data.dst_display_width)/2;
-				scale_data.dst_offset_y = (scale_data.surface_height - scale_data.dst_display_height)/2;
-			}
-
-#if SDL_VERSION_ATLEAST(2,0,0)
-			SDL_RenderClear(renderer);
-#endif
-			actual_rendering();
-		} else {
-			TCOD_sys_console_to_bitmap(vbitmap, console_width, console_height, console_buffer, prev_console_buffer_ptr);
-			if ( TCOD_ctx.sdl_cbk ) {
-#if SDL_VERSION_ATLEAST(2,0,0)
-				TCOD_ctx.sdl_cbk((void *)renderer);
-#else
-				TCOD_ctx.sdl_cbk((void *)screen);
-#endif
-			}
-		}
-#if SDL_VERSION_ATLEAST(2,0,0)	
-		SDL_RenderPresent(renderer);
-#else
-		SDL_Flip(screen);
-#endif
-	}
-#ifndef NO_OPENGL
-	else {
-		TCOD_opengl_render(oldFade, ascii_updated, console_buffer, prev_console_buffer);
-		TCOD_opengl_swap();
-	}  
-#endif
-	oldFade=(int)TCOD_console_get_fade();
-	if ( any_ascii_updated ) {
-		memset(ascii_updated,0,sizeof(bool)*TCOD_ctx.max_font_chars);
-		any_ascii_updated=false;
-	}
-}
-
-void TCOD_sys_console_to_bitmap(void *vbitmap, int console_width, int console_height, char_t *console_buffer, char_t *prev_console_buffer) {
+void TCOD_sys_console_to_bitmap(void *vbitmap,
+		TCOD_console_data_t* console, TCOD_console_data_t* cache) {
 	static SDL_Surface *charmap_backup=NULL;
+	SDL_Surface *bitmap = (SDL_Surface *)vbitmap;
 	int x,y;
-	SDL_Surface *bitmap=(SDL_Surface *)vbitmap;
-	Uint32 sdl_back=0,sdl_fore=0;
+	uint32_t sdl_back=0, sdl_fore=0;
 	TCOD_color_t fading_color = TCOD_console_get_fading_color();
 	int fade = (int)TCOD_console_get_fade();
-	bool track_changes=(oldFade == fade && prev_console_buffer);
-   	Uint8 bpp = charmap->format->BytesPerPixel;
-	char_t *c=&console_buffer[0];
-	char_t *oc=&prev_console_buffer[0];
+	/* can only track changes on the root console */
+	bool track_changes = (cache && oldFade == fade);
+	uint8_t bpp = charmap->format->BytesPerPixel;
+	int *c = console->ch_array;
+	int *oc;
+	TCOD_color_t *ofg, *obg, *nfg, *nbg;
 	int hdelta;
 	if ( bpp == 4 ) {
 		hdelta=(charmap->pitch - TCOD_ctx.font_width*bpp)/4;
 	} else {
 		hdelta=(charmap->pitch - TCOD_ctx.font_width*bpp);
 	}
+	nfg = TCOD_image_get_colors(console->fg_colors);
+	nbg = TCOD_image_get_colors(console->bg_colors);
+	if (track_changes) {
+		oc = cache->ch_array;
+		ofg = TCOD_image_get_colors(cache->fg_colors);
+		obg = TCOD_image_get_colors(cache->bg_colors);
+	}
 	if ( charmap_backup == NULL ) {
 		charmap_backup=(SDL_Surface *)TCOD_sys_get_surface(charmap->w,charmap->h,true);
 		SDL_BlitSurface(charmap,NULL,charmap_backup,NULL);
-	}	
+	}
 #ifdef USE_SDL_LOCKS
 	if ( SDL_MUSTLOCK( bitmap ) && SDL_LockSurface( bitmap ) < 0 ) return;
 #endif
-	for (y=0;y<console_height;y++) {
-		for (x=0; x<console_width; x++) {
+	for (y = 0; y < console->h; y++) {
+		for (x = 0; x < console->w; x++) {
 			SDL_Rect srcRect,dstRect;
 			bool changed=true;
-			if ( c->cf == -1 ) c->cf = TCOD_ctx.ascii_to_tcod[c->c];
 			if ( track_changes ) {
 				changed=false;
-				if ( c->dirt || ascii_updated[ c->c ] || c->back.r != oc->back.r || c->back.g != oc->back.g
-					|| c->back.b != oc->back.b || c->fore.r != oc->fore.r
-					|| c->fore.g != oc->fore.g || c->fore.b != oc->fore.b
-					|| c->c != oc->c || c->cf != oc->cf) {
+				if (
+					nbg->r != obg->r || nbg->g != obg->g || nbg->b != obg->b ||
+					nfg->r != ofg->r || nfg->g != ofg->g || nfg->b != ofg->b ||
+					*c != *oc) {
 					changed=true;
 				}
 			}
-			c->dirt=0;
 			if ( changed ) {
-				TCOD_color_t b=c->back;
+				TCOD_color_t b=*nbg;
 				dstRect.x=x*TCOD_ctx.font_width;
 				dstRect.y=y*TCOD_ctx.font_height;
 				dstRect.w=TCOD_ctx.font_width;
@@ -684,20 +465,13 @@ void TCOD_sys_console_to_bitmap(void *vbitmap, int console_width, int console_he
 					b.b = ((int)b.b) * fade / 255 + ((int)fading_color.b) * (255-fade)/255;
 				}
 				sdl_back=SDL_MapRGB(bitmap->format,b.r,b.g,b.b);
-#if SDL_VERSION_ATLEAST(2,0,0)
-#else
-				if ( bitmap == screen && TCOD_ctx.fullscreen ) {
-					dstRect.x+=TCOD_ctx.fullscreen_offsetx;
-					dstRect.y+=TCOD_ctx.fullscreen_offsety;
-				}
-#endif
 				SDL_FillRect(bitmap,&dstRect,sdl_back);
-				if ( c->c != ' ' ) {
+				if ( *c != ' ' ) {
 					/* draw foreground */
-					int ascii=c->cf;
+					int ascii = TCOD_ctx.ascii_to_tcod[*c];
 					TCOD_color_t *curtext = &charcols[ascii];
 					bool first = first_draw[ascii];
-					TCOD_color_t f=c->fore;
+					TCOD_color_t f=*nfg;
 
 					if ( fade != 255 ) {
 						f.r = ((int)f.r) * fade / 255 + ((int)fading_color.r) * (255-fade)/255;
@@ -705,7 +479,7 @@ void TCOD_sys_console_to_bitmap(void *vbitmap, int console_width, int console_he
 						f.b = ((int)f.b) * fade / 255 + ((int)fading_color.b) * (255-fade)/255;
 					}
 					/* only draw character if foreground color != background color */
-					if ( ascii_updated[c->c] || f.r != b.r || f.g != b.g || f.b != b.b ) {
+					if ( f.r != b.r || f.g != b.g || f.b != b.b ) {
 						if ( charmap->format->Amask == 0
 							&& f.r == fontKeyCol.r && f.g == fontKeyCol.g && f.b == fontKeyCol.b ) {
 							/* cannot draw with the key color... */
@@ -728,7 +502,7 @@ void TCOD_sys_console_to_bitmap(void *vbitmap, int console_width, int console_he
 #endif
 							if ( bpp == 4 ) {
 								/* 32 bits font : fill the whole character with foreground color */
-								Uint32 *pix = (Uint32 *)(((Uint8 *)charmap->pixels)+srcRect.x*bpp + srcRect.y*charmap->pitch);
+								uint32_t *pix = (uint32_t *)(((uint8_t*)charmap->pixels)+srcRect.x*bpp + srcRect.y*charmap->pitch);
 								int h=TCOD_ctx.font_height;
 								if ( ! TCOD_ctx.colored[ascii] ) {
 									while ( h-- ) {
@@ -742,14 +516,14 @@ void TCOD_sys_console_to_bitmap(void *vbitmap, int console_width, int console_he
 									}
 								} else {
 									/* colored character : multiply color with foreground color */
-									Uint32 *pixorig = (Uint32 *)(((Uint8 *)charmap_backup->pixels)+srcRect.x*bpp + srcRect.y*charmap_backup->pitch);
+									uint32_t *pixorig = (uint32_t *)(((uint8_t*)charmap_backup->pixels)+srcRect.x*bpp + srcRect.y*charmap_backup->pitch);
 									int hdelta_backup=(charmap_backup->pitch - TCOD_ctx.font_width*4)/4;
 									while (h> 0) {
 										int w=TCOD_ctx.font_width;
 										while ( w > 0 ) {
-											int r=(int)(*((Uint8 *)(pixorig)+charmap_backup->format->Rshift/8));
-											int g=(int)(*((Uint8 *)(pixorig)+charmap_backup->format->Gshift/8));
-											int b=(int)(*((Uint8 *)(pixorig)+charmap_backup->format->Bshift/8));
+											int r=(int)(*((uint8_t*)(pixorig)+charmap_backup->format->Rshift/8));
+											int g=(int)(*((uint8_t*)(pixorig)+charmap_backup->format->Gshift/8));
+											int b=(int)(*((uint8_t*)(pixorig)+charmap_backup->format->Bshift/8));
 											(*pix) &= nrgb_mask; /* erase the color */
 											r = r * f.r / 255;
 											g = g * f.g / 255;
@@ -767,7 +541,7 @@ void TCOD_sys_console_to_bitmap(void *vbitmap, int console_width, int console_he
 								}
 							} else	{
 								/* 24 bits font : fill only non key color pixels */
-								Uint32 *pix = (Uint32 *)(((Uint8 *)charmap->pixels)+srcRect.x*bpp + srcRect.y*charmap->pitch);
+								uint32_t *pix = (uint32_t *)(((uint8_t*)charmap->pixels)+srcRect.x*bpp + srcRect.y*charmap->pitch);
 								int h=TCOD_ctx.font_height;
 								if ( ! TCOD_ctx.colored[ascii] ) {
 									while ( h-- ) {
@@ -777,22 +551,22 @@ void TCOD_sys_console_to_bitmap(void *vbitmap, int console_width, int console_he
 												(*pix) &= nrgb_mask;
 												(*pix) |= sdl_fore;
 											}
-											pix = (Uint32 *) (((Uint8 *)pix)+3);
+											pix = (uint32_t *) (((uint8_t*)pix)+3);
 										}
-										pix = (Uint32 *) (((Uint8 *)pix)+hdelta);
+										pix = (uint32_t *) (((uint8_t*)pix)+hdelta);
 									}
 								} else {
 									/* colored character : multiply color with foreground color */
-									Uint32 *pixorig = (Uint32 *)(((Uint8 *)charmap_backup->pixels)+srcRect.x*4 + srcRect.y*charmap_backup->pitch);
+									uint32_t *pixorig = (uint32_t *)(((uint8_t*)charmap_backup->pixels)+srcRect.x*4 + srcRect.y*charmap_backup->pitch);
 									/* charmap_backup is always 32 bits */
 									int hdelta_backup=(charmap_backup->pitch - TCOD_ctx.font_width*4)/4;
 									while (h> 0) {
 										int w=TCOD_ctx.font_width;
 										while ( w > 0 ) {
 											if (((*pixorig) & rgb_mask) != sdl_key ) {
-												int r=(int)(*((Uint8 *)(pixorig)+charmap_backup->format->Rshift/8));
-												int g=(int)(*((Uint8 *)(pixorig)+charmap_backup->format->Gshift/8));
-												int b=(int)(*((Uint8 *)(pixorig)+charmap_backup->format->Bshift/8));
+												int r=(int)(*((uint8_t*)(pixorig)+charmap_backup->format->Rshift/8));
+												int g=(int)(*((uint8_t*)(pixorig)+charmap_backup->format->Gshift/8));
+												int b=(int)(*((uint8_t*)(pixorig)+charmap_backup->format->Bshift/8));
 												(*pix) &= nrgb_mask; /* erase the color */
 												r = r * f.r / 255;
 												g = g * f.g / 255;
@@ -801,11 +575,11 @@ void TCOD_sys_console_to_bitmap(void *vbitmap, int console_width, int console_he
 												(*pix) |= (r<<charmap->format->Rshift)|(g<<charmap->format->Gshift)|(b<<charmap->format->Bshift); 
 											}
 											w--;
-											pix = (Uint32 *) (((Uint8 *)pix)+3);
+											pix = (uint32_t *) (((uint8_t*)pix)+3);
 											pixorig ++;
 										}
 										h--;
-										pix = (Uint32 *) (((Uint8 *)pix)+hdelta);
+										pix = (uint32_t *) (((uint8_t*)pix)+hdelta);
 										pixorig += hdelta_backup;
 									}
 								}
@@ -820,67 +594,30 @@ void TCOD_sys_console_to_bitmap(void *vbitmap, int console_width, int console_he
 					}
 				}
 			}
-			c++;oc++;
+			c++;
+			nfg++;
+			nbg++;
+			if (track_changes) {
+				oc++;
+				ofg++;
+				obg++;
+			}
 		}
 	}
 #ifdef USE_SDL_LOCKS
 	if ( SDL_MUSTLOCK( bitmap ) ) SDL_UnlockSurface( bitmap );
 #endif
-}
-
-void TCOD_sys_set_keyboard_repeat(int initial_delay, int interval) {
-#if !SDL_VERSION_ATLEAST(2,0,0)
-	SDL_EnableKeyRepeat(initial_delay,interval);
-#endif
+	if (cache) {
+		/* update previous values cache */
+		memcpy(cache->ch_array, console->ch_array,
+		       sizeof(console->ch_array[0]) * console->w * console->h);
+		TCOD_image_mipmap_copy_internal(console->fg_colors, cache->fg_colors);
+		TCOD_image_mipmap_copy_internal(console->bg_colors, cache->bg_colors);
+	}
 }
 
 void *TCOD_sys_get_surface(int width, int height, bool alpha) {
-	Uint32 rmask,gmask,bmask,amask;
-	SDL_Surface *bitmap;
-	int flags=SDL_SWSURFACE;
-
-	if ( alpha ) {
-		if ( SDL_BYTEORDER == SDL_LIL_ENDIAN ) {
-			rmask=0x000000FF;
-			gmask=0x0000FF00;
-			bmask=0x00FF0000;
-			amask=0xFF000000;
-		} else {
-			rmask=0xFF000000;
-			gmask=0x00FF0000;
-			bmask=0x0000FF00;
-			amask=0x000000FF;
-		}
-#if !SDL_VERSION_ATLEAST(2,0,0)
-		flags|=SDL_SRCALPHA;
-#endif
-	} else {
-		if ( SDL_BYTEORDER == SDL_LIL_ENDIAN ) {
-			rmask=0x0000FF;
-			gmask=0x00FF00;
-			bmask=0xFF0000;
-		} else {
-			rmask=0xFF0000;
-			gmask=0x00FF00;
-			bmask=0x0000FF;
-		}
-		amask=0;
-	}
-#if SDL_VERSION_ATLEAST(2,0,0)	
-	bitmap=SDL_CreateRGBSurface(flags,width,height,
-#else
-	bitmap=SDL_AllocSurface(flags,width,height,
-#endif
-		alpha ? 32:24,
-		rmask,gmask,bmask,amask);
-	if ( alpha ) {
-#if SDL_VERSION_ATLEAST(2,0,0)	
-		SDL_SetSurfaceAlphaMod(bitmap, 255);
-#else
-		SDL_SetAlpha(bitmap, SDL_SRCALPHA, 255);
-#endif
-	}
-	return (void *)bitmap;
+	return sdl->create_surface(width,height,alpha);
 }
 
 void TCOD_sys_update_char(int asciiCode, int fontx, int fonty, TCOD_image_t img, int x, int y) {
@@ -892,12 +629,12 @@ void TCOD_sys_update_char(int asciiCode, int fontx, int fonty, TCOD_image_t img,
 	for (px=0; px < TCOD_ctx.font_width; px ++ ) {
 		for (py=0;py < TCOD_ctx.font_height; py++ ) {
 			TCOD_color_t col=TCOD_white;
-			Uint8 *pixel;
-			Uint8 bpp;
+			uint8_t*pixel;
+			uint8_t bpp;
 			if ( (unsigned)(x+px) < (unsigned)iw && (unsigned)(y+py) < (unsigned)ih ) {
 				col=TCOD_image_get_pixel(img,x+px,y+py);
 			}
-			pixel=(Uint8 *)(charmap->pixels) + (fonty*TCOD_ctx.font_height+py) * charmap->pitch + (fontx*TCOD_ctx.font_width+px) * charmap->format->BytesPerPixel;
+			pixel=(uint8_t*)(charmap->pixels) + (fonty*TCOD_ctx.font_height+py) * charmap->pitch + (fontx*TCOD_ctx.font_width+px) * charmap->format->BytesPerPixel;
 	    	bpp = charmap->format->BytesPerPixel;
 			if (bpp == 4 ) {
 				*((pixel)+charmap->format->Ashift/8) = col.r;
@@ -911,34 +648,17 @@ void TCOD_sys_update_char(int asciiCode, int fontx, int fonty, TCOD_image_t img,
 			}
 		}
 	}
-	/* TODO : improve this. */
 	charcols[asciiCode]=pink;
-	ascii_updated[asciiCode]=true;
-	any_ascii_updated=true;
+	TCOD_sys_set_dirty_character_code(asciiCode);
 }
 
-#ifdef TCOD_MACOSX
-void CustomSDLMain();
-#endif
-
-void TCOD_sys_startup() {
+void TCOD_sys_startup(void) {
 	if (has_startup) return;
-#ifdef TCOD_MACOSX
-	CustomSDLMain();
-#endif
-#if SDL_VERSION_ATLEAST(2,0,0)
 #ifndef NDEBUG
 	SDL_LogSetAllPriority(SDL_LOG_PRIORITY_VERBOSE);
 #endif
-#endif
-	TCOD_IFNOT(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO) >= 0 ) return;
-#ifndef	TCOD_WINDOWS
-	/* not needed and might crash on windows */
-	atexit(SDL_Quit);
-#endif
-#if !SDL_VERSION_ATLEAST(2,0,0)
-	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,SDL_DEFAULT_REPEAT_INTERVAL);
-#endif
+	TCOD_IFNOT(SDL_Init(SDL_INIT_VIDEO) >= 0 ) return;
+	memset(&TCOD_ctx.key_state,0,sizeof(TCOD_key_t));
 	TCOD_ctx.max_font_chars=256;
 	alloc_ascii_tables();
 #ifndef NO_OPENGL
@@ -948,7 +668,16 @@ void TCOD_sys_startup() {
 	has_startup=true;
 }
 
-static void TCOD_sys_load_player_config() {
+void TCOD_sys_shutdown(void) {
+	if (!has_startup) return;
+	TCOD_sys_uninit();
+	sdl->shutdown();
+	SDL_Quit();
+	memset(&scale_data, 0, sizeof(scale_data_t));
+	has_startup = false;
+}
+
+static void TCOD_sys_load_player_config(void) {
 	const char *renderer;	
 	const char *font;	
 	int fullscreenWidth,fullscreenHeight;
@@ -1010,145 +739,47 @@ static void TCOD_sys_load_player_config() {
 }
 
 
-TCOD_renderer_t TCOD_sys_get_renderer() {
+TCOD_renderer_t TCOD_sys_get_renderer(void) {
 	return TCOD_ctx.renderer;
 }
 
 void TCOD_sys_set_renderer(TCOD_renderer_t renderer) {
 	if ( renderer == TCOD_ctx.renderer ) return;
 	TCOD_ctx.renderer=renderer;
-#if SDL_VERSION_ATLEAST(2,0,0)
-	if ( window ) {
-#else
-	if ( screen ) {
-#endif
-		TCOD_sys_term();
-	}
-	TCOD_sys_init(TCOD_ctx.root->w,TCOD_ctx.root->h,TCOD_ctx.root->buf,TCOD_ctx.root->oldbuf,TCOD_ctx.fullscreen);
+	TCOD_sys_uninit();
+	TCOD_sys_init(TCOD_ctx.root, TCOD_ctx.fullscreen);
 	TCOD_console_set_window_title(TCOD_ctx.window_title);
 	TCOD_console_set_dirty(0,0,TCOD_ctx.root->w,TCOD_ctx.root->h);
 }
 
-static void TCOD_sys_init_screen_offset() {
+void TCOD_sys_init_screen_offset(void) {
 	TCOD_ctx.fullscreen_offsetx=(TCOD_ctx.actual_fullscreen_width-TCOD_ctx.root->w*TCOD_ctx.font_width)/2;
 	TCOD_ctx.fullscreen_offsety=(TCOD_ctx.actual_fullscreen_height-TCOD_ctx.root->h*TCOD_ctx.font_height)/2;
-	printf("fullscreen offset : %d %d\n",TCOD_ctx.fullscreen_offsetx,TCOD_ctx.fullscreen_offsety);
 }
 
-bool TCOD_sys_init(int w,int h, char_t *buf, char_t *oldbuf, bool fullscreen) {
+bool TCOD_sys_init(TCOD_console_data_t *console, bool fullscreen) {
 	static TCOD_renderer_t last_renderer=TCOD_RENDERER_SDL;
 	static char last_font[512]="";
-#if SDL_VERSION_ATLEAST(2,0,0)	
-	Uint32 winflags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
-#endif
-	if ( ! has_startup ) TCOD_sys_startup();
+	TCOD_sys_startup();
 	/* check if there is a user (player) config file */
 	if ( TCOD_sys_file_exists("./libtcod.cfg")) {
 		/* yes, read it */
 		TCOD_sys_load_player_config();
 		if (TCOD_ctx.fullscreen) fullscreen=true;
 	}
-#if SDL_VERSION_ATLEAST(2,0,0) && defined(TCOD_ANDROID)
-	/* Android should always be fullscreen. */
-	TCOD_ctx.fullscreen = fullscreen = true;
-#endif
 	if (last_renderer != TCOD_ctx.renderer || ! charmap || strcmp(last_font,TCOD_ctx.font_file) != 0) {
 		/* reload the font when switching renderer to restore original character colors */
 		TCOD_sys_load_font();
 	}
-	if ( fullscreen  ) {
-		find_resolution();
-#ifndef NO_OPENGL	
-		if (TCOD_ctx.renderer != TCOD_RENDERER_SDL ) {
-			TCOD_opengl_init_attributes();
-#if SDL_VERSION_ATLEAST(2,0,0)
-			winflags |= SDL_WINDOW_FULLSCREEN | SDL_WINDOW_BORDERLESS | SDL_WINDOW_OPENGL;
-#	if defined(TCOD_ANDROID) && defined(FUTURE_SUPPORT)
-			winflags |= SDL_WINDOW_RESIZABLE;
-#	endif
-			window = SDL_CreateWindow(TCOD_ctx.window_title,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,TCOD_ctx.actual_fullscreen_width,TCOD_ctx.actual_fullscreen_height,winflags);
-			if ( window && TCOD_opengl_init_state(w, h, charmap) && TCOD_opengl_init_shaders() ) {
-#else
-			screen=SDL_SetVideoMode(TCOD_ctx.actual_fullscreen_width,TCOD_ctx.actual_fullscreen_height,32,SDL_FULLSCREEN|SDL_OPENGL);
-			if ( screen && TCOD_opengl_init_state(w, h, charmap) && TCOD_opengl_init_shaders() ) {
-#endif
-				TCOD_LOG(("Using %s renderer...\n",TCOD_ctx.renderer == TCOD_RENDERER_GLSL ? "GLSL" : "OPENGL"));
-			} else {
-				TCOD_LOG(("Fallback to SDL renderer...\n"));
-				TCOD_ctx.renderer = TCOD_RENDERER_SDL;
-			}
-		} 
-#endif		
-		if (TCOD_ctx.renderer == TCOD_RENDERER_SDL ) {
-#if SDL_VERSION_ATLEAST(2,0,0)
-			winflags |= SDL_WINDOW_FULLSCREEN | SDL_WINDOW_BORDERLESS;
-#	if defined(TCOD_ANDROID) && defined(FUTURE_SUPPORT)
-			winflags |= SDL_WINDOW_RESIZABLE;
-#	endif
-			window = SDL_CreateWindow(TCOD_ctx.window_title,SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, TCOD_ctx.actual_fullscreen_width,TCOD_ctx.actual_fullscreen_height,winflags);
-			if ( window == NULL ) TCOD_fatal_nopar("SDL : cannot set fullscreen video mode");
-#else
-			screen=SDL_SetVideoMode(TCOD_ctx.actual_fullscreen_width,TCOD_ctx.actual_fullscreen_height,32,SDL_FULLSCREEN);
-			if ( screen == NULL ) TCOD_fatal_nopar("SDL : cannot set fullscreen video mode");
-#endif
-		}
-		SDL_ShowCursor(0);
-#if SDL_VERSION_ATLEAST(2,0,0)
-		SDL_GetWindowSize(window,&TCOD_ctx.actual_fullscreen_width,&TCOD_ctx.actual_fullscreen_height);
-#else
-		TCOD_ctx.actual_fullscreen_width=screen->w;
-		TCOD_ctx.actual_fullscreen_height=screen->h;
-#endif
-		TCOD_sys_init_screen_offset();
-#if !SDL_VERSION_ATLEAST(2,0,0)
-		SDL_FillRect(screen,0,0);
-#endif
-	} else {
-#ifndef NO_OPENGL	
-		if (TCOD_ctx.renderer != TCOD_RENDERER_SDL ) {
-			TCOD_opengl_init_attributes();
-#if SDL_VERSION_ATLEAST(2,0,0)
-			winflags |= SDL_WINDOW_OPENGL;
-			window = SDL_CreateWindow(TCOD_ctx.window_title,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,w*TCOD_ctx.font_width,h*TCOD_ctx.font_height,winflags);
-			if ( window && TCOD_opengl_init_state(w, h, charmap) && TCOD_opengl_init_shaders() ) {
-#else
-			screen=SDL_SetVideoMode(w*TCOD_ctx.font_width,h*TCOD_ctx.font_height,32,SDL_OPENGL);
-			if ( screen && TCOD_opengl_init_state(w, h, charmap) && TCOD_opengl_init_shaders() ) {
-#endif
-				TCOD_LOG(("Using %s renderer...\n",TCOD_ctx.renderer == TCOD_RENDERER_GLSL ? "GLSL" : "OPENGL"));
-			} else {
-				TCOD_LOG(("Fallback to SDL renderer...\n"));
-				TCOD_ctx.renderer = TCOD_RENDERER_SDL;
-			}
-		} 
-#endif		
-		if (TCOD_ctx.renderer == TCOD_RENDERER_SDL ) {
-#if SDL_VERSION_ATLEAST(2,0,0)
-			window = SDL_CreateWindow(TCOD_ctx.window_title,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,w*TCOD_ctx.font_width,h*TCOD_ctx.font_height,winflags);
-#else
-			screen=SDL_SetVideoMode(w*TCOD_ctx.font_width,h*TCOD_ctx.font_height,32,0);
-#endif
-			TCOD_LOG(("Using SDL renderer...\n"));
-		}
-#if SDL_VERSION_ATLEAST(2,0,0)
-		if ( window == NULL ) TCOD_fatal_nopar("SDL : cannot create window");
-#else
-		if ( screen == NULL ) TCOD_fatal_nopar("SDL : cannot create window");
-#endif
-	}
-#if SDL_VERSION_ATLEAST(2,0,0)
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	if ( renderer == NULL ) TCOD_fatal_nopar("SDL : cannot create renderer");
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-#else
-	SDL_EnableUNICODE(1);
-#endif
-	consoleBuffer=buf;
-	prevConsoleBuffer=oldbuf;
-	TCOD_ctx.fullscreen=fullscreen;
+	sdl->create_window(console->w, console->h, fullscreen);
 	memset(key_status,0,sizeof(bool)*(TCODK_CHAR+1));
-	memset(ascii_updated,0,sizeof(bool)*TCOD_ctx.max_font_chars);
+
 	return true;
+}
+
+void TCOD_sys_uninit(void) {
+	if (!has_startup) return;
+	sdl->destroy_window();
 }
 
 void TCOD_sys_save_bitmap(void *bitmap, const char *filename) {
@@ -1174,110 +805,12 @@ void TCOD_sys_save_screenshot(const char *filename) {
 			}
 		} while(!filename);
 	}
-	if ( TCOD_ctx.renderer == TCOD_RENDERER_SDL ) {
-#if SDL_VERSION_ATLEAST(2,0,0)
-		/* This would be a lot easier if image saving could do textures. */
-	    SDL_Rect rect;
-		SDL_RenderGetViewport(renderer, &rect);
-		Uint32 format = SDL_GetWindowPixelFormat(window);
-		SDL_Texture *texture = SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_TARGET, rect.w, rect.h);
-		if (0 != texture) {
-			if (SDL_SetRenderTarget(renderer, texture)) {
-				void *pixels;
-				int pitch, access;
-
-				actual_rendering();
-				SDL_SetRenderTarget(renderer, NULL);
-
-				rect.x = rect.y = rect.w = rect.h = 0;
-				if (-1 != SDL_QueryTexture(texture, &format, &access, &rect.w, &rect.h) &&
-						-1 != SDL_LockTexture(texture, NULL, &pixels, &pitch)) {
-					int depth;
-					Uint32 rmask, gmask, bmask, amask;
-					if (SDL_TRUE == SDL_PixelFormatEnumToMasks(format, &depth, &rmask, &gmask, &bmask, &amask)) {
-						SDL_Surface *surface = SDL_CreateRGBSurfaceFrom(pixels, rect.w, rect.h, depth, pitch, rmask, gmask, bmask, amask);
-						TCOD_sys_save_bitmap((void *)surface,filename);
-						SDL_FreeSurface(surface);
-					} else
-						TCOD_LOG(("TCOD_sys_save_screenshot - failed call to SDL_PixelFormatEnumToMasks"));
-
-					SDL_UnlockTexture(texture);
-				} else
-					TCOD_LOG(("TCOD_sys_save_screenshot - failed call to SDL_QueryTexture or SDL_LockTexture"));
-			} else
-				TCOD_LOG(("TCOD_sys_save_screenshot - failed call to SDL_SetRenderTarget"));
-			SDL_DestroyTexture(texture);
-		} else
-			TCOD_LOG(("TCOD_sys_save_screenshot - failed call to SDL_CreateTexture"));
-#else
-		TCOD_sys_save_bitmap((void *)screen,filename);
-#endif
-#ifndef NO_OPENGL		
-	} else {
-		SDL_Surface *screenshot=(SDL_Surface *)TCOD_opengl_get_screen();
-		TCOD_sys_save_bitmap((void *)screenshot,filename);
-		SDL_FreeSurface(screenshot);
-#endif		
-	}
+	sdl->save_screenshot(filename);
 }
 
 void TCOD_sys_set_fullscreen(bool fullscreen) {
-	bool mouseOn=SDL_ShowCursor(-1);
 	TCOD_ctx.fullscreen=fullscreen;
-	/*
-	SDL_QuitSubSystem(SDL_INIT_VIDEO);
-	SDL_InitSubSystem(SDL_INIT_VIDEO);
-	charmap=SDL_LoadBMP(TCOD_ctx.font_file);
-	if (charmap == NULL ) TCOD_fatal("SDL : cannot load %s",TCOD_ctx.font_file);
-	memset(charcols,128,256*sizeof(TCOD_color_t));
-	*/
-	if ( fullscreen ) {
-#if SDL_VERSION_ATLEAST(2,0,0)
-		find_resolution();
-		SDL_SetWindowFullscreen(window, fullscreen);
-#else
-		SDL_Surface *newscreen;
-		find_resolution();
-		newscreen=SDL_SetVideoMode(TCOD_ctx.actual_fullscreen_width,TCOD_ctx.actual_fullscreen_height,32,SDL_FULLSCREEN);
-		TCOD_IFNOT ( newscreen != NULL ) return;
-		screen=newscreen;
-#endif
-		SDL_ShowCursor(mouseOn ? 1:0);
-#if SDL_VERSION_ATLEAST(2,0,0)
-		SDL_GetWindowSize(window,&TCOD_ctx.actual_fullscreen_width,&TCOD_ctx.actual_fullscreen_height);
-#else
-		TCOD_ctx.actual_fullscreen_width=screen->w;
-		TCOD_ctx.actual_fullscreen_height=screen->h;
-#endif
-		TCOD_sys_init_screen_offset();
-		/*
-		printf ("actual resolution : %dx%d\n",TCOD_ctx.actual_fullscreen_width,TCOD_ctx.actual_fullscreen_height);
-		printf ("offset : %dx%d\n",TCOD_ctx.fullscreen_offsetx,TCOD_ctx.fullscreen_offsety);
-		printf ("flags : %x bpp : %d bitspp : %d\n",screen->flags, screen->format->BytesPerPixel, screen->format->BitsPerPixel);
-		*/
-	} else {
-#if SDL_VERSION_ATLEAST(2,0,0)
-		SDL_SetWindowFullscreen(window, fullscreen);
-#else
-		SDL_Surface *newscreen=SDL_SetVideoMode(TCOD_ctx.root->w*TCOD_ctx.font_width,TCOD_ctx.root->h*TCOD_ctx.font_height,32,0);
-		TCOD_IFNOT( newscreen != NULL ) return;
-		screen=newscreen;
-#endif
-		SDL_ShowCursor(mouseOn ? 1:0);
-		TCOD_ctx.fullscreen_offsetx=0;
-		TCOD_ctx.fullscreen_offsety=0;
-	}
-	TCOD_ctx.fullscreen=fullscreen;
-	/* SDL_WM_SetCaption(TCOD_ctx.window_title,NULL); */
-	oldFade=-1; /* to redraw the whole screen */
-#if !SDL_VERSION_ATLEAST(2,0,0)
-	SDL_UpdateRect(screen, 0, 0, 0, 0);
-#endif
-}
-
-/* This just forces a complete redraw, bypassing the usual rendering of changes. */
-void TCOD_sys_set_clear_screen() {
-	clear_screen=true;
+	sdl->set_fullscreen(fullscreen);
 }
 
 void TCOD_sys_set_scale_factor(float value) {
@@ -1287,30 +820,25 @@ void TCOD_sys_set_scale_factor(float value) {
 		scale_factor = scale_data.min_scale_factor;
 	else if (scale_factor - 1e-3 > MAX_SCALE_FACTOR)
 		scale_factor = MAX_SCALE_FACTOR;
-	printf("scale_factor: %0.3f -> %0.3f (wanted: %0.3f)", old_scale_factor, scale_factor, value);
+	/*printf("scale_factor: %0.3f -> %0.3f (wanted: %0.3f)", old_scale_factor, scale_factor, value);*/
 }
 
 void TCOD_sys_set_window_title(const char *title) {
 	strcpy(TCOD_ctx.window_title,title);
-#if SDL_VERSION_ATLEAST(2,0,0)
-	SDL_SetWindowTitle(window, title);
-#else
-	SDL_WM_SetCaption(title,NULL);
-#endif
+	sdl->set_window_title(title);
 }
 
 void TCOD_sys_flush(bool render) {
-	static uint32 old_time,new_time=0, elapsed=0;
-	int32 frame_time,time_to_wait;
+	static uint32_t old_time,new_time=0, elapsed=0;
+	int32_t frame_time,time_to_wait;
 	if ( render ) {
-#if SDL_VERSION_ATLEAST(2,0,0)	
-		TCOD_sys_render(NULL,TCOD_console_get_width(NULL),TCOD_console_get_height(NULL),consoleBuffer, prevConsoleBuffer);
-#else
-		TCOD_sys_render(screen,TCOD_console_get_width(NULL),TCOD_console_get_height(NULL),consoleBuffer, prevConsoleBuffer);
-#endif
+		TCOD_sys_render(NULL, TCOD_ctx.root);
 	}
 	old_time=new_time;
 	new_time=TCOD_sys_elapsed_milli();
+	/* If TCOD has been terminated and restarted. */
+	if (old_time > new_time)
+		old_time = elapsed = 0;
 	if ( new_time / 1000 != elapsed ) {
 		/* update fps every second */
 		fps=cur_fps;
@@ -1330,7 +858,6 @@ void TCOD_sys_flush(bool render) {
 	last_frame_length = frame_time * 0.001f;
 }
 
-#if SDL_VERSION_ATLEAST(2,0,0)	
 static char TCOD_sys_get_vk(SDL_Keycode sdl_key) {
 	int i;
 	for (i = 0; i < NUM_VK_TO_C_ENTRIES; i++) {
@@ -1352,59 +879,24 @@ static void TCOD_sys_set_vk(SDL_Keycode sdl_key, char tcod_key) {
 		}
 	}
 }
-#endif
 
 static void TCOD_sys_convert_event(SDL_Event *ev, TCOD_key_t *ret) {
 	SDL_KeyboardEvent *kev=&ev->key;
-#if SDL_VERSION_ATLEAST(2,0,0)
 	/* SDL2 does not map keycodes and modifiers to characters, this is on the developer.
 		Presumably in order to avoid problems with different keyboard layouts, they
 		are expected to write their own key mapping editing code for the user.  */
 	if (SDLK_SCANCODE_MASK == (kev->keysym.sym & SDLK_SCANCODE_MASK))
 		ret->c = 0;
-	else {
+	else
 		ret->c = kev->keysym.sym;
-		if (kev->keysym.mod & KMOD_SHIFT)
-			switch (kev->keysym.sym) {
-			case SDLK_BACKQUOTE : ret->c='~'; break;
-			case SDLK_1 : ret->c='!'; break;
-			case SDLK_2 : ret->c='@'; break;
-			case SDLK_3 : ret->c='#'; break;
-			case SDLK_4 : ret->c='$'; break;
-			case SDLK_5 : ret->c='%'; break;
-			case SDLK_6 : ret->c='^'; break;
-			case SDLK_7 : ret->c='&'; break;
-			case SDLK_8 : ret->c='*'; break;
-			case SDLK_9 : ret->c='('; break;
-			case SDLK_0 : ret->c=')'; break;
-			case SDLK_MINUS : ret->c='_'; break;
-			case SDLK_EQUALS : ret->c='+'; break;
-			case SDLK_LEFTBRACKET : ret->c='{'; break;
-			case SDLK_RIGHTBRACKET : ret->c='}'; break;
-			case SDLK_BACKSLASH : ret->c='|'; break;
-			case SDLK_SEMICOLON : ret->c=':'; break;
-			case SDLK_QUOTE : ret->c='"'; break;
-			case SDLK_COMMA : ret->c='<'; break;
-			case SDLK_PERIOD : ret->c='>'; break;
-			case SDLK_SLASH : ret->c='?'; break;
-			}
-	}
-#else
-	ret->c=(char)kev->keysym.unicode;
-#endif
 	if ( ( kev->keysym.mod & (KMOD_LCTRL|KMOD_RCTRL) ) != 0 ) {
 		/* when pressing CTRL-A, we don't get unicode for 'a', but unicode for CTRL-A = 1. Fix it */
 		if ( kev->keysym.sym >= SDLK_a && kev->keysym.sym <= SDLK_z ) {
 			ret->c = 'a'+(kev->keysym.sym - SDLK_a);
 		}
 	}
-#if SDL_VERSION_ATLEAST(2,0,0)	
 	if ( ev->type == SDL_KEYDOWN ) TCOD_sys_set_vk(kev->keysym.sym, ret->c);
 	else if (ev->type == SDL_KEYUP ) ret->c = TCOD_sys_get_vk(kev->keysym.sym);
-#else
-	if ( ev->type == SDL_KEYDOWN ) vk_to_c[kev->keysym.sym] = ret->c;
-	else if (ev->type == SDL_KEYUP ) ret->c = vk_to_c[kev->keysym.sym];
-#endif
 	switch(kev->keysym.sym) {
 		case SDLK_ESCAPE : ret->vk=TCODK_ESCAPE;break;
 		case SDLK_SPACE : ret->vk=TCODK_SPACE; break;
@@ -1421,11 +913,7 @@ static void TCOD_sys_convert_event(SDL_Event *ev, TCOD_key_t *ret) {
 		case SDLK_LALT : case SDLK_RALT : ret->vk=TCODK_ALT;break;
 		case SDLK_LCTRL : case SDLK_RCTRL : ret->vk=TCODK_CONTROL;break;
 		case SDLK_LSHIFT : case SDLK_RSHIFT : ret->vk=TCODK_SHIFT;break;
-#if SDL_VERSION_ATLEAST(2,0,0)	
 		case SDLK_PRINTSCREEN : ret->vk=TCODK_PRINTSCREEN;break;
-#else
-		case SDLK_PRINT : ret->vk=TCODK_PRINTSCREEN;break;
-#endif
 		case SDLK_LEFT : ret->vk=TCODK_LEFT;break;
 		case SDLK_UP : ret->vk=TCODK_UP;break;
 		case SDLK_RIGHT : ret->vk=TCODK_RIGHT;break;
@@ -1452,9 +940,9 @@ static void TCOD_sys_convert_event(SDL_Event *ev, TCOD_key_t *ret) {
 		case SDLK_7 : ret->vk=TCODK_7;break;
 		case SDLK_8 : ret->vk=TCODK_8;break;
 		case SDLK_9 : ret->vk=TCODK_9;break;
-#if SDL_VERSION_ATLEAST(2,0,0)	
 		case SDLK_RGUI : ret->vk=TCODK_RWIN;break;
 		case SDLK_LGUI : ret->vk=TCODK_LWIN;break;
+		case SDLK_NUMLOCKCLEAR : ret->vk=TCODK_NUMLOCK;break;
 		case SDLK_KP_0 : ret->vk=TCODK_KP0;break;
 		case SDLK_KP_1 : ret->vk=TCODK_KP1;break;
 		case SDLK_KP_2 : ret->vk=TCODK_KP2;break;
@@ -1465,20 +953,6 @@ static void TCOD_sys_convert_event(SDL_Event *ev, TCOD_key_t *ret) {
 		case SDLK_KP_7 : ret->vk=TCODK_KP7;break;
 		case SDLK_KP_8 : ret->vk=TCODK_KP8;break;
 		case SDLK_KP_9 : ret->vk=TCODK_KP9;break;
-#else
-		case SDLK_RSUPER : ret->vk=TCODK_RWIN;break;
-		case SDLK_LSUPER : ret->vk=TCODK_LWIN;break;
-		case SDLK_KP0 : ret->vk=TCODK_KP0;break;
-		case SDLK_KP1 : ret->vk=TCODK_KP1;break;
-		case SDLK_KP2 : ret->vk=TCODK_KP2;break;
-		case SDLK_KP3 : ret->vk=TCODK_KP3;break;
-		case SDLK_KP4 : ret->vk=TCODK_KP4;break;
-		case SDLK_KP5 : ret->vk=TCODK_KP5;break;
-		case SDLK_KP6 : ret->vk=TCODK_KP6;break;
-		case SDLK_KP7 : ret->vk=TCODK_KP7;break;
-		case SDLK_KP8 : ret->vk=TCODK_KP8;break;
-		case SDLK_KP9 : ret->vk=TCODK_KP9;break;
-#endif
 		case SDLK_KP_DIVIDE : ret->vk=TCODK_KPDIV;break;
 		case SDLK_KP_MULTIPLY : ret->vk=TCODK_KPMUL;break;
 		case SDLK_KP_PLUS : ret->vk=TCODK_KPADD;break;
@@ -1491,10 +965,10 @@ static void TCOD_sys_convert_event(SDL_Event *ev, TCOD_key_t *ret) {
 }
 
 static TCOD_key_t TCOD_sys_SDLtoTCOD(SDL_Event *ev, int flags) {
-	static TCOD_key_t ret;
-	ret.vk=TCODK_NONE;
-	ret.c=0;
-	ret.pressed=0;
+	TCOD_key_t *ret = &TCOD_ctx.key_state;
+	ret->vk=TCODK_NONE;
+	ret->c=0;
+	ret->pressed=0;
 	switch (ev->type) {
 		/* handled in TCOD_sys_handle_event */
 		/*
@@ -1508,20 +982,22 @@ static TCOD_key_t TCOD_sys_SDLtoTCOD(SDL_Event *ev, int flags) {
 			SDL_KeyboardEvent *kev=&ev->key;
 			TCOD_key_t tmpkey;
 			switch(kev->keysym.sym) {
-				case SDLK_LALT : ret.lalt=0; break;
-				case SDLK_RALT : ret.ralt=0; break;
-				case SDLK_LCTRL : ret.lctrl=0; break;
-				case SDLK_RCTRL : ret.rctrl=0; break;
-				case SDLK_LSHIFT : ret.shift=0; break;
-				case SDLK_RSHIFT : ret.shift=0; break;
+				case SDLK_LALT : ret->lalt=0; break;
+				case SDLK_RALT : ret->ralt=0; break;
+				case SDLK_LCTRL : ret->lctrl=0; break;
+				case SDLK_RCTRL : ret->rctrl=0; break;
+				case SDLK_LSHIFT : ret->shift=0; break;
+				case SDLK_RSHIFT : ret->shift=0; break;
+				case SDLK_LGUI : ret->lmeta=0; break;
+				case SDLK_RGUI : ret->rmeta=0; break;
 				default:break;
 			}
 			TCOD_sys_convert_event(ev,&tmpkey);
 			key_status[tmpkey.vk]=false;
 			if ( flags & TCOD_KEY_RELEASED ) {
-				ret.vk=tmpkey.vk;
-				ret.c=tmpkey.c;
-				ret.pressed=0;
+				ret->vk=tmpkey.vk;
+				ret->c=tmpkey.c;
+				ret->pressed=0;
 			}
 		}
 		break;
@@ -1529,25 +1005,27 @@ static TCOD_key_t TCOD_sys_SDLtoTCOD(SDL_Event *ev, int flags) {
 			SDL_KeyboardEvent *kev=&ev->key;
 			TCOD_key_t tmpkey;
 			switch(kev->keysym.sym) {
-				case SDLK_LALT : ret.lalt=1; break;
-				case SDLK_RALT : ret.ralt=1; break;
-				case SDLK_LCTRL : ret.lctrl=1; break;
-				case SDLK_RCTRL : ret.rctrl=1; break;
-				case SDLK_LSHIFT : ret.shift=1; break;
-				case SDLK_RSHIFT : ret.shift=1; break;
+				case SDLK_LALT : ret->lalt=1; break;
+				case SDLK_RALT : ret->ralt=1; break;
+				case SDLK_LCTRL : ret->lctrl=1; break;
+				case SDLK_RCTRL : ret->rctrl=1; break;
+				case SDLK_LSHIFT : ret->shift=1; break;
+				case SDLK_RSHIFT : ret->shift=1; break;
+				case SDLK_LGUI : ret->lmeta=1; break;
+				case SDLK_RGUI : ret->rmeta=1; break;
 				default : break;
 			}
 			TCOD_sys_convert_event(ev,&tmpkey);
 			key_status[tmpkey.vk]=true;
 			if ( flags & TCOD_KEY_PRESSED ) {
-				ret.vk=tmpkey.vk;
-				ret.c=tmpkey.c;
-				ret.pressed=1;
+				ret->vk=tmpkey.vk;
+				ret->c=tmpkey.c;
+				ret->pressed=1;
 			}
 		}
 		break;
 	}
-	return ret;
+	return *ret;
 }
 
 bool TCOD_sys_is_key_pressed(TCOD_keycode_t key) {
@@ -1576,8 +1054,8 @@ void TCOD_sys_unproject_screen_coords(int sx, int sy, int *ssx, int *ssy) {
 		*ssx = (scale_data.src_x0 + ((sx - scale_data.dst_offset_x) * scale_data.src_copy_width) / scale_data.dst_display_width);
 		*ssy = (scale_data.src_y0 + ((sy - scale_data.dst_offset_y) * scale_data.src_copy_width) / scale_data.dst_display_width);
 	} else {
-		*ssx = sx - TCOD_ctx.fullscreen_offsetx;
-		*ssy = sy - TCOD_ctx.fullscreen_offsety;
+		*ssx=sx - TCOD_ctx.fullscreen_offsetx;
+		*ssy=sy - TCOD_ctx.fullscreen_offsety;
 	}
 }
 
@@ -1596,6 +1074,7 @@ void TCOD_sys_convert_screen_to_console_coords(int sx, int sy, int *cx, int *cy)
 static TCOD_mouse_t tcod_mouse={0,0,0,0,0,0,0,0,false,false,false,false,false,false,false,false};
 static TCOD_event_t TCOD_sys_handle_event(SDL_Event *ev,TCOD_event_t eventMask, TCOD_key_t *key, TCOD_mouse_t *mouse) {
 	TCOD_event_t retMask=0;
+	key->text[0] = '\0';
 	/* printf("TCOD_sys_handle_event type=%04x\n", ev->type); */
 	switch(ev->type) {
 		case SDL_KEYDOWN : {		 
@@ -1616,14 +1095,15 @@ static TCOD_event_t TCOD_sys_handle_event(SDL_Event *ev,TCOD_event_t eventMask, 
 			}
 		}
 		break;
-#if !SDL_VERSION_ATLEAST(2,0,0)
-		case SDL_ACTIVEEVENT : 
-			switch(ev->active.state) {
-				case SDL_APPMOUSEFOCUS : TCOD_ctx.app_has_mouse_focus=ev->active.gain; break;
-				default : TCOD_ctx.app_is_active=ev->active.gain; break;
-			}
+		case SDL_TEXTINPUT: {
+			SDL_TextInputEvent *iev=&ev->text;
+			*key = TCOD_ctx.key_state;
+			key->vk = TCODK_TEXT;
+			key->pressed = 1;
+			strncpy(key->text, iev->text, TCOD_KEY_TEXT_SIZE);
+			return retMask | TCOD_EVENT_KEY_PRESS; 
+		}
 		break;
-#endif
 #ifdef TCOD_TOUCH_INPUT
 		/*
 		 * Need to distinguish between:
@@ -1635,10 +1115,9 @@ static TCOD_event_t TCOD_sys_handle_event(SDL_Event *ev,TCOD_event_t eventMask, 
 		case SDL_FINGERUP :
 		case SDL_FINGERMOTION :
 		{
-			SDL_Touch *touch=SDL_GetTouch(ev->tfinger.touchId);
 			int idx, mouse_touch_valid;
 			float xf, yf, screen_x, screen_y;
-			Uint32 ticks_taken = 0;
+			uint32_t ticks_taken = 0;
 
 			/* Reset the global variable. */
 			if (tcod_touch.nfingerspressed == 0) {
@@ -1671,14 +1150,14 @@ static TCOD_event_t TCOD_sys_handle_event(SDL_Event *ev,TCOD_event_t eventMask, 
 				mouse_touch_valid = mouse_touch && tcod_touch.nfingerspressed == 1 && tcod_touch.fingerspressed[0];
 
 			/* Coordinates are raw full screen positions. */
-			screen_x = (ev->tfinger.x * scale_data.surface_width) / touch->xres;
-			screen_y = (ev->tfinger.y * scale_data.surface_height) / touch->yres;
+			screen_x = ev->tfinger.x * scale_data.surface_width;
+			screen_y = ev->tfinger.y * scale_data.surface_height;
 			xf = (float)(screen_x - scale_data.dst_offset_x) / scale_data.dst_display_width;
 			yf = (float)(screen_y - scale_data.dst_offset_y) / scale_data.dst_display_height;
 			tcod_touch.coords[idx][0] = scale_data.src_x0 + scale_data.src_copy_width * xf;
 			tcod_touch.coords[idx][1] = scale_data.src_y0 + scale_data.src_copy_height * yf;
-			tcod_touch.coords_delta[idx][0] = (ev->tfinger.dx * scale_data.src_proportionate_width) / touch->xres;
-			tcod_touch.coords_delta[idx][1] = (ev->tfinger.dy * scale_data.src_proportionate_height) / touch->yres;
+			tcod_touch.coords_delta[idx][0] = ev->tfinger.dx * scale_data.src_proportionate_width;
+			tcod_touch.coords_delta[idx][1] = ev->tfinger.dy * scale_data.src_proportionate_height;
 
 			/* Console coordinates need to be mapped back from screen coordinates through scaling. */
 			tcod_touch.consolecoords[idx][0] = tcod_touch.coords[idx][0] / TCOD_ctx.font_width;
@@ -1747,18 +1226,18 @@ static TCOD_event_t TCOD_sys_handle_event(SDL_Event *ev,TCOD_event_t eventMask, 
 
 				/* Bound the translations within the console area. */
 				if (fabs(xc_shift) > 1e-3f) {
-					scale_xc -= xc_shift; /* Actual display shift is the inverted finger movement. */
-					if (scale_xc + 1e-3f < 0.0f)
-						scale_xc = 0.0f;
-					if (scale_xc - 1e-3f > 1.0f)
-						scale_xc = 1.0f;
+					sdl->scale_xc -= xc_shift; /* Actual display shift is the inverted finger movement. */
+					if (sdl->scale_xc + 1e-3f < 0.0f)
+                        sdl->scale_xc = 0.0f;
+					if (sdl->scale_xc - 1e-3f > 1.0f)
+                        sdl->scale_xc = 1.0f;
 				}
 				if (fabs(yc_shift) > 1e-3f) {
-					scale_yc -= yc_shift; /* Actual display shift is the inverted finger movement. */
-					if (scale_yc + 1e-3f < 0.0f)
-						scale_yc = 0.0f;
-					if (scale_yc - 1e-3f > 1.0f)
-						scale_yc = 1.0f;
+                    sdl->scale_yc -= yc_shift; /* Actual display shift is the inverted finger movement. */
+					if (sdl->scale_yc + 1e-3f < 0.0f)
+                        sdl->scale_yc = 0.0f;
+					if (sdl->scale_yc - 1e-3f > 1.0f)
+                        sdl->scale_yc = 1.0f;
 				}
 				if (fabs(scale_adjust - 1.0f) > 1e-3f)
 					TCOD_sys_set_scale_factor(scale_factor * scale_adjust);
@@ -1802,7 +1281,6 @@ static TCOD_event_t TCOD_sys_handle_event(SDL_Event *ev,TCOD_event_t eventMask, 
 				return retMask | TCOD_EVENT_MOUSE_MOVE;
 			}
 		break; 
-#if SDL_VERSION_ATLEAST(2,0,0)
 		case SDL_MOUSEWHEEL :
 			if (ev->wheel.y < 0)
 				mouse->wheel_down=true;
@@ -1810,7 +1288,6 @@ static TCOD_event_t TCOD_sys_handle_event(SDL_Event *ev,TCOD_event_t eventMask, 
 				mouse->wheel_up=true;
 			return retMask | TCOD_EVENT_MOUSE_PRESS;
 		break;
-#endif
 		case SDL_MOUSEBUTTONDOWN : 
 			if ( (TCOD_EVENT_MOUSE_PRESS & eventMask) != 0) {
 				SDL_MouseButtonEvent *mev=&ev->button;
@@ -1819,10 +1296,6 @@ static TCOD_event_t TCOD_sys_handle_event(SDL_Event *ev,TCOD_event_t eventMask, 
 					case SDL_BUTTON_LEFT : mouse->lbutton=mousebl=true; break;
 					case SDL_BUTTON_MIDDLE : mouse->mbutton=mousebm=true; break;
 					case SDL_BUTTON_RIGHT : mouse->rbutton=mousebr=true; break;
-#if !SDL_VERSION_ATLEAST(2,0,0)	
-					case SDL_BUTTON_WHEELUP : mouse->wheel_up=true; break;
-					case SDL_BUTTON_WHEELDOWN : mouse->wheel_down=true;break;
-#endif
 				}
 				/* update mouse position */
 				if ( (TCOD_EVENT_MOUSE_MOVE & eventMask) == 0) {
@@ -1856,7 +1329,6 @@ static TCOD_event_t TCOD_sys_handle_event(SDL_Event *ev,TCOD_event_t eventMask, 
 		case SDL_QUIT :
 			TCOD_ctx.is_window_closed=true;
 		break;
-#if SDL_VERSION_ATLEAST(2,0,0)
 		case SDL_WINDOWEVENT :
 			/* At this point, there are some corner cases that need dealing with.  So log this. */
 			/* printf("SDL2 WINDOWEVENT: 0x%04x\n", ev->window.event); */
@@ -1879,6 +1351,9 @@ static TCOD_event_t TCOD_sys_handle_event(SDL_Event *ev,TCOD_event_t eventMask, 
 				TCOD_ctx.app_is_active=true; break;
 			case SDL_WINDOWEVENT_MINIMIZED:      /**< Window has been minimized */
 				TCOD_ctx.app_is_active=false; break;
+			case SDL_WINDOWEVENT_EXPOSED:        /**< Window has been returned to and needs a refresh. */
+				TCOD_sys_render(NULL, TCOD_ctx.root);
+				break;
 #ifdef NDEBUG_HMM
 			default:
 				TCOD_LOG(("SDL2 WINDOWEVENT (unknown): 0x%04x\n", ev->window.event));
@@ -1886,11 +1361,6 @@ static TCOD_event_t TCOD_sys_handle_event(SDL_Event *ev,TCOD_event_t eventMask, 
 #endif
 			}
  		break;
-#else
-		case SDL_VIDEOEXPOSE :
-			TCOD_sys_console_to_bitmap(screen,TCOD_console_get_width(NULL),TCOD_console_get_height(NULL),consoleBuffer,prevConsoleBuffer);
-		break;			
-#endif
 		default : break; 
 	}
 	return retMask;
@@ -1900,7 +1370,6 @@ TCOD_event_t TCOD_sys_wait_for_event(int eventMask, TCOD_key_t *key, TCOD_mouse_
 	SDL_Event ev;
 	TCOD_event_t retMask=0;
 	if ( eventMask == 0 ) return 0;
-	SDL_PumpEvents();
 	if ( flush ) {
 		while ( SDL_PollEvent(&ev) ) {
 			TCOD_sys_SDLtoTCOD(&ev,0);
@@ -1929,7 +1398,6 @@ TCOD_event_t TCOD_sys_check_for_event(int eventMask, TCOD_key_t *key, TCOD_mouse
 	SDL_Event ev;
 	TCOD_event_t retMask=0;
 	if ( eventMask == 0 ) return 0;
-	SDL_PumpEvents();
 	tcod_mouse.lbutton_pressed =false;
 	tcod_mouse.rbutton_pressed =false;
 	tcod_mouse.mbutton_pressed =false;
@@ -1951,7 +1419,7 @@ TCOD_event_t TCOD_sys_check_for_event(int eventMask, TCOD_key_t *key, TCOD_mouse
 	return retMask;
 }
 
-TCOD_mouse_t TCOD_mouse_get_status() {
+TCOD_mouse_t TCOD_mouse_get_status(void) {
 	return tcod_mouse;
 }
 
@@ -1981,22 +1449,8 @@ TCOD_key_t TCOD_sys_wait_for_keypress(bool flush) {
 }
 
 
-void TCOD_sys_sleep_milli(uint32 milliseconds) {
+void TCOD_sys_sleep_milli(uint32_t milliseconds) {
 	SDL_Delay(milliseconds);
-}
-
-void TCOD_sys_term() {
-	SDL_Quit();
-#if SDL_VERSION_ATLEAST(2,0,0)
-	window=NULL;
-	scale_screen=NULL;
-	if (renderer) {
-		SDL_DestroyRenderer(renderer);
-		renderer = NULL;
-	}
-#else
-	screen=NULL;
-#endif
 }
 
 void *TCOD_sys_load_image(const char *filename) {
@@ -2015,11 +1469,11 @@ void TCOD_sys_get_image_size(const void *image, int *w, int *h) {
 TCOD_color_t TCOD_sys_get_image_pixel(const void *image,int x, int y) {
 	TCOD_color_t ret;
 	SDL_Surface *surf=(SDL_Surface *)image;
-	Uint8 bpp;
-	Uint8 *bits;
+	uint8_t bpp;
+	uint8_t*bits;
 	if ( x < 0 || y < 0 || x >= surf->w || y >= surf->h ) return TCOD_black;
 	bpp = surf->format->BytesPerPixel;
-	bits = ((Uint8 *)surf->pixels)+y*surf->pitch+x*bpp;
+	bits = ((uint8_t*)surf->pixels)+y*surf->pitch+x*bpp;
 	switch (bpp) {
 		case 1 :
 		{
@@ -2043,20 +1497,20 @@ TCOD_color_t TCOD_sys_get_image_pixel(const void *image,int x, int y) {
 
 int TCOD_sys_get_image_alpha(const void *image,int x, int y) {
 	SDL_Surface *surf=(SDL_Surface *)image;
-	Uint8 bpp;
-	Uint8 *bits;
+	uint8_t bpp;
+	uint8_t*bits;
 	if ( x < 0 || y < 0 || x >= surf->w || y >= surf->h ) return 255;
 	bpp = surf->format->BytesPerPixel;
 	if ( bpp != 4 ) return 255;
-	bits = ((Uint8 *)surf->pixels)+y*surf->pitch+x*bpp;
+	bits = ((uint8_t*)surf->pixels)+y*surf->pitch+x*bpp;
 	return *((bits)+surf->format->Ashift/8);
 }
 
-uint32 TCOD_sys_elapsed_milli() {
-	return (uint32)SDL_GetTicks();
+uint32_t TCOD_sys_elapsed_milli(void) {
+	return (uint32_t)SDL_GetTicks();
 }
 
-float TCOD_sys_elapsed_seconds() {
+float TCOD_sys_elapsed_seconds(void) {
 	static float div=1.0f/1000.0f;
 	return SDL_GetTicks()*div;
 }
@@ -2066,25 +1520,6 @@ void TCOD_sys_force_fullscreen_resolution(int width, int height) {
 	TCOD_ctx.fullscreen_height=height;
 }
 
-/*
-void * TCOD_sys_create_bitmap(int width, int height, TCOD_color_t *buf) {
-	int x,y;
-	SDL_Surface *bitmap=SDL_CreateRGBSurface(SDL_SWSURFACE,width,height,charmap->format->BitsPerPixel,
-		charmap->format->Rmask,charmap->format->Gmask,charmap->format->Bmask,charmap->format->Amask);
-	for (x=0; x < width; x++) {
-		for (y=0; y < height; y++) {
-			SDL_Rect rect;
-			Uint32 col=SDL_MapRGB(charmap->format,buf[x+y*width].r,buf[x+y*width].g,buf[x+y*width].b);
-			rect.x=x;
-			rect.y=y;
-			rect.w=1;
-			rect.h=1;
-			SDL_FillRect(bitmap,&rect,col);
-		}
-	}
-	return (void *)bitmap;
-}
-*/
 void * TCOD_sys_create_bitmap(int width, int height, TCOD_color_t *buf) {
 	int x,y;
 	SDL_PixelFormat fmt;
@@ -2109,7 +1544,7 @@ void * TCOD_sys_create_bitmap(int width, int height, TCOD_color_t *buf) {
 	for (x=0; x < width; x++) {
 		for (y=0; y < height; y++) {
 			SDL_Rect rect;
-			Uint32 col=SDL_MapRGB(&fmt,buf[x+y*width].r,buf[x+y*width].g,buf[x+y*width].b);
+			uint32_t col=SDL_MapRGB(&fmt,buf[x+y*width].r,buf[x+y*width].g,buf[x+y*width].b);
 			rect.x=x;
 			rect.y=y;
 			rect.w=1;
@@ -2129,19 +1564,19 @@ void TCOD_sys_set_fps(int val) {
 	else min_frame_length=1000/val;
 }
 
-void TCOD_sys_save_fps() {
+void TCOD_sys_save_fps(void) {
 	min_frame_length_backup=min_frame_length;
 }
 
-void TCOD_sys_restore_fps() {
+void TCOD_sys_restore_fps(void) {
 	min_frame_length=min_frame_length_backup;
 }
 
-int TCOD_sys_get_fps() {
+int TCOD_sys_get_fps(void) {
 	return fps;
 }
 
-float TCOD_sys_get_last_frame_length() {
+float TCOD_sys_get_last_frame_length(void) {
 	return last_frame_length;
 }
 
@@ -2153,33 +1588,13 @@ void TCOD_sys_get_char_size(int *w, int *h) {
 void TCOD_sys_get_current_resolution(int *w, int *h) {
 	/* be sure that SDL is initialized */
 	TCOD_sys_startup();
-#if SDL_VERSION_ATLEAST(2,0,0)
-	int displayidx;
-	SDL_Rect rect = { 0, 0, 0, 0 };
-	if (window) {
-		TCOD_IFNOT(window) return;
-		displayidx = SDL_GetWindowDisplayIndex(window);
-		TCOD_IFNOT(displayidx >= 0) return;
-	} else {
-		/* No window if no console, but user can want to know res before opening one. */
-		TCOD_IFNOT(SDL_GetNumVideoDisplays() > 0) return;
-		displayidx = 0;
-	}
-	TCOD_IFNOT(SDL_GetDisplayBounds(displayidx, &rect) == 0) return;
-	*w=rect.w;
-	*h=rect.h;
-#else
-	const SDL_VideoInfo *info=SDL_GetVideoInfo();
-	*w=info->current_w;
-	*h=info->current_h;
-#endif
+	sdl->get_current_resolution(w,h);
 }
 
 /* image stuff */
-bool TCOD_sys_check_magic_number(const char *filename, int size, uint8 *data) {
-	uint8 tmp[128];
-	int i;
-#if SDL_VERSION_ATLEAST(2,0,0)
+bool TCOD_sys_check_magic_number(const char *filename, size_t size, uint8_t*data) {
+	uint8_t tmp[128];
+	size_t i;
 	SDL_RWops *rwops =  SDL_RWFromFile(filename, "rb");
 	if (! rwops) return false;
 	if ( (i = rwops->read(rwops,tmp,size,1)) != 1 ) {
@@ -2187,44 +1602,29 @@ bool TCOD_sys_check_magic_number(const char *filename, int size, uint8 *data) {
 		return false;
 	}
 	rwops->close(rwops);
-#else
-	FILE *f=fopen(filename,"rb");
-	if (! f) return false;
-	if ( fread(tmp,1,128,f) < (unsigned)size ) {
-		fclose(f);
-		return false;
-	}
-	fclose(f);
-#endif
 	for (i=0; i< size; i++) if (tmp[i]!=data[i]) return false;
 	return true;
 }
 
-#if SDL_VERSION_ATLEAST(2,0,0)
-void *TCOD_sys_get_SDL_window() {
+void *TCOD_sys_get_SDL_window(void) {
 	return (void *)window;
 }
 
-void *TCOD_sys_get_SDL_renderer() {
+void *TCOD_sys_get_SDL_renderer(void) {
 	return (void *)renderer;
 }
-#endif
 
 /* mouse stuff */
 void TCOD_mouse_show_cursor(bool visible) {
   SDL_ShowCursor(visible ? 1 : 0);
 }
 
-bool TCOD_mouse_is_cursor_visible() {
+bool TCOD_mouse_is_cursor_visible(void) {
   return SDL_ShowCursor(-1) ? true : false;
 }
 
 void TCOD_mouse_move(int x, int y) {
-#if SDL_VERSION_ATLEAST(2,0,0)
-  SDL_WarpMouseInWindow(window, (Uint16)x,(Uint16)y);
-#else
-  SDL_WarpMouse((Uint16)x,(Uint16)y);
-#endif
+	sdl->set_mouse_position(x,y);
 }
 
 void TCOD_mouse_includes_touch(bool enable) {
@@ -2233,80 +1633,70 @@ void TCOD_mouse_includes_touch(bool enable) {
 #endif
 }
 
+/*clipboard stuff */
+bool TCOD_sys_clipboard_set(const char *value) {
+	if (!has_startup) { return false; }
+	return sdl->set_clipboard_text(value);
+}
+
+char *TCOD_sys_clipboard_get() {
+	if (!has_startup) { return ""; }
+	return sdl->get_clipboard_text();
+}
+
 bool TCOD_sys_read_file(const char *filename, unsigned char **buf, size_t *size) {
-	uint32 filesize;
-	/* get file size */
-#if SDL_VERSION_ATLEAST(2,0,0)
-	SDL_RWops *rwops= SDL_RWFromFile(filename,"rb");
-	if (!rwops) return false;
-	SDL_RWseek(rwops,0,RW_SEEK_END);
-	filesize=SDL_RWtell(rwops);
-	SDL_RWseek(rwops,0,RW_SEEK_SET);	
-#else
-	FILE * fops=fopen(filename,"rb");
-	if (!fops) return false;
-	fseek(fops,0,SEEK_END);
-	filesize=ftell(fops);
-	fseek(fops,0,SEEK_SET);
-#endif
-	/* allocate buffer */
-	*buf = (unsigned char *)malloc(sizeof(unsigned char)*filesize);
-	/* read from file */
-#if SDL_VERSION_ATLEAST(2,0,0)
-	if (SDL_RWread(rwops,*buf,sizeof(unsigned char),filesize) != filesize) {
-		SDL_RWclose(rwops);
-		free(*buf);
-		return false;
-	}
-	SDL_RWclose(rwops);
-#else
-	if (fread(*buf,sizeof(unsigned char),filesize,fops) != filesize ) {
-		fclose(fops);
-		free(*buf);
-		return false;
-	}
-	fclose(fops);
-#endif
-	*size=filesize;
-	return true;
+	return sdl->file_read(filename,buf,size);
 }
 
 bool TCOD_sys_file_exists(const char * filename, ...) {
-#if SDL_VERSION_ATLEAST(2,0,0)
-	SDL_RWops *rwops;
-#else
-	FILE * fops;
-#endif
 	char f[1024];
 	va_list ap;
 	va_start(ap,filename);
 	vsprintf(f,filename,ap);
 	va_end(ap);
-#if SDL_VERSION_ATLEAST(2,0,0)
-	rwops = SDL_RWFromFile(f,"rb");
-	if (rwops) {
-		SDL_RWclose(rwops);
-#else
-	fops=fopen(f,"rb");
-	if (fops) {
-		fclose(fops);
-#endif
-		return true;
-	}
-	return false;
+	return sdl->file_exists(f);
 }
 
-bool TCOD_sys_write_file(const char *filename, unsigned char *buf, uint32 size) {
-#if SDL_VERSION_ATLEAST(2,0,0)
-	SDL_RWops *rwops= SDL_RWFromFile(filename,"wb");
-	if (!rwops) return false;
-	SDL_RWwrite(rwops,buf,sizeof(unsigned char),size);
-	SDL_RWclose(rwops);
-#else
-	FILE * fops=fopen(filename,"wb");
-	if (!fops) return false;
-	fwrite(buf,sizeof(unsigned char),size,fops);
-	fclose(fops);
-#endif
-	return true;
+bool TCOD_sys_write_file(const char *filename, unsigned char *buf, uint32_t size) {
+	return sdl->file_write(filename,buf,size);
 }
+
+/* Mark a rectangle of tiles dirty. */
+void TCOD_sys_set_dirty(int dx, int dy, int dw, int dh) {
+	int x, y;
+	TCOD_console_data_t *dat = sdl->get_root_console_cache();
+	if (!dat) return;
+	TCOD_IFNOT(dx < dat->w && dy < dat->h && dx + dw >= 0 && dy + dh >= 0) return;
+	TCOD_IFNOT(dx >= 0) {
+		dw += dx;
+		dx = 0;
+	}
+	TCOD_IFNOT(dy >= 0) {
+		dh += dy;
+		dy = 0;
+	}
+	TCOD_IFNOT(dx + dw <= dat->w) dw = dat->w - dx;
+	TCOD_IFNOT(dy + dh <= dat->h) dh = dat->h - dy;
+
+	for (x = dx; x < dx + dw; ++x) {
+		for (y = dy; y < dy + dh; ++y) {
+			dat->ch_array[dat->w * y + x] = -1;
+		}
+	}
+}
+
+/* Mark a character dirty by invalidating all occurrences of it in the software
+   renderer cache.  Each character tile will be refreshed when the old buffer
+   is compared to the current buffer next render.
+   It's recommended that this method stays non-public. */
+void TCOD_sys_set_dirty_character_code(int ch) {
+	int i;
+	TCOD_console_data_t *dat = sdl->get_root_console_cache();
+	if (!dat) return;
+	for (i = 0; i < dat->w * dat->h; ++i) {
+		if (dat->ch_array[i] == ch) {
+			dat->ch_array[i] = -1;
+		}
+	}
+}
+#endif /* TCOD_SDL2 */

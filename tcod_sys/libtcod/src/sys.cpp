@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -24,28 +24,32 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "libtcod.hpp"
+#include <sys.hpp>
+
 #include <stdio.h>
 #include <stdarg.h>
 
-void TCODSystem::saveScreenshot(const char *filename) {
-	TCOD_sys_save_screenshot(filename);
-}
-
-void TCODSystem::sleepMilli(uint32 milliseconds) {
+#ifdef TCOD_OSUTIL_SUPPORT
+void TCODSystem::sleepMilli(uint32_t milliseconds) {
 	TCOD_sys_sleep_milli(milliseconds);
 }
 
-uint32 TCODSystem::getElapsedMilli() {
+uint32_t TCODSystem::getElapsedMilli() {
 	return TCOD_sys_elapsed_milli();
 }
 
 float TCODSystem::getElapsedSeconds() {
 	return TCOD_sys_elapsed_seconds();
 }
+#endif
+
+#ifdef TCOD_SDL2
+void TCODSystem::saveScreenshot(const char *filename) {
+	TCOD_sys_save_screenshot(filename);
+}
 
 void TCODSystem::forceFullscreenResolution(int width, int height) {
-	TCOD_sys_force_fullscreen_resolution(width,height);
+	TCOD_sys_force_fullscreen_resolution(width, height);
 }
 
 void TCODSystem::setRenderer(TCOD_renderer_t renderer) {
@@ -62,7 +66,9 @@ TCOD_event_t TCODSystem::checkForEvent(int eventMask, TCOD_key_t *key, TCOD_mous
 TCOD_renderer_t TCODSystem::getRenderer() {
 	return TCOD_sys_get_renderer();
 }
+#endif
 
+#ifdef TCOD_OSUTIL_SUPPORT
 void TCODSystem::setFps(int val) {
 	TCOD_sys_set_fps(val);
 }
@@ -74,13 +80,15 @@ int TCODSystem::getFps() {
 float TCODSystem::getLastFrameLength() {
 	return TCOD_sys_get_last_frame_length();
 }
+#endif
 
+#ifdef TCOD_SDL2
 void TCODSystem::getCurrentResolution(int *w, int *h) {
-	TCOD_sys_get_current_resolution(w,h);
+	TCOD_sys_get_current_resolution(w, h);
 }
 
 void TCODSystem::getFullscreenOffsets(int *offx, int *offy) {
-	TCOD_sys_get_fullscreen_offsets(offx,offy);
+	TCOD_sys_get_fullscreen_offsets(offx, offy);
 }
 
 void TCODSystem::updateChar(int asciiCode, int fontx, int fonty,const TCODImage *img,int x,int y) {
@@ -88,8 +96,9 @@ void TCODSystem::updateChar(int asciiCode, int fontx, int fonty,const TCODImage 
 }
 
 void TCODSystem::getCharSize(int *w, int *h) {
-	TCOD_sys_get_char_size(w,h);
+	TCOD_sys_get_char_size(w, h);
 }
+#endif
 
 // filesystem stuff
 bool TCODSystem::createDirectory(const char *path) {
@@ -132,19 +141,20 @@ bool TCODSystem::readFile(const char *filename, unsigned char **buf, size_t *siz
 	return TCOD_sys_read_file(filename,buf,size) != 0;
 }
 
-bool TCODSystem::writeFile(const char *filename, unsigned char *buf, uint32 size) {
+bool TCODSystem::writeFile(const char *filename, unsigned char *buf, uint32_t size) {
 	return TCOD_sys_write_file(filename,buf,size) != 0;
 }
 
+#ifdef TCOD_SDL2
 // clipboard stuff
-void TCODSystem::setClipboard(const char *value) {
-	TCOD_sys_clipboard_set(value);
+bool TCODSystem::setClipboard(const char *value) {
+	return TCOD_sys_clipboard_set(value) != 0;
 }
 
 char *TCODSystem::getClipboard() {
 	return TCOD_sys_clipboard_get();
 }
-
+#endif
 
 // thread stuff
 int TCODSystem::getNumCores() {
@@ -225,5 +235,7 @@ extern "C" void TCOD_CRenderer(void *sdl_surface) {
 }
 void TCODSystem::registerSDLRenderer(ITCODSDLRenderer *renderer) {
 	::renderer = renderer;
+#ifdef TCOD_SDL2
 	TCOD_sys_register_SDL_renderer(TCOD_CRenderer);
+#endif
 }

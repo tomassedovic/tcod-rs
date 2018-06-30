@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -24,11 +24,20 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include <libtcod_portability.h>
+
+#ifdef TCOD_IMAGE_SUPPORT
+
 #include <stdlib.h>
 #include <stdarg.h>
 #include <math.h>
-#include "libtcod.h"
-#include "libtcod_int.h"
+
+#include <image.h>
+#ifdef TCOD_CONSOLE_SUPPORT
+#include <console.h>
+#endif
+#include <libtcod_int.h>
+#include <libtcod_utility.h>
 
 typedef struct {
 	int width,height;
@@ -44,6 +53,28 @@ typedef struct {
 	TCOD_color_t key_color;
 	bool has_key_color;
 } image_data_t;
+
+/*
+Internal libtcod optimisation, direct colour manipulation in the images primary mipmap.
+*/
+TCOD_color_t *TCOD_image_get_colors(TCOD_image_t *image) {
+	image_data_t *img = ((image_data_t *)image);
+	return img->mipmaps[0].buf;
+}
+
+void TCOD_image_get_key_data(TCOD_image_t image, bool *has_key_color, TCOD_color_t *key_color) {
+	image_data_t *img = ((image_data_t *)image);
+	*has_key_color = img->has_key_color;
+	*key_color = img->key_color;
+}
+
+void TCOD_image_invalidate_mipmaps(TCOD_image_t *image) {
+	int i;
+	image_data_t *img = ((image_data_t *)image);
+	for (i = 1; i < img->nb_mipmaps; i++) {
+		img->mipmaps[i].dirty = true;
+	}
+}
 
 static int TCOD_image_get_mipmap_levels(int width, int height) {
 	int curw=width;
@@ -88,6 +119,25 @@ static void TCOD_image_generate_mip(image_data_t *img, int mip) {
 			col->b=b;
 		}
 	}
+}
+
+/*
+Internal way of copying rendering fg/bg color frame data.
+*/
+bool TCOD_image_mipmap_copy_internal(TCOD_image_t srcImage, TCOD_image_t dstImage) {
+	int i;
+	image_data_t *img_src = (image_data_t *)srcImage;
+	image_data_t *img_dst = (image_data_t *)dstImage;
+	if (!img_src->mipmaps || img_src->sys_img || !img_dst->mipmaps || img_dst->sys_img) /* Both internal images. */
+		return false;
+	if (img_src->mipmaps[0].width != img_dst->mipmaps[0].width || img_src->mipmaps[0].height != img_dst->mipmaps[0].height)
+		return false;
+	/* Copy all mipmaps? */
+	img_dst->mipmaps[0].dirty = img_src->mipmaps[0].dirty;
+	memcpy(img_dst->mipmaps[0].buf, img_src->mipmaps[0].buf, sizeof(TCOD_color_t)*(img_src->mipmaps[0].width)*(img_src->mipmaps[0].height));
+	for (i = 1; i < img_src->nb_mipmaps; i++)
+		img_dst->mipmaps[i].dirty = true;
+	return true;
 }
 
 static void TCOD_image_init_mipmaps(image_data_t *img) {
@@ -251,7 +301,9 @@ void TCOD_image_delete_internal(TCOD_image_t image) {
 		free(img->mipmaps);
 	}
 	if ( img->sys_img ) {
+#ifdef TCOD_SDL2
 		TCOD_sys_delete_bitmap(img->sys_img);
+#endif
 	}
 }
 
@@ -271,14 +323,17 @@ bool TCOD_image_is_pixel_transparent(TCOD_image_t image, int x, int y) {
 	return false;
 }
 
+#ifdef TCOD_CONSOLE_SUPPORT
+
 void TCOD_image_blit(TCOD_image_t image, TCOD_console_t console, float x, float y,
 	TCOD_bkgnd_flag_t bkgnd_flag, float scalex, float scaley, float angle) {
 	int width,height;
+	float rx,ry;
 	image_data_t *img=(image_data_t *)image;
 	if ( scalex == 0.0f || scaley == 0.0f || bkgnd_flag == TCOD_BKGND_NONE ) return;
 	TCOD_image_get_size(image,&width,&height);
-	float rx = x - width * 0.5f;
-	float ry = y - height * 0.5f; 
+	rx = x - width * 0.5f;
+	ry = y - height * 0.5f; 
 	if ( scalex == 1.0f && scaley == 1.0f && angle == 0.0f && rx == ((int)rx) && ry == ((int)ry)) {
 		/* clip the image */
 		int ix = (int)(x - width*0.5f);
@@ -381,9 +436,13 @@ TCOD_image_t TCOD_image_from_console(TCOD_console_t console) {
 
 void TCOD_image_refresh_console(TCOD_image_t image, TCOD_console_t console) {
 	image_data_t *img=(image_data_t *)image;
-	TCOD_sys_console_to_bitmap(img->sys_img, TCOD_console_get_width(console), TCOD_console_get_height(console),
-		TCOD_console_get_buf(console),NULL);
+	console = (console?console:TCOD_ctx.root);
+	/* We're copying the state and clearing part of the copy, no need to delete/free. */
+	TCOD_sys_console_to_bitmap(
+		img->sys_img, (TCOD_console_data_t*)console, NULL);
 }
+
+#endif /* TCOD_CONSOLE_SUPPORT */
 
 void TCOD_image_save(TCOD_image_t image, const char *filename) {
 	image_data_t *img=(image_data_t *)image;
@@ -408,6 +467,7 @@ void TCOD_image_set_key_color(TCOD_image_t image, TCOD_color_t key_color) {
 	img->has_key_color=true;
 	img->key_color=key_color;
 }
+
 void TCOD_image_invert(TCOD_image_t image) {
 	int i,mip;
 	int width,height;
@@ -724,6 +784,8 @@ void getPattern(TCOD_color_t desired[4], TCOD_color_t palette[2], int *nbCols, i
 	*ascii=flagToAscii[flag];
 }
 
+#ifdef TCOD_CONSOLE_SUPPORT
+
 void TCOD_image_blit_2x(TCOD_image_t image, TCOD_console_t con, int dx, int dy, int sx, int sy, int w, int h) {
 	TCOD_color_t grid[4];
 	TCOD_color_t cols[2];
@@ -786,19 +848,20 @@ void TCOD_image_blit_2x(TCOD_image_t image, TCOD_console_t con, int dx, int dy, 
 				TCOD_console_set_char(con,conx,cony,' ');
 			} else {
 				if ( ascii >= 0 ) {
-					TCOD_console_set_default_background(con,cols[0]);
-					TCOD_console_set_default_foreground(con,cols[1]);
-					TCOD_console_put_char(con,conx,cony,ascii,TCOD_BKGND_SET);
+					TCOD_console_set_char_background(con,conx,cony,cols[0],TCOD_BKGND_SET);
+					TCOD_console_set_char_foreground(con,conx,cony,cols[1]);
+					TCOD_console_set_char(con,conx,cony,ascii);
 				} else {
 					/* negative ascii code means we need to invert back/fore colors */
-					TCOD_console_set_default_background(con,cols[1]);
-					TCOD_console_set_default_foreground(con,cols[0]);
-					TCOD_console_put_char(con,conx,cony,-ascii,TCOD_BKGND_SET);
+					TCOD_console_set_char_background(con,conx,cony,cols[1],TCOD_BKGND_SET);
+					TCOD_console_set_char_foreground(con,conx,cony,cols[0]);
+					TCOD_console_set_char(con,conx,cony,-ascii);
 				}
 			}
 		}
 	}
 }
 
+#endif /* TCOD_CONSOLE_SUPPORT */
 
-
+#endif /* TCOD_IMAGE_SUPPORT */

@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -24,12 +24,14 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include <wrappers.h>
+
 #include <math.h>
 #include <string.h>
-#include "libtcod.h"
-#include "libtcod_int.h"
 
-#include "wrappers.h"
+#include <console.h>
+#include <libtcod_int.h>
+#include <namegen.h>
 
 #define RED_MASK   0x0000FF
 #define GREEN_MASK 0x00FF00
@@ -82,17 +84,19 @@ void TCOD_color_get_HSV_wrapper(colornum_t c,float * h,
   TCOD_color_get_HSV (int_to_color(c), h, s, v);
 }
 
-float TCOD_color_get_hue_ (colornum_t c) {
+float TCOD_color_get_hue_wrapper (colornum_t c) {
   return TCOD_color_get_hue(int_to_color(c));
 }
 
-float TCOD_color_get_saturation_ (colornum_t c) {
+float TCOD_color_get_saturation_wrapper (colornum_t c) {
   return TCOD_color_get_saturation(int_to_color(c));
 }
 
-float TCOD_color_get_value_ (colornum_t c) {
+float TCOD_color_get_value_wrapper (colornum_t c) {
   return TCOD_color_get_value(int_to_color(c));
 }
+
+#ifdef TCOD_CONSOLE_SUPPORT
 
 colornum_t TCOD_console_get_default_background_wrapper(TCOD_console_t con)
 {
@@ -153,7 +157,7 @@ void TCOD_console_put_char_ex_wrapper(TCOD_console_t con, int x, int y,
                              int_to_color(back));
 }
 
-void TCOD_console_set_fade_wrapper(uint8 val, colornum_t fade)
+void TCOD_console_set_fade_wrapper(uint8_t val, colornum_t fade)
 {
   TCOD_console_set_fade (val, int_to_color(fade));
 }
@@ -161,12 +165,12 @@ void TCOD_console_set_fade_wrapper(uint8 val, colornum_t fade)
 void TCOD_console_fill_background(TCOD_console_t con, int *r, int *g, int *b) {
 	TCOD_console_data_t *dat = con ? (TCOD_console_data_t *)con : TCOD_ctx.root;
 	int i;
-	char_t *curchar=dat->buf;
-	for (i=0; i < dat->w*dat->h; i++) {
-		curchar->back.r=*r;
-		curchar->back.g=*g;
-		curchar->back.b=*b;
-		curchar++;
+	TCOD_color_t *curcolor = TCOD_image_get_colors(dat->bg_colors);
+	for (i = 0; i < dat->w*dat->h; i++) {
+		curcolor->r = *r;
+		curcolor->g = *g;
+		curcolor->b = *b;
+		curcolor++;
 		r++;
 		g++;
 		b++;
@@ -176,12 +180,12 @@ void TCOD_console_fill_background(TCOD_console_t con, int *r, int *g, int *b) {
 void TCOD_console_fill_foreground(TCOD_console_t con, int *r, int *g, int *b) {
 	TCOD_console_data_t *dat = con ? (TCOD_console_data_t *)con : TCOD_ctx.root;
 	int i;
-	char_t *curchar=dat->buf;
-	for (i=0; i < dat->w*dat->h; i++) {
-		curchar->fore.r=*r;
-		curchar->fore.g=*g;
-		curchar->fore.b=*b;
-		curchar++;
+	TCOD_color_t *curcolor = TCOD_image_get_colors(dat->fg_colors);
+	for (i = 0; i < dat->w*dat->h; i++) {
+		curcolor->r = *r;
+		curcolor->g = *g;
+		curcolor->b = *b;
+		curcolor++;
 		r++;
 		g++;
 		b++;
@@ -191,12 +195,8 @@ void TCOD_console_fill_foreground(TCOD_console_t con, int *r, int *g, int *b) {
 void TCOD_console_fill_char(TCOD_console_t con, int *arr) {
 	TCOD_console_data_t *dat = con ? (TCOD_console_data_t *)con : TCOD_ctx.root;
 	int i;
-	char_t *curchar=dat->buf;
-	for (i=0; i < dat->w*dat->h; i++) {
-		curchar->c=*arr;
-		curchar->cf=TCOD_ctx.ascii_to_tcod[*arr];
-		curchar++;
-		arr++;
+	for (i = 0; i < dat->w*dat->h; i++) {
+		dat->ch_array[i] = arr[i];
 	}
 }
 
@@ -215,6 +215,9 @@ void TCOD_console_set_color_control_wrapper(TCOD_colctrl_t con,
 				  int_to_color(back));
 }
 
+#endif /* TCOD_CONSOLE_SUPPORT */
+
+#ifdef TCOD_IMAGE_SUPPORT
 void TCOD_image_clear_wrapper(TCOD_image_t image,
 					  colornum_t color)
 {
@@ -248,6 +251,9 @@ void TCOD_image_set_key_color_wrapper(TCOD_image_t image,
   TCOD_image_set_key_color (image,
 			    int_to_color(key_color));
 }
+#endif /* TCOD_IMAGE_SUPPORT */
+
+#ifdef TCOD_CONSOLE_SUPPORT
 
 bool TCOD_console_check_for_keypress_wrapper (TCOD_key_t *holder, int flags)
 {
@@ -305,7 +311,7 @@ void TCOD_console_print_double_frame(TCOD_console_t con,int x,int y,int w,int h,
 		title = TCOD_console_vsprint(fmt,ap);
 		va_end(ap);
 		title[w-3]=0; /* truncate if needed */
-		xs = x + (w-strlen(title)-2)/2;
+		xs = x + (w-(int)strlen(title)-2)/2;
 		tmp=dat->back; /* swap colors */
 		dat->back=dat->fore;
 		dat->fore=tmp;
@@ -324,11 +330,13 @@ char *TCOD_console_print_return_string(TCOD_console_t con,int x,int y, int rw,
   return msg;
 }
 
+#endif /* TCOD_CONSOLE_SUPPORT */
+
 colornum_t TCOD_parser_get_color_property_wrapper(TCOD_parser_t parser, const char *name) {
 	return color_to_int(TCOD_parser_get_color_property(parser,name));
 }
 
-int TCOD_namegen_get_nb_sets_wrapper() {
+int TCOD_namegen_get_nb_sets_wrapper(void) {
 	TCOD_list_t l=TCOD_namegen_get_sets();
 	int nb = TCOD_list_size(l);
 	TCOD_list_delete(l);
@@ -344,6 +352,7 @@ void TCOD_namegen_get_sets_wrapper(char **sets) {
 	}
 }
 
+#ifdef TCOD_SDL2
 int TCOD_sys_get_current_resolution_x()
 {
   int x, y;
@@ -357,8 +366,11 @@ int TCOD_sys_get_current_resolution_y()
   TCOD_sys_get_current_resolution(&x, &y);
   return y;
 }
+#endif
 
+#ifdef TCOD_CONSOLE_SUPPORT
 void TCOD_console_set_key_color_wrapper (TCOD_console_t con, colornum_t c)
 {
   TCOD_console_set_key_color(con, int_to_color(c));
 }
+#endif

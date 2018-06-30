@@ -1,7 +1,5 @@
 //! Port of line drawing toolkit.
 
-extern crate libc;
-
 use bindings::ffi;
 use bindings::c_int;
 

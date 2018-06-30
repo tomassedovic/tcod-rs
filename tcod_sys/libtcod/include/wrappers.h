@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -27,6 +27,15 @@
 #ifndef WRAPPERS_H
 #define WRAPPERS_H
 
+#include "libtcod_portability.h"
+#include "console_types.h"
+#include "image.h"
+#include "mouse.h"
+#include "parser.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* wrappers to ease other languages integration */
 typedef unsigned int colornum_t;
 
@@ -44,10 +53,11 @@ TCODLIB_API colornum_t TCOD_color_lerp_wrapper(colornum_t c1,
 						 colornum_t c2, float coef);
 TCODLIB_API void TCOD_color_get_HSV_wrapper(colornum_t c,float * h,
 					    float * s, float * v);
-TCODLIB_API float TCOD_color_get_hue_ (colornum_t c);
-TCODLIB_API float TCOD_color_get_saturation_ (colornum_t c);
-TCODLIB_API float TCOD_color_get_value_ (colornum_t c);
+TCODLIB_API float TCOD_color_get_hue_wrapper (colornum_t c);
+TCODLIB_API float TCOD_color_get_saturation_wrapper (colornum_t c);
+TCODLIB_API float TCOD_color_get_value_wrapper(colornum_t c);
 
+#ifdef TCOD_CONSOLE_SUPPORT
 /* console module */
 /* TCODLIB_API void TCOD_console_set_custom_font_wrapper(const char *fontFile,
                         int char_width, int char_height, int nb_char_horiz,
@@ -71,8 +81,8 @@ TCODLIB_API void TCOD_console_set_char_foreground_wrapper(TCOD_console_t con,int
                                       colornum_t col);
 TCODLIB_API void TCOD_console_put_char_ex_wrapper(TCOD_console_t con, int x,
 	int y, int c, colornum_t fore, colornum_t back);
-TCODLIB_API void TCOD_console_set_fade_wrapper(uint8 val, colornum_t fade);
-TCODLIB_API colornum_t TCOD_console_get_fading_color_wrapper();
+TCODLIB_API void TCOD_console_set_fade_wrapper(uint8_t val, colornum_t fade);
+TCODLIB_API colornum_t TCOD_console_get_fading_color_wrapper(void);
 TCODLIB_API void TCOD_console_set_color_control_wrapper(TCOD_colctrl_t con,
 						colornum_t fore,
 						colornum_t back);
@@ -80,8 +90,6 @@ TCODLIB_API bool TCOD_console_check_for_keypress_wrapper(TCOD_key_t *holder,
 							 int flags);
 TCODLIB_API void TCOD_console_wait_for_keypress_wrapper(TCOD_key_t *holder,
 							bool flush);
-TCODLIB_API uint32 TCOD_console_check_for_keypress_bitfield (int flags);
-TCODLIB_API uint32 TCOD_console_wait_for_keypress_bitfield (bool flush);
 TCODLIB_API void TCOD_console_fill_background(TCOD_console_t con, int *r, int *g, int *b);
 TCODLIB_API void TCOD_console_fill_foreground(TCOD_console_t con, int *r, int *g, int *b);
 TCODLIB_API void TCOD_console_fill_char(TCOD_console_t con, int *arr);
@@ -101,8 +109,10 @@ TCODLIB_API char *TCOD_console_print_return_string(TCOD_console_t con,int x,
 						   TCOD_alignment_t align, char *msg,
 						   bool can_split,
 						   bool count_only);
-TCODLIB_API void console_set_key_color_wrapper (TCOD_console_t con, colornum_t c);
+TCODLIB_API void TCOD_console_set_key_color_wrapper (TCOD_console_t con, colornum_t c);
+#endif
 
+#ifdef TCOD_IMAGE_SUPPORT
 /* image module */
 
 TCODLIB_API void TCOD_image_clear_wrapper(TCOD_image_t image,
@@ -115,34 +125,24 @@ TCODLIB_API void TCOD_image_put_pixel_wrapper(TCOD_image_t image,int x, int y,
 				      colornum_t col);
 TCODLIB_API void TCOD_image_set_key_color_wrapper(TCOD_image_t image,
 					  colornum_t key_color);
+#endif
 
+#ifdef TCOD_CONSOLE_SUPPORT
 /* mouse module */
 TCODLIB_API void TCOD_mouse_get_status_wrapper(TCOD_mouse_t *holder);
-TCODLIB_API int TCOD_mouse_get_x();
-TCODLIB_API int TCOD_mouse_get_y();
-TCODLIB_API int TCOD_mouse_get_cx();
-TCODLIB_API int TCOD_mouse_get_cy();
-TCODLIB_API int TCOD_mouse_get_dx();
-TCODLIB_API int TCOD_mouse_get_dy();
-TCODLIB_API int TCOD_mouse_get_dcx();
-TCODLIB_API int TCOD_mouse_get_dcy();
-TCODLIB_API uint32 TCOD_mouse_get_lbutton();
-TCODLIB_API uint32 TCOD_mouse_get_mbutton();
-TCODLIB_API uint32 TCOD_mouse_get_rbutton();
-TCODLIB_API uint32 TCOD_mouse_get_lbutton_pressed();
-TCODLIB_API uint32 TCOD_mouse_get_mbutton_pressed();
-TCODLIB_API uint32 TCOD_mouse_get_rbutton_pressed();
+#endif
 
 /* parser module */
 TCODLIB_API colornum_t TCOD_parser_get_color_property_wrapper(TCOD_parser_t parser, const char *name);
 
 /* namegen module */
-TCODLIB_API int TCOD_namegen_get_nb_sets_wrapper();
+TCODLIB_API int TCOD_namegen_get_nb_sets_wrapper(void);
 TCODLIB_API void TCOD_namegen_get_sets_wrapper(char **sets);
 
 /* sys module */
-TCODLIB_API int TCOD_sys_get_current_resolution_x();
-TCODLIB_API int TCOD_sys_get_current_resolution_y();
-
+TCODLIB_API int TCOD_sys_get_current_resolution_x(void);
+TCODLIB_API int TCOD_sys_get_current_resolution_y(void);
+#ifdef __cplusplus
+}
+#endif
 #endif	/* WRAPPERS_H */
-

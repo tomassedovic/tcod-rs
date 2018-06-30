@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -24,7 +24,7 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "libtcod.hpp"
+#include <zip.hpp>
 
 TCODZip::TCODZip() {
 	data=TCOD_zip_new();
@@ -62,13 +62,17 @@ void TCODZip::putColor(const TCODColor *val) {
 	TCOD_zip_put_color(data,col);
 }
 
+#ifdef TCOD_IMAGE_SUPPORT
 void TCODZip::putImage(const TCODImage *val) {
 	TCOD_zip_put_image(data,val->data);
 }
+#endif
 
+#ifdef TCOD_CONSOLE_SUPPORT
 void TCODZip::putConsole(const TCODConsole *val) {
 	TCOD_zip_put_console(data,val->data);
 }
+#endif
 
 int TCODZip::saveToFile(const char *filename) {
 	return TCOD_zip_save_to_file(data,filename);
@@ -102,22 +106,26 @@ TCODColor TCODZip::getColor() {
 	return TCODColor(TCOD_zip_get_color(data));
 }
 
+#ifdef TCOD_IMAGE_SUPPORT
 TCODImage *TCODZip::getImage() {
 	return new TCODImage(TCOD_zip_get_image(data));
 }
+#endif
 
+#ifdef TCOD_CONSOLE_SUPPORT
 TCODConsole *TCODZip::getConsole() {
 	return new TCODConsole(TCOD_zip_get_console(data));
 }
+#endif
 
-uint32 TCODZip::getCurrentBytes() const {
+uint32_t TCODZip::getCurrentBytes() const {
 	return TCOD_zip_get_current_bytes(data);
 }
 
-uint32 TCODZip::getRemainingBytes() const {
+uint32_t TCODZip::getRemainingBytes() const {
 	return TCOD_zip_get_remaining_bytes(data);
 }
 
-void TCODZip::skipBytes(uint32 nbBytes) {
+void TCODZip::skipBytes(uint32_t nbBytes) {
 	TCOD_zip_skip_bytes(data,nbBytes);
 }

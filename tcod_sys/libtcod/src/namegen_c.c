@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -28,12 +28,14 @@
 * Mingos' NameGen
 * This file was written by Dominik "Mingos" Marczuk.
 */
+#include <namegen.h>
 
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
-#include "libtcod.h"
+
+#include <parser.h>
 
 /* ------------ *
  * the typedefs *
@@ -414,9 +416,9 @@ void namegen_word_prune_spaces (char * str) {
 /* prune repeated "syllables", such as Arnarn */
 bool namegen_word_prune_syllables (char *str) {
     char * data = TCOD_strdup(str);
-    int len = strlen(data); /* length of the string */
+    size_t len = strlen(data); /* length of the string */
     char check[8];
-    int i; /* iteration in for loops */
+    size_t i; /* iteration in for loops */
     /* change to lowercase */
     for (i = 0; i < len; i++) data[i] = (char)(tolower(data[i]));
     /* start pruning */

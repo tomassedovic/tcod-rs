@@ -1,6 +1,6 @@
 /*
-* libtcod 1.5.2
-* Copyright (c) 2008,2009,2010,2012 Jice & Mingos
+* libtcod 1.6.3
+* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +13,10 @@
 *     * The name of Jice or Mingos may not be used to endorse or promote products
 *       derived from this software without specific prior written permission.
 *
-* THIS SOFTWARE IS PROVIDED BY JICE AND MINGOS ``AS IS'' AND ANY
+* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE OR MINGOS BE LIABLE FOR ANY
+* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
 * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -24,11 +24,16 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include <txtfield.h>
+
+#ifdef TCOD_CONSOLE_SUPPORT
 
 #include <stdlib.h>
 #include <string.h>
-#include "libtcod.h"
-#include "libtcod_int.h"
+
+#include <console.h>
+#include <libtcod_int.h>
+#include <libtcod_utility.h>
 
 #define MAX_INT 0x7FFFFFFF
 
@@ -582,7 +587,7 @@ bool TCOD_text_update (TCOD_text_t txt, TCOD_key_t key) {
 /* renders the textfield */
 void TCOD_text_render (TCOD_text_t txt, TCOD_console_t con) {
     text_t * data = (text_t*)txt;
-    uint32 time;
+    uint32_t time;
 	bool cursor_on;
 	char back=0;
 	int curx,cury,cursorx,cursory, curpos;
@@ -664,6 +669,9 @@ void TCOD_text_reset (TCOD_text_t txt) {
     TCOD_IFNOT(data && data->con ) return;
     memset(data->text,'\0',data->len);
     data->curlen = 0;
+    data->cursor_pos = 0;
+	data->sel_start = MAX_INT;
+	data->sel_end = -1;
     data->input_continue = true;
 }
 
@@ -676,3 +684,5 @@ void TCOD_text_delete (TCOD_text_t txt) {
     TCOD_console_delete(data->con);
     free(data);
 }
+
+#endif /* TCOD_CONSOLE_SUPPORT */
