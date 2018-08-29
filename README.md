@@ -102,6 +102,17 @@ on your distro.
 
 You can also check the [official libtcod build instructions for Linux](http://roguecentral.org/doryen/data/libtcod/doc/1.5.2/html2/compile_libtcod_linux.html?c=true).
 
+#### Building a dynamic library
+
+By default, `tcod-rs` will build the library statically on Linux as including
+the code into the executable is usually more convenient. To build a dynamic
+library specify the `dynlib` feature for `tcod_sys` in `Cargo.toml`
+
+```
+[dependencies.tcod_sys]
+version = "..."
+features = ["dynlib"]
+```
 
 ### Building on Windows (with MSVC)
 

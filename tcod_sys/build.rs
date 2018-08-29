@@ -45,6 +45,71 @@ fn compile_config(config: cc::Build) {
 }
 
 
+/// Build static libtcod for Linux
+#[cfg(not(feature = "dynlib"))]
+fn build_linux_static(_dst: &Path, libtcod_sources: &[& 'static str]) {
+    // Tell rust to link the produced library
+    // It is important to specify this first, so that the library will be linked
+    // before SDL2, as the link order matters for static libraries
+    println!("cargo:rustc-link-lib=static=tcod");
+    let mut config = cc::Build::new();
+    // Add dependencies
+    for include_path in &pkg_config::find_library("sdl2").unwrap().include_paths {
+        config.include(include_path);
+    }
+    // Build the library
+    config.define("TCOD_SDL2", None);
+    config.define("NO_OPENGL", None);
+    config.define("NDEBUG", None);
+    config.flag("-fno-strict-aliasing");
+    config.flag("-ansi");
+    build_libtcod_objects(config, libtcod_sources);
+}
+
+
+/// Build dynamic libtcod for Linux
+#[cfg(feature = "dynlib")]
+fn build_linux_dynamic(dst: &Path, libtcod_sources: &[& 'static str]) {
+    // Build the *.o files:
+    {
+        let mut config = cc::Build::new();
+        for include_path in &pkg_config::find_library("sdl2").unwrap().include_paths {
+            config.include(include_path);
+        }
+        config.define("TCOD_SDL2", None);
+        config.define("NO_OPENGL", None);
+        config.define("NDEBUG", None);
+        config.flag("-fno-strict-aliasing");
+        config.flag("-ansi");
+        build_libtcod_objects(config, libtcod_sources);
+    }
+
+    // Build the DLL
+    let mut config = cc::Build::new();
+    config.define("TCOD_SDL2", None);
+    config.define("NO_OPENGL", None);
+    config.define("NDEBUG", None);
+    config.flag("-shared");
+    config.flag("-Wl,-soname,libtcod.so");
+    config.flag("-o");
+    config.flag(dst.join("libtcod.so").to_str().unwrap());
+    for c_file in libtcod_sources {
+        config.flag(dst.join(c_file).with_extension("o").to_str().unwrap());
+    }
+    config.flag(dst.join("libz.a").to_str().unwrap());
+    config.flag("-lSDL2");
+    config.flag("-lX11");
+    config.flag("-lm");
+    config.flag("-ldl");
+    config.flag("-lpthread");
+
+    compile_config(config);
+    assert!(dst.join("libtcod.so").is_file());
+
+    pkg_config::find_library("x11").unwrap();
+}
+
+
 fn main() {
     let is_crater = option_env!("CRATER_TASK_TYPE");
 
@@ -115,43 +180,10 @@ fn main() {
     if target.contains("linux") {
         build_libz(libz_sources);
 
-        // Build the *.o files:
-        {
-            let mut config = cc::Build::new();
-            for include_path in &pkg_config::find_library("sdl2").unwrap().include_paths {
-                config.include(include_path);
-            }
-            config.define("TCOD_SDL2", None);
-            config.define("NO_OPENGL", None);
-            config.define("NDEBUG", None);
-            config.flag("-fno-strict-aliasing");
-            config.flag("-ansi");
-            build_libtcod_objects(config, libtcod_sources);
-        }
-
-        // Build the DLL
-        let mut config = cc::Build::new();
-        config.define("TCOD_SDL2", None);
-        config.define("NO_OPENGL", None);
-        config.define("NDEBUG", None);
-        config.flag("-shared");
-        config.flag("-Wl,-soname,libtcod.so");
-        config.flag("-o");
-        config.flag(dst.join("libtcod.so").to_str().unwrap());
-        for c_file in libtcod_sources {
-            config.flag(dst.join(c_file).with_extension("o").to_str().unwrap());
-        }
-        config.flag(dst.join("libz.a").to_str().unwrap());
-        config.flag("-lSDL2");
-        config.flag("-lX11");
-        config.flag("-lm");
-        config.flag("-ldl");
-        config.flag("-lpthread");
-
-        compile_config(config);
-        assert!(dst.join("libtcod.so").is_file());
-
-        pkg_config::find_library("x11").unwrap();
+        #[cfg(not(feature = "dynlib"))]
+        build_linux_static(&dst, libtcod_sources);
+        #[cfg(feature = "dynlib")]
+        build_linux_dynamic(&dst, libtcod_sources);
 
     } else if target.contains("darwin") {
         build_libz(libz_sources);

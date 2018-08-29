@@ -16,6 +16,9 @@ exclude = [
 name = "tcod_sys"
 path = "lib.rs"
 
+[features]
+dynlib = []
+
 [build-dependencies]
 cc = "1.0"
 pkg-config = "0.3"
