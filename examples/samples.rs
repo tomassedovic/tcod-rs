@@ -1,5 +1,4 @@
 extern crate tcod;
-extern crate tcod_sys as ffi;
 extern crate rand;
 
 use tcod::console::*;
