@@ -106,7 +106,7 @@ impl<'a> Bsp<'a> {
                            max_h_ratio: f32,
                            max_v_ratio: f32) {
         let mut rnd = if let Some(&mut r) = randomizer {
-            *r.as_native()
+            *r.as_native_mut()
         } else {
             ptr::null()
         };
