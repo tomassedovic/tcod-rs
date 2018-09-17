@@ -1,6 +1,9 @@
 use bindings::ffi::{self, TCOD_fov_algorithm_t};
 use bindings::{AsNative, c_bool};
 
+unsafe impl Sync for Map {}
+unsafe impl Send for Map {}
+
 pub struct Map {
     tcod_map: ffi::TCOD_map_t,
 }
