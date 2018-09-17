@@ -11,6 +11,7 @@ pub type c_bool = c_uchar;
 
 pub trait AsNative<T> {
     unsafe fn as_native(&self) -> &T;
+    unsafe fn as_native_mut(&mut self) -> &mut T;
 }
 
 pub trait FromNative<T> {
