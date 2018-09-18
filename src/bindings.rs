@@ -22,11 +22,19 @@ impl<'a, T, U: AsNative<T> + ?Sized> AsNative<T> for &'a U {
     unsafe fn as_native(&self) -> &T {
         (**self).as_native()
     }
+    
+    unsafe fn as_native_mut(&mut self) -> &mut T {
+        (**self).as_native_mut()
+    }
 }
 
 impl <T, U: AsNative<T> + ?Sized> AsNative<T> for Box<U> {
     unsafe fn as_native(&self) -> &T {
         (**self).as_native()
+    }
+    
+    unsafe fn as_native_mut(&mut self) -> &mut T {
+        (**self).as_native_mut()
     }
 }
 
