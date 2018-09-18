@@ -63,7 +63,8 @@ impl<'a> AStar<'a> {
 
     pub fn new_from_map(map: Map, diagonal_cost: f32) -> AStar<'static> {
         let tcod_path = unsafe {
-            ffi::TCOD_path_new_using_map(*map.as_native(), diagonal_cost)
+            let tcod_map = *map.as_native().lock().unwrap();
+            ffi::TCOD_path_new_using_map(tcod_map, diagonal_cost)
         };
         let (w, h) = map.size();
         AStar {
@@ -207,7 +208,8 @@ impl<'a> Dijkstra<'a> {
 
     pub fn new_from_map(map: Map, diagonal_cost: f32) -> Dijkstra<'static> {
         let tcod_path = unsafe {
-            ffi::TCOD_dijkstra_new(*map.as_native(), diagonal_cost)
+            let tcod_map = *map.as_native().lock().unwrap();
+            ffi::TCOD_dijkstra_new(tcod_map, diagonal_cost)
         };
         let (w, h) = map.size();
         Dijkstra {
