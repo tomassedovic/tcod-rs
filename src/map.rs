@@ -1,3 +1,4 @@
+use std::sync::{Arc, Mutex};
 use bindings::ffi::{self, TCOD_fov_algorithm_t};
 use bindings::{AsNative, c_bool};
 
@@ -5,11 +6,12 @@ unsafe impl Sync for Map {}
 unsafe impl Send for Map {}
 
 pub struct Map {
-    tcod_map: ffi::TCOD_map_t,
+    tcod_map: Arc<Mutex<ffi::TCOD_map_t>>,
 }
 
-impl AsNative<ffi::TCOD_map_t> for Map {
-    unsafe fn as_native(&self) -> &ffi::TCOD_map_t {
+
+impl AsNative<Arc<Mutex<ffi::TCOD_map_t>>> for Map {
+    unsafe fn as_native(&self) -> &Arc<Mutex<ffi::TCOD_map_t>> {
         &self.tcod_map
     }
 }
@@ -18,14 +20,15 @@ impl Map {
     pub fn new(width: i32, height: i32) -> Map {
         assert!(width > 0 && height > 0);
         unsafe {
-            Map{tcod_map: ffi::TCOD_map_new(width, height)}
+            Map{tcod_map: Arc::new(Mutex::new(ffi::TCOD_map_new(width, height)))}
         }
     }
 
     pub fn size(&self) -> (i32, i32) {
         unsafe {
-            (ffi::TCOD_map_get_width(self.tcod_map),
-             ffi::TCOD_map_get_height(self.tcod_map))
+            let tcod_map = *self.tcod_map.lock().unwrap();
+            (ffi::TCOD_map_get_width(tcod_map),
+             ffi::TCOD_map_get_height(tcod_map))
         }
     }
 
@@ -34,7 +37,8 @@ impl Map {
         let (width, height) = self.size();
         assert!(x < width && y < height);
         unsafe {
-            ffi::TCOD_map_set_properties(self.tcod_map, x, y,
+            let tcod_map = *self.tcod_map.lock().unwrap();
+            ffi::TCOD_map_set_properties(tcod_map, x, y,
                                          transparent as c_bool,
                                          walkable as c_bool);
         }
@@ -44,7 +48,8 @@ impl Map {
                        light_walls: bool, algo: FovAlgorithm) {
         assert!(origin_x >= 0 && origin_y >= 0);
         unsafe {
-            ffi::TCOD_map_compute_fov(self.tcod_map, origin_x, origin_y, max_radius,
+            let tcod_map = *self.tcod_map.lock().unwrap();
+            ffi::TCOD_map_compute_fov(tcod_map, origin_x, origin_y, max_radius,
                                      light_walls as c_bool,
                                      algo.into());
         }
@@ -55,7 +60,8 @@ impl Map {
         let (width, height) = self.size();
         assert!(x < width && y < height);
         unsafe {
-            ffi::TCOD_map_is_in_fov(self.tcod_map, x, y) != 0
+            let tcod_map = *self.tcod_map.lock().unwrap();
+            ffi::TCOD_map_is_in_fov(tcod_map, x, y) != 0
         }
     }
 
@@ -63,22 +69,25 @@ impl Map {
         assert!(x >= 0 && y >= 0);
         let (width, height) = self.size();
         assert!(x < width && y < height);
+        let tcod_map = *self.tcod_map.lock().unwrap();
         unsafe {
-            ffi::TCOD_map_is_walkable(self.tcod_map, x, y) != 0
+            ffi::TCOD_map_is_walkable(tcod_map, x, y) != 0
         }
     }
     
     pub fn clear(&mut self, transparent: bool, walkable: bool) {
         unsafe {
-            ffi::TCOD_map_clear(self.tcod_map, transparent as c_bool, walkable as c_bool);
+            let tcod_map = *self.tcod_map.lock().unwrap();
+            ffi::TCOD_map_clear(tcod_map, transparent as c_bool, walkable as c_bool);
         }
     }
 }
 
 impl Drop for Map {
     fn drop(&mut self) {
+        let tcod_map = *self.tcod_map.lock().unwrap();
         unsafe {
-            ffi::TCOD_map_delete(self.tcod_map)
+            ffi::TCOD_map_delete(tcod_map)
         }
     }
 }
