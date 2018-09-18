@@ -177,6 +177,10 @@ impl<'a> AsNative<ffi::TCOD_path_t> for Dijkstra<'a> {
     unsafe fn as_native(&self) -> &ffi::TCOD_dijkstra_t {
         &self.tcod_path
     }
+    
+    unsafe fn as_native_mut(&mut self) -> &mut ffi::TCOD_dijkstra_t {
+        &mut self.tcod_path
+    }
 }
 
 impl<'a> Drop for Dijkstra<'a> {
