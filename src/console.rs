@@ -1092,7 +1092,7 @@ impl AsNative<ffi::TCOD_console_t> for Root {
     }
     
     unsafe fn as_native_mut(&mut self) -> &mut ffi::TCOD_console_t {
-        &mut ROOT_ID.id
+        unimplemented!();
     }
 }
 

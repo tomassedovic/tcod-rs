@@ -24,7 +24,7 @@ impl<'a, T, U: AsNative<T> + ?Sized> AsNative<T> for &'a U {
     }
     
     unsafe fn as_native_mut(&mut self) -> &mut T {
-        (**self).as_native_mut()
+        unimplemented!();
     }
 }
 

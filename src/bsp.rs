@@ -99,20 +99,20 @@ impl<'a> Bsp<'a> {
     }
 
     pub fn split_recursive(&mut self,
-                           randomizer: Option<&mut Rng>,
+                           mut randomizer: Option<&mut Rng>,
                            nb: i32,
                            min_h_size: i32,
                            min_v_size: i32,
                            max_h_ratio: f32,
                            max_v_ratio: f32) {
-        let mut rnd = if let Some(&mut r) = randomizer {
+        let rnd = unsafe { if let Some(ref mut r) = randomizer {
             *r.as_native_mut()
         } else {
             ptr::null()
-        };
+        } };
         unsafe {
             ffi::TCOD_bsp_split_recursive(self.bsp as *mut ffi::TCOD_bsp_t,
-                                          rnd,
+                                          rnd as *mut _,
                                           nb,
                                           min_h_size,
                                           min_v_size,
