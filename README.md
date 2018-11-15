@@ -15,7 +15,7 @@ useful functionality such as:
 
 
 This project provides [Rust](http://www.rust-lang.org/) bindings for libtcod
-v1.5.2.
+v1.6.3.
 
 This project follows [Semantic Versioning](http://semver.org/). Since we're
 under `1.0.0` anything goes. The API can change at any time.
