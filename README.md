@@ -34,7 +34,7 @@ http://tomassedovic.github.io/tcod-rs/tcod/index.html
 But that's mostly useful for types, function signatures, etc. We don't have much
 in term of actual docs, but you can always check the official ones:
 
-http://roguecentral.org/doryen/data/libtcod/doc/1.5.1/index2.html?c=true
+https://libtcod.readthedocs.io/en/stable/
 
 
 Current status
