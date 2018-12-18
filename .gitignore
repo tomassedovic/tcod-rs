@@ -29,3 +29,4 @@ watch.sh
 /tcod_sys/target/
 !/tcod_sys/libtcod/SDL*.dll
 !/tcod_sys/libtcod/dependencies/**
+.vscode/tasks.json

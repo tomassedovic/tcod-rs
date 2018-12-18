@@ -9,6 +9,10 @@ impl AsNative<ffi::TCOD_map_t> for Map {
     unsafe fn as_native(&self) -> &ffi::TCOD_map_t {
         &self.tcod_map
     }
+    
+    unsafe fn as_native_mut(&mut self) -> &mut ffi::TCOD_map_t {
+        &mut self.tcod_map
+    }
 }
 
 impl Map {

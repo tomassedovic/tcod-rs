@@ -103,6 +103,10 @@ impl AsNative<ffi::TCOD_random_t> for Rng {
     unsafe fn as_native(&self) -> &ffi::TCOD_random_t {
         &self.tcod_random
     }
+    
+    unsafe fn as_native_mut(&mut self) -> &mut ffi::TCOD_random_t {
+        &mut self.tcod_random
+    }
 }
 
 impl Drop for Rng {

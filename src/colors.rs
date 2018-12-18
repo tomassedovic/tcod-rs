@@ -14,6 +14,10 @@ impl AsNative<ffi::TCOD_color_t> for Color {
     unsafe fn as_native(&self) -> &ffi::TCOD_color_t {
         ::std::mem::transmute(self)
     }
+    
+    unsafe fn as_native_mut(&mut self) -> &mut ffi::TCOD_color_t {
+        ::std::mem::transmute(self)
+    }
 }
 
 impl FromNative<ffi::TCOD_color_t> for Color {

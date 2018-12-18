@@ -1090,11 +1090,19 @@ impl AsNative<ffi::TCOD_console_t> for Root {
     unsafe fn as_native(&self) -> &ffi::TCOD_console_t {
         &ROOT_ID.id
     }
+    
+    unsafe fn as_native_mut(&mut self) -> &mut ffi::TCOD_console_t {
+        unimplemented!();
+    }
 }
 
 impl AsNative<ffi::TCOD_console_t> for Offscreen {
     unsafe fn as_native(&self) -> &ffi::TCOD_console_t {
         &self.con
+    }
+    
+    unsafe fn as_native_mut(&mut self) -> &mut ffi::TCOD_console_t {
+        &mut self.con
     }
 }
 

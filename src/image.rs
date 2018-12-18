@@ -16,6 +16,10 @@ impl AsNative<ffi::TCOD_image_t> for Image {
     unsafe fn as_native(&self) -> &ffi::TCOD_image_t {
         &self.tcod_image
     }
+    
+    unsafe fn as_native_mut(&mut self) -> &mut ffi::TCOD_image_t {
+        &mut self.tcod_image
+    }
 }
 
 impl FromNative<ffi::TCOD_image_t> for Image {
