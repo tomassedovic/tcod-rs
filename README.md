@@ -92,7 +92,7 @@ tcod = "0.13"
 Run the equivalent of:
 
 ```sh
-$ sudo apt-get install gcc g++ make libsdl1.2-dev
+$ sudo apt-get install gcc g++ make libsdl2-dev
 $ cd yourgame
 $ cargo build --release
 $ cargo run --release
