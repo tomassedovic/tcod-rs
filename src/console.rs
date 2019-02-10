@@ -128,6 +128,10 @@ impl Offscreen {
 
 }
 
+// ! libtcod is not thread-safe, this may have some side effects but none have been seen yet
+// ! This is primary so that Offscreen consoles can be used as specs resources
+unsafe impl Send for Offscreen {}
+
 /// The console representing the main window of the application
 ///
 /// This is the only console type capable of handling user input and flushing its contents onto the screen.
