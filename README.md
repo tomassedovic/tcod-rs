@@ -150,7 +150,7 @@ cargo run --release
 2. Run:
 
 ```sh
-$ brew install pkg-config sdl
+$ brew install pkg-config sdl2
 $ cd yourgame
 $ cargo build --release
 $ cargo run --release
