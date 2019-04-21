@@ -1,7 +1,7 @@
 libtcod bindings for Rust [![Build Status](https://travis-ci.org/tomassedovic/tcod-rs.svg?branch=master)](https://travis-ci.org/tomassedovic/tcod-rs)
 -------------------------
 
-[libtcod a.k.a. "The Doryen Library"](http://roguecentral.org/doryen/libtcod/)
+[libtcod a.k.a. "The Doryen Library"](https://bitbucket.org/libtcod/libtcod)
 is a smallish library designed for writing roguelikes. It provides a bunch of
 useful functionality such as:
 
@@ -11,7 +11,7 @@ useful functionality such as:
 * Path finding
 * Field of view
 * Portable (works on linux, windows and mac)
-* [Lots of other stuff](http://roguecentral.org/doryen/libtcod/features/)
+* [Lots of other stuff](https://bitbucket.org/libtcod/libtcod/wiki/Features)
 
 
 This project provides [Rust](http://www.rust-lang.org/) bindings for libtcod
@@ -100,8 +100,6 @@ $ cargo run --release
 
 on your distro.
 
-You can also check the [official libtcod build instructions for Linux](http://roguecentral.org/doryen/data/libtcod/doc/1.5.2/html2/compile_libtcod_linux.html?c=true).
-
 #### Building a dynamic library
 
 By default, `tcod-rs` will build the library statically on Linux as including
@@ -145,8 +143,6 @@ cargo build --release
 cargo run --release
 ```
 
-You can also check the [official libtcod build instructions for Windows](http://roguecentral.org/doryen/data/libtcod/doc/1.5.2/html2/compile_libtcod_mingw.html?c=true).
-
 
 ### Building on Mac OS X
 
@@ -154,7 +150,7 @@ You can also check the [official libtcod build instructions for Windows](http://
 2. Run:
 
 ```sh
-$ brew install pkg-config sdl
+$ brew install pkg-config sdl2
 $ cd yourgame
 $ cargo build --release
 $ cargo run --release
@@ -189,7 +185,7 @@ Contributing
 ------------
 
 The raw bindings were generated using
-[rust-bindgen](https://github.com/crabtw/rust-bindgen) and are located at
+[rust-bindgen](https://github.com/rust-lang/rust-bindgen) and are located at
 `src/ffi.rs`. The safe (hopefully?) wrapper was built on top of them at
 `src/lib.rs`.
 
