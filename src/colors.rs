@@ -27,12 +27,8 @@ impl FromNative<ffi::TCOD_color_t> for Color {
 }
 
 impl Color {
-    pub fn new(r: u8, g: u8, b: u8) -> Color {
-        Color {
-            r: r,
-            g: g,
-            b: b,
-        }
+    pub const fn new(r: u8, g: u8, b: u8) -> Color {
+        Color { r, g, b }
     }
 
     pub fn new_from_hsv(h: f32, s: f32, v: f32) -> Color {
