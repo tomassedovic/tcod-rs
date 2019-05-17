@@ -76,6 +76,19 @@ impl Map {
     }
 }
 
+impl Clone for Map {
+    fn clone(&self) -> Self {
+        let (width, height) = self.size();
+        let new_map = Map::new(width, height);
+
+        unsafe {
+            ffi::TCOD_map_copy(*self.as_native(), *new_map.as_native());
+        }
+
+        new_map
+    }
+}
+
 impl Drop for Map {
     fn drop(&mut self) {
         unsafe {
