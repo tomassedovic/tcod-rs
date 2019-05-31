@@ -133,7 +133,7 @@ impl ColorsSample {
         for x in 0..SAMPLE_SCREEN_WIDTH {
             for y in 0..SAMPLE_SCREEN_HEIGHT {
                 let mut col = console.get_char_background(x, y);
-                col = colors::lerp(col, colors::BLACK, 0.5);
+                col = colors::lerp(col, Color::BLACK, 0.5);
                 // use colored character 255 on first and last lines
                 let c = if y == 0 || y == SAMPLE_SCREEN_HEIGHT-1 {
                     '\u{00ff}'
@@ -167,7 +167,7 @@ impl Render for ColorsSample {
 
         console.set_default_foreground(text_color);
         // the background behind the text is slightly darkened using the Multiply flag
-        console.set_default_background(colors::GREY);
+        console.set_default_background(Color::GREY);
         console.print_rect_ex(SAMPLE_SCREEN_WIDTH/2, 5, SAMPLE_SCREEN_WIDTH-2, SAMPLE_SCREEN_HEIGHT-1,
                               BackgroundFlag::Multiply, TextAlignment::Center,
                               "The Doryen library uses 24 bits colors, for both background and foreground.");
@@ -291,7 +291,7 @@ fn seconds_from_duration(duration: Duration) -> f32 {
 impl Render for LineSample {
     fn initialize(&mut self, console: &mut Offscreen) {
         system::set_fps(30);
-        console.set_default_foreground(colors::WHITE);
+        console.set_default_foreground(Color::WHITE);
     }
 
     fn render(&mut self,
@@ -331,7 +331,7 @@ impl Render for LineSample {
         let line = Line::new((xo, yo), (xd, yd));
         for (x, y) in line {
             if x >= 0 && y >=0 && x < SAMPLE_SCREEN_WIDTH && y < SAMPLE_SCREEN_HEIGHT {
-                console.set_char_background(x, y, colors::LIGHT_BLUE, self.bk_flag);
+                console.set_char_background(x, y, Color::LIGHT_BLUE, self.bk_flag);
             }
         }
 
@@ -490,13 +490,13 @@ impl NoiseSample {
     }
 
     fn draw_rectangle(&self, console: &mut Offscreen) {
-        console.set_default_background(colors::GREY);
+        console.set_default_background(Color::GREY);
         let height = if self.func as u32 <= NoiseType::Wavelet as u32 {10} else {13};
         console.rect(2, 2, 23, height, false, BackgroundFlag::Multiply);
         for y in 2..(2+height) {
             for x in 2..25 {
                 let old_col = console.get_char_foreground(x, y);
-                let color = old_col * colors::GREY;
+                let color = old_col * Color::GREY;
                 console.set_char_foreground(x, y, color);
             }
         }
@@ -505,17 +505,17 @@ impl NoiseSample {
     fn draw_menu(&self, console: &mut Offscreen) {
         for cur_func in NoiseFunction::iter() {
             if self.func == cur_func {
-                console.set_default_foreground(colors::WHITE);
-                console.set_default_background(colors::LIGHT_BLUE);
+                console.set_default_foreground(Color::WHITE);
+                console.set_default_background(Color::LIGHT_BLUE);
                 console.print_ex(2, 2 + cur_func as i32, BackgroundFlag::Set, TextAlignment::Left,
                                  FUNC_NAMES[cur_func as usize]);
             } else {
-                console.set_default_foreground(colors::GREY);
+                console.set_default_foreground(Color::GREY);
                 console.print(2, 2 + cur_func as i32, FUNC_NAMES[cur_func as usize]);
             }
         }
 
-        console.set_default_foreground(colors::WHITE);
+        console.set_default_foreground(Color::WHITE);
         console.print(2, 11, format!("Y/H : zoom({:2.1})", self.zoom));
         if self.func > NoiseFunction::Wavelet {
             console.print(2, 12, format!("E/D : hurst ({:2.1})", self.hurst));
@@ -620,13 +620,13 @@ impl FovSample {
     }
 
     fn display_help(&self, console: &mut Offscreen) {
-        console.set_default_foreground(colors::WHITE);
+        console.set_default_foreground(Color::WHITE);
         console.print(1, 0,
                       format!("IJKL : move around\nT : torch fx {}\nW : light walls {}\n+-: algo {:11?}",
                               if self.torch { "on " } else { "off" },
                               if self.light_walls { "on "  } else { "off" },
                               self.algorithm));
-        console.set_default_foreground(colors::BLACK);
+        console.set_default_foreground(Color::BLACK);
     }
 
     fn display_map(&mut self, console: &mut Offscreen, dx: f32, dy: f32, di: f32) {
@@ -933,7 +933,7 @@ impl<'a> Render for PathSample<'a> {
         // during the player movement, only the @ is redrawn.
         // the rest impacts only the background color
         // draw the help text & player @
-        console.set_default_foreground(colors::WHITE);
+        console.set_default_foreground(Color::WHITE);
         console.put_char(self.dx, self.dy, '+', BackgroundFlag::None);
         console.put_char(self.px, self.py, '@', BackgroundFlag::None);
         console.print(1, 1, "IJKL / mouse :\nmove destination\nTAB : A*/dijkstra");
@@ -1212,7 +1212,7 @@ impl<'a> Render for BspSample<'a> {
         }
 
         console.clear();
-        console.set_default_foreground(colors::WHITE);
+        console.set_default_foreground(Color::WHITE);
         console.print(1, 1, format!("ENTER : rebuild bsp\nSPACE : rebuild dungeon\n+-: bsp depth {}\n*/: room size {}\n1 : random room size {}",
                                     self.bsp_depth,
                                     self.min_room_size,
@@ -1289,7 +1289,7 @@ impl ImageSample {
             blue: colors::Color::new(0, 0, 255),
             green: colors::Color::new(0, 255, 0),
         };
-        i.img.set_key_color(colors::BLACK);
+        i.img.set_key_color(Color::BLACK);
         i
     }
 }
@@ -1303,7 +1303,7 @@ impl Render for ImageSample {
               console: &mut Offscreen,
               _root: &Root,
               _event: Option<(EventFlags, Event)>) {
-        console.set_default_background(colors::BLACK);
+        console.set_default_background(Color::BLACK);
         console.clear();
 
         let elapsed_seconds = seconds_from_duration(system::get_elapsed_time());
@@ -1319,7 +1319,7 @@ impl Render for ImageSample {
         if elapsed % 2 != 0 {
             // split the color channels of circle.png
             // the red channel
-            console.set_default_background(colors::RED);
+            console.set_default_background(Color::RED);
             console.rect(0, 3, 15, 15, false, BackgroundFlag::Set);
             image::blit_rect(&self.circle, (-1, -1), console, (0, 3), BackgroundFlag::Multiply);
             // the green channel
@@ -1385,8 +1385,8 @@ impl MouseSample {
 impl Render for MouseSample {
     fn initialize(&mut self, console: &mut Offscreen) {
         system::set_fps(30);
-        console.set_default_background(colors::GREY);
-        console.set_default_foreground(colors::LIGHT_YELLOW);
+        console.set_default_background(Color::GREY);
+        console.set_default_foreground(Color::LIGHT_YELLOW);
         move_cursor(320, 200);
         show_cursor(true)
     }
@@ -1458,9 +1458,9 @@ impl NameSample {
     }
 
     fn display_names(&self, console: &mut Offscreen) {
-        console.set_default_background(colors::LIGHT_BLUE);
+        console.set_default_background(Color::LIGHT_BLUE);
         console.clear();
-        console.set_default_foreground(colors::WHITE);
+        console.set_default_foreground(Color::WHITE);
         console.print(1, 1, format!("{}\n\n+ : next generator\n- : prev generator",
                                     self.sets[self.cur_set]));
         for (i, name) in self.names.iter().enumerate() {
@@ -1664,11 +1664,11 @@ fn main() {
 fn print_samples(root: &mut Root, cur_sample: usize, samples: &[MenuItem]) {
     for (i, sample) in samples.iter().enumerate() {
         if i == cur_sample {
-            root.set_default_foreground(colors::WHITE);
-            root.set_default_background(colors::LIGHT_BLUE);
+            root.set_default_foreground(Color::WHITE);
+            root.set_default_background(Color::LIGHT_BLUE);
         } else {
-            root.set_default_foreground(colors::GREY);
-            root.set_default_background(colors::BLACK);
+            root.set_default_foreground(Color::GREY);
+            root.set_default_background(Color::BLACK);
         }
         let y = 46 - (samples.len() - i);
         let fun = &sample.name;
@@ -1678,7 +1678,7 @@ fn print_samples(root: &mut Root, cur_sample: usize, samples: &[MenuItem]) {
 }
 
 fn print_help_message(root: &mut Root) {
-    root.set_default_foreground(colors::GREY);
+    root.set_default_foreground(Color::GREY);
     root.print_ex(79, 46, BackgroundFlag::None, TextAlignment::Right,
                   format!("last frame : {:3.0} ms ({:3} fps)",
                           system::get_last_frame_length() * 1000.0,

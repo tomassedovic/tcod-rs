@@ -9,7 +9,7 @@ fn main() {
         .init();
 
     while !root.window_closed() {
-        root.set_default_background(tcod::colors::BLACK);
+        root.set_default_background(Color::BLACK);
 
         root.clear();
 
