@@ -1,6 +1,6 @@
 /*
-* libtcod 1.6.3
-* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
+* libtcod
+* Copyright (c) 2008-2018 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -10,8 +10,9 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote products
-*       derived from this software without specific prior written permission.
+*     * The name of Jice or Mingos may not be used to endorse or promote
+*       products derived from this software without specific prior written
+*       permission.
 *
 * THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -70,13 +71,6 @@ char *strcasestr (const char *haystack, const char *needle) {
 	}
 
 	return 0;
-}
-#endif
-
-#ifdef TCOD_SDL2
-void TCOD_sys_get_fullscreen_offsets(int *offx, int *offy) {
-	if ( offx ) *offx = TCOD_ctx.fullscreen_offsetx;
-	if ( offy ) *offy = TCOD_ctx.fullscreen_offsety;
 }
 #endif
 
@@ -521,8 +515,12 @@ void TCOD_condition_delete( TCOD_cond_t pcond) {
 #endif
 }
 
-#ifdef TCOD_BARE
-
+#ifndef TCOD_BARE
+void TCOD_sys_get_fullscreen_offsets(int *offx, int *offy) {
+	if ( offx ) *offx = TCOD_ctx.fullscreen_offsetx;
+	if ( offy ) *offy = TCOD_ctx.fullscreen_offsety;
+}
+#else
 void TCOD_sys_startup(void) {
 	//TCOD_ctx.max_font_chars = 256;
 	//alloc_ascii_tables();
@@ -538,7 +536,6 @@ bool TCOD_sys_read_file(const char *filename, unsigned char **buf, size_t *size)
 bool TCOD_sys_write_file(const char *filename, unsigned char *buf, uint32_t size) {
 	return false;
 }
-
 #endif /* TCOD_BARE */
 
 void TCOD_fatal(const char *fmt, ...) {
@@ -564,7 +561,7 @@ TCOD_library_t TCOD_load_library(const char *path) {
 	return (TCOD_library_t)LoadLibrary(path);
 }
 void * TCOD_get_function_address(TCOD_library_t library, const char *function_name) {
-	return (void *)GetProcAddress((HMODULE)library,function_name);	
+	return (void *)GetProcAddress((HMODULE)library,function_name);
 }
 void TCOD_close_library(TCOD_library_t library) {
 	FreeLibrary((HMODULE)library);

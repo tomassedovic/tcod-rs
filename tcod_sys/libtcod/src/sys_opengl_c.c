@@ -1,6 +1,6 @@
 /*
-* libtcod 1.6.3
-* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
+* libtcod
+* Copyright (c) 2008-2018 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -10,8 +10,9 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote products
-*       derived from this software without specific prior written permission.
+*     * The name of Jice or Mingos may not be used to endorse or promote
+*       products derived from this software without specific prior written
+*       permission.
 *
 * THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,11 +25,10 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
 /*
  * This renderer is mostly copied and pasted from Antagonist's SkyFire GLSL roguelike engine
- */ 
-#ifdef TCOD_SDL2
+ */
+#ifndef TCOD_BARE
 #include <sys.h>
 
 #include "libtcod_int.h"
@@ -50,7 +50,7 @@
 #define DBGCHECKGL CHECKGL
 #endif
 
-typedef  enum 
+typedef  enum
 {
 	Character,
 	ForeCol,
@@ -58,7 +58,7 @@ typedef  enum
 	ConsoleDataEnumSize
 } ConsoleDataEnum;
 /* JBR04152012 - Made Character a 4 byte value here to support extended characters like other renderers.
-   Seems like it should be possible to make it a two byte value using GL_UNSIGNED_SHORT_5_6_5_REV in updateTex, 
+   Seems like it should be possible to make it a two byte value using GL_UNSIGNED_SHORT_5_6_5_REV in updateTex,
    but I can't seem to get the math right in the shader code, it always loses precision somewhere,
    resulting in incorrect characters. */
 const int ConsoleDataAlignment[3] = {4, 3, 3 };
@@ -170,7 +170,7 @@ static PFNGLGETUNIFORMLOCATIONARBPROC glGetUniformLocationARB=0;
 static PFNGLUNIFORM1FARBPROC glUniform1fARB=0;
 static PFNGLUNIFORM1IARBPROC glUniform1iARB=0;
 static PFNGLACTIVETEXTUREPROC glActiveTextureF=0;
-                           
+
 static SDL_GLContext glcontext;
 
 void TCOD_opengl_uninit_state() {
@@ -198,7 +198,7 @@ bool TCOD_opengl_init_state(int conw, int conh, void *font) {
 		}
 		if (! hasShader ) {
 			TCOD_LOG(("Missing GL_ARB_shader_objects extension. Falling back to fixed pipeline...\n"));
-			TCOD_ctx.renderer = TCOD_RENDERER_OPENGL;		
+			TCOD_ctx.renderer = TCOD_RENDERER_OPENGL;
 		}
 	}
 
@@ -217,7 +217,7 @@ bool TCOD_opengl_init_state(int conw, int conh, void *font) {
 	glUniform1fARB=(PFNGLUNIFORM1FARBPROC)SDL_GL_GetProcAddress("glUniform1fARB");
 	glUniform1iARB=(PFNGLUNIFORM1IARBPROC)SDL_GL_GetProcAddress("glUniform1iARB");
 	glActiveTextureF=(PFNGLACTIVETEXTUREPROC)SDL_GL_GetProcAddress("glActiveTexture");
-	
+
 	/* set opengl state */
 	glEnable(GL_TEXTURE_2D);
 	glClearColor(1.0f, 1.0f, 0.0f, 0.0f);
@@ -227,11 +227,11 @@ bool TCOD_opengl_init_state(int conw, int conh, void *font) {
 	glLoadIdentity();
 	if ( TCOD_ctx.renderer == TCOD_RENDERER_GLSL ) {
 		glOrtho(0, conw, 0, conh, -1.0f, 1.0f);
-		glDisable (GL_BLEND); 
+		glDisable (GL_BLEND);
 	} else {
 		glOrtho(0, conw, conh, 0.0f, -1.0f, 1.0f);
-		glEnable (GL_BLEND); 
-		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable (GL_BLEND);
+		glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	glMatrixMode( GL_MODELVIEW );
@@ -411,7 +411,7 @@ bool TCOD_opengl_init_shaders(void) {
 	CHECKGL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, POTconwidth, POTconheight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0));
 
 	CHECKGL(glBindTexture(GL_TEXTURE_2D, 0));
-	
+
 	return true;
 }
 
@@ -534,7 +534,7 @@ bool TCOD_opengl_render( int oldFade, bool *ascii_updated, TCOD_console_data_t *
 		glEnd());
 		/* draw the characters (one quad per cell) */
 	    DBGCHECKGL(glBindTexture(GL_TEXTURE_2D, font_tex));
-	    
+
 	    c = console->ch_array;
 		nfg = TCOD_image_get_colors(console->fg_colors);
 		nbg = TCOD_image_get_colors(console->bg_colors);
@@ -579,7 +579,7 @@ bool TCOD_opengl_render( int oldFade, bool *ascii_updated, TCOD_console_data_t *
 	} else {
 		/* actual rendering */
 	    DBGCHECKGL(glUseProgramObjectARB(conProgram));
-	
+
 		/* Technically all these glUniform calls can be moved to SFConsole() when the shader is loaded */
 		/* None of these change */
 		/* The Textures still need to bind to the same # Activetexture throughout though */
@@ -588,25 +588,25 @@ bool TCOD_opengl_render( int oldFade, bool *ascii_updated, TCOD_console_data_t *
 	    DBGCHECKGL(glUniform1fARB(glGetUniformLocationARB(conProgram,"fontw"), (float)TCOD_ctx.fontNbCharHoriz));
 	    DBGCHECKGL(glUniform2fARB(glGetUniformLocationARB(conProgram,"fontcoef"), (float)(fontwidth)/(POTfontwidth*TCOD_ctx.fontNbCharHoriz), (float)(fontheight)/(POTfontheight*TCOD_ctx.fontNbCharVertic)));
 
-	
+
 	    DBGCHECKGL(glActiveTextureF(GL_TEXTURE0));
 	    DBGCHECKGL(glBindTexture(GL_TEXTURE_2D, font_tex));
 	    DBGCHECKGL(glUniform1iARB(glGetUniformLocationARB(conProgram,"font"),0));
-	
+
 	    DBGCHECKGL(glActiveTextureF(GL_TEXTURE1));
 	    DBGCHECKGL(glBindTexture(GL_TEXTURE_2D, Tex[Character]));
 	    DBGCHECKGL(glUniform1iARB(glGetUniformLocationARB(conProgram,"term"),1));
-	
+
 	    DBGCHECKGL(glActiveTextureF(GL_TEXTURE2));
 	    DBGCHECKGL(glBindTexture(GL_TEXTURE_2D, Tex[ForeCol]));
 	    DBGCHECKGL(glUniform1iARB(glGetUniformLocationARB(conProgram,"termfcol"),2));
-	
+
 	    DBGCHECKGL(glActiveTextureF(GL_TEXTURE3));
 	    DBGCHECKGL(glBindTexture(GL_TEXTURE_2D, Tex[BackCol]));
 	    DBGCHECKGL(glUniform1iARB(glGetUniformLocationARB(conProgram,"termbcol"),3));
-	
+
 	/*    DBGCHECKGL(shader->Validate()); */
-	
+
 		DBGCHECKGL(glBegin(GL_QUADS);
 	        glTexCoord2f(0.0f, 1.0f);
 			glVertex3f(-1.0f,-1.0f,0.0f);
@@ -617,9 +617,9 @@ bool TCOD_opengl_render( int oldFade, bool *ascii_updated, TCOD_console_data_t *
 	        glTexCoord2f(0.0f, 0.0f);
 			glVertex3f(-1.0f,1.0f,0.0f);
 		glEnd());
-	
+
 	    DBGCHECKGL(glBindTexture(GL_TEXTURE_2D, 0));
-	
+
 	    DBGCHECKGL(glUseProgramObjectARB(0));
 	}
 	/* fading overlay */
@@ -664,7 +664,7 @@ void * TCOD_opengl_get_screen(void) {
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glReadPixels(offx,offy,pixw,pixh, GL_RGB, GL_UNSIGNED_BYTE, surf->pixels);
 	glPopClientAttrib();
-	
+
 	/* vertical flip (opengl has lower-left origin, SDL upper left) */
 	mask=surf->format->Rmask|surf->format->Gmask|surf->format->Bmask;
 	nmask=~mask;
@@ -685,4 +685,4 @@ void * TCOD_opengl_get_screen(void) {
 
 #endif /* NO_OPENGL */
 
-#endif /* TCOD_SDL2 */
+#endif /* TCOD_BARE */

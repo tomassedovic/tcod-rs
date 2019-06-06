@@ -1,6 +1,6 @@
 /*
-* libtcod 1.6.3
-* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
+* libtcod
+* Copyright (c) 2008-2018 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -10,8 +10,9 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote products
-*       derived from this software without specific prior written permission.
+*     * The name of Jice or Mingos may not be used to endorse or promote
+*       products derived from this software without specific prior written
+*       permission.
 *
 * THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,7 +25,6 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
 #include <txtfield.hpp>
 
 #ifdef TCOD_CONSOLE_SUPPORT
@@ -46,7 +46,7 @@ void TCODText::setPos(int x, int y) {
 }
 
 void TCODText::setProperties(int cursor_char, int blink_interval, const char * prompt, int tab_size){
-	TCOD_text_set_properties(data,cursor_char,blink_interval,prompt,tab_size);	                            
+	TCOD_text_set_properties(data,cursor_char,blink_interval,prompt,tab_size);
 }
 
 void TCODText::setColors(TCODColor fore, TCODColor back, float back_transparency){
@@ -63,7 +63,7 @@ void TCODText::render(TCODConsole * con){
 	TCOD_text_render(data,con->data);
 }
 
-const char *TCODText::getText(){        
+const char *TCODText::getText(){
 	return TCOD_text_get(data);
 }
 

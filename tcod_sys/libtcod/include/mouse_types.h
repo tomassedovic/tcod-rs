@@ -1,6 +1,6 @@
 /*
-* libtcod 1.6.3
-* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
+* libtcod
+* Copyright (c) 2008-2018 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -10,8 +10,9 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote products
-*       derived from this software without specific prior written permission.
+*     * The name of Jice or Mingos may not be used to endorse or promote
+*       products derived from this software without specific prior written
+*       permission.
 *
 * THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,7 +25,6 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
 #ifndef _TCOD_MOUSE_TYPES_H
 #define _TCOD_MOUSE_TYPES_H
 
@@ -42,9 +42,9 @@ typedef struct {
   bool lbutton ; /* left button status */
   bool rbutton ; /* right button status */
   bool mbutton ; /* middle button status */
-  bool lbutton_pressed ; /* left button pressed event */ 
-  bool rbutton_pressed ; /* right button pressed event */ 
-  bool mbutton_pressed ; /* middle button pressed event */ 
+  bool lbutton_pressed ; /* left button pressed event */
+  bool rbutton_pressed ; /* right button pressed event */
+  bool mbutton_pressed ; /* middle button pressed event */
   bool wheel_up ; /* wheel up event */
   bool wheel_down ; /* wheel down event */
 } TCOD_mouse_t;

@@ -1,6 +1,6 @@
 /*
-* libtcod 1.6.3
-* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
+* libtcod
+* Copyright (c) 2008-2018 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -98,6 +98,9 @@
 #elif defined (__APPLE__) && defined (__MACH__)
 #  define TCOD_MACOSX
 #  define TCOD_GCC
+#  if __WORDSIZE == 64
+#    define TCOD_64BITS
+#  endif
 #endif
 
 /* unicode rendering functions support */
@@ -123,12 +126,10 @@
 #undef TCOD_IMAGE_SUPPORT
 #undef TCOD_OSUTIL_SUPPORT
 
-#ifdef TCOD_SDL2
+#ifndef TCOD_BARE
 #define TCOD_CONSOLE_SUPPORT
 #define TCOD_IMAGE_SUPPORT
 #define TCOD_OSUTIL_SUPPORT
-#else
-#define TCOD_BARE
 #endif
 
 /* int types */
@@ -165,6 +166,15 @@ char *strcasestr (const char *haystack, const char *needle);
 #endif
 #ifdef TCOD_WINDOWS
 #define vsnwprintf _vsnwprintf
+#endif
+
+/* cross platform deprecation */
+#if defined(_MSC_VER)
+#define TCOD_DEPRECATED __declspec(deprecated)
+#elif defined(__GNUC__)
+#define TCOD_DEPRECATED __attribute__ ((deprecated))
+#else
+#define TCOD_DEPRECATED
 #endif
 
 #ifdef __cplusplus

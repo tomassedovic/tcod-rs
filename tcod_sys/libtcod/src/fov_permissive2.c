@@ -1,6 +1,6 @@
 /*
-* libtcod 1.6.3
-* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
+* libtcod
+* Copyright (c) 2008-2018 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -10,8 +10,9 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote products
-*       derived from this software without specific prior written permission.
+*     * The name of Jice or Mingos may not be used to endorse or promote
+*       products derived from this software without specific prior written
+*       permission.
 *
 * THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -77,7 +78,7 @@ static bool is_blocked(map_t *map, view_t *view, int startX, int startY, int x, 
 	int posy=y*dy/STEP_SIZE+startY;
 	int offset=posx + (posy)*map->width;
 	bool blocked=!map->cells[offset].transparent;
-	if (! blocked || light_walls) map->cells[offset].fov=1; 
+	if (! blocked || light_walls) map->cells[offset].fov=1;
 	return blocked;
 }
 
@@ -124,7 +125,7 @@ static bool check_view(TCOD_list_t active_views, view_t **it) {
 	line_t *shallow_line=&view->shallow_line;
 	line_t *steep_line=&view->steep_line;
 	if (LINE_COLINEAR(shallow_line,steep_line)
-		&& (COLINEAR(shallow_line,offset,limit) 
+		&& (COLINEAR(shallow_line,offset,limit)
 		|| COLINEAR(shallow_line,limit,offset)) ){
 /*printf ("deleting view %x\n",it); */
 		/* slow ! */
@@ -134,7 +135,7 @@ static bool check_view(TCOD_list_t active_views, view_t **it) {
 	return true;
 }
 
-static void visit_coords(map_t *m,int startX, int startY, int x, int y, int dx, int dy, 
+static void visit_coords(map_t *m,int startX, int startY, int x, int y, int dx, int dy,
 	TCOD_list_t active_views, bool light_walls) {
 	/* top left */
 	int tlx=x, tly=y+STEP_SIZE;
@@ -153,13 +154,13 @@ static void visit_coords(map_t *m,int startX, int startY, int x, int y, int dx, 
 		return;
 	}
 	if ( !is_blocked(m,view,startX,startY,x,y,dx,dy,light_walls) ) return;
-	if (  ABOVE(&view->shallow_line,brx,bry) 
+	if (  ABOVE(&view->shallow_line,brx,bry)
 		&& BELOW(&view->steep_line,tlx,tly)) {
 		/* view blocked */
 		/* slow ! */
 		TCOD_list_remove_iterator(active_views,(void **)current_view);
 	} else if ( ABOVE(&view->shallow_line,brx,bry)) {
-		/* shallow bump */                
+		/* shallow bump */
 		add_shallow_bump(tlx,tly,view);
 		check_view(active_views,current_view);
 	} else if (BELOW(&view->steep_line,tlx,tly)) {
@@ -253,4 +254,3 @@ void TCOD_map_compute_fov_permissive2(TCOD_map_t map, int player_x, int player_y
 	free(bumps);
 	free(views);
 }
-

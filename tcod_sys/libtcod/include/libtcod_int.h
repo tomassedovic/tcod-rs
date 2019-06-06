@@ -1,6 +1,6 @@
 /*
-* libtcod 1.6.3
-* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
+* libtcod
+* Copyright (c) 2008-2018 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -10,8 +10,9 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote products
-*       derived from this software without specific prior written permission.
+*     * The name of Jice or Mingos may not be used to endorse or promote
+*       products derived from this software without specific prior written
+*       permission.
 *
 * THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,16 +25,12 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
 #ifndef _TCODLIB_INT_H
 #define _TCODLIB_INT_H
 #include <stdarg.h>
 #include <assert.h>
 #if defined(__ANDROID__)
 #include <android/log.h>
-#endif
-#ifdef TCOD_SDL2
-#include <SDL.h>
 #endif
 
 #include "libtcod_portability.h"
@@ -48,6 +45,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* SDL2 forward declarations */
+struct SDL_Surface;
+struct SDL_Window;
+struct SDL_Renderer;
 
 #ifdef TCOD_CONSOLE_SUPPORT
 typedef struct {
@@ -126,7 +128,7 @@ typedef struct {
 	int actual_fullscreen_width;
 	int actual_fullscreen_height;
 #endif
-#ifdef TCOD_SDL2
+#ifndef TCOD_BARE
 	/* renderer to use */
 	TCOD_renderer_t renderer;
 	/* user post-processing callback */
@@ -138,7 +140,7 @@ typedef struct {
 #ifdef TCOD_CONSOLE_SUPPORT
 	TCOD_key_t key_state;
 #endif
-#ifdef TCOD_SDL2
+#ifndef TCOD_BARE
 	/* application window was closed */
 	bool is_window_closed;
 	/* application has mouse focus */
@@ -179,7 +181,7 @@ extern TCOD_internal_context_t TCOD_ctx;
 #define TCOD_LOG(x) printf x
 #endif
 
-#if defined(TCOD_SDL2) && !defined(NO_OPENGL)
+#if !defined(TCOD_BARE) && !defined(NO_OPENGL)
 /* opengl utilities */
 void TCOD_opengl_init_attributes(void);
 bool TCOD_opengl_init_state(int conw, int conh, void *font_tex);
@@ -269,7 +271,7 @@ bool TCOD_sys_check_magic_number(const char *filename, size_t size, uint8_t *dat
 /* TCOD_list nonpublic methods */
 void TCOD_list_set_size(TCOD_list_t l, int size);
 
-#ifdef TCOD_SDL2
+#ifndef TCOD_BARE
 /*
 	SDL12/SDL2 abstraction layer
 */
@@ -282,7 +284,7 @@ typedef struct TCOD_SDL_driver_t {
 	/* render the console on a surface/texture */
 	void (*render)(struct TCOD_SDL_driver_t *sdl, void *vbitmap, TCOD_console_data_t *console);
 	/* create a new surface */
-	SDL_Surface *(*create_surface) (int width, int height, bool with_alpha);
+	struct SDL_Surface *(*create_surface) (int width, int height, bool with_alpha);
 	/* create the game window */
 	void (*create_window)(int w, int h, bool fullscreen);
 	/* destroy the game window */
@@ -335,9 +337,9 @@ typedef struct {
 extern scale_data_t scale_data;
 
 extern float scale_factor;
-extern SDL_Surface* charmap;
-extern SDL_Window* window;
-extern SDL_Renderer* renderer;
+extern struct SDL_Surface* charmap;
+extern struct SDL_Window* window;
+extern struct SDL_Renderer* renderer;
 extern char *last_clipboard_text;
 #endif
 
@@ -561,4 +563,3 @@ extern int oldFade;
 }
 #endif
 #endif
-

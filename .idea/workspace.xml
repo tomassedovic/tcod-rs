@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CargoProjects">
+    <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c57dbd04-917c-4225-87e5-0cbb2ecc9979" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/console_rexpaint.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/LIBTCOD-LICENSE.txt" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/LIBTCOD-LICENSE.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/README-linux-SDL2.md" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/README-linux-SDL2.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/bresenham.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/bresenham.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/bresenham.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/bresenham.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/bsp.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/bsp.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/bsp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/bsp.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/color.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/color.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/color.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/color.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/console.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/console.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/console.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/console.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/console_types.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/console_types.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/fov.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/fov.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/fov.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/fov.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/fov_types.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/fov_types.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/heightmap.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/heightmap.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/heightmap.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/heightmap.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/howto.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/howto.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/image.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/image.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/image.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/image.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/lex.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/lex.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/lex.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/lex.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/libtcod.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/libtcod.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/libtcod.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/libtcod.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/libtcod_int.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/libtcod_int.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/libtcod_portability.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/libtcod_portability.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/libtcod_utility.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/libtcod_utility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/libtcod_version.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/libtcod_version.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/list.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/list.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/list.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/list.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/mersenne.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/mersenne.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/mersenne.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/mersenne.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/mersenne_types.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/mersenne_types.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/mouse.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/mouse.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/mouse.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/mouse.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/mouse_types.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/mouse_types.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/namegen.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/namegen.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/namegen.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/namegen.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/noise.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/noise.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/noise.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/noise.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/noise_defaults.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/noise_defaults.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/parser.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/parser.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/parser.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/parser.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/path.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/path.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/path.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/path.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/sys.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/sys.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/sys.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/sys.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/tree.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/tree.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/tree.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/tree.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/txtfield.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/txtfield.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/txtfield.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/txtfield.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/wrappers.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/wrappers.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/zip.h" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/zip.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/include/zip.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/include/zip.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/bresenham.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/bresenham.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/bresenham_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/bresenham_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/bsp.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/bsp.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/bsp_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/bsp_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/color.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/color.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/color_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/color_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/console.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/console.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/console_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/console_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/console_rexpaint.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/console_rexpaint.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/fov.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/fov.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/fov_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/fov_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/fov_circular_raycasting.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/fov_circular_raycasting.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/fov_diamond_raycasting.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/fov_diamond_raycasting.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/fov_permissive2.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/fov_permissive2.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/fov_recursive_shadowcasting.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/fov_recursive_shadowcasting.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/fov_restrictive.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/fov_restrictive.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/heightmap.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/heightmap.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/heightmap_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/heightmap_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/image.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/image.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/image_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/image_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/lex.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/lex.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/lex_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/lex_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/list_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/list_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/mersenne.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/mersenne.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/mersenne_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/mersenne_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/mouse.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/mouse.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/namegen.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/namegen.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/namegen_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/namegen_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/noise.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/noise.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/noise_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/noise_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/parser.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/parser.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/parser_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/parser_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/path.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/path.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/path_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/path_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/sys.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/sys.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/sys_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/sys_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/sys_opengl_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/sys_opengl_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/sys_sdl2_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/sys_sdl2_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/sys_sdl_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/sys_sdl_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/sys_sdl_img_bmp.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/sys_sdl_img_bmp.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/sys_sdl_img_png.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/sys_sdl_img_png.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/tree_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/tree_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/txtfield.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/txtfield.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/txtfield_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/txtfield_c.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/wrappers.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/wrappers.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/zip.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/zip.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tcod_sys/libtcod/src/zip_c.c" beforeDir="false" afterPath="$PROJECT_DIR$/tcod_sys/libtcod/src/zip_c.c" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Makefile">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="153">
+              <caret line="9" selection-start-line="9" selection-end-line="9" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/lib.rs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="663">
+              <caret line="39" column="26" selection-start-line="39" selection-start-column="26" selection-end-line="39" selection-end-column="26" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/tcod_sys/build.rs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-1400">
+              <caret line="166" column="30" selection-start-line="166" selection-start-column="30" selection-end-line="166" selection-end-column="30" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/tcod_sys/build.rs" />
+      </list>
+    </option>
+  </component>
+  <component name="MacroExpansionManager">
+    <option name="directoryName" value="liIhKDLD" />
+  </component>
+  <component name="ProjectConfigurationFiles">
+    <option name="files">
+      <list>
+        <option value="$PROJECT_DIR$/.idea/tcod-rs.iml" />
+        <option value="$PROJECT_DIR$/.idea/vcs.xml" />
+        <option value="$PROJECT_DIR$/.idea/modules.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="1299" />
+    <option name="y" value="964" />
+    <option name="width" value="816" />
+    <option name="height" value="576" />
+  </component>
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="tcod-rs" type="b2602c69:ProjectViewProjectNode" />
+              <item name="tcod-rs" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="tcod-rs" type="b2602c69:ProjectViewProjectNode" />
+              <item name="tcod-rs" type="462c0819:PsiDirectoryNode" />
+              <item name="tcod_sys" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="tcod-rs" type="b2602c69:ProjectViewProjectNode" />
+              <item name="tcod-rs" type="462c0819:PsiDirectoryNode" />
+              <item name="tcod_sys" type="462c0819:PsiDirectoryNode" />
+              <item name="libtcod" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="org.rust.cargo.project.model.PROJECT_DISCOVERY" value="true" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="run" />
+      <option name="allFeatures" value="false" />
+      <option name="nocapture" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="RustProjectSettings">
+    <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="2576" height="1416" extended-state="6" />
+    <layout>
+      <window_info id="Designer" />
+      <window_info id="Favorites" side_tool="true" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info anchor="bottom" id="Version Control" />
+      <window_info active="true" anchor="bottom" id="Terminal" visible="true" weight="0.40763834" />
+      <window_info anchor="bottom" id="Event Log" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32969603" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="right" id="Cargo" />
+      <window_info anchor="right" id="Palette&#9;" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+    </layout>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/Makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="9" selection-start-line="9" selection-end-line="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lib.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="663">
+          <caret line="39" column="26" selection-start-line="39" selection-start-column="26" selection-end-line="39" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tcod_sys/libtcod/src/libtcod.cpp">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tcod_sys/libtcod/src/libtcod_c.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-678" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tcod_sys/build.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1400">
+          <caret line="166" column="30" selection-start-line="166" selection-start-column="30" selection-end-line="166" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>
