@@ -17,7 +17,8 @@ fn build_libz(libz_sources: &[&str]) {
 
 fn build_libtcod_objects(mut config: cc::Build, sources: &[&str]) {
     config.include("libtcod/include");
-    config.include("libtcod/src/zlib");
+    config.include("libtcod/src/vendor");
+    config.include("libtcod/src/vendor/zlib");
     for c_file in sources {
         config.file(c_file);
     }
@@ -127,21 +128,25 @@ fn main() {
     let sdl_include_dir = src.join("libtcod").join("dependencies").join("SDL2-2.0.7").join("include");
 
     let libz_sources = &[
-        "libtcod/src/zlib/adler32.c",
-	    "libtcod/src/zlib/crc32.c",
-	    "libtcod/src/zlib/deflate.c",
-	    "libtcod/src/zlib/infback.c",
-	    "libtcod/src/zlib/inffast.c",
-	    "libtcod/src/zlib/inflate.c",
-	    "libtcod/src/zlib/inftrees.c",
-	    "libtcod/src/zlib/trees.c",
-	    "libtcod/src/zlib/zutil.c",
-	    "libtcod/src/zlib/compress.c",
-	    "libtcod/src/zlib/uncompr.c",
-	    "libtcod/src/zlib/gzclose.c",
-	    "libtcod/src/zlib/gzlib.c",
-	    "libtcod/src/zlib/gzread.c",
-	    "libtcod/src/zlib/gzwrite.c",
+        "libtcod/src/vendor/zlib/adler32.c",
+	    "libtcod/src/vendor/zlib/crc32.c",
+	    "libtcod/src/vendor/zlib/deflate.c",
+	    "libtcod/src/vendor/zlib/infback.c",
+	    "libtcod/src/vendor/zlib/inffast.c",
+	    "libtcod/src/vendor/zlib/inflate.c",
+	    "libtcod/src/vendor/zlib/inftrees.c",
+	    "libtcod/src/vendor/zlib/trees.c",
+	    "libtcod/src/vendor/zlib/zutil.c",
+	    "libtcod/src/vendor/zlib/compress.c",
+	    "libtcod/src/vendor/zlib/uncompr.c",
+	    "libtcod/src/vendor/zlib/gzclose.c",
+	    "libtcod/src/vendor/zlib/gzlib.c",
+	    "libtcod/src/vendor/zlib/gzread.c",
+	    "libtcod/src/vendor/zlib/gzwrite.c",
+    ];
+
+    let vendor_sources = &[
+        "libtcod/src/vendor/stb.c"
     ];
 
     let libtcod_sources = &[
@@ -248,9 +253,10 @@ fn main() {
         config.flag("-shared");
         fs::create_dir(dst.join("lib")).unwrap();
         config.flag(&format!("-Wl,--out-implib,{}", dst.join("lib/libtcod.a").display()));
-        config.include(Path::new("libtcod").join("src").join("zlib"));
+        config.include(Path::new("libtcod").join("src").join("vendor"));
+        config.include(Path::new("libtcod").join("src").join("vendor").join("zlib"));
         config.include(Path::new("libtcod").join("include"));
-        for c_file in libz_sources.iter().chain(libtcod_sources) {
+        for c_file in libz_sources.iter().chain(libtcod_sources).chain(vendor_sources) {
             let path = c_file.split('/').fold(PathBuf::new(), |path, segment| path.join(segment));
             config.flag(src.join(path).to_str().unwrap());
         }
@@ -285,9 +291,10 @@ fn main() {
         config.flag("/DLIBTCOD_EXPORTS");
         config.flag(&format!("/Fo:{}\\", dst.to_str().unwrap()));
         config.include(sdl_include_dir.to_str().unwrap());
-        config.include(Path::new("libtcod").join("src").join("zlib"));
+        config.include(Path::new("libtcod").join("src").join("vendor"));
+        config.include(Path::new("libtcod").join("src").join("vendor").join("zlib"));
         config.include(Path::new("libtcod").join("include"));
-        for c_file in libz_sources.iter().chain(libtcod_sources) {
+        for c_file in libz_sources.iter().chain(vendor_sources).chain(libtcod_sources) {
             // Make sure the path is in the Windows format. This
             // shouldn't matter but it's distracting when debugging
             // build script issues.

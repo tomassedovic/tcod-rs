@@ -242,7 +242,7 @@ void TCOD_sys_load_font(void) {
 	/* figure out what kind of font we have */
 	/* check if the alpha layer is actually used */
 	if ( charmap->format->BytesPerPixel == 4 ) {
-		printf ("32bits font... checking for alpha layer... ");
+		TCOD_LOG(("32bits font... checking for alpha layer... "));
 		for (x=0; !hasTransparent && x < charmap->w; x ++ ) {
 			for (y=0;!hasTransparent && y < charmap->h; y++ ) {
 				uint8_t*pixel=(uint8_t*)(charmap->pixels) + y * charmap->pitch + x * charmap->format->BytesPerPixel;
@@ -252,17 +252,17 @@ void TCOD_sys_load_font(void) {
 				}
 			}
 		}
-		printf (hasTransparent ? "present\n" : "not present\n");
+		TCOD_LOG((hasTransparent ? "present\n" : "not present\n"));
 	} else if ( charmap->format->BytesPerPixel != 3 ) {
 		/* convert to 24 bits */
 		SDL_Surface *temp;
-		printf ("font bpp < 24. converting to 24bits\n");
+		TCOD_LOG(("font bpp < 24. converting to 24bits\n"));
 		temp=(SDL_Surface *)TCOD_sys_get_surface(charmap->w,charmap->h,false);
 		SDL_BlitSurface(charmap,NULL,temp,NULL);
 		SDL_FreeSurface(charmap);
 		charmap=temp;
 	} else {
-		printf ("24 bits font.\n");
+		TCOD_LOG(("24 bits font.\n"));
 	}
 	if (! hasTransparent ) {
 		/* alpha layer not used */
@@ -283,11 +283,11 @@ void TCOD_sys_load_font(void) {
 		fontKeyCol.r=*((pixel)+charmap->format->Rshift/8);
 		fontKeyCol.g=*((pixel)+charmap->format->Gshift/8);
 		fontKeyCol.b=*((pixel)+charmap->format->Bshift/8);
-		printf ("key color : %d %d %d\n",fontKeyCol.r,fontKeyCol.g,fontKeyCol.b);
+		TCOD_LOG(("key color : %d %d %d\n",fontKeyCol.r,fontKeyCol.g,fontKeyCol.b));
 		if ( ! TCOD_ctx.font_greyscale && charmap->format->BytesPerPixel == 4 ) {
 			/* 32 bits font but alpha layer not used. convert to 24 bits (faster) */
 			SDL_Surface *temp;
-			printf ("32bits font with no alpha => converting to faster 24 bits\n");
+			TCOD_LOG(("32bits font with no alpha => converting to faster 24 bits\n"));
 			temp=(SDL_Surface *)TCOD_sys_get_surface(charmap->w,charmap->h,false);
 			SDL_BlitSurface(charmap,NULL,temp,NULL);
 			SDL_FreeSurface(charmap);
@@ -314,7 +314,7 @@ void TCOD_sys_load_font(void) {
 					/* colored tile if a pixel is not desaturated */
 					if ( r != g || g !=b || b != r ) {
 						TCOD_ctx.colored[i]=true;
-						printf ("character for ascii code %d is colored\n",i);
+						TCOD_LOG(("character for ascii code %d is colored\n",i));
 						end=true;
 					}
 			}
@@ -326,7 +326,7 @@ void TCOD_sys_load_font(void) {
 		/* convert the surface to 32 bits if needed */
 		if ( charmap->format->BytesPerPixel != 4 ) {
 			SDL_Surface *temp;
-			printf("24bits greyscale font. converting to 32bits\n");
+			TCOD_LOG(("24bits greyscale font. converting to 32bits\n"));
 			temp=(SDL_Surface *)TCOD_sys_get_surface(charmap->w,charmap->h,true);
 			SDL_BlitSurface(charmap,NULL,temp,NULL);
 			SDL_FreeSurface(charmap);
@@ -494,7 +494,7 @@ void TCOD_sys_console_to_bitmap(void *vbitmap,
 				SDL_FillRect(bitmap,&dstRect,sdl_back);
 				if ( *c != ' ' ) {
 					/* draw foreground */
-					int ascii = TCOD_ctx.ascii_to_tcod[*c];
+					int ascii = TCOD_get_tileid_for_charcode_(*c);
 					TCOD_color_t *curtext = &charcols[ascii];
 					bool first = first_draw[ascii];
 					TCOD_color_t f=*nfg;
@@ -808,30 +808,48 @@ void TCOD_sys_uninit(void) {
 	sdl->destroy_window();
 }
 
+static char *TCOD_strcasestr (const char *haystack, const char *needle) {
+	const char *p, *startn = 0, *np = 0;
+
+	for (p = haystack; *p; p++) {
+		if (np) {
+			if (toupper(*p) == toupper(*np)) {
+				if (!*++np)
+					return (char *)startn;
+			} else
+				np = 0;
+		} else if (toupper(*p) == toupper(*needle)) {
+			np = needle + 1;
+			startn = p;
+		}
+	}
+
+	return 0;
+}
+
 void TCOD_sys_save_bitmap(void *bitmap, const char *filename) {
 	image_support_t *img=image_type;
-	while ( img->extension != NULL && strcasestr(filename,img->extension) == NULL ) img++;
+	while ( img->extension != NULL && TCOD_strcasestr(filename,img->extension) == NULL ) img++;
 	if ( img->extension == NULL || img->write == NULL ) img=image_type; /* default to bmp */
 	img->write((SDL_Surface *)bitmap,filename);
 }
 
 void TCOD_sys_save_screenshot(const char *filename) {
-	char buf[128];
-	if ( filename == NULL ) {
-		/* generate filename */
-		int idx=0;
-		do {
-		    FILE *f=NULL;
-			sprintf(buf,"./screenshot%03d.png",idx);
-			f=fopen(buf,"rb");
-			if ( ! f ) filename=buf;
-			else {
-				idx++;
-				fclose(f);
-			}
-		} while(!filename);
-	}
-	sdl->save_screenshot(filename);
+  char buf[128];
+  int idx = 0;
+  while (!filename) {
+    /* generate filename */
+    FILE *access_file = NULL;
+    sprintf(buf, "./screenshot%03d.png", idx);
+    access_file = fopen(buf, "rb");
+    if (!access_file) {
+      filename = buf;
+    } else {
+      idx++;
+      fclose(access_file);
+    }
+  }
+  sdl->save_screenshot(filename);
 }
 
 void TCOD_sys_set_fullscreen(bool fullscreen) {
@@ -1374,9 +1392,9 @@ static TCOD_event_t TCOD_sys_handle_event(SDL_Event *ev,TCOD_event_t eventMask, 
 				TCOD_ctx.app_has_mouse_focus=true; break;
 			case SDL_WINDOWEVENT_LEAVE:          /**< Window has lost mouse focus */
 				TCOD_ctx.app_has_mouse_focus=false; break;
-			case SDL_WINDOWEVENT_MAXIMIZED:      /**< Window has been maximized */
+			case SDL_WINDOWEVENT_FOCUS_GAINED:
 				TCOD_ctx.app_is_active=true; break;
-			case SDL_WINDOWEVENT_MINIMIZED:      /**< Window has been minimized */
+			case SDL_WINDOWEVENT_FOCUS_LOST:
 				TCOD_ctx.app_is_active=false; break;
 			case SDL_WINDOWEVENT_EXPOSED:        /**< Window has been returned to and needs a refresh. */
 				TCOD_sys_render(NULL, TCOD_ctx.root);
@@ -1452,7 +1470,13 @@ TCOD_mouse_t TCOD_mouse_get_status(void) {
 
 
 /* classic keyboard functions (based on generic events) */
-
+/**
+ *  Return immediately with a recently pressed key.
+ *
+ *  \param flags A TCOD_event_t bit-field, for example: `TCOD_EVENT_KEY_PRESS`
+ *  \return A TCOD_key_t struct with a recently pressed key.
+ *          If no event exists then the `vk` attribute will be `TCODK_NONE`
+ */
 TCOD_key_t TCOD_sys_check_for_keypress(int flags) {
 	static TCOD_key_t noret={TCODK_NONE,0};
 
@@ -1463,7 +1487,13 @@ TCOD_key_t TCOD_sys_check_for_keypress(int flags) {
 
 	return key;
 }
-
+/**
+ *  Wait for a key press event, then return it.
+ *
+ *  \param flush If 1 then the event queue will be cleared before waiting for
+ *               the next event.  This should always be 0.
+ *  \return A TCOD_key_t struct with the most recent key data.
+ */
 TCOD_key_t TCOD_sys_wait_for_keypress(bool flush) {
 	static TCOD_key_t noret={TCODK_NONE,0};
 
@@ -1725,5 +1755,14 @@ void TCOD_sys_set_dirty_character_code(int ch) {
 			dat->ch_array[i] = -1;
 		}
 	}
+}
+/**
+ *  Return the current tile index for a given character code.
+ */
+int TCOD_get_tileid_for_charcode_(int charcode) {
+  if (charcode >= 0 && charcode < TCOD_ctx.max_font_chars) {
+    return TCOD_ctx.ascii_to_tcod[charcode];
+  }
+  return 0;
 }
 #endif /* TCOD_BARE */
