@@ -16,8 +16,8 @@ fn build_libz(libz_sources: &[&str]) {
 }
 
 fn build_libtcod_objects(mut config: cc::Build, sources: &[&str]) {
-    config.include("libtcod/include");
-    config.include("libtcod/src/vendor");
+    config.include("libtcod/src/libtcod");
+    config.include("libtcod/src/vendor/utf8proc");
     config.include("libtcod/src/vendor/zlib");
     for c_file in sources {
         config.file(c_file);
@@ -146,40 +146,76 @@ fn main() {
     ];
 
     let vendor_sources = &[
-        "libtcod/src/vendor/stb.c"
+        "libtcod/src/vendor/stb.c",
+        "libtcod/src/vendor/lodepng.cpp",
+        "libtcod/src/vendor/utf8proc/utf8proc.c",
     ];
 
     let libtcod_sources = &[
- 	    "libtcod/src/bresenham_c.c",
-	    "libtcod/src/bsp_c.c",
-	    "libtcod/src/color_c.c",
-	    "libtcod/src/console_c.c",
-        "libtcod/src/console_rexpaint.c",
-	    "libtcod/src/fov_c.c",
-	    "libtcod/src/fov_circular_raycasting.c",
-	    "libtcod/src/fov_diamond_raycasting.c",
-	    "libtcod/src/fov_permissive2.c",
-	    "libtcod/src/fov_recursive_shadowcasting.c",
-	    "libtcod/src/fov_restrictive.c",
-	    "libtcod/src/heightmap_c.c",
-	    "libtcod/src/image_c.c",
-	    "libtcod/src/lex_c.c",
-	    "libtcod/src/list_c.c",
-	    "libtcod/src/mersenne_c.c",
-	    "libtcod/src/namegen_c.c",
-	    "libtcod/src/noise_c.c",
-	    "libtcod/src/parser_c.c",
-	    "libtcod/src/path_c.c",
-	    "libtcod/src/sys_c.c",
-	    "libtcod/src/sys_sdl2_c.c",
-	    "libtcod/src/sys_sdl_c.c",
-	    "libtcod/src/sys_sdl_img_bmp.c",
-	    "libtcod/src/sys_sdl_img_png.c",
-	    "libtcod/src/tree_c.c",
-	    "libtcod/src/txtfield_c.c",
-	    "libtcod/src/wrappers.c",
-	    "libtcod/src/zip_c.c",
-	    "libtcod/src/png/lodepng.c",
+        "libtcod/src/libtcod/bresenham_c.c",
+        "libtcod/src/libtcod/bsp_c.c",
+        "libtcod/src/libtcod/color_c.c",
+        "libtcod/src/libtcod/console.cpp",
+        "libtcod/src/libtcod/console_c.cpp",
+        "libtcod/src/libtcod/console_printing.c",
+        "libtcod/src/libtcod/console_rexpaint.c",
+        "libtcod/src/libtcod/fov_c.c",
+        "libtcod/src/libtcod/fov_circular_raycasting.c",
+        "libtcod/src/libtcod/fov_diamond_raycasting.c",
+        "libtcod/src/libtcod/fov_permissive2.c",
+        "libtcod/src/libtcod/fov_recursive_shadowcasting.c",
+        "libtcod/src/libtcod/fov_restrictive.c",
+        "libtcod/src/libtcod/heightmap_c.c",
+        "libtcod/src/libtcod/image.cpp",
+        "libtcod/src/libtcod/image_c.c",
+        "libtcod/src/libtcod/lex_c.c",
+        "libtcod/src/libtcod/list_c.c",
+        "libtcod/src/libtcod/mersenne_c.c",
+        "libtcod/src/libtcod/namegen_c.c",
+        "libtcod/src/libtcod/noise_c.c",
+        "libtcod/src/libtcod/parser_c.c",
+        "libtcod/src/libtcod/path_c.c",
+        "libtcod/src/libtcod/sys_c.cpp",
+        "libtcod/src/libtcod/sys_opengl_c.cpp",
+        "libtcod/src/libtcod/sys_sdl2_c.cpp",
+        "libtcod/src/libtcod/sys_sdl_c.cpp",
+        "libtcod/src/libtcod/sys_sdl_img_bmp.cpp",
+        "libtcod/src/libtcod/sys_sdl_img_png.cpp",
+        "libtcod/src/libtcod/tree_c.c",
+        "libtcod/src/libtcod/txtfield_c.c",
+        "libtcod/src/libtcod/wrappers.c",
+        "libtcod/src/libtcod/zip_c.c",
+        // color
+        "libtcod/src/libtcod/color/canvas.cpp",
+        // engine
+        "libtcod/src/libtcod/engine/backend.cpp",
+        "libtcod/src/libtcod/engine/display.cpp",
+        "libtcod/src/libtcod/engine/globals.cpp",
+        // gui
+        // "libtcod/src/libtcod/gui/button.cpp",
+        // "libtcod/src/libtcod/gui/container.cpp",
+        // "libtcod/src/libtcod/gui/flatlist.cpp",
+        // "libtcod/src/libtcod/gui/hbox.cpp",
+        // "libtcod/src/libtcod/gui/image.cpp",
+        // "libtcod/src/libtcod/gui/label.cpp",
+        // "libtcod/src/libtcod/gui/radiobutton.cpp",
+        // "libtcod/src/libtcod/gui/slider.cpp",
+        // "libtcod/src/libtcod/gui/statusbar.cpp",
+        // "libtcod/src/libtcod/gui/textbox.cpp",
+        // "libtcod/src/libtcod/gui/togglebutton.cpp",
+        // "libtcod/src/libtcod/gui/toolbar.cpp",
+        // "libtcod/src/libtcod/gui/vbox.cpp",
+        // "libtcod/src/libtcod/gui/widget.cpp",
+        // sdl2
+        "libtcod/src/libtcod/sdl2/legacy_backend.cpp",
+        "libtcod/src/libtcod/sdl2/sdl2_alias.cpp",
+        "libtcod/src/libtcod/sdl2/sdl2_display.cpp",
+        "libtcod/src/libtcod/sdl2/sdl2_renderer.cpp",
+        // tileset
+        "libtcod/src/libtcod/tileset/observer.cpp",
+        "libtcod/src/libtcod/tileset/tile.cpp",
+        "libtcod/src/libtcod/tileset/tileset.cpp",
+        "libtcod/src/libtcod/tileset/tilesheet.cpp",
     ];
 
     if target.contains("linux") {
@@ -215,7 +251,7 @@ fn main() {
         config.flag("-shared");
         config.flag("-o");
         config.flag(dst.join("libtcod.dylib").to_str().unwrap());
-        for c_file in libtcod_sources {
+        for c_file in libtcod_sources.iter() {
             config.flag(dst.join(c_file).with_extension("o").to_str().unwrap());
         }
         config.flag(dst.join("libz.a").to_str().unwrap());
@@ -254,13 +290,15 @@ fn main() {
         fs::create_dir(dst.join("lib")).unwrap();
         config.flag(&format!("-Wl,--out-implib,{}", dst.join("lib/libtcod.a").display()));
         config.include(Path::new("libtcod").join("src").join("vendor"));
+        config.include(Path::new("libtcod").join("src").join("vendor").join("utf8proc"));
         config.include(Path::new("libtcod").join("src").join("vendor").join("zlib"));
-        config.include(Path::new("libtcod").join("include"));
-        for c_file in libz_sources.iter().chain(libtcod_sources).chain(vendor_sources) {
+        config.include(Path::new("libtcod").join("src").join("libtcod"));
+        for c_file in libz_sources.iter().chain(libtcod_sources.iter()).chain(vendor_sources) {
             let path = c_file.split('/').fold(PathBuf::new(), |path, segment| path.join(segment));
             config.flag(src.join(path).to_str().unwrap());
         }
         config.flag("-mwindows");
+        config.flag("-EHsc");
         config.flag("-L");
         config.flag(sdl_lib_dir.to_str().unwrap());
         config.flag("-lSDL2");
@@ -289,12 +327,20 @@ fn main() {
         config.flag("/DNO_OPENGL");
         config.flag("/DNDEBUG");
         config.flag("/DLIBTCOD_EXPORTS");
+        config.flag("/EHsc");
         config.flag(&format!("/Fo:{}\\", dst.to_str().unwrap()));
         config.include(sdl_include_dir.to_str().unwrap());
         config.include(Path::new("libtcod").join("src").join("vendor"));
+        config.include(Path::new("libtcod").join("src").join("vendor").join("utf8proc"));
         config.include(Path::new("libtcod").join("src").join("vendor").join("zlib"));
-        config.include(Path::new("libtcod").join("include"));
-        for c_file in libz_sources.iter().chain(vendor_sources).chain(libtcod_sources) {
+        config.include(Path::new("libtcod").join("src").join("libtcod"));
+        config.include(Path::new("libtcod").join("src").join("libtcod").join("color"));
+        config.include(Path::new("libtcod").join("src").join("libtcod").join("engine"));
+        config.include(Path::new("libtcod").join("src").join("libtcod").join("gui"));
+        config.include(Path::new("libtcod").join("src").join("libtcod").join("sdl2"));
+        config.include(Path::new("libtcod").join("src").join("libtcod").join("tileset"));
+        config.include(Path::new("libtcod").join("src").join("libtcod").join("utility"));
+        for c_file in libz_sources.iter().chain(vendor_sources).chain(libtcod_sources.iter()) {
             // Make sure the path is in the Windows format. This
             // shouldn't matter but it's distracting when debugging
             // build script issues.
