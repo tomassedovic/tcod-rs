@@ -1,32 +1,38 @@
-/*
-* libtcod
-* Copyright (c) 2008-2018 Jice & Mingos & rmtew
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in the
-*       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote
-*       products derived from this software without specific prior written
-*       permission.
-*
-* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
-* EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
-* DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-* ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+/* BSD 3-Clause License
+ *
+ * Copyright © 2008-2019, Jice and the libtcod contributors.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 #ifndef _TCOD_COLOR_HPP
 #define _TCOD_COLOR_HPP
+
+#include <algorithm>
 
 #include "color.h"
 #include "utility.h"
@@ -146,8 +152,12 @@ public :
 	     TCODColor myColor = new TCODColor(321.0f,0.7f,1.0f); //HSV
 	@LuaEx myColor = tcod.Color(24,24,255)
 	*/
-	TCODColor(uint8_t r, uint8_t g, uint8_t b): r(r), g(g), b(b) {}
-	TCODColor(int r, int g, int b): r(r), g(g), b(b) {}
+	TCODColor(uint8_t r_, uint8_t g_, uint8_t b_)
+  : r(r_), g(g_), b(b_)
+  {}
+	TCODColor(int r_, int g_, int b_)
+  : r(r_), g(g_), b(b_)
+  {}
 	TCODColor(const TCOD_color_t &col): r(col.r), g(col.g), b(col.b) {}
 	TCODColor(float h, float s, float v);
 
@@ -169,12 +179,14 @@ public :
 	@LuaEx
 		if myColor == tcod.color.yellow then ... end
 	*/
-	bool operator == (const TCODColor & c) const {
-		return (c.r == r && c.g == g && c.b == b);
-	}
-	bool operator != (const TCODColor & c) const {
-		return (c.r != r || c.g != g || c.b != b);
-	}
+  bool operator == (const TCODColor& c) const
+  {
+    return (c.r == r && c.g == g && c.b == b);
+  }
+  bool operator != (const TCODColor& c) const
+  {
+    return !(*this == c);
+  }
 
 	/**
 	@PageName color
@@ -191,13 +203,10 @@ public :
 	@C#Ex TCODColor myDarkishRed = TCODColor.darkGrey.Multiply(TCODColor.lightRed);
 	@LuaEx myDarkishRed = tcod.color.darkGrey * tcod.color.lightRed
 	*/
-	TCODColor operator * (const TCODColor & a) const {
-		TCODColor ret;
-		ret.r=(uint8_t)(((int)r)*a.r/255);
-		ret.g=(uint8_t)(((int)g)*a.g/255);
-		ret.b=(uint8_t)(((int)b)*a.b/255);
-		return ret;
-	}
+  TCODColor operator*(const TCODColor& rhs) const
+  {
+    return TCODColor(*this, rhs, [](int c1, int c2){ return c1 * c2 / 255; });
+  }
 
 	/**
 	@PageName color
@@ -215,20 +224,10 @@ public :
 	@C#Ex TCODColor myDarkishRed = TCODColor.lightRed.Multiply(0.5f);
 	@LuaEx myDarkishRed = tcod.color.lightRed * 0.5
 	*/
-	TCODColor operator *(float value) const {
-		TCOD_color_t ret;
-		int r,g,b;
-		r = (int)(this->r * value);
-		g = (int)(this->g * value);
-		b = (int)(this->b * value);
-		r = CLAMP(0,255,r);
-		g = CLAMP(0,255,g);
-		b = CLAMP(0,255,b);
-		ret.r=(uint8_t)r;
-		ret.g=(uint8_t)g;
-		ret.b=(uint8_t)b;
-		return ret;
-	}
+  TCODColor operator*(float value) const
+  {
+    return TCODColor(*this, [=](int c){ return static_cast<int>(c * value); });
+  }
 
 	/**
 	@PageName color
@@ -244,19 +243,10 @@ public :
 	@C#Ex TCODColor myLightishRed = TCODColor.red.Plus(TCODColor.darkGrey)
 	@LuaEx myLightishRed = tcod.color.red + tcod.color.darkGrey
 	*/
-	TCODColor operator + (const TCODColor & a) const {
-		TCODColor ret;
-		int r=(int)(this->r)+a.r;
-		int g=(int)(this->g)+a.g;
-		int b=(int)(this->b)+a.b;
-		r = MIN(255,r);
-		g = MIN(255,g);
-		b = MIN(255,b);
-		ret.r=(uint8_t)r;
-		ret.g=(uint8_t)g;
-		ret.b=(uint8_t)b;
-		return ret;
-	}
+  TCODColor operator+(const TCODColor & rhs) const
+  {
+    return TCODColor(*this, rhs, [](int c1, int c2){ return c1 + c2; });
+  }
 
 	/**
 	@PageName color
@@ -272,19 +262,10 @@ public :
 	@C#Ex TCODColor myRedish = TCODColor.red.Minus(TCODColor.darkGrey)
 	@LuaEx myRedish = tcod.color.red - tcod.color.darkGrey
 	*/
-	TCODColor operator - (const TCODColor & a) const {
-		TCODColor ret;
-		int r=(int)(this->r)-a.r;
-		int g=(int)(this->g)-a.g;
-		int b=(int)(this->b)-a.b;
-		r = MAX(0,r);
-		g = MAX(0,g);
-		b = MAX(0,b);
-		ret.r=(uint8_t)r;
-		ret.g=(uint8_t)g;
-		ret.b=(uint8_t)b;
-		return ret;
-	}
+  TCODColor operator-(const TCODColor& rhs) const
+  {
+    return TCODColor(*this, rhs, [](int c1, int c2){ return c1 - c2; });
+  }
 
 	/**
 	@PageName color
@@ -305,13 +286,10 @@ coef should be between 0.0 and 1.0 but you can as well use other values
 	@C#Ex TCODColor myColor = TCODColor.Interpolate( TCODColor.darkGrey, TCODColor.lightRed, coef );
 	@LuaEx myColor = tcod.color.Interpolate( tcod.color.darkGrey, tcod.color.lightRed, coef )
 	*/
-	static TCODColor lerp(const TCODColor &a, const TCODColor &b, float coef) {
-		TCODColor ret;
-		ret.r=(uint8_t)(a.r+(b.r-a.r)*coef);
-		ret.g=(uint8_t)(a.g+(b.g-a.g)*coef);
-		ret.b=(uint8_t)(a.b+(b.b-a.b)*coef);
-		return ret;
-	}
+  static TCODColor lerp(const TCODColor &c1, const TCODColor &c2, float coef)
+  {
+    return TCODColor(c1, c2, [=](int c, int d){ return c + (d - c) * coef; });
+  }
 
 	/**
 	@PageName color
@@ -685,6 +663,33 @@ coef should be between 0.0 and 1.0 but you can as well use other values
 	// miscellaneous
 	static const TCODColor celadon;
 	static const TCODColor peach;
+ private:
+  /**
+   *  Return a color transformed by a lambda.
+   */
+  template <typename F>
+  TCODColor(const TCODColor& color, const F& lambda)
+  : r(clamp_(lambda(color.r))),
+    g(clamp_(lambda(color.g))),
+    b(clamp_(lambda(color.b)))
+  {}
+  /**
+   *  Return a color from two colors combined using a lambda.
+   */
+  template <typename F>
+  TCODColor(const TCODColor& color1, const TCODColor& color2, const F& lambda)
+  : r(clamp_(lambda(color1.r, color2.r))),
+    g(clamp_(lambda(color1.g, color2.g))),
+    b(clamp_(lambda(color1.b, color2.b)))
+  {}
+  /**
+   *  Return a color value clamped between 0 to 255.
+   */
+  template <typename T>
+  static constexpr uint8_t clamp_(const T& value) noexcept
+  {
+    return static_cast<uint8_t>(std::max<T>(0, std::min<T>(value, 255)));
+  }
 };
 
 TCODLIB_API TCODColor operator *(float value, const TCODColor &c);

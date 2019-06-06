@@ -1,37 +1,45 @@
-/*
-* libtcod
-* Copyright (c) 2008-2018 Jice & Mingos & rmtew
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in the
-*       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote
-*       products derived from this software without specific prior written
-*       permission.
-*
-* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
-* EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
-* DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-* ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-#ifndef _TCODLIB_INT_H
-#define _TCODLIB_INT_H
+/* BSD 3-Clause License
+ *
+ * Copyright © 2008-2019, Jice and the libtcod contributors.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+#ifndef TCODLIB_INT_H_
+#define TCODLIB_INT_H_
 #include <stdarg.h>
 #include <assert.h>
 #if defined(__ANDROID__)
 #include <android/log.h>
 #endif
+#ifdef __cplusplus
+#include <stdexcept>
+#include <string>
+#endif // __cplusplus
 
 #include "portability.h"
 #include "color.h"
@@ -74,6 +82,7 @@ typedef struct {
 	bool font_tcod_layout;
 	bool font_in_row;
 	bool font_greyscale;
+  int font_flags;
 	/* character size in font */
 	int font_width;
 	int font_height;
@@ -155,20 +164,22 @@ extern TCOD_internal_context_t TCOD_ctx;
 #if !defined(TCOD_BARE) && !defined(NO_OPENGL)
 /* opengl utilities */
 void TCOD_opengl_init_attributes(void);
-bool TCOD_opengl_init_state(int conw, int conh, void *font_tex);
+bool TCOD_opengl_init_state(int conw, int conh, struct SDL_Surface* font_tex);
 void TCOD_opengl_uninit_state(void);
 bool TCOD_opengl_init_shaders(void);
 bool TCOD_opengl_render(int oldFade, bool *ascii_updated, struct TCOD_Console *console, struct TCOD_Console *cache);
 void TCOD_opengl_swap(void);
-void * TCOD_opengl_get_screen(void);
+struct SDL_Surface* TCOD_opengl_get_screen(void);
 #endif
 
 #ifdef TCOD_IMAGE_SUPPORT
 /* image internal stuff */
-bool TCOD_image_mipmap_copy_internal(TCOD_image_t srcImage, TCOD_image_t dstImage);
-TCOD_color_t *TCOD_image_get_colors(TCOD_image_t *image);
-void TCOD_image_invalidate_mipmaps(TCOD_image_t *image);
-void TCOD_image_get_key_data(TCOD_image_t image, bool *has_key_color, TCOD_color_t *key_color);
+bool TCOD_image_mipmap_copy_internal(const TCOD_Image* srcImage,
+                                     TCOD_Image* dstImage);
+TCOD_color_t *TCOD_image_get_colors(TCOD_Image* image);
+void TCOD_image_invalidate_mipmaps(TCOD_Image* image);
+void TCOD_image_get_key_data(const TCOD_Image* image,
+                             bool *has_key_color, TCOD_color_t *key_color);
 #endif
 
 /* fov internal stuff */
@@ -179,37 +190,9 @@ void TCOD_map_compute_fov_permissive2(TCOD_map_t map, int player_x, int player_y
 void TCOD_map_compute_fov_restrictive_shadowcasting(TCOD_map_t map, int player_x, int player_y, int max_radius, bool light_walls);
 void TCOD_map_postproc(TCOD_map_t map,int x0,int y0, int x1, int y1, int dx, int dy);
 
-#ifdef TCOD_CONSOLE_SUPPORT
-/* TCODConsole non public methods*/
-bool TCOD_console_init(TCOD_console_t con,const char *title, bool fullscreen);
-int TCOD_console_print_internal(TCOD_console_t con,int x,int y, int w, int h, TCOD_bkgnd_flag_t flag, TCOD_alignment_t align, char *msg, bool can_split, bool count_only);
-int TCOD_console_stringLength(const unsigned char *s);
-unsigned char * TCOD_console_forward(unsigned char *s,int l);
-char *TCOD_console_vsprint(const char *fmt, va_list ap);
-#endif
-
 /* fatal errors */
 void TCOD_fatal(const char *fmt, ...);
 void TCOD_fatal_nopar(const char *msg);
-
-/* TCODSystem non public methods */
-#ifdef TCOD_CONSOLE_SUPPORT
-void TCOD_console_data_free(struct TCOD_Console *dat);
-bool TCOD_sys_init(struct TCOD_Console *console, bool fullscreen);
-void TCOD_sys_set_custom_font(const char *font_name,int nb_ch, int nb_cv,int flags);
-void TCOD_sys_map_ascii_to_font(int asciiCode, int fontCharX, int fontCharY);
-void *TCOD_sys_create_bitmap_for_console(TCOD_console_t console);
-void TCOD_sys_save_bitmap(void *bitmap, const char *filename);
-void *TCOD_sys_create_bitmap(int width, int height, TCOD_color_t *buf);
-void TCOD_sys_delete_bitmap(void *bitmap);
-void TCOD_sys_console_to_bitmap(void *bitmap, struct TCOD_Console *console,
-                                struct TCOD_Console *cache);
-TCODLIB_API void *TCOD_sys_get_surface(int width, int height, bool alpha);
-void TCOD_sys_save_fps(void);
-void TCOD_sys_restore_fps(void);
-void TCOD_sys_set_dirty(int dx, int dy, int dw, int dh);
-void TCOD_sys_set_dirty_character_code(int ch);
-int TCOD_get_tileid_for_charcode_(int charcode);
 
 /* switch fullscreen mode */
 void TCOD_sys_set_fullscreen(bool fullscreen);
@@ -222,8 +205,13 @@ TCOD_key_t TCOD_sys_check_for_keypress(int flags);
 TCOD_key_t TCOD_sys_wait_for_keypress(bool flush);
 bool TCOD_sys_is_key_pressed(TCOD_keycode_t key);
 void TCOD_sys_set_window_title(const char *title);
-#endif
+void TCOD_sys_pixel_to_tile(double* x, double* y);
 
+int TCOD_console_print_internal(
+    TCOD_Console* con, int x,int y, int w, int h, TCOD_bkgnd_flag_t flag,
+    TCOD_alignment_t align, char* msg, bool can_split, bool count_only
+);
+char* TCOD_console_vsprint(const char* fmt, va_list ap);
 /* UTF-8 stuff */
 #ifndef NO_UNICODE
 wchar_t *TCOD_console_vsprint_utf(const wchar_t *fmt, va_list ap);
@@ -233,10 +221,11 @@ int TCOD_console_print_internal_utf(TCOD_console_t con,int x,int y, int rw, int 
 
 #ifdef TCOD_IMAGE_SUPPORT
 /* image manipulation */
-TCODLIB_API void *TCOD_sys_load_image(const char *filename);
-void TCOD_sys_get_image_size(const void *image, int *w,int *h);
-TCOD_color_t TCOD_sys_get_image_pixel(const void *image,int x, int y);
-int TCOD_sys_get_image_alpha(const void *image,int x, int y);
+TCODLIB_API struct SDL_Surface* TCOD_sys_load_image(const char *filename);
+void TCOD_sys_get_image_size(const struct SDL_Surface *image, int *w,int *h);
+TCOD_color_t TCOD_sys_get_image_pixel(const struct SDL_Surface *image,
+                                      int x, int y);
+int TCOD_sys_get_image_alpha(const struct SDL_Surface* image, int x, int y);
 bool TCOD_sys_check_magic_number(const char *filename, size_t size, uint8_t *data);
 #endif
 
@@ -272,7 +261,7 @@ typedef struct TCOD_SDL_driver_t {
 	/* change the mouse cursor position */
 	void (*set_mouse_position)(int x, int y);
 	/* clipboard */
-	char *(*get_clipboard_text)(void);
+	const char *(*get_clipboard_text)(void);
 	bool (*set_clipboard_text)(const char *text);
 	/* android compatible file access functions */
 	bool (*file_read)(const char *filename, unsigned char **buf, size_t *size);
@@ -532,6 +521,114 @@ extern int oldFade;
 #define TCOD_PEACH 255,159,127
 
 #ifdef __cplusplus
+} // extern "C"
+#endif
+
+#ifdef __cplusplus
+// TCODConsole non public methods
+bool TCOD_console_init(TCOD_Console* con);
+bool TCOD_console_init(TCOD_Console* con, const std::string& title,
+                       bool fullscreen);
+int TCOD_console_stringLength(const unsigned char* s);
+unsigned char* TCOD_console_forward(unsigned char* s,int l);
+// TCODSystem non public methods
+bool TCOD_sys_init(struct TCOD_Console *console, bool fullscreen);
+void TCOD_sys_set_custom_font(const char *font_name,int nb_ch, int nb_cv,int flags);
+void TCOD_sys_map_ascii_to_font(int asciiCode, int fontCharX, int fontCharY);
+void TCOD_sys_decode_font_(void);
+struct SDL_Surface* TCOD_sys_create_bitmap_for_console(TCOD_Console* console);
+void TCOD_sys_save_bitmap(struct SDL_Surface* bitmap, const char *filename);
+struct SDL_Surface* TCOD_sys_create_bitmap(int width, int height,
+                                           TCOD_color_t *buf);
+void TCOD_sys_delete_bitmap(struct SDL_Surface* bitmap);
+void TCOD_sys_console_to_bitmap(
+    struct SDL_Surface* bitmap,
+    struct TCOD_Console *console,
+    struct TCOD_Console *cache);
+TCODLIB_CAPI struct SDL_Surface* TCOD_sys_get_surface(int width, int height,
+                                                      bool alpha);
+void TCOD_sys_save_fps(void);
+void TCOD_sys_restore_fps(void);
+void TCOD_sys_set_dirty(int dx, int dy, int dw, int dh);
+void TCOD_sys_set_dirty_character_code(int ch);
+int TCOD_get_tileid_for_charcode_(int charcode);
+namespace tcod {
+namespace console {
+/**
+ *  Validate and return a console.
+ */
+inline TCOD_Console* validate_(TCOD_Console* console)
+{
+  console = (console ? console : TCOD_ctx.root);
+  TCOD_ASSERT(console);
+  return console;
 }
-#endif
-#endif
+/**
+ *  Validate and return a constant console.
+ */
+inline const TCOD_Console* validate_(const TCOD_Console* console)
+{
+  console = (console ? console : TCOD_ctx.root);
+  TCOD_ASSERT(console);
+  return console;
+}
+/**
+ *  Return a console reference from a valid console pointer.
+ */
+inline TCOD_Console& ensure_(TCOD_Console* console)
+{
+  console = validate_(console);
+  if (!console) {
+    throw std::logic_error("libtcod has not been initialized yet.");
+  }
+  return *console;
+}
+/**
+ *  Return a console reference from a valid constant console pointer.
+ */
+inline const TCOD_Console& ensure_(const TCOD_Console* console)
+{
+  console = validate_(console);
+  if (!console) {
+    throw std::logic_error("libtcod has not been initialized yet.");
+  }
+  return *console;
+}
+} // namespace console
+} // namespace tcod
+/**
+ *  Validate and return a console.
+ */
+inline TCOD_Console* TCOD_console_validate_(TCOD_Console* console)
+{
+  return tcod::console::validate_(console);
+}
+/**
+ *  Validate and return a constant console.
+ */
+inline const TCOD_Console* TCOD_console_validate_(const TCOD_Console* console)
+{
+  return tcod::console::validate_(console);
+}
+/**
+ *  Return true if the console is valid and the index is within it.
+ */
+inline bool TCOD_console_is_index_valid_(const TCOD_Console* console,
+                                         int x, int y)
+{
+  return console && 0 <= x && x < console->w && 0 <= y && y < console->h;
+}
+TCOD_event_t TCOD_sys_handle_mouse_event(
+    const union SDL_Event* ev, TCOD_mouse_t* mouse);
+TCOD_event_t TCOD_sys_handle_key_event(
+    const union SDL_Event* ev, TCOD_key_t* key);
+/**
+ *  Private function, gets pointers of an old renderer.
+ */
+struct SDL_Window* TCOD_sys_get_sdl_window_(void);
+/**
+ *  Private function, gets pointers of an old renderer.
+ */
+struct SDL_Renderer* TCOD_sys_get_sdl_renderer_(void);
+#endif // __cplusplus
+#endif // TCODLIB_INT_H_

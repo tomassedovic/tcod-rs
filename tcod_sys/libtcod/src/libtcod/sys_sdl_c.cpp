@@ -1,34 +1,39 @@
-/*
-* libtcod
-* Copyright (c) 2008-2018 Jice & Mingos & rmtew
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in the
-*       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote
-*       products derived from this software without specific prior written
-*       permission.
-*
-* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
-* EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
-* DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-* ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+/* BSD 3-Clause License
+ *
+ * Copyright © 2008-2019, Jice and the libtcod contributors.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 #ifndef TCOD_BARE
 #include "mouse.h"
 #include "sys.h"
 
+#include <array>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,6 +43,8 @@
 #include "console.h"
 #include "libtcod_int.h"
 #include "parser.h"
+#include "color/canvas.h"
+#include "engine/error.h"
 #include "engine/globals.h"
 
 static TCOD_SDL_driver_t *sdl=NULL;
@@ -45,10 +52,10 @@ static TCOD_SDL_driver_t *sdl=NULL;
 
 /* library initialization function */
 #ifdef TCOD_WINDOWS
-#define NOMINMAX
+#define NOMINMAX 1
 #include <windows.h>
-BOOL APIENTRY DllMain( HINSTANCE hModule, DWORD reason, LPVOID reserved) {
-	switch (reason ) {
+BOOL APIENTRY DllMain(HINSTANCE, DWORD reason, LPVOID) {
+	switch (reason) {
 		case DLL_PROCESS_ATTACH : sdl = SDL_implementation_factory(); break;
 		default : break;
 	}
@@ -85,31 +92,31 @@ typedef struct {
 /* image support stuff */
 bool TCOD_sys_check_bmp(const char *filename);
 SDL_Surface *TCOD_sys_read_bmp(const char *filename);
-void TCOD_sys_write_bmp(const SDL_Surface *surf, const char *filename);
+void TCOD_sys_write_bmp(SDL_Surface *surf, const char *filename);
 bool TCOD_sys_check_png(const char *filename);
 SDL_Surface *TCOD_sys_read_png(const char *filename);
-void TCOD_sys_write_png(const SDL_Surface *surf, const char *filename);
+void TCOD_sys_write_png(SDL_Surface *surf, const char *filename);
 
 typedef struct {
-	char *extension;
+	const char *extension;
 	bool (*check_type)(const char *filename);
 	SDL_Surface *(*read)(const char *filename);
-	void (*write)(const SDL_Surface *surf, const char *filename);
+	void (*write)(SDL_Surface *surf, const char *filename);
 } image_support_t;
 
-static image_support_t image_type[] = {
+static constexpr image_support_t image_type[] = {
 	{ "BMP", TCOD_sys_check_bmp, TCOD_sys_read_bmp, TCOD_sys_write_bmp },
 	{ "PNG", TCOD_sys_check_png, TCOD_sys_read_png, TCOD_sys_write_png },
 	{ NULL, NULL, NULL, NULL },
 };
 
-scale_data_t scale_data={0};
-SDL_Window* window=NULL;
-SDL_Renderer* renderer=NULL;
-float scale_factor=1.0f;
-SDL_Surface* charmap=NULL;
-char *last_clipboard_text = NULL;
-static bool has_startup=false;
+scale_data_t scale_data = {};
+SDL_Window* window = nullptr;
+SDL_Renderer* renderer = nullptr;
+float scale_factor = 1.0f;
+SDL_Surface* charmap = nullptr;
+char *last_clipboard_text = nullptr;
+static bool has_startup = false;
 #define MAX_SCALE_FACTOR 5.0f
 
 /* font transparent color */
@@ -150,27 +157,63 @@ typedef struct {
 } vk_to_c_entry;
 #define NUM_VK_TO_C_ENTRIES 10
 static vk_to_c_entry vk_to_c[NUM_VK_TO_C_ENTRIES];
-
-/* convert ASCII code to TCOD layout position */
-static int init_ascii_to_tcod[256] = {
-  0,  0,  0,  0,  0,  0,  0,  0,  0, 76, 77,  0,  0,  0,  0,  0, /* ASCII 0 to 15 */
- 71, 70, 72,  0,  0,  0,  0,  0, 64, 65, 67, 66,  0, 73, 68, 69, /* ASCII 16 to 31 */
-  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, /* ASCII 32 to 47 */
- 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, /* ASCII 48 to 63 */
- 32, 96, 97, 98, 99,100,101,102,103,104,105,106,107,108,109,110, /* ASCII 64 to 79 */
-111,112,113,114,115,116,117,118,119,120,121, 33, 34, 35, 36, 37, /* ASCII 80 to 95 */
- 38,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142, /* ASCII 96 to 111 */
-143,144,145,146,147,148,149,150,151,152,153, 39, 40, 41, 42,  0, /* ASCII 112 to 127 */
-  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, /* ASCII 128 to 143 */
-  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, /* ASCII 144 to 159 */
-  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, /* ASCII 160 to 175 */
- 43, 44, 45, 46, 49,  0,  0,  0,  0, 81, 78, 87, 88,  0,  0, 55, /* ASCII 176 to 191 */
- 53, 50, 52, 51, 47, 48,  0,  0, 85, 86, 82, 84, 83, 79, 80,  0, /* ASCII 192 to 207 */
-  0,  0,  0,  0,  0,  0,  0,  0,  0, 56, 54,  0,  0,  0,  0,  0, /* ASCII 208 to 223 */
- 74, 75, 57, 58, 59, 60, 61, 62, 63,  0,  0,  0,  0,  0,  0,  0, /* ASCII 224 to 239 */
-  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, /* ASCII 240 to 255 */
+/**
+ *  Codec for TCOD_FONT_LAYOUT_TCOD.
+ *
+ *  Converts from EASCII code-point -> raw tile position.
+ */
+constexpr std::array<int, 256> tcod_codec_{
+  0,  0,  0,  0,  0,  0,  0,  0,  0, 76, 77,  0,  0,  0,  0,  0, /* 0 to 15 */
+ 71, 70, 72,  0,  0,  0,  0,  0, 64, 65, 67, 66,  0, 73, 68, 69, /* 16 to 31 */
+  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, /* 32 to 47 */
+ 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, /* 48 to 63 */
+ 32, 96, 97, 98, 99,100,101,102,103,104,105,106,107,108,109,110, /* 64 to 79 */
+111,112,113,114,115,116,117,118,119,120,121, 33, 34, 35, 36, 37, /* 80 to 95 */
+ 38,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142, /* 96 to 111 */
+143,144,145,146,147,148,149,150,151,152,153, 39, 40, 41, 42,  0, /* 112 to 127 */
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, /* 128 to 143 */
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, /* 144 to 159 */
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, /* 160 to 175 */
+ 43, 44, 45, 46, 49,  0,  0,  0,  0, 81, 78, 87, 88,  0,  0, 55, /* 176 to 191 */
+ 53, 50, 52, 51, 47, 48,  0,  0, 85, 86, 82, 84, 83, 79, 80,  0, /* 192 to 207 */
+  0,  0,  0,  0,  0,  0,  0,  0,  0, 56, 54,  0,  0,  0,  0,  0, /* 208 to 223 */
+ 74, 75, 57, 58, 59, 60, 61, 62, 63,  0,  0,  0,  0,  0,  0,  0, /* 224 to 239 */
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, /* 240 to 255 */
 };
-
+constexpr std::array<int, 256> cp437_codec_{
+0x0000, 0x263A, 0x263B, 0x2665, 0x2666, 0x2663, 0x2660, 0x2022,
+0x25D8, 0x25CB, 0x25D9, 0x2642, 0x2640, 0x266A, 0x266B, 0x263C,
+0x25BA, 0x25C4, 0x2195, 0x203C, 0x00B6, 0x00A7, 0x25AC, 0x21A8,
+0x2191, 0x2193, 0x2192, 0x2190, 0x221F, 0x2194, 0x25B2, 0x25BC,
+0x0020, 0x0021, 0x0022, 0x0023, 0x0024, 0x0025, 0x0026, 0x0027,
+0x0028, 0x0029, 0x002A, 0x002B, 0x002C, 0x002D, 0x002E, 0x002F,
+0x0030, 0x0031, 0x0032, 0x0033, 0x0034, 0x0035, 0x0036, 0x0037,
+0x0038, 0x0039, 0x003A, 0x003B, 0x003C, 0x003D, 0x003E, 0x003F,
+0x0040, 0x0041, 0x0042, 0x0043, 0x0044, 0x0045, 0x0046, 0x0047,
+0x0048, 0x0049, 0x004A, 0x004B, 0x004C, 0x004D, 0x004E, 0x004F,
+0x0050, 0x0051, 0x0052, 0x0053, 0x0054, 0x0055, 0x0056, 0x0057,
+0x0058, 0x0059, 0x005A, 0x005B, 0x005C, 0x005D, 0x005E, 0x005F,
+0x0060, 0x0061, 0x0062, 0x0063, 0x0064, 0x0065, 0x0066, 0x0067,
+0x0068, 0x0069, 0x006A, 0x006B, 0x006C, 0x006D, 0x006E, 0x006F,
+0x0070, 0x0071, 0x0072, 0x0073, 0x0074, 0x0075, 0x0076, 0x0077,
+0x0078, 0x0079, 0x007A, 0x007B, 0x007C, 0x007D, 0x007E, 0x007F,
+0x00C7, 0x00FC, 0x00E9, 0x00E2, 0x00E4, 0x00E0, 0x00E5, 0x00E7,
+0x00EA, 0x00EB, 0x00E8, 0x00EF, 0x00EE, 0x00EC, 0x00C4, 0x00C5,
+0x00C9, 0x00E6, 0x00C6, 0x00F4, 0x00F6, 0x00F2, 0x00FB, 0x00F9,
+0x00FF, 0x00D6, 0x00DC, 0x00A2, 0x00A3, 0x00A5, 0x20A7, 0x0192,
+0x00E1, 0x00ED, 0x00F3, 0x00FA, 0x00F1, 0x00D1, 0x00AA, 0x00BA,
+0x00BF, 0x2310, 0x00AC, 0x00BD, 0x00BC, 0x00A1, 0x00AB, 0x00BB,
+0x2591, 0x2592, 0x2593, 0x2502, 0x2524, 0x2561, 0x2562, 0x2556,
+0x2555, 0x2563, 0x2551, 0x2557, 0x255D, 0x255C, 0x255B, 0x2510,
+0x2514, 0x2534, 0x252C, 0x251C, 0x2500, 0x253C, 0x255E, 0x255F,
+0x255A, 0x2554, 0x2569, 0x2566, 0x2560, 0x2550, 0x256C, 0x2567,
+0x2568, 0x2564, 0x2565, 0x2559, 0x2558, 0x2552, 0x2553, 0x256B,
+0x256A, 0x2518, 0x250C, 0x2588, 0x2584, 0x258C, 0x2590, 0x2580,
+0x03B1, 0x00DF, 0x0393, 0x03C0, 0x03A3, 0x03C3, 0x00B5, 0x03C4,
+0x03A6, 0x0398, 0x03A9, 0x03B4, 0x221E, 0x03C6, 0x03B5, 0x2229,
+0x2261, 0x00B1, 0x2265, 0x2264, 0x2320, 0x2321, 0x00F7, 0x2248,
+0x00B0, 0x2219, 0x00B7, 0x221A, 0x207F, 0x00B2, 0x25A0, 0x00A0,
+};
 static void alloc_ascii_tables(void) {
 	if ( TCOD_ctx.ascii_to_tcod ) free(TCOD_ctx.ascii_to_tcod);
 	if ( charcols ) {
@@ -178,10 +221,12 @@ static void alloc_ascii_tables(void) {
 		free(first_draw);
 	}
 
-	TCOD_ctx.ascii_to_tcod = (int *)calloc(sizeof(int),TCOD_ctx.max_font_chars);
-	charcols = (TCOD_color_t *)calloc(sizeof(TCOD_color_t),TCOD_ctx.max_font_chars);
-	first_draw =(bool *)calloc(sizeof(bool),TCOD_ctx.max_font_chars);
-	memcpy(TCOD_ctx.ascii_to_tcod,init_ascii_to_tcod,sizeof(int)*256);
+	TCOD_ctx.ascii_to_tcod =
+      static_cast<int*>(calloc(sizeof(int),TCOD_ctx.max_font_chars));
+	charcols = static_cast<TCOD_color_t*>(calloc(sizeof(TCOD_color_t),
+                                               TCOD_ctx.max_font_chars));
+	first_draw =
+      static_cast<bool*>(calloc(sizeof(bool), TCOD_ctx.max_font_chars));
 }
 /** Reallocate the TCOD_ctx.ascii_to_tcod array, usually to make it bigger.
  */
@@ -219,7 +264,8 @@ void TCOD_sys_map_ascii_to_font(int asciiCode, int fontCharX, int fontCharY) {
   auto tilesheet = tcod::engine::get_tilesheet();
   if (tileset && tilesheet) {
     try {
-      tileset->set_tile(asciiCode, tilesheet->get_tile(fontCharX, fontCharY));
+      int tile_id = fontCharX + fontCharY * tilesheet->get_columns();
+      tileset->set_tile(asciiCode, tilesheet->get_tile(tile_id));
     } catch (const std::runtime_error&) { // Ignore errors and continue.
     } catch (const std::logic_error&) {
     }
@@ -227,30 +273,50 @@ void TCOD_sys_map_ascii_to_font(int asciiCode, int fontCharX, int fontCharY) {
   // Assign to legacy character table.
   if (asciiCode >= TCOD_ctx.max_font_chars) {
     /* reduce total allocations by resizing in increments of 256 */
-    if (realloc_ascii_tables((asciiCode & 0xff) + 1)) {
+    if (realloc_ascii_tables((asciiCode | 0xff) + 1)) {
       return; /* Failed to realloc table (old table pointer is still good) */
     }
   }
   TCOD_ctx.ascii_to_tcod[asciiCode] =
       fontCharX + fontCharY * TCOD_ctx.fontNbCharHoriz;
 }
+/**
+ *  Set a code-point to point to an already existing code-point.
+ */
+static void TCOD_sys_map_clone_(int new_codepoint, int old_codepoint) {
+  if (old_codepoint < 0) { return; }
+  if (old_codepoint >= TCOD_ctx.max_font_chars) { return; }
+  TCOD_sys_map_ascii_to_font(
+      new_codepoint, TCOD_ctx.ascii_to_tcod[old_codepoint], 0);
+}
 
-void TCOD_sys_load_font(void) {
+static int TCOD_sys_load_font(void) {
 	int i;
 	bool hasTransparent=false;
 	int x,y;
 
-	if ( charmap ) SDL_FreeSurface(charmap);
-	charmap=static_cast<SDL_Surface*>(TCOD_sys_load_image(TCOD_ctx.font_file));
-	if (charmap == NULL ) TCOD_fatal("SDL : cannot load %s",TCOD_ctx.font_file);
-	if ( (float)(charmap->w / TCOD_ctx.fontNbCharHoriz) != charmap->w / TCOD_ctx.fontNbCharHoriz
-		|| (float)(charmap->h / TCOD_ctx.fontNbCharVertic) != charmap->h / TCOD_ctx.fontNbCharVertic ) TCOD_fatal(" %s size is not a multiple of font layout (%dx%d)\n",
-		TCOD_ctx.font_file,TCOD_ctx.fontNbCharHoriz,TCOD_ctx.fontNbCharVertic);
+  if (charmap) { SDL_FreeSurface(charmap); }
+  charmap = TCOD_sys_load_image(TCOD_ctx.font_file);
+  if (charmap == NULL) {
+    return tcod::set_errorf("SDL : cannot load %s", TCOD_ctx.font_file);
+  }
+	if ((static_cast<float>(charmap->w / TCOD_ctx.fontNbCharHoriz)
+       != charmap->w / TCOD_ctx.fontNbCharHoriz)
+      || (static_cast<float>(charmap->h / TCOD_ctx.fontNbCharVertic)
+          != charmap->h / TCOD_ctx.fontNbCharVertic)) {
+    return tcod::set_errorf(
+        " %s size is not a multiple of font layout (%dx%d)\n",
+        TCOD_ctx.font_file,
+        TCOD_ctx.fontNbCharHoriz,
+        TCOD_ctx.fontNbCharVertic);
+  }
 	TCOD_ctx.font_width=charmap->w/TCOD_ctx.fontNbCharHoriz;
 	TCOD_ctx.font_height=charmap->h/TCOD_ctx.fontNbCharVertic;
 	/* allocated bool array for colored flags */
 	if ( TCOD_ctx.colored ) free(TCOD_ctx.colored);
-	TCOD_ctx.colored=(bool *)calloc(sizeof(bool), TCOD_ctx.fontNbCharHoriz*TCOD_ctx.fontNbCharVertic);
+	TCOD_ctx.colored = static_cast<bool*>(
+      calloc(sizeof(bool),
+             TCOD_ctx.fontNbCharHoriz * TCOD_ctx.fontNbCharVertic));
 	check_ascii_to_tcod();
 	/* figure out what kind of font we have */
 	/* check if the alpha layer is actually used */
@@ -258,7 +324,8 @@ void TCOD_sys_load_font(void) {
 		TCOD_LOG(("32bits font... checking for alpha layer... "));
 		for (x=0; !hasTransparent && x < charmap->w; x ++ ) {
 			for (y=0;!hasTransparent && y < charmap->h; y++ ) {
-				uint8_t*pixel=(uint8_t*)(charmap->pixels) + y * charmap->pitch + x * charmap->format->BytesPerPixel;
+				uint8_t* pixel = static_cast<uint8_t*>(charmap->pixels)
+            + y * charmap->pitch + x * charmap->format->BytesPerPixel;
 				uint8_t alpha=*((pixel)+charmap->format->Ashift/8);
 				if ( alpha < 255 ) {
 					hasTransparent=true;
@@ -270,7 +337,7 @@ void TCOD_sys_load_font(void) {
 		/* convert to 24 bits */
 		SDL_Surface *temp;
 		TCOD_LOG(("font bpp < 24. converting to 24bits\n"));
-		temp=(SDL_Surface *)TCOD_sys_get_surface(charmap->w,charmap->h,false);
+		temp = TCOD_sys_get_surface(charmap->w, charmap->h, false);
 		SDL_BlitSurface(charmap,NULL,temp,NULL);
 		SDL_FreeSurface(charmap);
 		charmap=temp;
@@ -286,13 +353,18 @@ void TCOD_sys_load_font(void) {
 			keyx = TCOD_ctx.font_width/2;
 			keyy = TCOD_ctx.font_height/2;
 		} else if (TCOD_ctx.font_in_row) {
-			keyx = ((int)(' ') % TCOD_ctx.fontNbCharHoriz ) * TCOD_ctx.font_width + TCOD_ctx.font_width/2;
-			keyy = ((int)(' ') / TCOD_ctx.fontNbCharHoriz ) * TCOD_ctx.font_height + TCOD_ctx.font_height/2;
+			keyx = (static_cast<int>(' ') % TCOD_ctx.fontNbCharHoriz)
+          * TCOD_ctx.font_width + TCOD_ctx.font_width / 2;
+			keyy = (static_cast<int>(' ') / TCOD_ctx.fontNbCharHoriz)
+          * TCOD_ctx.font_height + TCOD_ctx.font_height / 2;
 		} else {
-			keyx = ((int)(' ') / TCOD_ctx.fontNbCharVertic ) * TCOD_ctx.font_width + TCOD_ctx.font_width/2;
-			keyy = ((int)(' ') % TCOD_ctx.fontNbCharVertic ) * TCOD_ctx.font_height + TCOD_ctx.font_height/2;
+			keyx = (static_cast<int>(' ') / TCOD_ctx.fontNbCharVertic)
+          * TCOD_ctx.font_width + TCOD_ctx.font_width / 2;
+			keyy = (static_cast<int>(' ') % TCOD_ctx.fontNbCharVertic)
+          * TCOD_ctx.font_height + TCOD_ctx.font_height / 2;
 		}
-		pixel=(uint8_t*)(charmap->pixels) + keyy * charmap->pitch + keyx * charmap->format->BytesPerPixel;
+		pixel = static_cast<uint8_t*>(charmap->pixels)
+        + keyy * charmap->pitch + keyx * charmap->format->BytesPerPixel;
 		fontKeyCol.r=*((pixel)+charmap->format->Rshift/8);
 		fontKeyCol.g=*((pixel)+charmap->format->Gshift/8);
 		fontKeyCol.b=*((pixel)+charmap->format->Bshift/8);
@@ -301,7 +373,7 @@ void TCOD_sys_load_font(void) {
 			/* 32 bits font but alpha layer not used. convert to 24 bits (faster) */
 			SDL_Surface *temp;
 			TCOD_LOG(("32bits font with no alpha => converting to faster 24 bits\n"));
-			temp=(SDL_Surface *)TCOD_sys_get_surface(charmap->w,charmap->h,false);
+			temp = TCOD_sys_get_surface(charmap->w, charmap->h, false);
 			SDL_BlitSurface(charmap,NULL,temp,NULL);
 			SDL_FreeSurface(charmap);
 			charmap=temp;
@@ -315,8 +387,10 @@ void TCOD_sys_load_font(void) {
 		cy=(i/TCOD_ctx.fontNbCharHoriz);
 		for( px=0; !end && px < TCOD_ctx.font_width; px++ ) {
 			for (py=0; !end && py < TCOD_ctx.font_height; py++ ) {
-					uint8_t*pixel=(uint8_t*)(charmap->pixels) + (cy*TCOD_ctx.font_height+py) * charmap->pitch
-						+ (cx*TCOD_ctx.font_width+px) * charmap->format->BytesPerPixel;
+					uint8_t*pixel=static_cast<uint8_t*>(charmap->pixels)
+              + (cy * TCOD_ctx.font_height + py) * charmap->pitch
+						  + (cx * TCOD_ctx.font_width + px)
+                * charmap->format->BytesPerPixel;
 					uint8_t r=*((pixel)+charmap->format->Rshift/8);
 					uint8_t g=*((pixel)+charmap->format->Gshift/8);
 					uint8_t b=*((pixel)+charmap->format->Bshift/8);
@@ -340,7 +414,7 @@ void TCOD_sys_load_font(void) {
 		if ( charmap->format->BytesPerPixel != 4 ) {
 			SDL_Surface *temp;
 			TCOD_LOG(("24bits greyscale font. converting to 32bits\n"));
-			temp=(SDL_Surface *)TCOD_sys_get_surface(charmap->w,charmap->h,true);
+			temp = TCOD_sys_get_surface(charmap->w, charmap->h, true);
 			SDL_BlitSurface(charmap,NULL,temp,NULL);
 			SDL_FreeSurface(charmap);
 			charmap=temp;
@@ -353,14 +427,16 @@ void TCOD_sys_load_font(void) {
 			for (x=cx*TCOD_ctx.font_width; x < (cx+1)*TCOD_ctx.font_width; x ++ ) {
 				for (y=cy*TCOD_ctx.font_height;y < (cy+1)*TCOD_ctx.font_height; y++ ) {
 					if ( ! TCOD_ctx.colored[i]) {
-						uint8_t*pixel=(uint8_t*)(charmap->pixels) + y * charmap->pitch + x * charmap->format->BytesPerPixel;
+						uint8_t* pixel = static_cast<uint8_t*>(charmap->pixels)
+                + y * charmap->pitch + x * charmap->format->BytesPerPixel;
 						uint8_t r=*((pixel)+charmap->format->Rshift/8);
 						*((pixel)+charmap->format->Ashift/8) = (invert ? 255-r : r);
 						*((pixel)+charmap->format->Rshift/8)=255;
 						*((pixel)+charmap->format->Gshift/8)=255;
 						*((pixel)+charmap->format->Bshift/8)=255;
 					} else {
-						uint8_t*pixel=(uint8_t*)(charmap->pixels) + y * charmap->pitch + x * charmap->format->BytesPerPixel;
+						uint8_t* pixel = static_cast<uint8_t*>(charmap->pixels)
+                + y * charmap->pitch + x * charmap->format->BytesPerPixel;
 						uint8_t r=*((pixel)+charmap->format->Rshift/8);
 						uint8_t g=*((pixel)+charmap->format->Gshift/8);
 						uint8_t b=*((pixel)+charmap->format->Bshift/8);
@@ -384,23 +460,57 @@ void TCOD_sys_load_font(void) {
 		first_draw[i]=true;
 	}
 	check_ascii_to_tcod();
-	if (!TCOD_ctx.font_tcod_layout) {
-		/* apply standard ascii mapping */
-		if ( TCOD_ctx.font_in_row ) {
-			/* for font in row */
-			for (i=0; i < TCOD_ctx.max_font_chars; i++ ) TCOD_ctx.ascii_to_tcod[i]=i;
-		} else {
-			/* for font in column */
-			for (i=0; i < TCOD_ctx.max_font_chars; i++ ) {
-				int fy = i % TCOD_ctx.fontNbCharVertic;
-				int fx = i / TCOD_ctx.fontNbCharVertic;
-				TCOD_ctx.ascii_to_tcod[i]=fx + fy * TCOD_ctx.fontNbCharHoriz;
-			}
-		}
-	}
+  TCOD_sys_decode_font_();
+  return 0;
 }
-
-void TCOD_sys_set_custom_font(const char *fontFile,int nb_ch, int nb_cv, int flags) {
+/**
+ *  Decode the font layout depending on the current flags.
+ */
+void TCOD_sys_decode_font_(void)
+{
+  if (TCOD_ctx.font_flags & TCOD_FONT_LAYOUT_CP437) {
+    for (int i = 0; i < static_cast<int>(cp437_codec_.size()); ++i) {
+      TCOD_sys_map_ascii_to_font(cp437_codec_.at(i), i, 0);
+    }
+  } else if (TCOD_ctx.font_tcod_layout) {
+    for (int i = 0; i < static_cast<int>(tcod_codec_.size()); ++i) {
+      TCOD_sys_map_ascii_to_font(i, tcod_codec_.at(i), 0);
+    }
+    TCOD_sys_map_clone_(0x2500, TCOD_CHAR_HLINE);
+    TCOD_sys_map_clone_(0x2502, TCOD_CHAR_VLINE);
+    TCOD_sys_map_clone_(0x250C, TCOD_CHAR_NW);
+    TCOD_sys_map_clone_(0x2510, TCOD_CHAR_NE);
+    TCOD_sys_map_clone_(0x2514, TCOD_CHAR_SW);
+    TCOD_sys_map_clone_(0x2518, TCOD_CHAR_SE);
+  } else {
+    if (TCOD_ctx.font_in_row) {
+      /* for font in row */
+      for (int i = 0; i < TCOD_ctx.max_font_chars; ++i) {
+        TCOD_sys_map_ascii_to_font(i, i, 0);
+      }
+    } else {
+      /* for font in column */
+      for (int i = 0; i < TCOD_ctx.max_font_chars; ++i) {
+        int fy = i % TCOD_ctx.fontNbCharVertic;
+        int fx = i / TCOD_ctx.fontNbCharVertic;
+        TCOD_sys_map_ascii_to_font(i, fx, fy);
+      }
+    }
+    TCOD_sys_map_clone_(0x2500, 0xC4);
+    TCOD_sys_map_clone_(0x2502, 0xB3);
+    TCOD_sys_map_clone_(0x250C, 0xDA);
+    TCOD_sys_map_clone_(0x2510, 0xBF);
+    TCOD_sys_map_clone_(0x2514, 0xC0);
+    TCOD_sys_map_clone_(0x2518, 0xD9);
+  }
+}
+/**
+ *  This function used to handle more stuff, now it only initializes the
+ *  legacy font system.
+ *
+ *  See TCOD_console_set_custom_font.
+ */
+void TCOD_sys_set_custom_font(const char*, int, int, int) {
   check_ascii_to_tcod();
 }
 
@@ -410,11 +520,10 @@ void find_resolution(void) {
 	sdl->get_closest_mode(&TCOD_ctx.actual_fullscreen_width,&TCOD_ctx.actual_fullscreen_height);
 }
 
-void *TCOD_sys_create_bitmap_for_console(TCOD_console_t console) {
-	int w,h;
-	w = TCOD_console_get_width(console) * TCOD_ctx.font_width;
-	h = TCOD_console_get_height(console) * TCOD_ctx.font_height;
-	return TCOD_sys_get_surface(w,h,false);
+SDL_Surface* TCOD_sys_create_bitmap_for_console(TCOD_Console* console) {
+  int w = TCOD_console_get_width(console) * TCOD_ctx.font_width;
+  int h = TCOD_console_get_height(console) * TCOD_ctx.font_height;
+  return TCOD_sys_get_surface(w, h, false);
 }
 
 static void TCOD_sys_render(void *vbitmap, struct TCOD_Console* console) {
@@ -423,253 +532,252 @@ static void TCOD_sys_render(void *vbitmap, struct TCOD_Console* console) {
   }
 }
 
-void TCOD_sys_console_to_bitmap(void *vbitmap,
-		struct TCOD_Console* console, struct TCOD_Console* cache) {
-	static SDL_Surface *charmap_backup=NULL;
-	SDL_Surface *bitmap = (SDL_Surface *)vbitmap;
-	int x,y;
-	uint32_t sdl_back=0, sdl_fore=0;
-	TCOD_color_t fading_color = TCOD_console_get_fading_color();
-	int fade = (int)TCOD_console_get_fade();
-	/* can only track changes on the root console */
-	bool track_changes = (cache && oldFade == fade);
-	uint8_t bpp = charmap->format->BytesPerPixel;
-	int *c = console->ch_array;
-	int *oc;
-	TCOD_color_t *ofg, *obg, *nfg, *nbg;
-	int hdelta;
-	if ( bpp == 4 ) {
-		hdelta=(charmap->pitch - TCOD_ctx.font_width*bpp)/4;
-	} else {
-		hdelta=(charmap->pitch - TCOD_ctx.font_width*bpp);
-	}
-	nfg = console->fg_array;
-	nbg = console->bg_array;
-	if (track_changes) {
-		oc = cache->ch_array;
-		ofg = cache->fg_array;
-		obg = cache->bg_array;
-	}
-	if ( charmap_backup == NULL ) {
-		charmap_backup=(SDL_Surface *)TCOD_sys_get_surface(charmap->w,charmap->h,true);
-		SDL_BlitSurface(charmap,NULL,charmap_backup,NULL);
-	}
-#ifdef USE_SDL_LOCKS
-	if ( SDL_MUSTLOCK( bitmap ) && SDL_LockSurface( bitmap ) < 0 ) return;
-#endif
-	for (y = 0; y < console->h; y++) {
-		for (x = 0; x < console->w; x++) {
-			SDL_Rect srcRect,dstRect;
-			bool changed=true;
-			if ( track_changes ) {
-				changed=false;
-				if (
-					nbg->r != obg->r || nbg->g != obg->g || nbg->b != obg->b ||
-					nfg->r != ofg->r || nfg->g != ofg->g || nfg->b != ofg->b ||
-					*c != *oc) {
-					changed=true;
-				}
-			}
-			if ( changed ) {
-				TCOD_color_t b=*nbg;
-				dstRect.x=x*TCOD_ctx.font_width;
-				dstRect.y=y*TCOD_ctx.font_height;
-				dstRect.w=TCOD_ctx.font_width;
-				dstRect.h=TCOD_ctx.font_height;
-				/* draw background */
-				if ( fade != 255 ) {
-					b.r = ((int)b.r) * fade / 255 + ((int)fading_color.r) * (255-fade)/255;
-					b.g = ((int)b.g) * fade / 255  + ((int)fading_color.g) * (255-fade)/255;
-					b.b = ((int)b.b) * fade / 255 + ((int)fading_color.b) * (255-fade)/255;
-				}
-				sdl_back=SDL_MapRGB(bitmap->format,b.r,b.g,b.b);
-				SDL_FillRect(bitmap,&dstRect,sdl_back);
-				if ( *c != ' ' ) {
-					/* draw foreground */
-					int ascii = TCOD_get_tileid_for_charcode_(*c);
-					TCOD_color_t *curtext = &charcols[ascii];
-					bool first = first_draw[ascii];
-					TCOD_color_t f=*nfg;
-
-					if ( fade != 255 ) {
-						f.r = ((int)f.r) * fade / 255 + ((int)fading_color.r) * (255-fade)/255;
-						f.g = ((int)f.g) * fade / 255 + ((int)fading_color.g) * (255-fade)/255;
-						f.b = ((int)f.b) * fade / 255 + ((int)fading_color.b) * (255-fade)/255;
-					}
-					/* only draw character if foreground color != background color */
-					if ( f.r != b.r || f.g != b.g || f.b != b.b ) {
-						if ( charmap->format->Amask == 0
-							&& f.r == fontKeyCol.r && f.g == fontKeyCol.g && f.b == fontKeyCol.b ) {
-							/* cannot draw with the key color... */
-							if ( f.r < 255 ) f.r++; else f.r--;
-						}
-						srcRect.x = (ascii%TCOD_ctx.fontNbCharHoriz)*TCOD_ctx.font_width;
-						srcRect.y = (ascii/TCOD_ctx.fontNbCharHoriz)*TCOD_ctx.font_height;
-						srcRect.w=TCOD_ctx.font_width;
-						srcRect.h=TCOD_ctx.font_height;
-
-						if ( charmap && (first || curtext->r != f.r || curtext->g != f.g || curtext->b!=f.b) ) {
-							/* change the character color in the font */
-					    	first_draw[ascii]=false;
-							sdl_fore=SDL_MapRGB(charmap->format,f.r,f.g,f.b) & rgb_mask;
-							*curtext=f;
-#ifdef USE_SDL_LOCKS
-							if ( SDL_MUSTLOCK(charmap) ) {
-								if ( SDL_LockSurface(charmap) < 0 ) return;
-							}
-#endif
-							if ( bpp == 4 ) {
-								/* 32 bits font : fill the whole character with foreground color */
-								uint32_t *pix = (uint32_t *)(((uint8_t*)charmap->pixels)+srcRect.x*bpp + srcRect.y*charmap->pitch);
-								int h=TCOD_ctx.font_height;
-								if ( ! TCOD_ctx.colored[ascii] ) {
-									while ( h-- ) {
-										int w=TCOD_ctx.font_width;
-										while ( w-- ) {
-											(*pix) &= nrgb_mask;
-											(*pix) |= sdl_fore;
-											pix++;
-										}
-										pix += hdelta;
-									}
-								} else {
-									/* colored character : multiply color with foreground color */
-									uint32_t *pixorig = (uint32_t *)(((uint8_t*)charmap_backup->pixels)+srcRect.x*bpp + srcRect.y*charmap_backup->pitch);
-									int hdelta_backup=(charmap_backup->pitch - TCOD_ctx.font_width*4)/4;
-									while (h> 0) {
-										int w=TCOD_ctx.font_width;
-										while ( w > 0 ) {
-											int r=(int)(*((uint8_t*)(pixorig)+charmap_backup->format->Rshift/8));
-											int g=(int)(*((uint8_t*)(pixorig)+charmap_backup->format->Gshift/8));
-											int b=(int)(*((uint8_t*)(pixorig)+charmap_backup->format->Bshift/8));
-											(*pix) &= nrgb_mask; /* erase the color */
-											r = r * f.r / 255;
-											g = g * f.g / 255;
-											b = b * f.b / 255;
-											/* set the new color */
-											(*pix) |= (r<<charmap->format->Rshift)|(g<<charmap->format->Gshift)|(b<<charmap->format->Bshift);
-											w--;
-											pix++;
-											pixorig++;
-										}
-										h--;
-										pix += hdelta;
-										pixorig += hdelta_backup;
-									}
-								}
-							} else	{
-								/* 24 bits font : fill only non key color pixels */
-								uint32_t *pix = (uint32_t *)(((uint8_t*)charmap->pixels)+srcRect.x*bpp + srcRect.y*charmap->pitch);
-								int h=TCOD_ctx.font_height;
-								if ( ! TCOD_ctx.colored[ascii] ) {
-									while ( h-- ) {
-										int w=TCOD_ctx.font_width;
-										while ( w-- ) {
-											if (((*pix) & rgb_mask) != sdl_key ) {
-												(*pix) &= nrgb_mask;
-												(*pix) |= sdl_fore;
-											}
-											pix = (uint32_t *) (((uint8_t*)pix)+3);
-										}
-										pix = (uint32_t *) (((uint8_t*)pix)+hdelta);
-									}
-								} else {
-									/* colored character : multiply color with foreground color */
-									uint32_t *pixorig = (uint32_t *)(((uint8_t*)charmap_backup->pixels)+srcRect.x*4 + srcRect.y*charmap_backup->pitch);
-									/* charmap_backup is always 32 bits */
-									int hdelta_backup=(charmap_backup->pitch - TCOD_ctx.font_width*4)/4;
-									while (h> 0) {
-										int w=TCOD_ctx.font_width;
-										while ( w > 0 ) {
-											if (((*pixorig) & rgb_mask) != sdl_key ) {
-												int r=(int)(*((uint8_t*)(pixorig)+charmap_backup->format->Rshift/8));
-												int g=(int)(*((uint8_t*)(pixorig)+charmap_backup->format->Gshift/8));
-												int b=(int)(*((uint8_t*)(pixorig)+charmap_backup->format->Bshift/8));
-												(*pix) &= nrgb_mask; /* erase the color */
-												r = r * f.r / 255;
-												g = g * f.g / 255;
-												b = b * f.b / 255;
-												/* set the new color */
-												(*pix) |= (r<<charmap->format->Rshift)|(g<<charmap->format->Gshift)|(b<<charmap->format->Bshift);
-											}
-											w--;
-											pix = (uint32_t *) (((uint8_t*)pix)+3);
-											pixorig ++;
-										}
-										h--;
-										pix = (uint32_t *) (((uint8_t*)pix)+hdelta);
-										pixorig += hdelta_backup;
-									}
-								}
-							}
-#ifdef USE_SDL_LOCKS
-							if ( SDL_MUSTLOCK(charmap) ) {
-								SDL_UnlockSurface(charmap);
-							}
-#endif
-						}
-						SDL_BlitSurface(charmap,&srcRect,bitmap,&dstRect);
-					}
-				}
-			}
-			c++;
-			nfg++;
-			nbg++;
-			if (track_changes) {
-				oc++;
-				ofg++;
-				obg++;
-			}
-		}
-	}
-#ifdef USE_SDL_LOCKS
-	if ( SDL_MUSTLOCK( bitmap ) ) SDL_UnlockSurface( bitmap );
-#endif
-	if (cache) {
-		/* update previous values cache */
-		memcpy(cache->ch_array, console->ch_array,
-		       sizeof(console->ch_array[0]) * console->w * console->h);
-		memcpy(cache->fg_array, console->fg_array,
-		       sizeof(console->fg_array[0]) * console->w * console->h);
-		memcpy(cache->bg_array, console->bg_array,
-		       sizeof(console->bg_array[0]) * console->w * console->h);
-	}
+static TCOD_color_t blend_fade_color_(
+    const TCOD_color_t& color,
+    const TCOD_color_t& fade_color,
+    uint8_t fade_value)
+{
+  if (fade_value != 255) { return color; }
+  return {
+      static_cast<uint8_t>(
+          static_cast<int>(color.r) * fade_value / 255
+          + static_cast<int>(fade_color.r) * (255 - fade_value) / 255),
+      static_cast<uint8_t>(
+          static_cast<int>(color.g) * fade_value / 255
+          + static_cast<int>(fade_color.g) * (255 - fade_value) / 255),
+      static_cast<uint8_t>(
+          static_cast<int>(color.b) * fade_value / 255
+          + static_cast<int>(fade_color.b) * (255 - fade_value) / 255),
+  };
 }
 
-void *TCOD_sys_get_surface(int width, int height, bool alpha) {
+void TCOD_sys_console_to_bitmap(
+    SDL_Surface* vbitmap,
+    struct TCOD_Console* console,
+    struct TCOD_Console* cache)
+{
+  static SDL_Surface* charmap_backup = NULL;
+  SDL_Surface *bitmap = vbitmap;
+  uint32_t sdl_back = 0;
+  uint32_t sdl_fore = 0;
+  TCOD_color_t fading_color = TCOD_console_get_fading_color();
+  int fade = TCOD_console_get_fade();
+  /* can only track changes on the root console */
+  bool track_changes = (cache && oldFade == fade);
+  uint8_t bpp = charmap->format->BytesPerPixel;
+  int hdelta;
+  if (bpp == 4) {
+    hdelta = (charmap->pitch - TCOD_ctx.font_width * bpp) / 4;
+  } else {
+    hdelta = (charmap->pitch - TCOD_ctx.font_width * bpp);
+  }
+  if (charmap_backup == NULL) {
+    charmap_backup = TCOD_sys_get_surface(charmap->w, charmap->h, true);
+    SDL_BlitSurface(charmap, NULL, charmap_backup, NULL);
+  }
+  for (int y = 0; y < console->h; ++y) {
+    for (int x = 0; x < console->w; ++x) {
+      using tcod::console::Tile;
+      int console_i = y * console->w + x;
+      const Tile& current = console->tiles[console_i];
+      const int& c = current.ch;
+      const TCOD_ColorRGBA& nfg = current.fg;
+      const TCOD_ColorRGBA& nbg = current.bg;
+      SDL_Rect srcRect, dstRect;
+      if (track_changes) {
+        Tile& old = cache->tiles[console_i];
+        if (current == old) {
+          continue;
+        }
+        old = current;
+      }
+      TCOD_ColorRGB b = tcod::ColorRGB(nbg);
+      dstRect.x = x * TCOD_ctx.font_width;
+      dstRect.y = y * TCOD_ctx.font_height;
+      dstRect.w = TCOD_ctx.font_width;
+      dstRect.h = TCOD_ctx.font_height;
+      /* draw background */
+      b = blend_fade_color_(b, fading_color, fade);
+      sdl_back = SDL_MapRGB(bitmap->format, b.r, b.g, b.b);
+      SDL_FillRect(bitmap, &dstRect, sdl_back);
+      if (c != ' ') {
+        /* draw foreground */
+        int ascii = TCOD_get_tileid_for_charcode_(c);
+        TCOD_ColorRGB *curtext = &charcols[ascii];
+        bool first = first_draw[ascii];
+        TCOD_ColorRGB f = tcod::ColorRGB(nfg);
+        f = blend_fade_color_(f, fading_color, fade);
+        /* only draw character if foreground color != background color */
+        if (f != b) {
+          if (charmap->format->Amask == 0 && f == fontKeyCol) {
+            /* cannot draw with the key color... */
+            if (f.r < 255) { f.r++; } else { f.r--; }
+          }
+          srcRect.x = (ascii % TCOD_ctx.fontNbCharHoriz)
+                      * TCOD_ctx.font_width;
+          srcRect.y = (ascii / TCOD_ctx.fontNbCharHoriz)
+                      * TCOD_ctx.font_height;
+          srcRect.w = TCOD_ctx.font_width;
+          srcRect.h = TCOD_ctx.font_height;
+
+          if (charmap && (first || *curtext != f)) {
+            /* change the character color in the font */
+            first_draw[ascii] = false;
+            sdl_fore = SDL_MapRGB(charmap->format, f.r, f.g, f.b) & rgb_mask;
+            *curtext = f;
+            if (bpp == 4) {
+              /* 32 bits font : fill the whole character with foreground color */
+              uint32_t *pix = reinterpret_cast<uint32_t *>(
+                  reinterpret_cast<uint8_t*>(charmap->pixels) + srcRect.x * bpp
+                  + srcRect.y * charmap->pitch);
+              int h = TCOD_ctx.font_height;
+              if (!TCOD_ctx.colored[ascii]) {
+                while (h--) {
+                  int w = TCOD_ctx.font_width;
+                  while (w--) {
+                    (*pix) &= nrgb_mask;
+                    (*pix) |= sdl_fore;
+                    ++pix;
+                  }
+                  pix += hdelta;
+                }
+              } else {
+                /* colored character : multiply color with foreground color */
+                uint32_t *pixorig = reinterpret_cast<uint32_t *>(
+                    reinterpret_cast<uint8_t*>(charmap_backup->pixels)
+                    + srcRect.x * bpp + srcRect.y * charmap_backup->pitch);
+                int hdelta_backup = (charmap_backup->pitch
+                                      - TCOD_ctx.font_width * 4) / 4;
+                while (h > 0) {
+                  int w = TCOD_ctx.font_width;
+                  while (w > 0) {
+                    int r_ = reinterpret_cast<uint8_t*>(pixorig)[
+                        charmap_backup->format->Rshift / 8];
+                    int g_ = reinterpret_cast<uint8_t*>(pixorig)[
+                        charmap_backup->format->Gshift / 8];
+                    int b_ = reinterpret_cast<uint8_t*>(pixorig)[
+                        charmap_backup->format->Bshift / 8];
+                    (*pix) &= nrgb_mask; /* erase the color */
+                    r_ = r_ * f.r / 255;
+                    g_ = g_ * f.g / 255;
+                    b_ = b_ * f.b / 255;
+                    /* set the new color */
+                    (*pix) |= (r_ << charmap->format->Rshift)
+                              | (g_ <<charmap->format->Gshift)
+                              | (b_ <<charmap->format->Bshift);
+                    w--;
+                    pix++;
+                    pixorig++;
+                  }
+                  h--;
+                  pix += hdelta;
+                  pixorig += hdelta_backup;
+                }
+              }
+            } else {
+              /* 24 bits font : fill only non key color pixels */
+              uint32_t *pix = reinterpret_cast<uint32_t*>(
+                  reinterpret_cast<uint8_t*>(charmap->pixels)
+                  + srcRect.x*bpp + srcRect.y * charmap->pitch);
+              int h = TCOD_ctx.font_height;
+              if (!TCOD_ctx.colored[ascii]) {
+                while (h--) {
+                  int w = TCOD_ctx.font_width;
+                  while (w--) {
+                    if (((*pix) & rgb_mask) != sdl_key ) {
+                      (*pix) &= nrgb_mask;
+                      (*pix) |= sdl_fore;
+                    }
+                    pix = reinterpret_cast<uint32_t*>(
+                        reinterpret_cast<uint8_t*>(pix) + 3);
+                  }
+                  pix = reinterpret_cast<uint32_t*>(
+                      reinterpret_cast<uint8_t*>(pix) + hdelta);
+                }
+              } else {
+                /* colored character : multiply color with foreground color */
+                uint32_t *pixorig = reinterpret_cast<uint32_t*>(
+                    reinterpret_cast<uint8_t*>(charmap_backup->pixels)
+                    + srcRect.x * 4 + srcRect.y * charmap_backup->pitch);
+                /* charmap_backup is always 32 bits */
+                int hdelta_backup = (charmap_backup->pitch
+                                      - TCOD_ctx.font_width * 4) / 4;
+                while (h > 0) {
+                  int w = TCOD_ctx.font_width;
+                  while (w > 0) {
+                    if (((*pixorig) & rgb_mask) != sdl_key) {
+                      int r_ = reinterpret_cast<uint8_t*>(pixorig)[
+                          charmap_backup->format->Rshift / 8];
+                      int g_ = reinterpret_cast<uint8_t*>(pixorig)[
+                          charmap_backup->format->Gshift / 8];
+                      int b_ = reinterpret_cast<uint8_t*>(pixorig)[
+                          charmap_backup->format->Bshift / 8];
+                      (*pix) &= nrgb_mask; /* erase the color */
+                      r_ = r_ * f.r / 255;
+                      g_ = g_ * f.g / 255;
+                      b_ = b_ * f.b / 255;
+                      /* set the new color */
+                      (*pix) |= (r_ << charmap->format->Rshift)
+                                | (g_ << charmap->format->Gshift)
+                                | (b_ << charmap->format->Bshift);
+                    }
+                    w--;
+                    pix = reinterpret_cast<uint32_t*>(
+                        reinterpret_cast<uint8_t*>(pix) + 3);
+                    pixorig++;
+                  }
+                  h--;
+                  pix = reinterpret_cast<uint32_t*>(
+                      reinterpret_cast<uint8_t*>(pix) + hdelta);
+                  pixorig += hdelta_backup;
+                }
+              }
+            }
+          }
+          SDL_BlitSurface(charmap, &srcRect, bitmap, &dstRect);
+        }
+      }
+    }
+  }
+#ifdef USE_SDL_LOCKS
+  if (SDL_MUSTLOCK(bitmap)) { SDL_UnlockSurface(bitmap); }
+#endif
+}
+
+SDL_Surface *TCOD_sys_get_surface(int width, int height, bool alpha) {
 	return sdl->create_surface(width,height,alpha);
 }
 
-void TCOD_sys_update_char(int asciiCode, int fontx, int fonty, TCOD_image_t img, int x, int y) {
-	int px,py;
-	int iw,ih;
-	static TCOD_color_t pink={255,0,255};
-	TCOD_sys_map_ascii_to_font(asciiCode,fontx,fonty);
-	TCOD_image_get_size(img,&iw,&ih);
-	for (px=0; px < TCOD_ctx.font_width; px ++ ) {
-		for (py=0;py < TCOD_ctx.font_height; py++ ) {
-			TCOD_color_t col=TCOD_white;
-			uint8_t*pixel;
-			uint8_t bpp;
-			if ( (unsigned)(x+px) < (unsigned)iw && (unsigned)(y+py) < (unsigned)ih ) {
-				col=TCOD_image_get_pixel(img,x+px,y+py);
-			}
-			pixel=(uint8_t*)(charmap->pixels) + (fonty*TCOD_ctx.font_height+py) * charmap->pitch + (fontx*TCOD_ctx.font_width+px) * charmap->format->BytesPerPixel;
-	    	bpp = charmap->format->BytesPerPixel;
-			if (bpp == 4 ) {
-				*((pixel)+charmap->format->Ashift/8) = col.r;
-				*((pixel)+charmap->format->Rshift/8)=255;
-				*((pixel)+charmap->format->Gshift/8)=255;
-				*((pixel)+charmap->format->Bshift/8)=255;
-			} else {
-				*((pixel)+charmap->format->Rshift/8)=col.r;
-				*((pixel)+charmap->format->Gshift/8)=col.g;
-				*((pixel)+charmap->format->Bshift/8)=col.b;
-			}
-		}
-	}
-	charcols[asciiCode]=pink;
-	TCOD_sys_set_dirty_character_code(asciiCode);
+void TCOD_sys_update_char(int asciiCode, int fontx, int fonty,
+                          TCOD_Image* img, int x, int y)
+{
+  static const TCOD_color_t pink = {255, 0, 255};
+  TCOD_sys_map_ascii_to_font(asciiCode, fontx, fonty);
+  int iw, ih;
+  TCOD_image_get_size(img, &iw, &ih);
+  for (int px = 0; px < TCOD_ctx.font_width; ++px) {
+    for (int py = 0; py < TCOD_ctx.font_height; ++py) {
+      TCOD_color_t col = TCOD_image_get_pixel(img, x + px, y + py);
+      uint8_t* pixel = static_cast<uint8_t*>(charmap->pixels)
+                       + (fonty * TCOD_ctx.font_height + py)
+                       * charmap->pitch
+                       + (fontx * TCOD_ctx.font_width + px)
+                       * charmap->format->BytesPerPixel;
+      uint8_t bpp = charmap->format->BytesPerPixel;
+      if (bpp == 4) {
+        *(pixel + charmap->format->Ashift / 8) = col.r;
+        *(pixel + charmap->format->Rshift / 8) = 255;
+        *(pixel + charmap->format->Gshift / 8) = 255;
+        *(pixel + charmap->format->Bshift / 8) = 255;
+      } else {
+        *(pixel + charmap->format->Rshift / 8) = col.r;
+        *(pixel + charmap->format->Gshift / 8) = col.g;
+        *(pixel + charmap->format->Bshift / 8) = col.b;
+      }
+    }
+  }
+  charcols[asciiCode] = pink;
+  TCOD_sys_set_dirty_character_code(asciiCode);
 }
 /**
  *  Older startup function, mostly called from TCOD_sys_init.
@@ -696,11 +804,7 @@ void TCOD_sys_startup(void) {
  */
 void TCOD_sys_shutdown(void)
 {
-  if (TCOD_ctx.root) {
-    TCOD_console_data_free(TCOD_ctx.root);
-    free(TCOD_ctx.root);
-    TCOD_ctx.root = NULL;
-  }
+  TCOD_console_delete(TCOD_ctx.root);
   if (tcod::engine::get_display()){
     tcod::engine::set_display(nullptr);
     return;
@@ -783,7 +887,8 @@ TCOD_renderer_t TCOD_sys_get_renderer(void) {
 void TCOD_sys_set_renderer(TCOD_renderer_t renderer) {
   if ( renderer == TCOD_ctx.renderer ) return;
   TCOD_console_init_root(TCOD_ctx.root->w, TCOD_ctx.root->h,
-                         TCOD_ctx.window_title, TCOD_ctx.fullscreen, renderer);
+                         TCOD_ctx.window_title, TCOD_console_is_fullscreen(),
+                         renderer);
 }
 
 void TCOD_sys_init_screen_offset(void) {
@@ -803,38 +908,42 @@ bool TCOD_sys_init(struct TCOD_Console *console, bool fullscreen) {
 	}
 	if (last_renderer != TCOD_ctx.renderer || ! charmap || strcmp(last_font,TCOD_ctx.font_file) != 0) {
 		/* reload the font when switching renderer to restore original character colors */
-		TCOD_sys_load_font();
+		if (TCOD_sys_load_font() < 0) { return false; }
 	}
 	sdl->create_window(console->w, console->h, fullscreen);
 	memset(key_status,0,sizeof(bool)*(TCODK_CHAR+1));
 
 	return true;
 }
-
-static char *TCOD_strcasestr (const char *haystack, const char *needle) {
-	const char *p, *startn = 0, *np = 0;
-
-	for (p = haystack; *p; p++) {
-		if (np) {
-			if (toupper(*p) == toupper(*np)) {
-				if (!*++np)
-					return (char *)startn;
-			} else
-				np = 0;
-		} else if (toupper(*p) == toupper(*needle)) {
-			np = needle + 1;
-			startn = p;
-		}
-	}
-
-	return 0;
+TCOD_DEPRECATED_NOMESSAGE
+static char* TCOD_strcasestr(const char *haystack, const char *needle)
+{
+  const char *startn = NULL, *np = NULL;
+  for (const char* p = haystack; *p; p++) {
+    if (np) {
+      if (toupper(*p) == toupper(*np)) {
+        if (!*++np) { return const_cast<char*>(startn); }
+      } else {
+        np = 0;
+      }
+    } else if (toupper(*p) == toupper(*needle)) {
+      np = needle + 1;
+      startn = p;
+    }
+  }
+  return 0;
 }
 
-void TCOD_sys_save_bitmap(void *bitmap, const char *filename) {
-	image_support_t *img=image_type;
-	while ( img->extension != NULL && TCOD_strcasestr(filename,img->extension) == NULL ) img++;
-	if ( img->extension == NULL || img->write == NULL ) img=image_type; /* default to bmp */
-	img->write((SDL_Surface *)bitmap,filename);
+void TCOD_sys_save_bitmap(SDL_Surface* bitmap, const char *filename) {
+  const image_support_t *img = image_type;
+  while (img->extension != NULL
+         && TCOD_strcasestr(filename,img->extension) == NULL ) {
+    ++img;
+  }
+  if (img->extension == NULL || img->write == NULL) {
+    img = image_type; // default to bmp
+  }
+  img->write(bitmap, filename);
 }
 
 void TCOD_sys_save_screenshot(const char *filename) {
@@ -852,7 +961,12 @@ void TCOD_sys_save_screenshot(const char *filename) {
       fclose(access_file);
     }
   }
-  sdl->save_screenshot(filename);
+  auto display = tcod::engine::get_display();
+  if (display) {
+    tcod::image::save(display->read_pixels(), filename);
+  } else {
+    sdl->save_screenshot(filename);
+  }
 }
 
 void TCOD_sys_set_fullscreen(bool fullscreen) {
@@ -860,19 +974,20 @@ void TCOD_sys_set_fullscreen(bool fullscreen) {
 	sdl->set_fullscreen(fullscreen);
 }
 
-void TCOD_sys_set_scale_factor(float value) {
-	float old_scale_factor = scale_factor;
-	scale_factor = value;
-	if (scale_factor + 1e-3 < scale_data.min_scale_factor)
-		scale_factor = scale_data.min_scale_factor;
-	else if (scale_factor - 1e-3 > MAX_SCALE_FACTOR)
-		scale_factor = MAX_SCALE_FACTOR;
-	/*printf("scale_factor: %0.3f -> %0.3f (wanted: %0.3f)", old_scale_factor, scale_factor, value);*/
+void TCOD_sys_set_scale_factor(float value)
+{
+  scale_factor = value;
+  if (scale_factor + 1e-3f < scale_data.min_scale_factor) {
+    scale_factor = scale_data.min_scale_factor;
+  } else if (scale_factor - 1e-3f > MAX_SCALE_FACTOR) {
+    scale_factor = MAX_SCALE_FACTOR;
+  }
 }
 
 void TCOD_sys_set_window_title(const char *title) {
-	strcpy(TCOD_ctx.window_title,title);
-	sdl->set_window_title(title);
+  strncpy(TCOD_ctx.window_title, title, sizeof(TCOD_ctx.window_title) - 1);
+  TCOD_ctx.window_title[sizeof(TCOD_ctx.window_title) - 1] = '\0';
+  sdl->set_window_title(title);
 }
 /**
  *  Keep track of time and wait if the frame-rate is faster than the set FPS.
@@ -1129,35 +1244,87 @@ void TCOD_sys_convert_screen_to_console_coords(int sx, int sy, int *cx, int *cy)
 /** The global libtcod mouse state. */
 static TCOD_mouse_t tcod_mouse={0,0,0,0,0,0,0,0,false,false,false,false,false,false,false,false};
 /**
+ *  Convert a pixel coordinate to a tile coordinate using global state.
+ */
+void TCOD_sys_pixel_to_tile(double* x, double* y)
+{
+  if (!x || !y) { return; }
+  auto display = tcod::engine::get_display();
+  if (display) {
+    std::array<double, 2> xy = display->pixel_to_tile({*x, *y});
+    *x = std::get<0>(xy);
+    *y = std::get<1>(xy);
+  } else {
+    *x = (*x - TCOD_ctx.fullscreen_offsetx) / TCOD_ctx.font_width;
+    *y = (*y - TCOD_ctx.fullscreen_offsety) / TCOD_ctx.font_height;
+  }
+}
+/**
+ *  Parse the coordinates and motion of an SDL event into a libtcod mouse
+ *  struct.
+ */
+static void sdl_parse_mouse_(const SDL_Event& ev, TCOD_mouse_t& mouse)
+{
+  switch(ev.type) {
+    case SDL_MOUSEMOTION:
+      mouse.x = ev.motion.x;
+      mouse.y = ev.motion.y;
+      mouse.dx = ev.motion.xrel;
+      mouse.dy = ev.motion.yrel;
+      break;
+    case SDL_MOUSEWHEEL:
+      // Leave x,y attributes as is to preserve the original libtcod behaviour.
+      mouse.wheel_up = ev.wheel.y > 0;
+      mouse.wheel_down = ev.wheel.y < 0;
+      mouse.dx = mouse.dy = 0;
+      break;
+    case SDL_MOUSEBUTTONDOWN:
+    case SDL_MOUSEBUTTONUP:
+      mouse.x = ev.button.x;
+      mouse.y = ev.button.y;
+      mouse.dx = mouse.dy = 0;
+      break;
+    default: return;
+  }
+  auto display = tcod::engine::get_display();
+  if (display) {
+    auto to_tile = [&](double x, double y) -> std::array<int, 2> {
+      std::array<double, 2> result(display->pixel_to_tile({x, y}));
+      return {static_cast<int>(result.at(0)), static_cast<int>(result.at(1))};
+    };
+    std::array<int, 2> cell_xy(to_tile(mouse.x, mouse.y));
+    std::array<int, 2> prev_cell_xy(
+        to_tile(mouse.x - mouse.dx, mouse.y - mouse.dy)
+    );
+    mouse.cx = cell_xy.at(0);
+    mouse.cy = cell_xy.at(1);
+    mouse.dcx = cell_xy.at(0) - prev_cell_xy.at(0);
+    mouse.dcy = cell_xy.at(1) - prev_cell_xy.at(1);
+  } else {
+    mouse.x -= TCOD_ctx.fullscreen_offsetx;
+    mouse.y -= TCOD_ctx.fullscreen_offsety;
+    mouse.cx = mouse.x / TCOD_ctx.font_width;
+    mouse.cy = mouse.y / TCOD_ctx.font_height;
+    int prev_cx = (mouse.x - mouse.dx) / TCOD_ctx.font_width;
+    int prev_cy = (mouse.y - mouse.dy) / TCOD_ctx.font_height;
+    mouse.dcx = mouse.cx - prev_cx;
+    mouse.dcy = mouse.cy - prev_cy;
+  }
+}
+/**
  *  Parse an SDL_Event into `mouse` and return the relevant TCOD_event_t.
  *
  *  Returns 0 if the event wasn't mouse related.
  */
-static TCOD_event_t TCOD_sys_handle_mouse_event(const SDL_Event *ev,
-                                                TCOD_mouse_t *mouse) {
+TCOD_event_t TCOD_sys_handle_mouse_event(
+    const SDL_Event* ev, TCOD_mouse_t* mouse)
+{
   if (!ev || !mouse) { return TCOD_EVENT_NONE; }
+  sdl_parse_mouse_(*ev, *mouse);
   switch(ev->type) {
     case SDL_MOUSEMOTION:
-      TCOD_sys_unproject_screen_coords(ev->motion.x, ev->motion.y,
-                                       &mouse->x, &mouse->y);
-      if (scale_data.surface_width != 0) {
-        mouse->dx = (ev->motion.xrel * scale_data.src_proportionate_width
-                     / scale_data.surface_width);
-        mouse->dy = (ev->motion.yrel * scale_data.src_proportionate_height
-                     / scale_data.surface_height);
-      }
-      mouse->cx = mouse->x / TCOD_ctx.font_width;
-      mouse->cy = mouse->y / TCOD_ctx.font_height;
-      mouse->dcx = mouse->dx / TCOD_ctx.font_width;
-      mouse->dcy = mouse->dy / TCOD_ctx.font_height;
-
       return TCOD_EVENT_MOUSE_MOVE;
     case SDL_MOUSEWHEEL:
-      if (ev->wheel.y < 0) {
-        mouse->wheel_down = true;
-      } else {
-        mouse->wheel_up = true;
-      }
       return TCOD_EVENT_MOUSE_PRESS;
     case SDL_MOUSEBUTTONDOWN:
       switch (ev->button.button) {
@@ -1192,8 +1359,8 @@ static TCOD_event_t TCOD_sys_handle_mouse_event(const SDL_Event *ev,
  *
  *  Returns 0 if the event wasn't keyboard related.
  */
-static TCOD_event_t TCOD_sys_handle_key_event(const SDL_Event *ev,
-                                              TCOD_key_t *key) {
+TCOD_event_t TCOD_sys_handle_key_event(const SDL_Event* ev, TCOD_key_t* key)
+{
   if (!ev || !key) { return TCOD_EVENT_NONE; }
   switch(ev->type) {
     case SDL_KEYDOWN:
@@ -1215,13 +1382,14 @@ static TCOD_event_t TCOD_sys_handle_key_event(const SDL_Event *ev,
       return TCOD_EVENT_NONE;
   }
 }
-static TCOD_event_t TCOD_sys_handle_event(SDL_Event *ev,TCOD_event_t eventMask, TCOD_key_t *key, TCOD_mouse_t *mouse) {
-	TCOD_event_t retMask = TCOD_EVENT_NONE;
+static TCOD_event_t TCOD_sys_handle_event(
+    SDL_Event *ev, TCOD_event_t eventMask,
+    TCOD_key_t *key, TCOD_mouse_t *mouse)
+{
+	int retMask = TCOD_EVENT_NONE;
 	/* printf("TCOD_sys_handle_event type=%04x\n", ev->type); */
-	retMask = static_cast<TCOD_event_t>(
-      retMask | TCOD_sys_handle_mouse_event(ev, mouse) & eventMask);
-  retMask = static_cast<TCOD_event_t>(
-      retMask | TCOD_sys_handle_key_event(ev, key) & eventMask);
+	retMask |= TCOD_sys_handle_mouse_event(ev, mouse) & eventMask;
+	retMask |= TCOD_sys_handle_key_event(ev, key) & eventMask;
 	switch(ev->type) {
 #ifdef TCOD_TOUCH_INPUT
 		/*
@@ -1421,7 +1589,7 @@ static TCOD_event_t TCOD_sys_handle_event(SDL_Event *ev,TCOD_event_t eventMask, 
  		break;
 		default : break;
 	}
-	return retMask;
+	return static_cast<TCOD_event_t>(retMask);
 }
 /**
  *  Internal function containing code shared by TCOD_sys_wait_for_event
@@ -1515,14 +1683,11 @@ TCOD_mouse_t TCOD_mouse_get_status(void) {
  *          If no event exists then the `vk` attribute will be `TCODK_NONE`
  */
 TCOD_key_t TCOD_sys_check_for_keypress(int flags) {
-	static TCOD_key_t noret={TCODK_NONE,0};
-
-	TCOD_key_t key;
-	TCOD_event_t ev = TCOD_sys_check_for_event(flags & TCOD_EVENT_KEY, &key, NULL);
-
-	if ((ev & TCOD_EVENT_KEY) == 0) return noret;
-
-	return key;
+  TCOD_key_t key;
+  TCOD_event_t ev = TCOD_sys_check_for_event(flags & TCOD_EVENT_KEY,
+                                             &key, nullptr);
+  if ((ev & TCOD_EVENT_KEY) == 0) { return {}; }
+  return key;
 }
 /**
  *  Wait for a key press event, then return it.
@@ -1532,81 +1697,70 @@ TCOD_key_t TCOD_sys_check_for_keypress(int flags) {
  *  \return A TCOD_key_t struct with the most recent key data.
  */
 TCOD_key_t TCOD_sys_wait_for_keypress(bool flush) {
-	static TCOD_key_t noret={TCODK_NONE,0};
-
-	TCOD_key_t key;
-	TCOD_event_t ev = TCOD_sys_wait_for_event(TCOD_EVENT_KEY_PRESS, &key, NULL, flush);
-
-	if ((ev & TCOD_EVENT_KEY_PRESS) == 0) return noret;
-
-	return key;
+  TCOD_key_t key;
+  TCOD_event_t ev = TCOD_sys_wait_for_event(TCOD_EVENT_KEY_PRESS,
+                                            &key, nullptr, flush);
+  if ((ev & TCOD_EVENT_KEY_PRESS) == 0) { return {}; }
+  return key;
 }
-
 
 void TCOD_sys_sleep_milli(uint32_t milliseconds) {
 	SDL_Delay(milliseconds);
 }
 
-void *TCOD_sys_load_image(const char *filename) {
-	image_support_t *img=image_type;
-	while ( img->extension != NULL && !img->check_type(filename) ) img++;
-	if ( img->extension == NULL || img->read == NULL ) return NULL; /* unknown format */
-	return img->read(filename);
+SDL_Surface* TCOD_sys_load_image(const char *filename) {
+  const image_support_t* img = image_type;
+  while (img->extension != NULL && !img->check_type(filename)) { img++; }
+  if (img->extension == NULL || img->read == NULL) { return NULL; } /* unknown format */
+  return img->read(filename);
 }
 
-void TCOD_sys_get_image_size(const void *image, int *w, int *h) {
-	SDL_Surface *surf=(SDL_Surface *)image;
-    *w = surf->w;
-    *h = surf->h;
+void TCOD_sys_get_image_size(const SDL_Surface* image, int *w, int *h)
+{
+  *w = image->w;
+  *h = image->h;
+}
+TCOD_color_t TCOD_sys_get_image_pixel(const SDL_Surface* image, int x, int y)
+{
+  if (x < 0 || y < 0 || x >= image->w || y >= image->h) { return TCOD_black; }
+  uint8_t bpp = image->format->BytesPerPixel;
+  uint8_t* bits = static_cast<uint8_t*>(image->pixels);
+  bits += y * image->pitch + x * bpp;
+  switch (bpp) {
+    case 1:
+      if (image->format->palette) {
+        SDL_Color col = image->format->palette->colors[(*bits)];
+        return {col.r, col.g, col.b};
+      } else {
+        return TCOD_black;
+      }
+      break;
+    default:
+      return {
+          *((bits)+image->format->Rshift/8),
+          *((bits)+image->format->Gshift/8),
+          *((bits)+image->format->Bshift/8),
+      };
+  }
 }
 
-TCOD_color_t TCOD_sys_get_image_pixel(const void *image,int x, int y) {
-	TCOD_color_t ret;
-	SDL_Surface *surf=(SDL_Surface *)image;
-	uint8_t bpp;
-	uint8_t*bits;
-	if ( x < 0 || y < 0 || x >= surf->w || y >= surf->h ) return TCOD_black;
-	bpp = surf->format->BytesPerPixel;
-	bits = ((uint8_t*)surf->pixels)+y*surf->pitch+x*bpp;
-	switch (bpp) {
-		case 1 :
-		{
-			if (surf->format->palette) {
-				SDL_Color col = surf->format->palette->colors[(*bits)];
-				ret.r=col.r;
-				ret.g=col.g;
-				ret.b=col.b;
-			} else return TCOD_black;
-		}
-		break;
-		default :
-			ret.r =  *((bits)+surf->format->Rshift/8);
-			ret.g =  *((bits)+surf->format->Gshift/8);
-			ret.b =  *((bits)+surf->format->Bshift/8);
-		break;
-	}
-
-	return ret;
+int TCOD_sys_get_image_alpha(const SDL_Surface *surf, int x, int y)
+{
+  if (x < 0 || y < 0 || x >= surf->w || y >= surf->h) { return 255; }
+  uint8_t bpp = surf->format->BytesPerPixel;
+  if (bpp != 4) { return 255; }
+  uint8_t* bits = static_cast<uint8_t*>(surf->pixels);
+  bits += y * surf->pitch + x * bpp;
+  return bits[surf->format->Ashift / 8];
 }
-
-int TCOD_sys_get_image_alpha(const void *image,int x, int y) {
-	SDL_Surface *surf=(SDL_Surface *)image;
-	uint8_t bpp;
-	uint8_t*bits;
-	if ( x < 0 || y < 0 || x >= surf->w || y >= surf->h ) return 255;
-	bpp = surf->format->BytesPerPixel;
-	if ( bpp != 4 ) return 255;
-	bits = ((uint8_t*)surf->pixels)+y*surf->pitch+x*bpp;
-	return *((bits)+surf->format->Ashift/8);
+uint32_t TCOD_sys_elapsed_milli(void)
+{
+  return SDL_GetTicks();
 }
-
-uint32_t TCOD_sys_elapsed_milli(void) {
-	return (uint32_t)SDL_GetTicks();
-}
-
-float TCOD_sys_elapsed_seconds(void) {
-	static float div=1.0f/1000.0f;
-	return SDL_GetTicks()*div;
+float TCOD_sys_elapsed_seconds(void)
+{
+  static float div=1.0f / 1000.0f;
+  return SDL_GetTicks() * div;
 }
 
 void TCOD_sys_force_fullscreen_resolution(int width, int height) {
@@ -1614,7 +1768,8 @@ void TCOD_sys_force_fullscreen_resolution(int width, int height) {
 	TCOD_ctx.fullscreen_height=height;
 }
 
-void * TCOD_sys_create_bitmap(int width, int height, TCOD_color_t *buf) {
+SDL_Surface* TCOD_sys_create_bitmap(int width, int height, TCOD_color_t *buf)
+{
 	int x,y;
 	SDL_PixelFormat fmt;
 	SDL_Surface *bitmap;
@@ -1646,11 +1801,11 @@ void * TCOD_sys_create_bitmap(int width, int height, TCOD_color_t *buf) {
 			SDL_FillRect(bitmap,&rect,col);
 		}
 	}
-	return (void *)bitmap;
+	return bitmap;
 }
 
-void TCOD_sys_delete_bitmap(void *bitmap) {
-	SDL_FreeSurface((SDL_Surface *)bitmap);
+void TCOD_sys_delete_bitmap(SDL_Surface* bitmap) {
+	SDL_FreeSurface(bitmap);
 }
 
 void TCOD_sys_set_fps(int val) {
@@ -1675,8 +1830,14 @@ float TCOD_sys_get_last_frame_length(void) {
 }
 
 void TCOD_sys_get_char_size(int *w, int *h) {
-  *w = TCOD_ctx.font_width;
-  *h = TCOD_ctx.font_height;
+  auto tileset = tcod::engine::get_tileset();
+  if (tileset) {
+    *w = tileset->get_tile_width();
+    *h = tileset->get_tile_height();
+  } else {
+    *w = TCOD_ctx.font_width;
+    *h = TCOD_ctx.font_height;
+  }
 }
 
 void TCOD_sys_get_current_resolution(int *w, int *h) {
@@ -1700,12 +1861,14 @@ bool TCOD_sys_check_magic_number(const char *filename, size_t size, uint8_t*data
 	return true;
 }
 
-void *TCOD_sys_get_SDL_window(void) {
-	return (void *)window;
+SDL_Window* TCOD_sys_get_SDL_window(void)
+{
+  return window;
 }
 
-void *TCOD_sys_get_SDL_renderer(void) {
-	return (void *)renderer;
+SDL_Renderer* TCOD_sys_get_SDL_renderer(void)
+{
+  return renderer;
 }
 
 /* mouse stuff */
@@ -1721,11 +1884,15 @@ void TCOD_mouse_move(int x, int y) {
 	sdl->set_mouse_position(x,y);
 }
 
-void TCOD_mouse_includes_touch(bool enable) {
 #ifdef TCOD_TOUCH_INPUT
+void TCOD_mouse_includes_touch(bool enable)
+{
 	mouse_touch = enable;
-#endif
 }
+#else
+void TCOD_mouse_includes_touch(bool)
+{}
+#endif
 
 /*clipboard stuff */
 bool TCOD_sys_clipboard_set(const char *value) {
@@ -1734,8 +1901,8 @@ bool TCOD_sys_clipboard_set(const char *value) {
 }
 
 char *TCOD_sys_clipboard_get() {
-	if (!has_startup) { return ""; }
-	return sdl->get_clipboard_text();
+	if (!has_startup) { return const_cast<char*>(""); }
+	return const_cast<char*>(sdl->get_clipboard_text());
 }
 
 bool TCOD_sys_read_file(const char *filename, unsigned char **buf, size_t *size) {
@@ -1774,7 +1941,7 @@ void TCOD_sys_set_dirty(int dx, int dy, int dw, int dh) {
 
 	for (x = dx; x < dx + dw; ++x) {
 		for (y = dy; y < dy + dh; ++y) {
-			dat->ch_array[dat->w * y + x] = -1;
+			dat->tiles[dat->w * y + x].ch = -1;
 		}
 	}
 }
@@ -1788,8 +1955,8 @@ void TCOD_sys_set_dirty_character_code(int ch) {
 	struct TCOD_Console *dat = sdl->get_root_console_cache();
 	if (!dat) return;
 	for (i = 0; i < dat->w * dat->h; ++i) {
-		if (dat->ch_array[i] == ch) {
-			dat->ch_array[i] = -1;
+		if (dat->tiles[i].ch == ch) {
+			dat->tiles[i].ch = -1;
 		}
 	}
 }
@@ -1801,5 +1968,13 @@ int TCOD_get_tileid_for_charcode_(int charcode) {
     return TCOD_ctx.ascii_to_tcod[charcode];
   }
   return 0;
+}
+struct SDL_Window* TCOD_sys_get_sdl_window_(void)
+{
+  return window;
+}
+struct SDL_Renderer* TCOD_sys_get_sdl_renderer_(void)
+{
+  return renderer;
 }
 #endif /* TCOD_BARE */

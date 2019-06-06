@@ -1,30 +1,34 @@
-/*
-* libtcod
-* Copyright (c) 2008-2018 Jice & Mingos & rmtew
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in the
-*       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote
-*       products derived from this software without specific prior written
-*       permission.
-*
-* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
-* EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
-* DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-* ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+/* BSD 3-Clause License
+ *
+ * Copyright © 2008-2019, Jice and the libtcod contributors.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 #ifndef TCOD_BARE
 
 #include <sys.h>
@@ -566,6 +570,7 @@ TCOD_SDL_driver_t *SDL_implementation_factory(void) {
 #include "console.h"
 #include "libtcod_int.h"
 #include "utility.h"
+#include "color/canvas.h"
 
 static SDL_Surface* scale_screen=NULL;
 static bool clear_screen=false;
@@ -612,7 +617,7 @@ static void actual_rendering(void) {
 		dstRect.w=scale_data.dst_display_width; dstRect.h=scale_data.dst_display_height;
 	}
 	if ( TCOD_ctx.sdl_cbk ) {
-		TCOD_ctx.sdl_cbk((void *)scale_screen);
+		TCOD_ctx.sdl_cbk(scale_screen);
 	}
 	texture = SDL_CreateTextureFromSurface(renderer, scale_screen);
 	SDL_RenderCopy(renderer, texture, &srcRect, &dstRect);
@@ -635,7 +640,11 @@ static struct TCOD_Console *ensure_cache(struct TCOD_Console* root) {
  * faults, this should only be called when it would normally be and not
  * specifically to force screen refreshes.  To this end, and to avoid
  * threading complications it takes care of special cases internally.  */
-static void render(TCOD_SDL_driver_t *sdl, void *vbitmap, struct TCOD_Console *console) {
+static void render(
+    TCOD_SDL_driver_t *sdl,
+    void*, // vbitmap
+    struct TCOD_Console *console)
+{
 	if ( TCOD_ctx.renderer == TCOD_RENDERER_SDL ) {
 		int console_width_p = console->w * TCOD_ctx.font_width;
 		int console_height_p = console->h * TCOD_ctx.font_height;
@@ -680,17 +689,26 @@ static void render(TCOD_SDL_driver_t *sdl, void *vbitmap, struct TCOD_Console *c
 				scale_data.surface_width = console_width_p;
 				scale_data.surface_height = console_height_p;
 			}
-			scale_data.min_scale_factor = MAX((float)console_width_p/scale_data.surface_width, (float)console_height_p/scale_data.surface_height);
+			scale_data.min_scale_factor = std::max<float>(
+          static_cast<float>(console_width_p) / scale_data.surface_width,
+          static_cast<float>(console_height_p) / scale_data.surface_height);
 			if (scale_data.min_scale_factor > 1.0f)
 				scale_data.min_scale_factor = 1.0f;
 			/*printf("min_scale_factor %0.3f = MAX(%d/%d, %d/%d)", scale_data.min_scale_factor, console_width_p, scale_data.surface_width, console_height_p, scale_data.surface_height);*/
 
-			scale_data.dst_height_width_ratio = (float)scale_data.surface_height/scale_data.surface_width;
-			scale_data.src_proportionate_width = (int)(console_width_p / scale_factor);
-			scale_data.src_proportionate_height = (int)((console_width_p * scale_data.dst_height_width_ratio) / scale_factor);
+			scale_data.dst_height_width_ratio =
+          static_cast<float>(scale_data.surface_height)
+          / scale_data.surface_width;
+			scale_data.src_proportionate_width =
+          static_cast<int>(console_width_p / scale_factor);
+			scale_data.src_proportionate_height = static_cast<int>(
+          (console_width_p * scale_data.dst_height_width_ratio)
+          / scale_factor);
 
 			/* Work out how much of the console to copy. */
-			scale_data.src_x0 = (int)((sdl->scale_xc * console_width_p) - (0.5f * scale_data.src_proportionate_width));
+			scale_data.src_x0 = static_cast<int>(
+          (sdl->scale_xc * console_width_p)
+          - (0.5f * scale_data.src_proportionate_width));
 			if (scale_data.src_x0 + scale_data.src_proportionate_width > console_width_p)
 				scale_data.src_x0 = console_width_p - scale_data.src_proportionate_width;
 			if (scale_data.src_x0 < 0)
@@ -699,7 +717,9 @@ static void render(TCOD_SDL_driver_t *sdl, void *vbitmap, struct TCOD_Console *c
 			if (scale_data.src_x0 + scale_data.src_copy_width > console_width_p)
 				scale_data.src_copy_width = console_width_p - scale_data.src_x0;
 
-			scale_data.src_y0 = (int)((sdl->scale_yc * console_height_p) - (0.5f * scale_data.src_proportionate_height));
+			scale_data.src_y0 = static_cast<int>(
+          (sdl->scale_yc * console_height_p)
+          - (0.5f * scale_data.src_proportionate_height));
 			if (scale_data.src_y0 + scale_data.src_proportionate_height > console_height_p)
 				scale_data.src_y0 = console_height_p - scale_data.src_proportionate_height;
 			if (scale_data.src_y0 < 0)
@@ -724,7 +744,7 @@ static void render(TCOD_SDL_driver_t *sdl, void *vbitmap, struct TCOD_Console *c
 		TCOD_opengl_swap();
 	}
 #endif
-	oldFade=(int)TCOD_console_get_fade();
+  oldFade = TCOD_console_get_fade();
 }
 
 /* Return the current root console cache if it exists, or NULL. */
@@ -878,50 +898,30 @@ static void set_window_title(const char *title) {
 	SDL_SetWindowTitle(window, title);
 }
 
-static void save_screenshot(const char *filename) {
-	if ( TCOD_ctx.renderer == TCOD_RENDERER_SDL ) {
-		/* This would be a lot easier if image saving could do textures. */
-	    SDL_Rect rect;
-		uint32_t format;
-		SDL_Texture *texture;
-		SDL_RenderGetViewport(renderer, &rect);
-		format = SDL_GetWindowPixelFormat(window);
-		texture = SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_TARGET, rect.w, rect.h);
-		if (0 != texture) {
-			if (SDL_SetRenderTarget(renderer, texture)) {
-				void *pixels;
-				int pitch, access;
-
-				actual_rendering();
-				SDL_SetRenderTarget(renderer, NULL);
-
-				rect.x = rect.y = rect.w = rect.h = 0;
-				if (-1 != SDL_QueryTexture(texture, &format, &access, &rect.w, &rect.h) &&
-						-1 != SDL_LockTexture(texture, NULL, &pixels, &pitch)) {
-					int depth;
-					uint32_t rmask, gmask, bmask, amask;
-					if (SDL_TRUE == SDL_PixelFormatEnumToMasks(format, &depth, &rmask, &gmask, &bmask, &amask)) {
-						SDL_Surface *surface = SDL_CreateRGBSurfaceFrom(pixels, rect.w, rect.h, depth, pitch, rmask, gmask, bmask, amask);
-						TCOD_sys_save_bitmap((void *)surface,filename);
-						SDL_FreeSurface(surface);
-					} else
-						TCOD_LOG(("TCOD_sys_save_screenshot - failed call to SDL_PixelFormatEnumToMasks"));
-
-					SDL_UnlockTexture(texture);
-				} else
-					TCOD_LOG(("TCOD_sys_save_screenshot - failed call to SDL_QueryTexture or SDL_LockTexture"));
-			} else
-				TCOD_LOG(("TCOD_sys_save_screenshot - failed call to SDL_SetRenderTarget"));
-			SDL_DestroyTexture(texture);
-		} else
-			TCOD_LOG(("TCOD_sys_save_screenshot - failed call to SDL_CreateTexture"));
+static void save_screenshot(const char* filename)
+{
+  switch (TCOD_ctx.renderer) {
+    case TCOD_RENDERER_SDL: {
+      int width, height;
+      SDL_GetRendererOutputSize(renderer, &width, &height);
+      tcod::image::Image pixels(width, height);
+      SDL_RenderReadPixels(
+          renderer,
+          nullptr,
+          SDL_PIXELFORMAT_RGBA32,
+          static_cast<void*>(pixels.data()),
+          width * 4);
+      tcod::image::save(pixels, filename);
+      break;
+    }
 #ifndef NO_OPENGL
-	} else {
-		SDL_Surface *screenshot=(SDL_Surface *)TCOD_opengl_get_screen();
-		TCOD_sys_save_bitmap((void *)screenshot,filename);
-		SDL_FreeSurface(screenshot);
+    case TCOD_RENDERER_OPENGL:
+      SDL_Surface* screenshot = TCOD_opengl_get_screen();
+      TCOD_sys_save_bitmap(screenshot, filename);
+      SDL_FreeSurface(screenshot);
+      break;
 #endif
-	}
+  }
 }
 /* get desktop resolution */
 static void get_current_resolution(int *w, int *h) {
@@ -942,10 +942,11 @@ static void get_current_resolution(int *w, int *h) {
 }
 
 static void set_mouse_position(int x, int y) {
-  SDL_WarpMouseInWindow(window, (uint16_t)x,(uint16_t)y);
+  SDL_WarpMouseInWindow(
+      window, static_cast<uint16_t>(x), static_cast<uint16_t>(y));
 }
 
-static char *get_clipboard_text(void) {
+static const char *get_clipboard_text(void) {
 #ifdef TCOD_LINUX
 	/*
 		X11 clipboard is inaccessible without an open window.
@@ -983,7 +984,7 @@ static bool set_clipboard_text(const char *text) {
 
 /* android compatible file access functions */
 static bool file_read(const char *filename, unsigned char **buf, size_t *size) {
-	int64_t filesize;
+	size_t filesize;
 	/* get file size */
 	SDL_RWops *rwops= SDL_RWFromFile(filename,"rb");
 	if (!rwops) return false;
@@ -991,9 +992,9 @@ static bool file_read(const char *filename, unsigned char **buf, size_t *size) {
 	filesize=SDL_RWtell(rwops);
 	SDL_RWseek(rwops,0,RW_SEEK_SET);
 	/* allocate buffer */
-	*buf = (unsigned char *)malloc(sizeof(unsigned char)*filesize);
+	*buf = static_cast<unsigned char*>(malloc(sizeof(unsigned char) * filesize));
 	/* read from file */
-	if (SDL_RWread(rwops,*buf,sizeof(unsigned char),filesize) != filesize) {
+	if (SDL_RWread(rwops, *buf, sizeof(unsigned char), filesize) != filesize) {
 		SDL_RWclose(rwops);
 		free(*buf);
 		return false;
@@ -1033,7 +1034,8 @@ static void shutdown_(void) {
 }
 
 TCOD_SDL_driver_t *SDL_implementation_factory(void) {
-	TCOD_SDL_driver_t *ret=(TCOD_SDL_driver_t *)calloc(1,sizeof(TCOD_SDL_driver_t));
+	TCOD_SDL_driver_t *ret =
+      static_cast<TCOD_SDL_driver_t *>(calloc(1, sizeof(TCOD_SDL_driver_t)));
     ret->scale_xc = 0.5f;
     ret->scale_yc = 0.5f;
 

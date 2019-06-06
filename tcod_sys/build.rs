@@ -15,10 +15,23 @@ fn build_libz(libz_sources: &[&str]) {
     config.compile("libz.a");
 }
 
+fn add_includes(config: &mut cc::Build) {
+    config.include(Path::new("libtcod").join("src").join("vendor"));
+    config.include(Path::new("libtcod").join("src").join("vendor").join("utf8proc"));
+    config.include(Path::new("libtcod").join("src").join("vendor").join("zlib"));
+    config.include(Path::new("libtcod").join("src").join("libtcod").join("color"));
+    config.include(Path::new("libtcod").join("src").join("libtcod").join("console"));
+    config.include(Path::new("libtcod").join("src").join("libtcod").join("engine"));
+    config.include(Path::new("libtcod").join("src").join("libtcod").join("gui"));
+    config.include(Path::new("libtcod").join("src").join("libtcod").join("sdl2"));
+    config.include(Path::new("libtcod").join("src").join("libtcod").join("pathfinding"));
+    config.include(Path::new("libtcod").join("src").join("libtcod").join("tileset"));
+    config.include(Path::new("libtcod").join("src").join("libtcod").join("utility"));
+    config.include(Path::new("libtcod").join("src").join("libtcod"));
+}
+
 fn build_libtcod_objects(mut config: cc::Build, sources: &[&str]) {
-    config.include("libtcod/src/libtcod");
-    config.include("libtcod/src/vendor/utf8proc");
-    config.include("libtcod/src/vendor/zlib");
+    add_includes(&mut config);
     for c_file in sources {
         config.file(c_file);
     }
@@ -146,6 +159,7 @@ fn main() {
     ];
 
     let vendor_sources = &[
+        "libtcod/src/vendor/glad.c",
         "libtcod/src/vendor/stb.c",
         "libtcod/src/vendor/lodepng.cpp",
         "libtcod/src/vendor/utf8proc/utf8proc.c",
@@ -157,8 +171,7 @@ fn main() {
         "libtcod/src/libtcod/color_c.c",
         "libtcod/src/libtcod/console.cpp",
         "libtcod/src/libtcod/console_c.cpp",
-        "libtcod/src/libtcod/console_printing.c",
-        "libtcod/src/libtcod/console_rexpaint.c",
+        "libtcod/src/libtcod/deprecated.cpp",
         "libtcod/src/libtcod/fov_c.c",
         "libtcod/src/libtcod/fov_circular_raycasting.c",
         "libtcod/src/libtcod/fov_diamond_raycasting.c",
@@ -167,7 +180,7 @@ fn main() {
         "libtcod/src/libtcod/fov_restrictive.c",
         "libtcod/src/libtcod/heightmap_c.c",
         "libtcod/src/libtcod/image.cpp",
-        "libtcod/src/libtcod/image_c.c",
+        "libtcod/src/libtcod/image_c.cpp",
         "libtcod/src/libtcod/lex_c.c",
         "libtcod/src/libtcod/list_c.c",
         "libtcod/src/libtcod/mersenne_c.c",
@@ -183,13 +196,23 @@ fn main() {
         "libtcod/src/libtcod/sys_sdl_img_png.cpp",
         "libtcod/src/libtcod/tree_c.c",
         "libtcod/src/libtcod/txtfield_c.c",
-        "libtcod/src/libtcod/wrappers.c",
+        "libtcod/src/libtcod/wrappers.cpp",
         "libtcod/src/libtcod/zip_c.c",
         // color
         "libtcod/src/libtcod/color/canvas.cpp",
+        // console
+        // Note that console/console.cpp here was renamed because MSVC can't deal with source
+        // files with the same name in different dirs (output is the same .obj file for each).
+        // I failed to make this go away with /Fo.
+        // See https://stackoverflow.com/questions/3729515/visual-studio-2010-2008-cant-handle-source-files-with-identical-names-in-diff/
+        "libtcod/src/libtcod/console/console_clobbered.cpp",
+        "libtcod/src/libtcod/console/drawing.cpp",
+        "libtcod/src/libtcod/console/printing.cpp",
+        "libtcod/src/libtcod/console/rexpaint.cpp",
         // engine
         "libtcod/src/libtcod/engine/backend.cpp",
         "libtcod/src/libtcod/engine/display.cpp",
+        "libtcod/src/libtcod/engine/error.cpp",
         "libtcod/src/libtcod/engine/globals.cpp",
         // gui
         // "libtcod/src/libtcod/gui/button.cpp",
@@ -206,16 +229,27 @@ fn main() {
         // "libtcod/src/libtcod/gui/toolbar.cpp",
         // "libtcod/src/libtcod/gui/vbox.cpp",
         // "libtcod/src/libtcod/gui/widget.cpp",
+        // pathfinding
+        "libtcod/src/libtcod/pathfinding/astar.cpp",
+        "libtcod/src/libtcod/pathfinding/dijkstra.cpp",
+        "libtcod/src/libtcod/pathfinding/generic.cpp",
         // sdl2
+        "libtcod/src/libtcod/sdl2/event.cpp",
+        "libtcod/src/libtcod/sdl2/gl2_display.cpp",
+        "libtcod/src/libtcod/sdl2/gl2_raii.cpp",
+        "libtcod/src/libtcod/sdl2/gl2_renderer.cpp",
+        "libtcod/src/libtcod/sdl2/gl_alias.cpp",
         "libtcod/src/libtcod/sdl2/legacy_backend.cpp",
         "libtcod/src/libtcod/sdl2/sdl2_alias.cpp",
         "libtcod/src/libtcod/sdl2/sdl2_display.cpp",
         "libtcod/src/libtcod/sdl2/sdl2_renderer.cpp",
         // tileset
+        "libtcod/src/libtcod/tileset/fallback.cpp",
         "libtcod/src/libtcod/tileset/observer.cpp",
         "libtcod/src/libtcod/tileset/tile.cpp",
         "libtcod/src/libtcod/tileset/tileset.cpp",
         "libtcod/src/libtcod/tileset/tilesheet.cpp",
+        "libtcod/src/libtcod/tileset/truetype.cpp",
     ];
 
     if target.contains("linux") {
@@ -289,10 +323,7 @@ fn main() {
         config.flag("-shared");
         fs::create_dir(dst.join("lib")).unwrap();
         config.flag(&format!("-Wl,--out-implib,{}", dst.join("lib/libtcod.a").display()));
-        config.include(Path::new("libtcod").join("src").join("vendor"));
-        config.include(Path::new("libtcod").join("src").join("vendor").join("utf8proc"));
-        config.include(Path::new("libtcod").join("src").join("vendor").join("zlib"));
-        config.include(Path::new("libtcod").join("src").join("libtcod"));
+        add_includes(&mut config);
         for c_file in libz_sources.iter().chain(libtcod_sources.iter()).chain(vendor_sources) {
             let path = c_file.split('/').fold(PathBuf::new(), |path, segment| path.join(segment));
             config.flag(src.join(path).to_str().unwrap());
@@ -330,16 +361,7 @@ fn main() {
         config.flag("/EHsc");
         config.flag(&format!("/Fo:{}\\", dst.to_str().unwrap()));
         config.include(sdl_include_dir.to_str().unwrap());
-        config.include(Path::new("libtcod").join("src").join("vendor"));
-        config.include(Path::new("libtcod").join("src").join("vendor").join("utf8proc"));
-        config.include(Path::new("libtcod").join("src").join("vendor").join("zlib"));
-        config.include(Path::new("libtcod").join("src").join("libtcod"));
-        config.include(Path::new("libtcod").join("src").join("libtcod").join("color"));
-        config.include(Path::new("libtcod").join("src").join("libtcod").join("engine"));
-        config.include(Path::new("libtcod").join("src").join("libtcod").join("gui"));
-        config.include(Path::new("libtcod").join("src").join("libtcod").join("sdl2"));
-        config.include(Path::new("libtcod").join("src").join("libtcod").join("tileset"));
-        config.include(Path::new("libtcod").join("src").join("libtcod").join("utility"));
+        add_includes(&mut config);
         for c_file in libz_sources.iter().chain(vendor_sources).chain(libtcod_sources.iter()) {
             // Make sure the path is in the Windows format. This
             // shouldn't matter but it's distracting when debugging

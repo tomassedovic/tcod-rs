@@ -1,37 +1,44 @@
-/*
-* libtcod
-* Copyright (c) 2008-2018 Jice & Mingos & rmtew
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in the
-*       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote
-*       products derived from this software without specific prior written
-*       permission.
-*
-* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
-* EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
-* DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-* ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+/* BSD 3-Clause License
+ *
+ * Copyright © 2008-2019, Jice and the libtcod contributors.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 #ifndef _TCOD_CONSOLE_HPP
 #define _TCOD_CONSOLE_HPP
 
 #include <string>
 
 #include "console.h"
-#include "console_rexpaint.h"
+#include "console/drawing.h"
+#include "console/printing.h"
+#include "console/rexpaint.h"
+#include "engine/display.h"
 
 #ifdef TCOD_CONSOLE_SUPPORT
 
@@ -680,11 +687,11 @@ public :
 	TCOD_alignment_t getAlignment() const;
   /**
    *  Print an EASCII formatted string to the console.
-   *  /rst
+   *  \rst
    *  .. deprecated:: 1.8
    *    EASCII is being phased out.  Use TCODConsole::printf or one of the
    *    UTF-8 overloads.
-   *  /endrst
+   *  \endrst
    */
   TCOD_DEPRECATED("Use TCODConsole::printf or the std::string overload for"
                   " this function.")
@@ -694,17 +701,17 @@ public :
    *
    *  This method will use this consoles default alignment, blend mode, and
    *  colors.
-   *  /rst
+   *  \rst
    *  .. versionadded:: 1.8
-   *  /endrst
+   *  \endrst
    */
   void print(int x, int y, const std::string &str);
   /**
    *  Print a UTF-8 string to the console with specific alignment and blend
    *  mode.
-   *  /rst
+   *  \rst
    *  .. versionadded:: 1.8
-   *  /endrst
+   *  \endrst
    */
   void print(int x, int y, const std::string &str,
              TCOD_alignment_t alignment, TCOD_bkgnd_flag_t flag);
@@ -713,27 +720,29 @@ public :
    *
    *  This method will use this consoles default alignment, blend mode, and
    *  colors.
-   *  /rst
+   *  \rst
    *  .. versionadded:: 1.8
-   *  /endrst
+   *  \endrst
    */
+  TCODLIB_FORMAT(4, 5)
   void printf(int x, int y, const char *fmt, ...);
   /**
    *  Format and print a UTF-8 string to the console with specific alignment
    *  and blend mode.
-   *  /rst
+   *  \rst
    *  .. versionadded:: 1.8
-   *  /endrst
+   *  \endrst
    */
+  TCODLIB_FORMAT(6, 7)
   void printf(int x, int y, TCOD_bkgnd_flag_t flag, TCOD_alignment_t alignment,
               const char *fmt, ...);
   /**
    *  Print an EASCII formatted string to the console.
-   *  /rst
+   *  \rst
    *  .. deprecated:: 1.8
    *    Use `TCODConsole::print` or `TCODConsole::printf`.
    *    These functions have overloads for specifying flag and alignment.
-   *  /endrst
+   *  \endrst
    */
   TCOD_DEPRECATED("Use TCODConsole::print or TCODConsole::printf instead of"
                   " this function.")
@@ -761,7 +770,8 @@ public :
 		y <= y+h < console height
 	@Param fmt printf-like format string, eventually followed by parameters. You can use control codes to change the colors inside the string, except in C#.
 	*/
-   	int printRect(int x, int y, int w, int h, const char *fmt, ...);
+  TCODLIB_FORMAT(6, 7)
+  int printRect(int x, int y, int w, int h, const char *fmt, ...);
 
 	/**
 	@PageName console_print
@@ -787,7 +797,9 @@ public :
 	@Param alignment defines how the strings are printed on screen.
 	@Param fmt printf-like format string, eventually followed by parameters. You can use control codes to change the colors inside the string, except in C#.
 	*/
-	int printRectEx(int x, int y, int w, int h, TCOD_bkgnd_flag_t flag, TCOD_alignment_t alignment, const char *fmt, ...);
+  TCODLIB_FORMAT(8, 9)
+  int printRectEx(int x, int y, int w, int h, TCOD_bkgnd_flag_t flag,
+                  TCOD_alignment_t alignment, const char *fmt, ...);
 
 	/**
 	@PageName console_print
@@ -806,7 +818,8 @@ public :
 		y <= y+h < console height
 	@Param fmt printf-like format string, eventually followed by parameters. You can use control codes to change the colors inside the string, except in C#.
 	*/
-	int getHeightRect(int x, int y, int w, int h, const char *fmt, ...);
+  TCODLIB_FORMAT(6, 7)
+  int getHeightRect(int x, int y, int w, int h, const char *fmt, ...);
 
 	/**
 	@PageName console_print
@@ -1770,6 +1783,11 @@ public :
 		... use off1
 		off1=nil -- release the reference
 	*/
+  TCOD_DEPRECATED("This function is a stub and will do nothing.")
+  static void setKeyboardRepeat(int initialDelay,int interval);
+  TCOD_DEPRECATED("This function is a stub and will do nothing.")
+  static void disableKeyboardRepeat();
+
 	virtual ~TCODConsole();
 
 	void setDirty(int x, int y, int w, int h);
@@ -1786,11 +1804,11 @@ protected :
 	friend class TCODImage;
 	friend class TCODZip;
 	friend class TCODText;
-  friend TCODLIB_API void TCOD_console_init_root(
-      int w, int h, const char* title,
-      bool fullscreen, TCOD_renderer_t renderer);
+  friend TCODLIB_API void tcod::console::init_root(
+      int w, int h, const std::string& title,
+      bool fullscreen, TCOD_renderer_t renderer, bool vsync);
 	TCODConsole();
-	TCOD_console_t data;
+	TCOD_Console* data;
 };
 
 #endif /* TCOD_CONSOLE_SUPPORT */

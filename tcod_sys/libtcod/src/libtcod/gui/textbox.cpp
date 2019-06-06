@@ -1,30 +1,34 @@
-/*
-* libtcod
-* Copyright (c) 2008-2018 Jice & Mingos & rmtew
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in the
-*       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote
-*       products derived from this software without specific prior written
-*       permission.
-*
-* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
-* EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
-* DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-* ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+/* BSD 3-Clause License
+ *
+ * Copyright © 2008-2019, Jice and the libtcod contributors.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 #include "textbox.hpp"
 
 #include <string.h>
@@ -45,7 +49,7 @@ TextBox::TextBox(int x,int y,int w, int maxw, const char *label, const char *val
 	if ( label ) this->label=TCOD_strdup(label);
 	boxw=w;
 	if (label ) {
-		boxx=(int)strlen(label)+1;
+		boxx=static_cast<int>(strlen(label) + 1);
 		this->w+= boxx;
 	}
 }
@@ -68,7 +72,7 @@ void TextBox::render() {
 	con->setDefaultBackground(keyboardFocus == this ? foreFocus : fore);
 	con->setDefaultForeground(keyboardFocus == this ? backFocus : back);
 	con->rect(x+boxx,y,boxw,h,false,TCOD_BKGND_SET);
-	int len=(int)strlen(txt)-offset;
+	int len = static_cast<int>(strlen(txt) - offset);
 	if (len > boxw) len = boxw;
 	if ( txt ) con->printEx(x+boxx,y,TCOD_BKGND_NONE,TCOD_LEFT,"%.*s",len,&txt[offset]);
 	if (keyboardFocus == this && blink > 0.0f) {
@@ -89,9 +93,9 @@ void TextBox::update(TCOD_key_t k) {
 		if ( k.vk == TCODK_CHAR ||
 			(k.vk >= TCODK_0 && k.vk <= TCODK_9) ||
 			(k.vk >= TCODK_KP0 && k.vk <= TCODK_KP9) ) {
-			if ( ! insert || (int)strlen(txt) < maxw ) {
-				if ( insert && pos < (int)strlen(txt) )  {
-					for (int i=(int)strlen(txt); i >= pos; i-- ) {
+			if (!insert || static_cast<int>(strlen(txt)) < maxw) {
+				if (insert && pos < static_cast<int>(strlen(txt)))  {
+					for (int i = static_cast<int>(strlen(txt)); i >= pos; --i) {
 						txt[i+1]=txt[i];
 					}
 				}
@@ -109,7 +113,7 @@ void TextBox::update(TCOD_key_t k) {
 				blink=blinkingDelay;
 			break;
 			case TCODK_RIGHT :
-				if (pos < (int)strlen(txt)) pos++;
+				if (pos < static_cast<int>(strlen(txt))) { pos++; }
 				if ( pos >= w ) offset = pos-w+1;
 				blink=blinkingDelay;
 			break;
@@ -129,7 +133,7 @@ void TextBox::update(TCOD_key_t k) {
 				blink=blinkingDelay;
 			break;
 			case TCODK_DELETE :
-				if (pos < (int)strlen(txt)) {
+				if (pos < static_cast<int>(strlen(txt))) {
 					for (uint32_t i=pos; i <= strlen(txt); i++ ) {
 						txt[i]=txt[i+1];
 					}
@@ -144,7 +148,7 @@ void TextBox::update(TCOD_key_t k) {
 			break;
 */
 			case TCODK_END :
-				pos = (int)strlen(txt);
+				pos = static_cast<int>(strlen(txt));
 				if ( pos >= w ) offset = pos-w+1;
 				blink=blinkingDelay;
 			break;

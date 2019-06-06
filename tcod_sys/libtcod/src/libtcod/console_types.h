@@ -1,35 +1,40 @@
-/*
-* libtcod
-* Copyright (c) 2008-2018 Jice & Mingos & rmtew
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in the
-*       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote
-*       products derived from this software without specific prior written
-*       permission.
-*
-* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
-* EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
-* DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-* ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+/* BSD 3-Clause License
+ *
+ * Copyright © 2008-2019, Jice and the libtcod contributors.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 #ifndef _TCOD_CONSOLE_TYPES_H
 #define _TCOD_CONSOLE_TYPES_H
 
 #include "portability.h"
 #include "color.h"
+#include "console/console.h"
 
 typedef enum {
 	TCODK_NONE,
@@ -224,27 +229,9 @@ typedef enum {
 } TCOD_colctrl_t;
 
 typedef enum {
-	TCOD_BKGND_NONE,
-	TCOD_BKGND_SET,
-	TCOD_BKGND_MULTIPLY,
-	TCOD_BKGND_LIGHTEN,
-	TCOD_BKGND_DARKEN,
-	TCOD_BKGND_SCREEN,
-	TCOD_BKGND_COLOR_DODGE,
-	TCOD_BKGND_COLOR_BURN,
-	TCOD_BKGND_ADD,
-	TCOD_BKGND_ADDA,
-	TCOD_BKGND_BURN,
-	TCOD_BKGND_OVERLAY,
-	TCOD_BKGND_ALPH,
-	TCOD_BKGND_DEFAULT
-} TCOD_bkgnd_flag_t;
-
-typedef enum {
 	TCOD_KEY_PRESSED=1,
 	TCOD_KEY_RELEASED=2,
 } TCOD_key_status_t;
-
 /**
  *  These font flags can be OR'd together into a bit-field and passed to
  *  TCOD_console_set_custom_font
@@ -269,6 +256,13 @@ typedef enum {
   TCOD_FONT_TYPE_GRAYSCALE=4,
   /** A unique layout used by some of libtcod's fonts. */
   TCOD_FONT_LAYOUT_TCOD=8,
+  /**
+   *  Decode a code page 437 tileset into Unicode code-points.
+   *  \rst
+   *  .. versionadded:: 1.10
+   *  \endrst
+   */
+  TCOD_FONT_LAYOUT_CP437=16,
 } TCOD_font_flags_t;
 /**
  *  The available renderers.
@@ -290,43 +284,21 @@ typedef enum {
   TCOD_RENDERER_SDL,
   /**
    *  A new SDL2 renderer.  Allows the window to be resized.
-   *  /rst
+   *  \rst
    *  .. versionadded:: 1.8
-   *  /endrst
+   *  \endrst
    */
   TCOD_RENDERER_SDL2,
+  /**
+   *  A new OpenGL 2.0 core renderer.  Allows the window to be resized.
+   *  \rst
+   *  .. versionadded:: 1.9
+   *
+   *  .. versionchanged:: 1.11.0
+   *      This renderer now uses OpenGL 2.0 instead of 2.1.
+   *  \endrst
+   */
+  TCOD_RENDERER_OPENGL2,
   TCOD_NB_RENDERERS,
 } TCOD_renderer_t;
-
-/**
- *  \enum TCOD_alignment_t
- *
- *  Print justification options.
- */
-typedef enum {
-	TCOD_LEFT,
-	TCOD_RIGHT,
-	TCOD_CENTER
-} TCOD_alignment_t;
-
-/** Private console struct. */
-typedef struct TCOD_Console {
-  /** Character code array. */
-  int *ch_array;
-  /** Pointers to arrays of TCOD_color_t colors. */
-  TCOD_color_t *fg_array, *bg_array;
-  /** Console width and height (in characters, not pixels.) */
-  int w,h;
-  /** Default background operator for print & print_rect functions. */
-  TCOD_bkgnd_flag_t bkgnd_flag;
-  /** Default alignment for print & print_rect functions. */
-  TCOD_alignment_t alignment;
-  /** Foreground (text) and background colors. */
-  TCOD_color_t fore, back;
-  /** True if a key color is being used. */
-  bool has_key_color;
-  /** The current key color for this console. */
-  TCOD_color_t key_color;
-} TCOD_Console;
-typedef TCOD_Console *TCOD_console_t;
 #endif /* _TCOD_CONSOLE_TYPES_H */

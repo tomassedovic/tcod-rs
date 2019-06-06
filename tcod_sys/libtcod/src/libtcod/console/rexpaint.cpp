@@ -1,59 +1,64 @@
-/*
-* libtcod
-* Copyright (c) 2008-2018 Jice & Mingos & rmtew
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in the
-*       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote
-*       products derived from this software without specific prior written
-*       permission.
-*
-* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
-* EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
-* DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-* ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-#include "console_rexpaint.h"
+/* BSD 3-Clause License
+ *
+ * Copyright © 2008-2019, Jice and the libtcod contributors.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+#include "rexpaint.h"
 
 #ifdef TCOD_CONSOLE_SUPPORT
 
-#include <limits.h>
+#include <limits>
 
 #include <zlib.h>
 
-#include "console.h"
-#include "libtcod_int.h" /* Needed only for TCOD_fatal */
-#include "console_types.h"
-#include "color.h"
+#include "../console.h"
+#include "../libtcod_int.h" /* Needed only for TCOD_fatal */
+#include "../console_types.h"
+#include "../color.h"
 
 /* Convert a little-endian number to native memory order. */
-static uint32_t decode_little_endian(uint32_t data) {
-  int i;
-  uint32_t result=0;
-  for(i=0; i<(int)sizeof(result);++i){
-    result += (unsigned int)((unsigned char*)&data)[i] << (CHAR_BIT * i);
+static uint32_t decode_little_endian(uint32_t data)
+{
+  uint32_t result = 0;
+  const uint8_t* p = reinterpret_cast<uint8_t*>(&data);
+  for(int i = 0; i < static_cast<int>(sizeof(result)); ++i) {
+      result += p[i] << (std::numeric_limits<uint8_t>::digits * i);
   }
   return result;
 }
 /* Byte swaps a number into little-endian order to be saved to disk. */
 static uint32_t encode_little_endian(uint32_t number) {
-  int i;
-  uint32_t result=0;
-  for(i=0; i<(int)sizeof(result);++i){
-    ((unsigned char*)&result)[i] = number & UCHAR_MAX;
-    number >>= CHAR_BIT;
+  uint32_t result = 0;
+  uint8_t* p = reinterpret_cast<uint8_t*>(&result);
+  for(int i = 0; i < static_cast<int>(sizeof(result)); ++i) {
+    p[i] = number & std::numeric_limits<uint8_t>::max();
+    number >>= std::numeric_limits<uint8_t>::digits;
   }
   return result;
 }
@@ -73,13 +78,16 @@ struct RexPaintTile {
 };
 /* Read data from a gz file, returns 0 on success, or -1 on any error. */
 static int load_gz_confirm(gzFile gz_file, void *data, size_t length) {
-  if (gzread(gz_file, data, (int)length) != length) { return -1; }
+  int length_ = static_cast<int>(length);
+  if (gzread(gz_file, data, length_) != length_) { return -1; }
   return 0;
 }
 /* Loads a little-endian 32 bit signed int into memory. */
 static int load_int32(gzFile gz_file, int32_t *out) {
   if (load_gz_confirm(gz_file, out, sizeof(out[0]))) { return -1; }
-  *out = (int32_t)decode_little_endian((uint32_t)(out[0]));
+  *out = static_cast<int32_t>(
+      decode_little_endian(static_cast<uint32_t>(out[0]))
+  );
   return 0;
 }
 static int load_header(gzFile gz_file, struct RexPaintHeader *xp_header) {
@@ -99,7 +107,7 @@ static int load_tile(gzFile gz_file, struct RexPaintTile *tile) {
 /* Read a layer of REXPaint tiles onto a console.
    If transparent is true, then follow REXPaint's rules for transparency. */
 static int load_tiles(
-    gzFile gz_file, TCOD_console_t console, int transparent) {
+    gzFile gz_file, TCOD_Console* console, int transparent) {
   int x, y;
   const int width = TCOD_console_get_width(console);
   const int height = TCOD_console_get_height(console);
@@ -149,7 +157,8 @@ static TCOD_list_t load_consoleList(gzFile gz_file) {
     if (!console) {
       /* There was an issue then delete everything so far and return NULL */
       while (!TCOD_list_is_empty(console_list)) {
-        TCOD_console_delete(TCOD_list_pop(console_list));
+        TCOD_console_delete(
+            static_cast<TCOD_Console*>(TCOD_list_pop(console_list)));
       }
       TCOD_list_delete(console_list);
       return NULL;
@@ -165,9 +174,10 @@ static TCOD_console_t combine_console_list(TCOD_list_t console_list) {
   if (!console_list) { return NULL; }
   /* Reverse the list so that elements will be dequeued. */
   TCOD_list_reverse(console_list);
-  main_console = TCOD_list_pop(console_list);
+  main_console = static_cast<TCOD_Console*>(TCOD_list_pop(console_list));
   while (!TCOD_list_is_empty(console_list)) {
-    TCOD_console_t console = TCOD_list_pop(console_list);
+    TCOD_console_t console =
+        static_cast<TCOD_Console*>(TCOD_list_pop(console_list));
     /* Set key color to {255, 0, 255} before blit. */
     TCOD_console_set_key_color(console, TCOD_fuchsia);
     /* This blit may fail if the consoles do not match shapes. */
@@ -238,7 +248,7 @@ bool TCOD_console_load_xp(TCOD_console_t con, const char *filename) {
 }
 /* Saves a 32-bit signed int encoded as little-endian to gz_file. */
 static int write_int32(gzFile gz_file, int32_t number) {
-  uint32_t encoded = encode_little_endian((uint32_t)number);
+  uint32_t encoded = encode_little_endian(static_cast<uint32_t>(number));
   if (!gzwrite(gz_file, &encoded, sizeof(encoded))) {
     return -1;
   }
@@ -260,7 +270,7 @@ static int write_tile(gzFile gz_file, struct RexPaintTile *tile) {
   }
   return 0;
 }
-static int write_console(gzFile gz_file, TCOD_console_t console) {
+static int write_console(gzFile gz_file, const TCOD_Console* console) {
   int x, y;
   struct RexPaintLayerChunk xp_layer;
   xp_layer.width = TCOD_console_get_width(console);
@@ -295,7 +305,7 @@ static int write_console(gzFile gz_file, TCOD_console_t console) {
  *  The REXPaint format can support a 1:1 copy of a libtcod console.
  */
 bool TCOD_console_save_xp(
-    TCOD_console_t con, const char *filename, int compress_level) {
+    const TCOD_Console* con, const char *filename, int compress_level) {
   struct RexPaintHeader xp_header;
   gzFile gz_file = gzopen(filename, "wb");
   if (!gz_file) { return false; /* could not open file */ }
@@ -338,7 +348,8 @@ bool TCOD_console_list_save_xp(
     return false; /* error writing metadata */
   }
   for (i = 0; i < xp_header.layer_count; ++i){
-    if (write_console(gz_file, TCOD_list_get(console_list, i))) {
+    if (write_console(
+        gz_file, static_cast<TCOD_Console*>(TCOD_list_get(console_list, i)))) {
       gzclose(gz_file);
       return false; /* error writing out console data */
     }

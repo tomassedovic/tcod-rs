@@ -1,30 +1,34 @@
-/*
-* libtcod
-* Copyright (c) 2008-2018 Jice & Mingos & rmtew
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in the
-*       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote
-*       products derived from this software without specific prior written
-*       permission.
-*
-* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
-* EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
-* DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-* ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+/* BSD 3-Clause License
+ *
+ * Copyright © 2008-2019, Jice and the libtcod contributors.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 #include "wrappers.h"
 
 #include <math.h>
@@ -46,7 +50,10 @@ TCOD_color_t int_to_color (colornum_t col) {
   return ret;
 }
 
-#define color_to_int(col) (int)(((int)((col).b) << 16) | ((col).g << 8) | (col).r)
+static constexpr colornum_t color_to_int(const TCOD_ColorRGB& color)
+{
+  return (color.b << 16) | (color.g << 8) | color.r;
+}
 
 bool TCOD_color_equals_wrapper (colornum_t c1, colornum_t c2) {
   return TCOD_color_equals (int_to_color(c1), int_to_color(c2));
@@ -163,42 +170,29 @@ void TCOD_console_set_fade_wrapper(uint8_t val, colornum_t fade)
   TCOD_console_set_fade (val, int_to_color(fade));
 }
 
-void TCOD_console_fill_background(TCOD_console_t con, int *r, int *g, int *b) {
-	struct TCOD_Console *dat = con ? (struct TCOD_Console *)con : TCOD_ctx.root;
-	int i;
-	TCOD_color_t *curcolor = dat->bg_array;
-	for (i = 0; i < dat->w*dat->h; i++) {
-		curcolor->r = *r;
-		curcolor->g = *g;
-		curcolor->b = *b;
-		curcolor++;
-		r++;
-		g++;
-		b++;
-	}
+void TCOD_console_fill_background(TCOD_Console* con, int *r, int *g, int *b)
+{
+  con = tcod::console::validate_(con);
+  if (!con) { return; }
+  for (int i = 0; i < con->w * con->h; ++i) {
+    con->tiles[i].bg = tcod::ColorRGBA(r[i], g[i], b[i]);
+  }
 }
-
-void TCOD_console_fill_foreground(TCOD_console_t con, int *r, int *g, int *b) {
-	struct TCOD_Console *dat = con ? (struct TCOD_Console *)con : TCOD_ctx.root;
-	int i;
-	TCOD_color_t *curcolor = dat->fg_array;
-	for (i = 0; i < dat->w*dat->h; i++) {
-		curcolor->r = *r;
-		curcolor->g = *g;
-		curcolor->b = *b;
-		curcolor++;
-		r++;
-		g++;
-		b++;
-	}
+void TCOD_console_fill_foreground(TCOD_Console* con, int *r, int *g, int *b)
+{
+  con = tcod::console::validate_(con);
+  if (!con) { return; }
+  for (int i = 0; i < con->w * con->h; ++i) {
+    con->tiles[i].fg = tcod::ColorRGBA(r[i], g[i], b[i]);
+  }
 }
-
-void TCOD_console_fill_char(TCOD_console_t con, int *arr) {
-	struct TCOD_Console *dat = con ? (struct TCOD_Console *)con : TCOD_ctx.root;
-	int i;
-	for (i = 0; i < dat->w*dat->h; i++) {
-		dat->ch_array[i] = arr[i];
-	}
+void TCOD_console_fill_char(TCOD_Console* con, int *arr)
+{
+  con = tcod::console::validate_(con);
+  if (!con) { return; }
+  for (int i = 0; i < con->w * con->h; ++i) {
+    con->tiles[i].ch = arr[i];
+  }
 }
 
 colornum_t
@@ -285,9 +279,19 @@ void TCOD_console_double_vline(TCOD_console_t con,int x,int y, int l, TCOD_bkgnd
 	for (i=y; i< y+l; i++) TCOD_console_put_char(con,x,i,TCOD_CHAR_DVLINE,flag);
 }
 
-
-void TCOD_console_print_double_frame(TCOD_console_t con,int x,int y,int w,int h, bool empty, TCOD_bkgnd_flag_t flag, const char *fmt, ...) {
-	struct TCOD_Console *dat = con ? (struct TCOD_Console *)con : TCOD_ctx.root;
+void TCOD_console_print_double_frame(
+    TCOD_Console* con,
+    int x,
+    int y,
+    int w,
+    int h,
+    bool empty,
+    TCOD_bkgnd_flag_t flag,
+    const char *fmt,
+    ...)
+{
+  struct TCOD_Console *dat = tcod::console::validate_(con);
+  if (!dat) { return; }
 	TCOD_console_put_char(con,x,y,TCOD_CHAR_DNW,flag);
 	TCOD_console_put_char(con,x+w-1,y,TCOD_CHAR_DNE,flag);
 	TCOD_console_put_char(con,x,y+h-1,TCOD_CHAR_DSW,flag);
@@ -312,7 +316,7 @@ void TCOD_console_print_double_frame(TCOD_console_t con,int x,int y,int w,int h,
 		title = TCOD_console_vsprint(fmt,ap);
 		va_end(ap);
 		title[w-3]=0; /* truncate if needed */
-		xs = x + (w-(int)strlen(title)-2)/2;
+    xs = x + (w - static_cast<int>(strlen(title)) - 2) / 2;
 		tmp=dat->back; /* swap colors */
 		dat->back=dat->fore;
 		dat->fore=tmp;
@@ -348,7 +352,9 @@ void TCOD_namegen_get_sets_wrapper(char **sets) {
 	TCOD_list_t l=TCOD_namegen_get_sets();
 	char **it;
 	int i=0;
-	for (it=(char**)TCOD_list_begin(l); it != (char **)TCOD_list_end(l); it++) {
+  for (it = reinterpret_cast<char**>(TCOD_list_begin(l));
+       it != reinterpret_cast<char**>(TCOD_list_end(l));
+       ++it) {
 		sets[i++]=*it;
 	}
 }

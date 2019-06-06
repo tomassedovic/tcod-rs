@@ -1,30 +1,34 @@
-/*
-* libtcod
-* Copyright (c) 2008-2018 Jice & Mingos & rmtew
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in the
-*       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote
-*       products derived from this software without specific prior written
-*       permission.
-*
-* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
-* EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
-* DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-* ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+/* BSD 3-Clause License
+ *
+ * Copyright © 2008-2019, Jice and the libtcod contributors.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 #ifndef _TCOD_LIST_HPP
 #define _TCOD_LIST_HPP
 
@@ -85,13 +89,14 @@ public :
 		TCOD_list_push(intList,(const void *)5);
 		TCOD_list_t intList2 = TCOD_list_duplicate(intList); // intList2 contains two elements : 3 and 5
 	*/
-	TCODList(const TCOD_list_t l) {
-		array=NULL;
-		fillSize=allocSize=0;
-		for ( void **it=TCOD_list_begin(l); it != TCOD_list_end(l); it++ ) {
-			push(*((T *)(it)));
-		}
-	}
+  TCODList(const TCOD_list_t l)
+  {
+    array = NULL;
+    fillSize = allocSize = 0;
+    for (void** it = TCOD_list_begin(l); it != TCOD_list_end(l); ++it) {
+      push(*reinterpret_cast<T*>(it));
+    }
+  }
 	TCODList(const TCODList<T> &l2) {
 		array=NULL;
 		fillSize=allocSize=0;
@@ -244,12 +249,13 @@ public :
 		bool has3 = TCOD_list_contains(intList,(const void *)3); // has3 == true
 		bool has4 = TCOD_list_contains(intList,(const void *)4); // has4 == false
 	*/
-	bool contains(const T elt) const {
-		for ( T* curElt = begin(); curElt != end(); curElt ++) {
-			if ( *curElt == elt ) return true;
-		}
-		return false;
-	}
+  bool contains(const T elt) const
+  {
+    for (T* curElt = begin(); curElt != end(); ++curElt) {
+      if (*curElt == elt) { return true; }
+    }
+    return false;
+  }
 
 	/**
 	@PageName list_list
@@ -470,7 +476,7 @@ public :
 		val = (int)TCOD_list_pop(intList);
 	*/
 	T pop() {
-		if ( fillSize == 0 ) return (T)0;
+		if ( fillSize == 0 ) return T{};
 		return array[--fillSize];
 	}
 
@@ -495,7 +501,7 @@ public :
 		val = (int)TCOD_list_peek(intList);
 	*/
 	T peek() const {
-		if ( fillSize == 0 ) return (T)0;
+		if ( fillSize == 0 ) return T{};
 		return array[fillSize-1];
 	}
 

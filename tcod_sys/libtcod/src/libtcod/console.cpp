@@ -1,30 +1,34 @@
-/*
-* libtcod
-* Copyright (c) 2008-2018 Jice & Mingos & rmtew
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*     * Redistributions of source code must retain the above copyright
-*       notice, this list of conditions and the following disclaimer.
-*     * Redistributions in binary form must reproduce the above copyright
-*       notice, this list of conditions and the following disclaimer in the
-*       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote
-*       products derived from this software without specific prior written
-*       permission.
-*
-* THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
-* EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL JICE, MINGOS OR RMTEW BE LIABLE FOR ANY
-* DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-* ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+/* BSD 3-Clause License
+ *
+ * Copyright © 2008-2019, Jice and the libtcod contributors.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 #include "console.hpp"
 
 #include <stdio.h>
@@ -33,6 +37,7 @@
 
 #include "libtcod_int.h"
 #include "image.hpp"
+#include "engine/display.h"
 
 #ifdef TCOD_CONSOLE_SUPPORT
 
@@ -142,7 +147,7 @@ void TCODConsole::setWindowTitle(const char *title) {
 void TCODConsole::initRoot(int w, int h, const char *title, bool fullscreen,
                            TCOD_renderer_t renderer)
 {
-  TCOD_console_init_root(w, h, title, fullscreen, renderer);
+  tcod::console::init_root(w, h, title ? title : "", fullscreen, renderer);
 }
 
 void TCODConsole::setFullscreen(bool fullscreen) {
@@ -270,9 +275,8 @@ void TCODConsole::print(int x, int y, const std::string &str) {
 }
 void TCODConsole::print(int x, int y, const std::string &str,
                         TCOD_alignment_t alignment, TCOD_bkgnd_flag_t flag) {
-  TCOD_console_print_internal_utf8_(
-      data, x, y, 0, 0, flag, alignment,
-      reinterpret_cast<const unsigned char *>(str.c_str()), false, false);
+  tcod::console::print(data, x, y, str,
+                       &data->fore, &data->back, flag, alignment);
 }
 void TCODConsole::printf(int x, int y, const char *fmt, ...) {
   va_list ap;
@@ -322,14 +326,16 @@ void TCODConsole::printLine(int x, int y, TCOD_bkgnd_flag_t flag, TCOD_print_loc
 }
 */
 
-int TCODConsole::printRect(int x, int y, int w, int h, const char *fmt, ...) {
-	va_list ap;
-	struct TCOD_Console *dat=(struct TCOD_Console *)data;
-	TCOD_IFNOT ( dat != NULL ) return 0;
-	va_start(ap,fmt);
-	int ret = TCOD_console_print_internal(data,x,y,w,h,dat->bkgnd_flag,dat->alignment,TCOD_console_vsprint(fmt,ap),true,false);
-	va_end(ap);
-	return ret;
+int TCODConsole::printRect(int x, int y, int w, int h, const char *fmt, ...)
+{
+  va_list ap;
+  TCOD_IFNOT (data != NULL) { return 0; }
+  va_start(ap,fmt);
+  int ret = TCOD_console_print_internal(
+      data, x, y, w, h, data->bkgnd_flag, data->alignment,
+      TCOD_console_vsprint(fmt, ap), true, false);
+  va_end(ap);
+  return ret;
 }
 
 int TCODConsole::printRectEx(int x, int y, int w, int h, TCOD_bkgnd_flag_t flag,
@@ -374,13 +380,15 @@ void TCODConsole::mapStringToFont(const wchar_t *s, int fontCharX, int fontCharY
 	TCOD_console_map_string_to_font_utf(s, fontCharX, fontCharY);
 }
 
-void TCODConsole::print(int x, int y, const wchar_t *fmt, ...) {
-	va_list ap;
-	struct TCOD_Console *dat=(struct TCOD_Console *)data;
-	TCOD_IFNOT ( dat != NULL ) return;
-	va_start(ap,fmt);
-	TCOD_console_print_internal_utf(data,x,y,0,0,dat->bkgnd_flag,dat->alignment,TCOD_console_vsprint_utf(fmt,ap),false,false);
-	va_end(ap);
+void TCODConsole::print(int x, int y, const wchar_t *fmt, ...)
+{
+  va_list ap;
+  TCOD_IFNOT (data != NULL) { return; }
+  va_start(ap, fmt);
+  TCOD_console_print_internal_utf(
+      data, x, y, 0, 0, data->bkgnd_flag, data->alignment,
+      TCOD_console_vsprint_utf(fmt, ap), false, false);
+  va_end(ap);
 }
 
 void TCODConsole::printEx(int x, int y, TCOD_bkgnd_flag_t flag, TCOD_alignment_t alignment, const wchar_t *fmt, ...) {
@@ -390,15 +398,16 @@ void TCODConsole::printEx(int x, int y, TCOD_bkgnd_flag_t flag, TCOD_alignment_t
 	va_end(ap);
 }
 
-int TCODConsole::printRect(int x, int y, int w, int h, const wchar_t *fmt, ...) {
-	va_list ap;
-	struct TCOD_Console *dat=(struct TCOD_Console *)data;
-	TCOD_IFNOT ( dat != NULL ) return 0;
-	va_start(ap,fmt);
-	int ret = TCOD_console_print_internal_utf(data,x,y,w,h,dat->bkgnd_flag,dat->alignment,
-		TCOD_console_vsprint_utf(fmt,ap),true,false);
-	va_end(ap);
-	return ret;
+int TCODConsole::printRect(int x, int y, int w, int h, const wchar_t *fmt, ...)
+{
+  va_list ap;
+  TCOD_IFNOT (data != NULL) { return 0; }
+  va_start(ap,fmt);
+  int ret = TCOD_console_print_internal_utf(
+      data, x, y, w, h, data->bkgnd_flag, data->alignment,
+      TCOD_console_vsprint_utf(fmt, ap), true, false);
+  va_end(ap);
+  return ret;
 }
 
 int TCODConsole::printRectEx(int x, int y, int w, int h, TCOD_bkgnd_flag_t flag,
@@ -423,30 +432,31 @@ int TCODConsole::getHeightRect(int x, int y, int w, int h, const wchar_t *fmt, .
 
 // ctrl = TCOD_COLCTRL_1...TCOD_COLCTRL_5 or TCOD_COLCTRL_STOP
 #define NB_BUFFERS 10
-const char *TCODConsole::getColorControlString( TCOD_colctrl_t ctrl ) {
-	static char buf[NB_BUFFERS][2];
-	static int buf_nb=0;
-	const char *ret;
-	buf[buf_nb][0]=ctrl;
-	buf[buf_nb][1]=0;
-	ret = (const char *)(&buf[buf_nb][0]);
-	buf_nb = (buf_nb+1) % NB_BUFFERS;
-	return ret;
+const char *TCODConsole::getColorControlString(TCOD_colctrl_t ctrl)
+{
+  static char buf[NB_BUFFERS][2];
+  static int buf_nb = 0;
+  buf[buf_nb][0] = ctrl;
+  buf[buf_nb][1] = 0;
+  const char* ret = buf[buf_nb];
+  buf_nb = (buf_nb + 1) % NB_BUFFERS;
+  return ret;
 }
 
 // ctrl = TCOD_COLCTRL_FORE_RGB or TCOD_COLCTRL_BACK_RGB
-const char *TCODConsole::getRGBColorControlString( TCOD_colctrl_t ctrl, const TCODColor & col ) {
-	static char buf[NB_BUFFERS][5];
-	static int buf_nb=0;
-	const char *ret;
-	buf[buf_nb][0]=ctrl;
-	buf[buf_nb][1]=col.r;
-	buf[buf_nb][2]=col.g;
-	buf[buf_nb][3]=col.b;
-	buf[buf_nb][4]=0;
-	ret = (const char *)(&buf[buf_nb][0]);
-	buf_nb = (buf_nb+1) % NB_BUFFERS;
-	return ret;
+const char *TCODConsole::getRGBColorControlString(TCOD_colctrl_t ctrl,
+                                                  const TCODColor& col)
+{
+  static char buf[NB_BUFFERS][5];
+  static int buf_nb = 0;
+  buf[buf_nb][0] = ctrl;
+  buf[buf_nb][1] = col.r;
+  buf[buf_nb][2] = col.g;
+  buf[buf_nb][3] = col.b;
+  buf[buf_nb][4] = 0;
+  const char* ret = buf[buf_nb];
+  buf_nb = (buf_nb + 1) % NB_BUFFERS;
+  return ret;
 }
 
 #endif
