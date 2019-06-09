@@ -97,6 +97,10 @@ impl Drop for Map {
     }
 }
 
+// ! libtcod is not thread-safe, this may have some side effects but none have been seen yet
+// ! This is primary so that Map can be used as specs resources
+unsafe impl Send for Map {}
+
 #[repr(u32)]
 #[derive(Copy, Clone, Debug)]
 pub enum FovAlgorithm {
