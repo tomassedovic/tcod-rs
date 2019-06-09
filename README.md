@@ -104,11 +104,11 @@ on your distro.
 
 By default, `tcod-rs` will build the library statically on Linux as including
 the code into the executable is usually more convenient. To build a dynamic
-library specify the `dynlib` feature for `tcod_sys` in `Cargo.toml`
+library specify the `dynlib` feature for `tcod-sys` in `Cargo.toml`
 
 ```
-[dependencies.tcod_sys]
-version = "..."
+[dependencies.tcod-sys]
+version = "*"
 features = ["dynlib"]
 ```
 
