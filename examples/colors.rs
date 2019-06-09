@@ -9,8 +9,8 @@ fn main() {
         .size(80, 50)
         .title("Using colours with libtcod")
         .init();
-    con.set_default_background(colors::DARKEST_GREEN);
-    con.set_default_foreground(colors::LIGHTER_AZURE);
+    con.set_default_background(Color::DARKEST_GREEN);
+    con.set_default_foreground(Color::LIGHTER_AZURE);
 
     con.clear();
     // Uses the default foreground and background:
