@@ -312,4 +312,5 @@ fn main() {
 
     println!("cargo:rustc-link-search={}", dst.display());
     println!("cargo:rustc-link-lib=dylib=tcod");
+    println!("cargo:rustc-link-lib=SDL2");
 }
