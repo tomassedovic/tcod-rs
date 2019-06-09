@@ -289,6 +289,8 @@ static void create_window(int w, int h, bool fullscreen) {
 #endif		
 		if (TCOD_ctx.renderer == TCOD_RENDERER_SDL ) {
 			window = SDL_CreateWindow(TCOD_ctx.window_title,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,w*TCOD_ctx.font_width,h*TCOD_ctx.font_height,winflags);
+			SDL_PumpEvents();
+			SDL_SetWindowSize(window,w*TCOD_ctx.font_width,h*TCOD_ctx.font_height);
 			TCOD_LOG(("Using SDL renderer...\n"));
 		}
 		if ( window == NULL ) TCOD_fatal_nopar("SDL : cannot create window");
