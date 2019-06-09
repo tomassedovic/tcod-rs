@@ -1,7 +1,7 @@
 [package]
 name = "tcod"
 description = "The Rust bindings for the Doryen library (a.k.a. libtcod)."
-version = "0.14.0"
+version = "0.15.0"
 homepage = "https://github.com/tomassedovic/tcod-rs"
 repository = "https://github.com/tomassedovic/tcod-rs"
 documentation = "http://tomassedovic.github.io/tcod-rs/tcod/index.html"
@@ -17,10 +17,14 @@ authors = ["Tomas Sedovic <tomas@sedovic.cz>",
            "Jared McFarland <jared.online@gmail.com>",
            "Jonny Gilchrist (@jgilchrist)",
            "LaylConway <laylconway@live.com>",
+           "lucanLepus (@lucanLepus)",
            "Moredread <code@andre-bubel.de>",
            "Nikita Pekin",
+           "Niko Lepka @ElectricCoffee <slench102+git@gmail.com>",
+           "Noah Ryan @nsmryan <nsmryan@gmail.com>",
            "Paul Sanford <me@paulsanford.net>",
-           "Pranz <jesper.fridefors@gmail.com>"]
+           "Pranz <jesper.fridefors@gmail.com>",
+           "Zoltán Nagy @abesto <abesto@abesto.net>"]
 
 [lib]
 name = "tcod"
