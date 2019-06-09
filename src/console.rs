@@ -461,9 +461,9 @@ impl Root {
 pub struct RootInitializer<'a> {
     width: i32,
     height: i32,
-    title: Box<AsRef<str> + 'a>,
+    title: Box<dyn AsRef<str> + 'a>,
     is_fullscreen: bool,
-    font_path: Box<AsRef<Path> + 'a>,
+    font_path: Box<dyn AsRef<Path> + 'a>,
     font_layout: FontLayout,
     font_type: FontType,
     font_dimensions: (i32, i32),
