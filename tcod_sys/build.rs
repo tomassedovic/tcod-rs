@@ -76,7 +76,7 @@ fn build_linux_static(_dst: &Path, libtcod_sources: &[& 'static str]) {
     config.define("NO_OPENGL", None);
     config.define("NDEBUG", None);
     config.flag("-fno-strict-aliasing");
-    config.flag("-ansi");
+    config.flag("-std=c++14");
     build_libtcod_objects(config, libtcod_sources);
 }
 
@@ -94,7 +94,7 @@ fn build_linux_dynamic(dst: &Path, libtcod_sources: &[& 'static str]) {
         config.define("NO_OPENGL", None);
         config.define("NDEBUG", None);
         config.flag("-fno-strict-aliasing");
-        config.flag("-ansi");
+        config.flag("-std=c++14");
         build_libtcod_objects(config, libtcod_sources);
     }
 
@@ -273,7 +273,7 @@ fn main() {
             config.define("NO_OPENGL", None);
             config.define("NDEBUG", None);
             config.flag("-fno-strict-aliasing");
-            config.flag("-ansi");
+            config.flag("-std=c++14");
             build_libtcod_objects(config, libtcod_sources);
         }
 
@@ -313,7 +313,7 @@ fn main() {
         // Build the DLL
         let mut config = cc::Build::new();
         config.flag("-fno-strict-aliasing");
-        config.flag("-ansi");
+        config.flag("-std=c++14");
         config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
         config.define("NDEBUG", None);
