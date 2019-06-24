@@ -43,7 +43,7 @@ serialization = ["serde", "serde_derive"]
 
 [dependencies.tcod-sys]
 path = "tcod_sys"
-version = "5.0.0"
+version = "5.3.0"
 
 [dev-dependencies]
 rand = "0.3"
