@@ -22,7 +22,7 @@ before_install:
 install:
 - '[ "$TRAVIS_OS_NAME" = linux ] && sudo apt-get install -y libsdl2-dev libegl1-mesa-dev libgles2-mesa-dev || brew install sdl2'
 script:
-- CC=g++-8 cargo build --verbose
+- cargo build --verbose
 - cargo test --verbose
 - cargo test --features "rustc-serialize serde" --verbose
 - cargo test --release
@@ -51,3 +51,5 @@ after_success: ! '[ $TRAVIS_BRANCH = master ] &&
 env:
   global:
   - secure: h21kqC5s6iVs4p5n9KFZ5ZTWtPF8nGVFpaPP6t/1Sg+xMaHMDyr/sBYI1gsNGTXrVsiP2Zs6cRTBEbX12PVL6MXFgKpdhKG1+lBCMk6HxU8/W2UHCh6Y38+W4Ybyv5fuoWqkUOX3yODNkRZWrqNhdm8lCdE2uGczkIKPi7hDYMM=
+  - CC=gcc-8
+  - CXX=g++-8
