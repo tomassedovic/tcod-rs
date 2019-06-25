@@ -18,10 +18,17 @@ addons:
     packages:
       - g++-8
       - libsdl2-dev
+      - libegl1-mesa-dev
+      - libgles2-mesa-dev
 before_install:
-- '[ "$TRAVIS_OS_NAME" = linux ] && sudo apt-get update -qq || brew update'
+- '[ "$TRAVIS_OS_NAME" != linux ] && brew update'
 install:
-- '[ "$TRAVIS_OS_NAME" = linux ] && sudo apt-get install -y libegl1-mesa-dev libgles2-mesa-dev || brew install sdl2'
+- '[ "$TRAVIS_OS_NAME" != linux ] && brew install sdl2'
+  # Upgrade SDL. Copy-paste from https://github.com/libtcod/libtcod/blob/master/.ci/travis_before_install.sh @ ce85b9f0245ece439e509fc38667aa59c440d391
+- '[ "$TRAVIS_OS_NAME" = linux ] && wget -O - https://www.libsdl.org/release/SDL2-2.0.8.tar.gz | tar xz'
+- '[ "$TRAVIS_OS_NAME" = linux ] && (cd SDL2-* && ./configure --prefix=$HOME/.local && make -j 3 install)'
+- '[ "$TRAVIS_OS_NAME" = linxu ] && PATH=~/.local/bin:$PATH'
+
 script:
 - cargo build --verbose
 - cargo test --verbose
