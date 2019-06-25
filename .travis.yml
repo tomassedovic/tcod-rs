@@ -11,12 +11,18 @@ matrix:
     rust: nightly
   - os: osx
     rust: nightly
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-8
 before_install:
 - '[ "$TRAVIS_OS_NAME" = linux ] && sudo apt-get update -qq || brew update'
 install:
 - '[ "$TRAVIS_OS_NAME" = linux ] && sudo apt-get install -y libsdl2-dev libegl1-mesa-dev libgles2-mesa-dev || brew install sdl2'
 script:
-- cargo build --verbose
+- CC=g++-8 cargo build --verbose
 - cargo test --verbose
 - cargo test --features "rustc-serialize serde" --verbose
 - cargo test --release
