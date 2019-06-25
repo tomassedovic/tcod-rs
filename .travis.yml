@@ -27,7 +27,7 @@ install:
   # Upgrade SDL. Copy-paste from https://github.com/libtcod/libtcod/blob/master/.ci/travis_before_install.sh @ ce85b9f0245ece439e509fc38667aa59c440d391
 - 'if [[ "$TRAVIS_OS_NAME" == linux ]]; then wget -O - https://www.libsdl.org/release/SDL2-2.0.8.tar.gz | tar xz; fi'
 - 'if [[ "$TRAVIS_OS_NAME" == linux ]]; then (cd SDL2-* && ./configure --prefix=$HOME/.local && make -j 3 install); fi'
-- 'if [[ "$TRAVIS_OS_NAME" == linxu ]]; then PATH=~/.local/bin:$PATH; fi'
+- 'if [[ "$TRAVIS_OS_NAME" == linxu ]]; then PATH=~/.local/bin:$PATH; PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOME/.local/lib/pkgconfig"; fi'
 
 script:
 - cargo build --verbose
