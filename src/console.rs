@@ -703,6 +703,14 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
         }
     }
 
+    /// Return the console's default foreground color.
+    fn get_default_foreground(&mut self) -> Color {
+        unsafe {
+            FromNative::from_native(
+                ffi::TCOD_console_get_default_foreground(*self.as_native()))
+        }
+    }
+
     /// Sets the console's default background color. This is used in several other methods,
     /// like: `clear`, `put_char`, etc.
     fn set_default_background(&mut self, color: Color) {
