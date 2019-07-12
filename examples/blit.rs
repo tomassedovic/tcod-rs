@@ -12,8 +12,8 @@ fn main() {
 
     let mut direct: OffscreenConsole = OffscreenConsole::new(20, 20);
     let mut boxed_direct: Box<OffscreenConsole> = Box::new(OffscreenConsole::new(20, 20));
-    let mut trait_object: &Console = &OffscreenConsole::new(20, 20);
-    let mut boxed_trait: Box<Console> = Box::new(OffscreenConsole::new(20, 20));
+    let mut trait_object: &dyn Console = &OffscreenConsole::new(20, 20);
+    let mut boxed_trait: Box<dyn Console> = Box::new(OffscreenConsole::new(20, 20));
 
 
     root.set_default_background(Color::DARKEST_GREEN);

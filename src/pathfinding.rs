@@ -4,7 +4,7 @@ use map::Map;
 
 enum PathInnerData<'a> {
     Map(Map),
-    Callback(Box<FnMut((i32, i32), (i32, i32)) -> f32+'a>),
+    Callback(Box<dyn FnMut((i32, i32), (i32, i32)) -> f32+'a>),
 }
 
 pub struct AStar<'a>{

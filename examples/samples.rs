@@ -92,7 +92,7 @@ impl ColorsSample {
 
     }
 
-    fn set_colors(&self, console: &mut Console) {
+    fn set_colors(&self, console: &mut dyn Console) {
         enum Dir {
             TopLeft = 0,
             TopRight,
@@ -121,7 +121,7 @@ impl ColorsSample {
         }
     }
 
-    fn print_random_chars(&mut self, console: &mut Console) -> colors::Color {
+    fn print_random_chars(&mut self, console: &mut dyn Console) -> colors::Color {
         // ==== print the text with a random color ====
         // get the background color at the text position
         let mut text_color = console.get_char_background(SAMPLE_SCREEN_WIDTH/2, 5);
@@ -1519,11 +1519,11 @@ impl Render for NameSample {
 
 struct MenuItem<'a> {
     name: String,
-    render: &'a mut Render
+    render: &'a mut dyn Render
 }
 
 impl<'a> MenuItem<'a> {
-    fn new(name: &str, render: &'a mut Render) -> Self {
+    fn new(name: &str, render: &'a mut dyn Render) -> Self {
         MenuItem { name: name.to_owned(), render: render }
     }
 }
