@@ -61,6 +61,7 @@ pub mod bsp;
 pub mod chars;
 pub mod colors;
 pub mod console;
+pub mod heightmap;
 pub mod image;
 pub mod input;
 pub mod line;
