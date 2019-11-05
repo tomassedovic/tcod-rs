@@ -27,11 +27,11 @@ pub struct Noise {
 }
 
 impl AsNative<ffi::TCOD_noise_t> for Noise {
-    unsafe fn as_native(&self) -> &ffi::TCOD_image_t {
+    unsafe fn as_native(&self) -> &ffi::TCOD_noise_t {
         &self.noise
     }
 
-    unsafe fn as_native_mut(&mut self) -> &mut ffi::TCOD_image_t {
+    unsafe fn as_native_mut(&mut self) -> &mut ffi::TCOD_noise_t {
         &mut self.noise
     }
 }

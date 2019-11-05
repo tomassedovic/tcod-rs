@@ -294,6 +294,7 @@ impl Drop for HeightMap {
     }
 }
 
+#[derive(Copy, Clone, PartialOrd, PartialEq)]
 pub struct MinMax {
     min: f32,
     max: f32,
