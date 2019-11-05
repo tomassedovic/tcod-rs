@@ -174,7 +174,7 @@ impl HeightMap {
         drops: i32,
         erosion_coefficient: f32,
         sedimentation_coefficient: f32,
-        rnd: Rng,
+        rnd: &Rng,
     ) {
         unsafe {
             ffi::TCOD_heightmap_rain_erosion(
@@ -213,7 +213,7 @@ impl HeightMap {
         }
     }
 
-    pub fn add_voronoi(&mut self, points: i32, coefficients: &[f32], rnd: Rng) {
+    pub fn add_voronoi(&mut self, points: i32, coefficients: &[f32], rnd: &Rng) {
         unsafe {
             ffi::TCOD_heightmap_add_voronoi(
                 self.height_map,
@@ -225,7 +225,7 @@ impl HeightMap {
         }
     }
 
-    pub fn mid_point_displacement(&mut self, rnd: Rng, roughness: f32) {
+    pub fn mid_point_displacement(&mut self, rnd: &Rng, roughness: f32) {
         unsafe {
             ffi::TCOD_heightmap_mid_point_displacement(self.height_map, *rnd.as_native(), roughness)
         }
@@ -283,7 +283,7 @@ impl HeightMap {
         }
     }
 
-    pub fn islandify(&mut self, sea_level: f32, rnd: Rng) {
+    pub fn islandify(&mut self, sea_level: f32, rnd: &Rng) {
         unsafe { ffi::TCOD_heightmap_islandify(self.height_map, sea_level, *rnd.as_native()) }
     }
 }
