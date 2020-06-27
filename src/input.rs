@@ -169,22 +169,22 @@ pub fn move_cursor(x: i32, y: i32) {
 }
 
 bitflags! {
-    flags KeyPressFlags: c_uint {
-        const KEY_PRESSED  = ffi::TCOD_key_status_t::TCOD_KEY_PRESSED as c_uint,
-        const KEY_RELEASED = ffi::TCOD_key_status_t::TCOD_KEY_RELEASED as c_uint,
+    pub struct KeyPressFlags: c_uint {
+        const KEY_PRESSED  = ffi::TCOD_key_status_t::TCOD_KEY_PRESSED as c_uint;
+        const KEY_RELEASED = ffi::TCOD_key_status_t::TCOD_KEY_RELEASED as c_uint;
     }
 }
 
 bitflags! {
-    flags EventFlags: c_uint {
-        const KEY_PRESS     = ffi::TCOD_event_t::TCOD_EVENT_KEY_PRESS as c_uint,
-        const KEY_RELEASE   = ffi::TCOD_event_t::TCOD_EVENT_KEY_RELEASE as c_uint,
-        const KEY           = ffi::TCOD_event_t::TCOD_EVENT_KEY as c_uint,
-        const MOUSE_MOVE    = ffi::TCOD_event_t::TCOD_EVENT_MOUSE_MOVE as c_uint,
-        const MOUSE_PRESS   = ffi::TCOD_event_t::TCOD_EVENT_MOUSE_PRESS as c_uint,
-        const MOUSE_RELEASE = ffi::TCOD_event_t::TCOD_EVENT_MOUSE_RELEASE as c_uint,
-        const MOUSE         = ffi::TCOD_event_t::TCOD_EVENT_MOUSE as c_uint,
-        const ANY           = ffi::TCOD_event_t::TCOD_EVENT_ANY as c_uint,
+    pub struct EventFlags: c_uint {
+        const KEY_PRESS     = ffi::TCOD_event_t::TCOD_EVENT_KEY_PRESS as c_uint;
+        const KEY_RELEASE   = ffi::TCOD_event_t::TCOD_EVENT_KEY_RELEASE as c_uint;
+        const KEY           = ffi::TCOD_event_t::TCOD_EVENT_KEY as c_uint;
+        const MOUSE_MOVE    = ffi::TCOD_event_t::TCOD_EVENT_MOUSE_MOVE as c_uint;
+        const MOUSE_PRESS   = ffi::TCOD_event_t::TCOD_EVENT_MOUSE_PRESS as c_uint;
+        const MOUSE_RELEASE = ffi::TCOD_event_t::TCOD_EVENT_MOUSE_RELEASE as c_uint;
+        const MOUSE         = ffi::TCOD_event_t::TCOD_EVENT_MOUSE as c_uint;
+        const ANY           = ffi::TCOD_event_t::TCOD_EVENT_ANY as c_uint;
     }
 }
 
@@ -198,23 +198,23 @@ pub fn check_for_event(event_mask: EventFlags) -> Option<(EventFlags, Event)> {
     };
 
     let ret_flag = match event {
-        ffi::TCOD_event_t::TCOD_EVENT_KEY_PRESS => KEY_PRESS,
-        ffi::TCOD_event_t::TCOD_EVENT_KEY_RELEASE => KEY_RELEASE,
-        ffi::TCOD_event_t::TCOD_EVENT_KEY => KEY,
-        ffi::TCOD_event_t::TCOD_EVENT_MOUSE => MOUSE,
-        ffi::TCOD_event_t::TCOD_EVENT_MOUSE_MOVE => MOUSE_MOVE,
-        ffi::TCOD_event_t::TCOD_EVENT_MOUSE_PRESS => MOUSE_PRESS,
-        ffi::TCOD_event_t::TCOD_EVENT_MOUSE_RELEASE => MOUSE_RELEASE,
-        _ => ANY
+        ffi::TCOD_event_t::TCOD_EVENT_KEY_PRESS => EventFlags::KEY_PRESS,
+        ffi::TCOD_event_t::TCOD_EVENT_KEY_RELEASE => EventFlags::KEY_RELEASE,
+        ffi::TCOD_event_t::TCOD_EVENT_KEY => EventFlags::KEY,
+        ffi::TCOD_event_t::TCOD_EVENT_MOUSE => EventFlags::MOUSE,
+        ffi::TCOD_event_t::TCOD_EVENT_MOUSE_MOVE => EventFlags::MOUSE_MOVE,
+        ffi::TCOD_event_t::TCOD_EVENT_MOUSE_PRESS => EventFlags::MOUSE_PRESS,
+        ffi::TCOD_event_t::TCOD_EVENT_MOUSE_RELEASE => EventFlags::MOUSE_RELEASE,
+        _ => EventFlags::ANY
     };
 
-    if ret_flag == ANY {
+    if ret_flag == EventFlags::ANY {
         return None
     }
 
-    let ret_event = if ret_flag.intersects(KEY_PRESS|KEY_RELEASE|KEY) {
+    let ret_event = if ret_flag.intersects(EventFlags::KEY_PRESS|EventFlags::KEY_RELEASE|EventFlags::KEY) {
         Some(Event::Key(c_key_state.into()))
-    } else if ret_flag.intersects(MOUSE_MOVE|MOUSE_PRESS|MOUSE_RELEASE|MOUSE) {
+    } else if ret_flag.intersects(EventFlags::MOUSE_MOVE|EventFlags::MOUSE_PRESS|EventFlags::MOUSE_RELEASE|EventFlags::MOUSE) {
         Some(Event::Mouse(Mouse {
             x: c_mouse_state.x as isize,
             y: c_mouse_state.y as isize,
@@ -262,6 +262,6 @@ impl Iterator for EventIterator {
     type Item = (EventFlags, Event);
 
     fn next(&mut self) -> Option<(EventFlags, Event)> {
-        check_for_event(KEY | MOUSE)
+        check_for_event(EventFlags::KEY | EventFlags::MOUSE)
     }
 }

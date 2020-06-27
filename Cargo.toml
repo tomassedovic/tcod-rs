@@ -31,8 +31,8 @@ name = "tcod"
 path = "src/lib.rs"
 
 [dependencies]
-bitflags = "0.1"
-lazy_static = "0.1"
+bitflags = "1.2"
+lazy_static = "1.4"
 rustc-serialize = { optional = true, version = "0.3" }
 serde = { optional = true, version = "1.0" }
 serde_derive = { optional = true, version = "1.0" }
