@@ -1,6 +1,6 @@
 /*
-* libtcod 1.6.3
-* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
+* libtcod
+* Copyright (c) 2008-2018 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -10,8 +10,9 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote products
-*       derived from this software without specific prior written permission.
+*     * The name of Jice or Mingos may not be used to endorse or promote
+*       products derived from this software without specific prior written
+*       permission.
 *
 * THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -40,14 +41,15 @@ static void cast_ray(map_t *map, int xo, int yo, int xd, int yd, int r2,bool lig
 	bool blocked=false;
 	bool end=false;
 	int offset;
-	TCOD_line_init(xo,yo,xd,yd);
+	TCOD_bresenham_data_t bresenham_data;
+	TCOD_line_init_mt(xo,yo,xd,yd,&bresenham_data);
 	offset=curx+cury*map->width;
 	if ( 0 <= offset && offset < map->nbcells ) {
 		in=true;
 		map->cells[offset].fov=1;
 	}
 	while (!end) {
-		end = TCOD_line_step(&curx,&cury);	/* reached xd,yd */
+		end = TCOD_line_step_mt(&curx,&cury,&bresenham_data);	/* reached xd,yd */
 		offset=curx+cury*map->width;
 		if ( r2 > 0 ) {
 			/* check radius */
@@ -73,7 +75,7 @@ void TCOD_map_postproc(map_t *map,int x0,int y0, int x1, int y1, int dx, int dy)
 			int x2 = cx+dx;
 			int y2 = cy+dy;
 			unsigned int offset=cx+cy*map->width;
-			if ( offset < (unsigned)map->nbcells && map->cells[offset].fov == 1 
+			if ( offset < (unsigned)map->nbcells && map->cells[offset].fov == 1
 				&& map->cells[offset].transparent ) {
 				if ( x2 >= x0 && x2 <= x1 ) {
 					unsigned int offset2=x2+cy*map->width;
@@ -236,4 +238,3 @@ void TCOD_map_compute_fov_circular_raycasting(TCOD_map_t map, int player_x, int 
 		TCOD_map_postproc(m,player_x,player_y,xmax-1,ymax-1,1,1);
 	}
 }
-

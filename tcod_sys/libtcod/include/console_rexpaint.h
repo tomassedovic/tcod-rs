@@ -25,27 +25,26 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _TCOD_MOUSE_H
-#define _TCOD_MOUSE_H
+#ifndef TCOD_CONSOLE_REXPAINT_H_
+#define TCOD_CONSOLE_REXPAINT_H_
 
 #include "libtcod_portability.h"
-
-#ifdef TCOD_CONSOLE_SUPPORT
-
-#include "mouse_types.h"
+#include "console.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-TCODLIB_API void TCOD_mouse_show_cursor(bool visible);
-TCODLIB_API TCOD_mouse_t TCOD_mouse_get_status(void);
-TCODLIB_API bool TCOD_mouse_is_cursor_visible(void);
-TCODLIB_API void TCOD_mouse_move(int x, int y);
-TCODLIB_API void TCOD_mouse_includes_touch(bool enable);
+
+TCODLIB_API TCOD_console_t TCOD_console_from_xp(const char *filename);
+TCODLIB_API bool TCOD_console_load_xp(TCOD_console_t con, const char *filename);
+TCODLIB_API bool TCOD_console_save_xp(TCOD_console_t con,
+                                      const char *filename, int compress_level);
+TCODLIB_API TCOD_list_t TCOD_console_list_from_xp(const char *filename);
+TCODLIB_API bool TCOD_console_list_save_xp(
+    TCOD_list_t console_list, const char *filename, int compress_level);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* TCOD_CONSOLE_SUPPORT */
-
-#endif /* _TCOD_MOUSE_H */
+#endif /* TCOD_CONSOLE_REXPAINT_H_ */

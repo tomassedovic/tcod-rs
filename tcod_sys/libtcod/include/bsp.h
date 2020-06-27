@@ -1,6 +1,6 @@
 /*
-* libtcod 1.6.3
-* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
+* libtcod
+* Copyright (c) 2008-2018 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -10,8 +10,9 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote products
-*       derived from this software without specific prior written permission.
+*     * The name of Jice or Mingos may not be used to endorse or promote
+*       products derived from this software without specific prior written
+*       permission.
 *
 * THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,7 +25,6 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
 #ifndef _TCOD_BSP_H
 #define _TCOD_BSP_H
 
@@ -63,7 +63,7 @@ TCODLIB_API bool TCOD_bsp_contains(TCOD_bsp_t *node, int x, int y);
 TCODLIB_API TCOD_bsp_t * TCOD_bsp_find_node(TCOD_bsp_t *node, int x, int y);
 TCODLIB_API void TCOD_bsp_resize(TCOD_bsp_t *node, int x,int y, int w, int h);
 TCODLIB_API void TCOD_bsp_split_once(TCOD_bsp_t *node, bool horizontal, int position);
-TCODLIB_API void TCOD_bsp_split_recursive(TCOD_bsp_t *node, TCOD_random_t randomizer, int nb, 
+TCODLIB_API void TCOD_bsp_split_recursive(TCOD_bsp_t *node, TCOD_random_t randomizer, int nb,
 		int minHSize, int minVSize, float maxHRatio, float maxVRatio);
 TCODLIB_API void TCOD_bsp_remove_sons(TCOD_bsp_t *node);
 #ifdef __cplusplus

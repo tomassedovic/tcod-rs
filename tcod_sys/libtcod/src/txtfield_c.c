@@ -1,6 +1,6 @@
 /*
-* libtcod 1.6.3
-* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
+* libtcod
+* Copyright (c) 2008-2018 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -10,8 +10,9 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote products
-*       derived from this software without specific prior written permission.
+*     * The name of Jice or Mingos may not be used to endorse or promote
+*       products derived from this software without specific prior written
+*       permission.
 *
 * THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -133,7 +134,7 @@ TCOD_text_t TCOD_text_init2(int w, int h, int max_chars) {
 void TCOD_text_set_pos(TCOD_text_t txt, int x, int y) {
     text_t * data = (text_t*)txt;
 	data->x=x;
-	data->y=y;	
+	data->y=y;
 }
 
 /* set cursor and prompt */
@@ -330,7 +331,7 @@ static void selectEnd(text_t *data, int oldpos, TCOD_key_t key) {
 }
 
 enum { TYPE_SYMBOL, TYPE_ALPHANUM, TYPE_SPACE };
-static const char symbols[]="&~\"#'{([-|`_\\^@)]=+}*/!:;.,?<>";
+static const char txt_symbols[]="&~\"#'{([-|`_\\^@)]=+}*/!:;.,?<>";
 
 /* check whether a character is a space */
 /* this is needed because cctype isspace() returns rubbish for many diacritics */
@@ -344,7 +345,7 @@ static bool is_space (int ch) {
 }
 
 static void typecheck (int * type, int ch) {
-    if (strchr(symbols,ch)) *type = TYPE_SYMBOL;
+    if (strchr(txt_symbols,ch)) *type = TYPE_SYMBOL;
     else if (is_space(ch)) *type = TYPE_SPACE;
     else *type = TYPE_ALPHANUM;
 }

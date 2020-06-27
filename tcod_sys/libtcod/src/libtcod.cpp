@@ -25,27 +25,43 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef _TCOD_MOUSE_H
-#define _TCOD_MOUSE_H
+/** \file libtcod.cpp
+ *
+ *  To statically link a C++ program with libtcod you'll need to follow
+ *  the directions for compiling `libtcod_c.c` and then add `libtcod.cpp` to
+ *  your source files.
+ */
+#include "bresenham.cpp"
+#include "bsp.cpp"
+#include "color.cpp"
+#include "console.cpp"
+#include "fov.cpp"
+#include "heightmap.cpp"
+#include "image.cpp"
+#include "lex.cpp"
+#include "mersenne.cpp"
+#include "mouse.cpp"
+#include "namegen.cpp"
+#include "noise.cpp"
+#include "parser.cpp"
+#include "path.cpp"
+#include "sys.cpp"
+#include "txtfield.cpp"
+#include "zip.cpp"
 
-#include "libtcod_portability.h"
-
-#ifdef TCOD_CONSOLE_SUPPORT
-
-#include "mouse_types.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-TCODLIB_API void TCOD_mouse_show_cursor(bool visible);
-TCODLIB_API TCOD_mouse_t TCOD_mouse_get_status(void);
-TCODLIB_API bool TCOD_mouse_is_cursor_visible(void);
-TCODLIB_API void TCOD_mouse_move(int x, int y);
-TCODLIB_API void TCOD_mouse_includes_touch(bool enable);
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* TCOD_CONSOLE_SUPPORT */
-
-#endif /* _TCOD_MOUSE_H */
+/*
+#include "gui/button.cpp"
+#include "gui/container.cpp"
+#include "gui/flatlist.cpp"
+#include "gui/hbox.cpp"
+#include "gui/image.cpp"
+#include "gui/label.cpp"
+#include "gui/radiobutton.cpp"
+#include "gui/slider.cpp"
+#include "gui/statusbar.cpp"
+#include "gui/textbox.cpp"
+#include "gui/togglebutton.cpp"
+#include "gui/toolbar.cpp"
+#include "gui/vbox.cpp"
+#include "gui/widget.cpp"
+*/

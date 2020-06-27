@@ -1,6 +1,6 @@
 /*
-* libtcod 1.6.3
-* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
+* libtcod
+* Copyright (c) 2008-2018 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -10,8 +10,9 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote products
-*       derived from this software without specific prior written permission.
+*     * The name of Jice or Mingos may not be used to endorse or promote
+*       products derived from this software without specific prior written
+*       permission.
 *
 * THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,7 +25,6 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
 #ifndef _TCOD_PERLIN_HPP
 #define _TCOD_PERLIN_HPP
 
@@ -157,7 +157,7 @@ class TCODLIB_API TCODNoise {
 		@PageFather noise
 		@PageTitle Choosing a noise type
 		@FuncTitle Choosing a noise type
-		@FuncDesc Use this function to define the default algorithm used by the noise functions. 
+		@FuncDesc Use this function to define the default algorithm used by the noise functions.
 			The default algorithm is simplex. It's much faster than Perlin, especially in 4 dimensions. It has a better contrast too.
 		@Cpp void TCODNoise::setType(TCOD_noise_type_t type)
 		@C void TCOD_noise_set_type(TCOD_noise_t noise, TCOD_noise_type_t type)
@@ -188,7 +188,7 @@ float TCOD_noise_get_ex(TCOD_noise_t noise, float *f, TCOD_noise_type_t type)
 		@C# float TCODNoise::get(float[] f, type=NoiseDefault)
 		@Param noise	In the C version, the generator handler, returned by the initialization function.
 		@Param f	An array of coordinates, depending on the generator dimensions (between 1 and 4). The same array of coordinates will always return the same value.
-		@Param type	The algorithm to use. If not defined, use the default one (set with setType or simplex if not set) 
+		@Param type	The algorithm to use. If not defined, use the default one (set with setType or simplex if not set)
 		@CppEx
 			// 1d noise
 			TCODNoise * noise1d = new TCODNoise(1);
@@ -235,7 +235,7 @@ float TCOD_noise_get_fbm(TCOD_noise_t noise, float *f, float octaves, TCOD_noise
 		@Param noise	In the C version, the generator handler, returned by the initialization function.
 		@Param f	An array of coordinates, depending on the generator dimensions (between 1 and 4). The same array of coordinates will always return the same value.
 		@Param octaves	Number of iterations. Must be < TCOD_NOISE_MAX_OCTAVES = 128
-		@Param type	The algorithm to use. If not defined, use the default one (set with setType or simplex if not set) 
+		@Param type	The algorithm to use. If not defined, use the default one (set with setType or simplex if not set)
 		@CppEx
 			// 1d fbm
 			TCODNoise * noise1d = new TCODNoise(1);

@@ -1,6 +1,6 @@
 /*
-* libtcod 1.6.3
-* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
+* libtcod
+* Copyright (c) 2008-2018 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -10,8 +10,9 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote products
-*       derived from this software without specific prior written permission.
+*     * The name of Jice or Mingos may not be used to endorse or promote
+*       products derived from this software without specific prior written
+*       permission.
 *
 * THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -34,11 +35,11 @@
 #define MAX_JAVADOC_COMMENT_SIZE 16384
 
 /* damn ANSI C does not know strdup, strcasecmp, strncasecmp */
-char *TCOD_strdup(const char *s) {
-	size_t l=strlen(s)+1;
-	char *ret=malloc(sizeof(char)*l);
-	memcpy(ret,s,sizeof(char)*l);
-	return ret;
+char *TCOD_strdup(const char *str) {
+	size_t l = strlen(str) + 1;
+	char *duplicate = malloc(l);
+	if (duplicate) { strcpy(duplicate, str); }
+	return duplicate;
 }
 
 int TCOD_strcasecmp(const char *s1, const char *s2) {
@@ -50,7 +51,7 @@ int TCOD_strcasecmp(const char *s1, const char *s2) {
 		c2 = (unsigned char) tolower( (unsigned char) c2);
 	} while((c1 == c2) && (c1 != '\0'));
 	return (int) c1-c2;
-} 
+}
 
 int TCOD_strncasecmp(const char *s1, const char *s2, size_t n) {
 	unsigned char c1,c2;
@@ -62,7 +63,7 @@ int TCOD_strncasecmp(const char *s1, const char *s2, size_t n) {
 		n--;
 	} while((c1 == c2) && (c1 != '\0') && n > 0);
 	return (int) c1-c2;
-} 
+}
 
 static const char * TCOD_LEX_names[] = {
   "unknown token",
@@ -96,7 +97,7 @@ TCOD_lex_t *TCOD_lex_new_intern(void) {
 }
 
 TCOD_lex_t * TCOD_lex_new( const char **_symbols, const char **_keywords, const char *simpleComment,
-		const char *commentStart, const char *commentStop, const char *javadocCommentStart, 
+		const char *commentStart, const char *commentStop, const char *javadocCommentStart,
 		const char *_stringDelim, int _flags)
 {
 	TCOD_lex_t *lex=(TCOD_lex_t *)TCOD_lex_new_intern();
@@ -112,6 +113,7 @@ TCOD_lex_t * TCOD_lex_new( const char **_symbols, const char **_keywords, const 
 				sprintf (msg, "symbol '%s' too long (max size %d)",
 				       _symbols[ lex->nb_symbols ], TCOD_LEX_SYMBOL_SIZE );
 				TCOD_last_error=TCOD_strdup(msg);
+				TCOD_lex_delete (lex);
 				return NULL;
 			}
 			strcpy(lex->symbols[ lex->nb_symbols ], _symbols[ lex->nb_symbols ] );
@@ -128,6 +130,7 @@ TCOD_lex_t * TCOD_lex_new( const char **_symbols, const char **_keywords, const 
 				sprintf(msg,"keyword '%s' too long (max size %d)",
 						   _keywords[ lex->nb_keywords ], TCOD_LEX_KEYWORD_SIZE);
 				TCOD_last_error=TCOD_strdup(msg);
+				TCOD_lex_delete (lex);
 				return NULL;
 			}
 			if ( lex->flags & TCOD_LEX_FLAG_NOCASE )
@@ -221,7 +224,7 @@ bool TCOD_lex_set_data_file(TCOD_lex_t *lex, const char *_filename)
    	size = ftell(f);
    	fclose(f);
     f = fopen( _filename, "r" );
-    
+
     lex->buf = (char*)calloc(sizeof(char),(size + 1));
     lex->filename = TCOD_strdup( _filename );
     if ( lex->buf == NULL || lex->filename == NULL )
@@ -359,7 +362,7 @@ static bool TCOD_lex_get_special_char(TCOD_lex_t *lex, char *c) {
 		case 'n' : *c='\n'; break;
 		case 't' : *c='\t'; break;
 		case 'r' : *c='\r'; break;
-		case '\\' : 
+		case '\\' :
 		case '\"' :
 		case '\'' :
 		break;
@@ -697,4 +700,3 @@ bool TCOD_lex_expect_token_value(TCOD_lex_t *lex,int token_type, const char *tok
 	TCOD_lex_parse(lex);
 	return (token_type == lex->token_type && strcmp(lex->tok, token_value) == 0 );
 }
-

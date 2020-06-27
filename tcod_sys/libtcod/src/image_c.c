@@ -1,6 +1,6 @@
 /*
-* libtcod 1.6.3
-* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
+* libtcod
+* Copyright (c) 2008-2018 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -10,8 +10,9 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote products
-*       derived from this software without specific prior written permission.
+*     * The name of Jice or Mingos may not be used to endorse or promote
+*       products derived from this software without specific prior written
+*       permission.
 *
 * THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,18 +25,16 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include <libtcod_portability.h>
-
+#include "libtcod_portability.h"
 #ifdef TCOD_IMAGE_SUPPORT
+#include <image.h>
 
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
 #include <math.h>
 
-#include <image.h>
-#ifdef TCOD_CONSOLE_SUPPORT
 #include <console.h>
-#endif
 #include <libtcod_int.h>
 #include <libtcod_utility.h>
 
@@ -301,7 +300,7 @@ void TCOD_image_delete_internal(TCOD_image_t image) {
 		free(img->mipmaps);
 	}
 	if ( img->sys_img ) {
-#ifdef TCOD_SDL2
+#ifndef TCOD_BARE
 		TCOD_sys_delete_bitmap(img->sys_img);
 #endif
 	}
@@ -333,7 +332,7 @@ void TCOD_image_blit(TCOD_image_t image, TCOD_console_t console, float x, float 
 	if ( scalex == 0.0f || scaley == 0.0f || bkgnd_flag == TCOD_BKGND_NONE ) return;
 	TCOD_image_get_size(image,&width,&height);
 	rx = x - width * 0.5f;
-	ry = y - height * 0.5f; 
+	ry = y - height * 0.5f;
 	if ( scalex == 1.0f && scaley == 1.0f && angle == 0.0f && rx == ((int)rx) && ry == ((int)ry)) {
 		/* clip the image */
 		int ix = (int)(x - width*0.5f);

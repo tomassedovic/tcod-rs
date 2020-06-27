@@ -1,6 +1,6 @@
 /*
-* libtcod 1.6.3
-* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
+* libtcod
+* Copyright (c) 2008-2018 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -10,8 +10,9 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote products
-*       derived from this software without specific prior written permission.
+*     * The name of Jice or Mingos may not be used to endorse or promote
+*       products derived from this software without specific prior written
+*       permission.
 *
 * THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,7 +25,6 @@
 * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
 #ifndef _TCOD_BRESENHAM_HPP
 #define _TCOD_BRESENHAM_HPP
 
@@ -54,7 +54,7 @@ public :
 	@Param xTo,yTo Coordinates of the line's ending point.
 	*/
 	static void init(int xFrom, int yFrom, int xTo, int yTo);
-	
+
 	/**
 	@PageName line
 	@FuncTitle Walking the line
@@ -65,20 +65,20 @@ public :
 	@C# static bool TCODLine::step(ref int xCur, ref int yCur)
 	@Lua tcod.line.step(x,y) -- returns lineEnd,x,y
 	@Param xCur,yCur the coordinates of the next cell on the line are stored here when the function returns
-	@CppEx 
+	@CppEx
 		// Going from point 5,8 to point 13,4
 		int x = 5, y = 8;
 		TCODLine::init(x,y,13,4);
 		do {
 		    // update cell x,y
 		} while (!TCODLine::step(&x,&y));
-	@CEx 
+	@CEx
 		int x = 5, y = 8;
 		TCOD_line_init(x,y,13,4);
 		do {
-		    // update cell x,y 
+		    // update cell x,y
 		} while (!TCOD_line_step(&x,&y));
-	@PyEx 
+	@PyEx
 		libtcod.line_init(5,8,13,4)
 		# update cell 5,8
 		x,y=libtcod.line_step()
@@ -92,8 +92,8 @@ public :
 		repeat
 			-- update cell x,y
 			lineEnd,x,y = tcod.line.step(x,y)
-		until lineEnd		
-	*/	
+		until lineEnd
+	*/
 	static bool step(int *xCur, int *yCur);
 
 	/**
@@ -133,7 +133,7 @@ TCOD_line_line(5,8,13,4,my_listener);
 	@PyEx def my_listener(x,y):
     print x,y
     return True
-libtcod.line_line(5,8,13,4,my_listener)	 
+libtcod.line_line(5,8,13,4,my_listener)
 	*/
 	static bool line(int xFrom, int yFrom, int xTo, int yTo, TCODLineListener *listener);
 };

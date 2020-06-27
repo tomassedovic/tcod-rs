@@ -490,10 +490,10 @@ pub const PRINTF_UINTMAX_DEC_WIDTH: &'static [u8; 3usize] = b"20\0";
 pub const true_: u32 = 1;
 pub const false_: u32 = 0;
 pub const __bool_true_false_are_defined: u32 = 1;
-pub const TCOD_HEXVERSION: u32 = 67075;
-pub const TCOD_STRVERSION: &'static [u8; 6usize] = b"1.6.3\0";
-pub const TCOD_TECHVERSION: u32 = 17171200;
-pub const TCOD_STRVERSIONNAME: &'static [u8; 14usize] = b"libtcod 1.6.3\0";
+pub const TCOD_HEXVERSION: u32 = 67328;
+pub const TCOD_STRVERSION: &'static [u8; 6usize] = b"1.7.0\0";
+pub const TCOD_TECHVERSION: u32 = 17235968;
+pub const TCOD_STRVERSIONNAME: &'static [u8; 14usize] = b"libtcod 1.7.0\0";
 pub const TCOD_KEY_TEXT_SIZE: u32 = 32;
 pub const TCOD_NOISE_MAX_OCTAVES: u32 = 128;
 pub const TCOD_NOISE_MAX_DIMENSIONS: u32 = 4;
@@ -3455,6 +3455,15 @@ extern "C" {
         needle: *const ::std::os::raw::c_char,
     ) -> *mut ::std::os::raw::c_char;
 }
+#[doc = "  \\brief A callback to be passed to TCOD_line"]
+#[doc = ""]
+#[doc = "  The points given to the callback include both the starting and ending"]
+#[doc = "  positions."]
+#[doc = ""]
+#[doc = "  \\param x"]
+#[doc = "  \\param y"]
+#[doc = "  \\return As long as this callback returns true it will be called with the"]
+#[doc = "          next x,y point on the line."]
 pub type TCOD_line_listener_t = ::std::option::Option<
     unsafe extern "C" fn(x: ::std::os::raw::c_int, y: ::std::os::raw::c_int) -> bool,
 >;
@@ -3481,6 +3490,7 @@ extern "C" {
         listener: TCOD_line_listener_t,
     ) -> bool;
 }
+#[doc = "  \\brief A struct used for computing a bresenham line."]
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct TCOD_bresenham_data_t {
@@ -3980,6 +3990,7 @@ extern "C" {
 extern "C" {
     pub fn TCOD_bsp_remove_sons(node: *mut TCOD_bsp_t);
 }
+#[doc = "  \\brief An RGB color struct."]
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct TCOD_color_t {
@@ -4034,7 +4045,7 @@ extern "C" {
     pub fn TCOD_color_RGB(r: u8, g: u8, b: u8) -> TCOD_color_t;
 }
 extern "C" {
-    pub fn TCOD_color_HSV(h: f32, s: f32, v: f32) -> TCOD_color_t;
+    pub fn TCOD_color_HSV(hue: f32, saturation: f32, value: f32) -> TCOD_color_t;
 }
 extern "C" {
     pub fn TCOD_color_equals(c1: TCOD_color_t, c2: TCOD_color_t) -> bool;
@@ -4055,34 +4066,39 @@ extern "C" {
     pub fn TCOD_color_lerp(c1: TCOD_color_t, c2: TCOD_color_t, coef: f32) -> TCOD_color_t;
 }
 extern "C" {
-    pub fn TCOD_color_set_HSV(c: *mut TCOD_color_t, h: f32, s: f32, v: f32);
+    pub fn TCOD_color_set_HSV(color: *mut TCOD_color_t, hue: f32, saturation: f32, value: f32);
 }
 extern "C" {
-    pub fn TCOD_color_get_HSV(c: TCOD_color_t, h: *mut f32, s: *mut f32, v: *mut f32);
+    pub fn TCOD_color_get_HSV(
+        color: TCOD_color_t,
+        hue: *mut f32,
+        saturation: *mut f32,
+        value: *mut f32,
+    );
 }
 extern "C" {
-    pub fn TCOD_color_get_hue(c: TCOD_color_t) -> f32;
+    pub fn TCOD_color_get_hue(color: TCOD_color_t) -> f32;
 }
 extern "C" {
-    pub fn TCOD_color_set_hue(c: *mut TCOD_color_t, h: f32);
+    pub fn TCOD_color_set_hue(color: *mut TCOD_color_t, hue: f32);
 }
 extern "C" {
-    pub fn TCOD_color_get_saturation(c: TCOD_color_t) -> f32;
+    pub fn TCOD_color_get_saturation(color: TCOD_color_t) -> f32;
 }
 extern "C" {
-    pub fn TCOD_color_set_saturation(c: *mut TCOD_color_t, s: f32);
+    pub fn TCOD_color_set_saturation(color: *mut TCOD_color_t, saturation: f32);
 }
 extern "C" {
-    pub fn TCOD_color_get_value(c: TCOD_color_t) -> f32;
+    pub fn TCOD_color_get_value(color: TCOD_color_t) -> f32;
 }
 extern "C" {
-    pub fn TCOD_color_set_value(c: *mut TCOD_color_t, v: f32);
+    pub fn TCOD_color_set_value(color: *mut TCOD_color_t, value: f32);
 }
 extern "C" {
-    pub fn TCOD_color_shift_hue(c: *mut TCOD_color_t, hshift: f32);
+    pub fn TCOD_color_shift_hue(color: *mut TCOD_color_t, hshift: f32);
 }
 extern "C" {
-    pub fn TCOD_color_scale_HSV(c: *mut TCOD_color_t, scoef: f32, vcoef: f32);
+    pub fn TCOD_color_scale_HSV(color: *mut TCOD_color_t, saturation_coef: f32, value_coef: f32);
 }
 extern "C" {
     pub fn TCOD_color_gen_map(
@@ -5095,18 +5111,31 @@ pub enum TCOD_key_status_t {
     TCOD_KEY_RELEASED = 2,
 }
 impl TCOD_font_flags_t {
+    #[doc = " Tiles are arranged in column-major order."]
+    #[doc = ""]
+    #[doc = "       0 3 6"]
+    #[doc = "       1 4 7"]
+    #[doc = "       2 5 8"]
     pub const TCOD_FONT_LAYOUT_ASCII_INCOL: TCOD_font_flags_t = TCOD_font_flags_t(1);
 }
 impl TCOD_font_flags_t {
+    #[doc = " Tiles are arranged in row-major order."]
+    #[doc = ""]
+    #[doc = "       0 1 2"]
+    #[doc = "       3 4 5"]
+    #[doc = "       6 7 8"]
     pub const TCOD_FONT_LAYOUT_ASCII_INROW: TCOD_font_flags_t = TCOD_font_flags_t(2);
 }
 impl TCOD_font_flags_t {
+    #[doc = " Converts all tiles into a monochrome gradient."]
     pub const TCOD_FONT_TYPE_GREYSCALE: TCOD_font_flags_t = TCOD_font_flags_t(4);
 }
 impl TCOD_font_flags_t {
+    #[doc = " Converts all tiles into a monochrome gradient."]
     pub const TCOD_FONT_TYPE_GRAYSCALE: TCOD_font_flags_t = TCOD_font_flags_t(4);
 }
 impl TCOD_font_flags_t {
+    #[doc = " A unique layout used by some of libtcod's fonts."]
     pub const TCOD_FONT_LAYOUT_TCOD: TCOD_font_flags_t = TCOD_font_flags_t(8);
 }
 impl ::std::ops::BitOr<TCOD_font_flags_t> for TCOD_font_flags_t {
@@ -5136,17 +5165,33 @@ impl ::std::ops::BitAndAssign for TCOD_font_flags_t {
     }
 }
 #[repr(transparent)]
+#[doc = "  These font flags can be OR'd together into a bit-field and passed to"]
+#[doc = "  TCOD_console_set_custom_font"]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct TCOD_font_flags_t(pub i32);
 #[repr(i32)]
+#[doc = "  The available renderers."]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TCOD_renderer_t {
+    #[doc = " An OpenGL implementation using a shader."]
     TCOD_RENDERER_GLSL = 0,
+    #[doc = "  An OpenGL implementation without a shader."]
+    #[doc = ""]
+    #[doc = "  Performs worse than TCOD_RENDERER_GLSL without many benefits."]
     TCOD_RENDERER_OPENGL = 1,
+    #[doc = "  A software based renderer."]
+    #[doc = ""]
+    #[doc = "  The font file is loaded into RAM instead of VRAM in this implementation."]
     TCOD_RENDERER_SDL = 2,
+    #[doc = "  A software based renderer."]
+    #[doc = ""]
+    #[doc = "  The font file is loaded into RAM instead of VRAM in this implementation."]
     TCOD_NB_RENDERERS = 3,
 }
 #[repr(i32)]
+#[doc = "  \\enum TCOD_alignment_t"]
+#[doc = ""]
+#[doc = "  Print justification options."]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TCOD_alignment_t {
     TCOD_LEFT = 0,

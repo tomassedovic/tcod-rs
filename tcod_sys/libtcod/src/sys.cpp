@@ -1,6 +1,6 @@
 /*
-* libtcod 1.6.3
-* Copyright (c) 2008,2009,2010,2012,2013,2016,2017 Jice & Mingos & rmtew
+* libtcod
+* Copyright (c) 2008-2018 Jice & Mingos & rmtew
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -10,8 +10,9 @@
 *     * Redistributions in binary form must reproduce the above copyright
 *       notice, this list of conditions and the following disclaimer in the
 *       documentation and/or other materials provided with the distribution.
-*     * The name of Jice or Mingos may not be used to endorse or promote products
-*       derived from this software without specific prior written permission.
+*     * The name of Jice or Mingos may not be used to endorse or promote
+*       products derived from this software without specific prior written
+*       permission.
 *
 * THIS SOFTWARE IS PROVIDED BY JICE, MINGOS AND RMTEW ``AS IS'' AND ANY
 * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -43,7 +44,7 @@ float TCODSystem::getElapsedSeconds() {
 }
 #endif
 
-#ifdef TCOD_SDL2
+#ifndef TCOD_BARE
 void TCODSystem::saveScreenshot(const char *filename) {
 	TCOD_sys_save_screenshot(filename);
 }
@@ -82,7 +83,7 @@ float TCODSystem::getLastFrameLength() {
 }
 #endif
 
-#ifdef TCOD_SDL2
+#ifndef TCOD_BARE
 void TCODSystem::getCurrentResolution(int *w, int *h) {
 	TCOD_sys_get_current_resolution(w, h);
 }
@@ -145,7 +146,7 @@ bool TCODSystem::writeFile(const char *filename, unsigned char *buf, uint32_t si
 	return TCOD_sys_write_file(filename,buf,size) != 0;
 }
 
-#ifdef TCOD_SDL2
+#ifndef TCOD_BARE
 // clipboard stuff
 bool TCODSystem::setClipboard(const char *value) {
 	return TCOD_sys_clipboard_set(value) != 0;
@@ -229,13 +230,13 @@ void TCODSystem::deleteCondition( TCOD_cond_t cond) {
 }
 
 // custom post-renderer
-static ITCODSDLRenderer *renderer=NULL;
+static ITCODSDLRenderer *post_renderer=NULL;
 extern "C" void TCOD_CRenderer(void *sdl_surface) {
-	if ( renderer ) renderer->render(sdl_surface);
+	if ( post_renderer ) post_renderer->render(sdl_surface);
 }
 void TCODSystem::registerSDLRenderer(ITCODSDLRenderer *renderer) {
-	::renderer = renderer;
-#ifdef TCOD_SDL2
+	::post_renderer = renderer;
+#ifndef TCOD_BARE
 	TCOD_sys_register_SDL_renderer(TCOD_CRenderer);
 #endif
 }

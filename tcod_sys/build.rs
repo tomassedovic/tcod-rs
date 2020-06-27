@@ -58,7 +58,6 @@ fn build_linux_static(_dst: &Path, libtcod_sources: &[& 'static str]) {
         config.include(include_path);
     }
     // Build the library
-    config.define("TCOD_SDL2", None);
     config.define("NO_OPENGL", None);
     config.define("NDEBUG", None);
     config.flag("-fno-strict-aliasing");
@@ -76,7 +75,6 @@ fn build_linux_dynamic(dst: &Path, libtcod_sources: &[& 'static str]) {
         for include_path in &pkg_config::find_library("sdl2").unwrap().include_paths {
             config.include(include_path);
         }
-        config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
         config.define("NDEBUG", None);
         config.flag("-fno-strict-aliasing");
@@ -86,7 +84,6 @@ fn build_linux_dynamic(dst: &Path, libtcod_sources: &[& 'static str]) {
 
     // Build the DLL
     let mut config = cc::Build::new();
-    config.define("TCOD_SDL2", None);
     config.define("NO_OPENGL", None);
     config.define("NDEBUG", None);
     config.flag("-shared");
@@ -227,6 +224,7 @@ fn main() {
 	    "libtcod/src/wrappers.c",
 	    "libtcod/src/zip_c.c",
 	    "libtcod/src/png/lodepng.c",
+        "libtcod/src/vendor/stb.c",
     ];
 
     if target.contains("linux") {
@@ -246,7 +244,6 @@ fn main() {
             for include_path in &pkg_config::find_library("sdl2").unwrap().include_paths {
                 config.include(include_path);
             }
-            config.define("TCOD_SDL2", None);
             config.define("NO_OPENGL", None);
             config.define("NDEBUG", None);
             config.flag("-fno-strict-aliasing");
@@ -256,7 +253,6 @@ fn main() {
 
         // Build the DLL
         let mut config = cc::Build::new();
-        config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
         config.define("NDEBUG", None);
         config.flag("-shared");
@@ -291,7 +287,6 @@ fn main() {
         let mut config = cc::Build::new();
         config.flag("-fno-strict-aliasing");
         config.flag("-ansi");
-        config.define("TCOD_SDL2", None);
         config.define("NO_OPENGL", None);
         config.define("NDEBUG", None);
         config.define("LIBTCOD_EXPORTS", None);
@@ -331,7 +326,6 @@ fn main() {
 
         // Build the DLL
         let mut config = cc::Build::new();
-        config.flag("/DTCOD_SDL2");
         config.flag("/DNO_OPENGL");
         config.flag("/DNDEBUG");
         config.flag("/DLIBTCOD_EXPORTS");
