@@ -108,9 +108,17 @@ fn build_linux_dynamic(dst: &Path, libtcod_sources: &[& 'static str]) {
 
 #[cfg(feature = "generate_bindings")]
 fn generate_bindings<P: AsRef<Path>>(dst_dir: P) {
+    let target = env::var("TARGET").unwrap();
 
     // Tell cargo to invalidate the built crate whenever the wrapper changes
-    println!("cargo:rerun-if-changed=wrapper.h");
+    println!("cargo:rerun-if-changed=bindgen.h");
+
+    let font_flags_t_type = format!("pub type TCOD_font_flags_t_type = {};",
+        match target.as_ref() {
+        "x86_64-pc-windows-msvc" => String::from("i32"),
+        "x86_64-unknown-linux-gnu" => String::from("u32"),
+        t => format!("<Add {} to build.rs>", t)
+    });
 
     let bindings = bindgen::Builder::default()
         .header("bindgen.h")
@@ -118,6 +126,7 @@ fn generate_bindings<P: AsRef<Path>>(dst_dir: P) {
         .default_enum_style(bindgen::EnumVariation::Rust{non_exhaustive:false})
         .derive_default(true)
         .bitfield_enum("TCOD_font_flags_t")
+        .raw_line(font_flags_t_type)
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
@@ -131,7 +140,6 @@ fn generate_bindings<P: AsRef<Path>>(dst_dir: P) {
         .expect("Couldn't write bindings!");
 
     // Copy bindings to $TARGET_bindings.rs
-    let target = env::var("TARGET").unwrap();
     let target_bindings_file = format!("{}_bindings.rs", target);
     std::fs::copy(bindings_file, &target_bindings_file).unwrap();
     println!("cargo:rustc-env=BINDINGS_TARGET={}", target);

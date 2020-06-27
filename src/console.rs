@@ -391,7 +391,7 @@ impl Root {
             );
             ffi::TCOD_console_set_custom_font(
                 path.as_ptr(),
-                font_layout.bits() | font_type.bits(),
+                (font_layout.bits() | font_type.bits()) as i32,
                 nb_char_horizontal,
                 nb_char_vertical,
             );
@@ -1279,7 +1279,7 @@ native_enum_convert!(Renderer, TCOD_renderer_t);
 
 bitflags! {
     /// All the possible font layouts that can be used for custom bitmap fonts
-    pub struct FontLayout: i32 {
+    pub struct FontLayout: ffi::TCOD_font_flags_t_type {
         const ASCII_INCOL = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_ASCII_INCOL.0;
         const ASCII_INROW = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_ASCII_INROW.0;
         const TCOD = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_TCOD.0;
@@ -1287,7 +1287,7 @@ bitflags! {
 }
 
 bitflags! {
-    pub struct FontType: i32 {
+    pub struct FontType: ffi::TCOD_font_flags_t_type {
         const DEFAULT = 0;
         const GREYSCALE = ffi::TCOD_font_flags_t::TCOD_FONT_TYPE_GREYSCALE.0;
     }
