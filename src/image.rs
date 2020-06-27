@@ -125,7 +125,7 @@ impl Image {
     pub fn is_pixel_transparent(&self, x: i32, y: i32) -> bool {
         assert!(x >= 0 && y >= 0 && x < self.width && y < self.height);
         unsafe {
-            ffi::TCOD_image_is_pixel_transparent(self.tcod_image, x, y) != 0
+            ffi::TCOD_image_is_pixel_transparent(self.tcod_image, x, y)
         }
     }
 

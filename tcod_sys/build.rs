@@ -109,6 +109,52 @@ fn build_linux_dynamic(dst: &Path, libtcod_sources: &[& 'static str]) {
     pkg_config::find_library("x11").unwrap();
 }
 
+#[cfg(feature = "generate_bindings")]
+fn generate_bindings<P: AsRef<Path>>(dst_dir: P) {
+
+    // Tell cargo to invalidate the built crate whenever the wrapper changes
+    println!("cargo:rerun-if-changed=wrapper.h");
+
+    let bindings = bindgen::Builder::default()
+        .header("bindgen.h")
+        .emit_builtins()
+        .default_enum_style(bindgen::EnumVariation::Rust{non_exhaustive:false})
+        .derive_default(true)
+        // Tell cargo to invalidate the built crate whenever any of the
+        // included header files changed.
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+        .generate()
+        .expect("Unable to generate bindings");
+
+    // Write the bindings to the $OUT_DIR/bindings.rs file.
+    let bindings_file = dst_dir.as_ref().join("bindings.rs");
+    bindings
+        .write_to_file(&bindings_file)
+        .expect("Couldn't write bindings!");
+
+    // Copy bindings to $TARGET_bindings.rs
+    let target = env::var("TARGET").unwrap();
+    let target_bindings_file = format!("{}_bindings.rs", target);
+    std::fs::copy(bindings_file, &target_bindings_file).unwrap();
+    println!("cargo:rustc-env=BINDINGS_TARGET={}", target);
+
+    // Tell cargo to invalidate the built crate whenever the bindings change
+    println!("cargo:rerun-if-changed={}", target_bindings_file);
+}
+
+#[cfg(not(feature = "generate_bindings"))]
+fn validate_bindings_for_target() {
+    let target = env::var("TARGET").unwrap();
+    let target_bindings_file = format!("{}_bindings.rs", target);
+    let target_bindings_path: &Path = target_bindings_file.as_ref();
+    if !target_bindings_path.exists() {
+        panic!("No bindings found for {}", target);
+    }
+    println!("cargo:rustc-env=BINDINGS_TARGET={}", target);
+
+    // Tell cargo to invalidate the built crate whenever the bindings change
+    println!("cargo:rerun-if-changed={}", target_bindings_file);
+}
 
 fn main() {
     let is_crater = option_env!("CRATER_TASK_TYPE");
@@ -120,6 +166,11 @@ fn main() {
     let src_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let dst_dir = env::var("OUT_DIR").unwrap();
     let target = env::var("TARGET").unwrap();
+
+    #[cfg(feature = "generate_bindings")]
+    generate_bindings(&dst_dir);
+    #[cfg(not(feature = "generate_bindings"))]
+    validate_bindings_for_target();
 
     let src = Path::new(&src_dir);
     let dst = Path::new(&dst_dir);

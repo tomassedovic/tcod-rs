@@ -1,8 +1,7 @@
-use std::mem;
 use std::str;
 
 use bindings::ffi;
-use bindings::{CStr, c_bool, c_char, c_uint, keycode_from_native};
+use bindings::{CStr, c_char, c_uint, keycode_from_native};
 
 
 /// Deprecated. Use `tcod::input::Mouse` instead.
@@ -118,14 +117,14 @@ impl From<ffi::TCOD_key_t> for Key {
             code: keycode_from_native(tcod_key.vk).unwrap(),
             text: tcod_key.text,
             printable: tcod_key.c as u8 as char,
-            pressed: tcod_key.pressed != 0,
-            left_alt: tcod_key.lalt != 0,
-            left_ctrl: tcod_key.lctrl != 0,
-            right_alt: tcod_key.ralt != 0,
-            right_ctrl: tcod_key.rctrl != 0,
-            shift: tcod_key.shift != 0,
-            alt: tcod_key.lalt != 0 || tcod_key.ralt != 0,
-            ctrl: tcod_key.lctrl != 0 || tcod_key.rctrl != 0,
+            pressed: tcod_key.pressed,
+            left_alt: tcod_key.lalt,
+            left_ctrl: tcod_key.lctrl,
+            right_alt: tcod_key.ralt,
+            right_ctrl: tcod_key.rctrl,
+            shift: tcod_key.shift,
+            alt: tcod_key.lalt || tcod_key.ralt,
+            ctrl: tcod_key.lctrl || tcod_key.rctrl,
         }
     }
 }
@@ -153,13 +152,13 @@ pub struct Mouse {
 
 pub fn show_cursor(visible: bool) {
     unsafe {
-        ffi::TCOD_mouse_show_cursor(visible as c_bool);
+        ffi::TCOD_mouse_show_cursor(visible);
     }
 }
 
 pub fn is_cursor_visible() -> bool {
     unsafe {
-        ffi::TCOD_mouse_is_cursor_visible() != 0
+        ffi::TCOD_mouse_is_cursor_visible()
     }
 }
 
@@ -190,8 +189,8 @@ bitflags! {
 }
 
 pub fn check_for_event(event_mask: EventFlags) -> Option<(EventFlags, Event)> {
-    let mut c_key_state: ffi::TCOD_key_t = unsafe { mem::uninitialized() };
-    let mut c_mouse_state: ffi::TCOD_mouse_t = unsafe { mem::uninitialized() };
+    let mut c_key_state: ffi::TCOD_key_t = Default::default();
+    let mut c_mouse_state: ffi::TCOD_mouse_t = Default::default();
 
     let event = unsafe {
         ffi::TCOD_sys_check_for_event(event_mask.bits() as i32,
@@ -225,14 +224,14 @@ pub fn check_for_event(event_mask: EventFlags) -> Option<(EventFlags, Event)> {
             cy: c_mouse_state.cy as isize,
             dcx: c_mouse_state.dcx as isize,
             dcy: c_mouse_state.dcy as isize,
-            lbutton: c_mouse_state.lbutton != 0,
-            rbutton: c_mouse_state.rbutton != 0,
-            mbutton: c_mouse_state.mbutton != 0,
-            lbutton_pressed: c_mouse_state.lbutton_pressed != 0,
-            rbutton_pressed: c_mouse_state.rbutton_pressed != 0,
-            mbutton_pressed: c_mouse_state.mbutton_pressed != 0,
-            wheel_up: c_mouse_state.wheel_up != 0,
-            wheel_down: c_mouse_state.wheel_down != 0
+            lbutton: c_mouse_state.lbutton,
+            rbutton: c_mouse_state.rbutton,
+            mbutton: c_mouse_state.mbutton,
+            lbutton_pressed: c_mouse_state.lbutton_pressed,
+            rbutton_pressed: c_mouse_state.rbutton_pressed,
+            mbutton_pressed: c_mouse_state.mbutton_pressed,
+            wheel_up: c_mouse_state.wheel_up,
+            wheel_down: c_mouse_state.wheel_down
         }))
     } else {
         None

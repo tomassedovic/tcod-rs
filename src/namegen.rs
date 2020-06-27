@@ -63,7 +63,7 @@ impl Namegen {
     pub fn generate<T>(&self, name: T) -> Option<String> where T: AsRef<str> {
         unsafe {
             let name_string = CString::new(name.as_ref()).unwrap();
-            let borrowed = ffi::TCOD_namegen_generate(name_string.as_ptr() as *mut _, 0);
+            let borrowed = ffi::TCOD_namegen_generate(name_string.as_ptr() as *mut _, false);
             cstr_to_owned(borrowed)
         }
     }
@@ -74,7 +74,7 @@ impl Namegen {
             let rule_string = CString::new(rule.as_ref()).unwrap();
 
             let borrowed = ffi::TCOD_namegen_generate_custom(name_string.as_ptr() as *mut _,
-                                                             rule_string.as_ptr() as *mut _, 0);
+                                                             rule_string.as_ptr() as *mut _, false);
             cstr_to_owned(borrowed)
         }
     }

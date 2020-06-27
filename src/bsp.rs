@@ -2,7 +2,7 @@
 
 use bindings::ffi;
 use bindings::AsNative;
-use bindings::{c_void, c_bool};
+use bindings::c_void;
 use random::Rng;
 use std::ops::{Deref, DerefMut};
 use std::fmt;
@@ -64,7 +64,7 @@ impl<'a> fmt::Debug for Bsp<'a> {
 }
 
 
-extern "C" fn callback_wrapper<T>(node: *mut ffi::TCOD_bsp_t, user_data: *mut c_void) -> c_bool
+extern "C" fn callback_wrapper<T>(node: *mut ffi::TCOD_bsp_t, user_data: *mut c_void) -> bool
     where T: FnMut(&mut Bsp) -> bool
 {
     let callback_ptr = user_data as *mut T;
@@ -73,7 +73,7 @@ extern "C" fn callback_wrapper<T>(node: *mut ffi::TCOD_bsp_t, user_data: *mut c_
     };
     if node.is_null() { panic!("Null node when traversing a BSP.") }
     let mut bsp = Bsp { bsp: unsafe { &mut *node }, root: false };
-    cb(&mut bsp) as c_bool
+    cb(&mut bsp)
 }
 
 impl<'a> Bsp<'a> {
@@ -94,7 +94,7 @@ impl<'a> Bsp<'a> {
 
     pub fn split_once(&mut self, horizontal: bool, position: i32) {
         unsafe { ffi::TCOD_bsp_split_once(self.bsp as *mut ffi::TCOD_bsp_t,
-                                          horizontal as u8,
+                                          horizontal,
                                           position) }
     }
 
@@ -126,9 +126,9 @@ impl<'a> Bsp<'a> {
     }
 
     /// Returns `Some(Bsp)` with left subtree, or `None` if the BSP has not been split.
-    pub fn left(&self) -> Option<Self> {
+    pub fn left(&mut self) -> Option<Self> {
         unsafe {
-            let left = ffi::TCOD_bsp_left(self.bsp as *const ffi::TCOD_bsp_t);
+            let left = ffi::TCOD_bsp_left(self.bsp as *mut ffi::TCOD_bsp_t);
             if left.is_null() {
                 None
             } else {
@@ -141,9 +141,9 @@ impl<'a> Bsp<'a> {
     }
 
     /// Returns `Some(Bsp)` with right subtree, or `None` if the BSP has not been split.
-    pub fn right(&self) -> Option<Self> {
+    pub fn right(&mut self) -> Option<Self> {
         unsafe {
-            let right = ffi::TCOD_bsp_right(self.bsp as *const ffi::TCOD_bsp_t) ;
+            let right = ffi::TCOD_bsp_right(self.bsp as *mut ffi::TCOD_bsp_t) ;
             if right.is_null() {
                 None
             } else {
@@ -156,9 +156,9 @@ impl<'a> Bsp<'a> {
     }
 
     /// Returns `Some(Bsp)` with father, or `None` if the node is root.
-    pub fn father(&self) -> Option<Self> {
+    pub fn father(&mut self) -> Option<Self> {
         unsafe {
-            let father = ffi::TCOD_bsp_father(self.bsp as *const ffi::TCOD_bsp_t);
+            let father = ffi::TCOD_bsp_father(self.bsp as *mut ffi::TCOD_bsp_t);
             if father.is_null() {
                 None
             } else {
@@ -170,17 +170,17 @@ impl<'a> Bsp<'a> {
         }
     }
 
-    pub fn is_leaf(&self) -> bool {
-        unsafe { ffi::TCOD_bsp_is_leaf(self.bsp as *const ffi::TCOD_bsp_t) != 0 }
+    pub fn is_leaf(&mut self) -> bool {
+        unsafe { ffi::TCOD_bsp_is_leaf(self.bsp as *mut ffi::TCOD_bsp_t) }
     }
 
-    pub fn contains(&self, cx: i32, cy: i32) -> bool {
-        unsafe { ffi::TCOD_bsp_contains(self.bsp as *const ffi::TCOD_bsp_t, cx, cy) != 0 }
+    pub fn contains(&mut self, cx: i32, cy: i32) -> bool {
+        unsafe { ffi::TCOD_bsp_contains(self.bsp as *mut ffi::TCOD_bsp_t, cx, cy) }
     }
 
-    pub fn find_node(&self, cx: i32, cy: i32) -> Option<Self> {
+    pub fn find_node(&mut self, cx: i32, cy: i32) -> Option<Self> {
         unsafe {
-            let pointer = ffi::TCOD_bsp_find_node(self.bsp as *const ffi::TCOD_bsp_t,
+            let pointer = ffi::TCOD_bsp_find_node(self.bsp as *mut ffi::TCOD_bsp_t,
                                                   cx, cy);
             if pointer.is_null() {
                 None
@@ -194,11 +194,11 @@ impl<'a> Bsp<'a> {
     }
 
     pub fn horizontal(&self) -> bool {
-        self.horizontal != 0
+        self.horizontal
     }
 
     pub fn set_horizontal(&mut self, h: bool) {
-        self.horizontal = h as u8;
+        self.horizontal = h;
     }
 
     /// Instead of 5 `traverse*` functions as in original API, Rust binding
@@ -246,7 +246,7 @@ impl<'a> Bsp<'a> {
                                                                 cb as *mut _ as *mut c_void),
             }
         };
-        retval != 0
+        retval
     }
 }
 

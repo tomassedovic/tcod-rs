@@ -6,9 +6,6 @@ pub use std::os::raw::{c_char, c_int, c_float, c_uint, c_void, c_uchar};
 use std::mem::transmute;
 use super::input::KeyCode;
 
-#[allow(non_camel_case_types)]
-pub type c_bool = c_uchar;
-
 pub trait AsNative<T> {
     unsafe fn as_native(&self) -> &T;
     unsafe fn as_native_mut(&mut self) -> &mut T;
@@ -40,7 +37,7 @@ impl <T, U: AsNative<T> + ?Sized> AsNative<T> for Box<U> {
 
 pub fn keycode_from_native(input: self::ffi::TCOD_keycode_t) -> Option<KeyCode> {
     match input as u32 {
-        x @ 0 ... 66 => Some(unsafe { transmute(x) }),
+        x @ 0 ..= 66 => Some(unsafe { transmute(x) }),
         _ => None
     }
 }

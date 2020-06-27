@@ -184,23 +184,12 @@ We're not sure exactly why this is so we'd appreciate anyone's help!
 Contributing
 ------------
 
-The raw bindings were generated using
-[rust-bindgen](https://github.com/rust-lang/rust-bindgen) and are located at
-`src/ffi.rs`. The safe (hopefully?) wrapper was built on top of them at
-`src/lib.rs`.
-
 This is far from done, patches to missing functionality wrappers, documentation
 and examples are very much appreciated. If your patch (any patch -- including
 typos) gets accepted, you'll get a commit access if you want it.
 
 We accept GitHub as well as regular pull requests (i.e. emailing or tweeting the
 URL of your feature branch works).
-
-You can regenerate the raw bindings by running:
-
-```sh
-bindgen -builtins -l tcod include/libtcod.h -o src/ffi.rs
-```
 
 
 ### Contributors
