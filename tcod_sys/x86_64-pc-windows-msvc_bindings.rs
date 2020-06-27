@@ -5095,17 +5095,49 @@ pub enum TCOD_key_status_t {
     TCOD_KEY_RELEASED = 2,
 }
 impl TCOD_font_flags_t {
-    pub const TCOD_FONT_TYPE_GRAYSCALE: TCOD_font_flags_t =
-        TCOD_font_flags_t::TCOD_FONT_TYPE_GREYSCALE;
+    pub const TCOD_FONT_LAYOUT_ASCII_INCOL: TCOD_font_flags_t = TCOD_font_flags_t(1);
 }
-#[repr(i32)]
+impl TCOD_font_flags_t {
+    pub const TCOD_FONT_LAYOUT_ASCII_INROW: TCOD_font_flags_t = TCOD_font_flags_t(2);
+}
+impl TCOD_font_flags_t {
+    pub const TCOD_FONT_TYPE_GREYSCALE: TCOD_font_flags_t = TCOD_font_flags_t(4);
+}
+impl TCOD_font_flags_t {
+    pub const TCOD_FONT_TYPE_GRAYSCALE: TCOD_font_flags_t = TCOD_font_flags_t(4);
+}
+impl TCOD_font_flags_t {
+    pub const TCOD_FONT_LAYOUT_TCOD: TCOD_font_flags_t = TCOD_font_flags_t(8);
+}
+impl ::std::ops::BitOr<TCOD_font_flags_t> for TCOD_font_flags_t {
+    type Output = Self;
+    #[inline]
+    fn bitor(self, other: Self) -> Self {
+        TCOD_font_flags_t(self.0 | other.0)
+    }
+}
+impl ::std::ops::BitOrAssign for TCOD_font_flags_t {
+    #[inline]
+    fn bitor_assign(&mut self, rhs: TCOD_font_flags_t) {
+        self.0 |= rhs.0;
+    }
+}
+impl ::std::ops::BitAnd<TCOD_font_flags_t> for TCOD_font_flags_t {
+    type Output = Self;
+    #[inline]
+    fn bitand(self, other: Self) -> Self {
+        TCOD_font_flags_t(self.0 & other.0)
+    }
+}
+impl ::std::ops::BitAndAssign for TCOD_font_flags_t {
+    #[inline]
+    fn bitand_assign(&mut self, rhs: TCOD_font_flags_t) {
+        self.0 &= rhs.0;
+    }
+}
+#[repr(transparent)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum TCOD_font_flags_t {
-    TCOD_FONT_LAYOUT_ASCII_INCOL = 1,
-    TCOD_FONT_LAYOUT_ASCII_INROW = 2,
-    TCOD_FONT_TYPE_GREYSCALE = 4,
-    TCOD_FONT_LAYOUT_TCOD = 8,
-}
+pub struct TCOD_font_flags_t(pub i32);
 #[repr(i32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TCOD_renderer_t {

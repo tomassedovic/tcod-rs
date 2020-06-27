@@ -1866,8 +1866,8 @@ impl Options {
             fullscreen_width: 0,
             fullscreen_height: 0,
             font: "consolas10x10_gs_tc.png".to_owned(),
-            font_type: FontType::Greyscale,
-            font_layout: FontLayout::Tcod,
+            font_type: FontType::GREYSCALE,
+            font_layout: FontLayout::TCOD,
             nb_char_horiz: 0,
             nb_char_vertic: 0,
             fullscreen: false,
@@ -2052,9 +2052,9 @@ fn parse_args(options: &mut Options) {
                 }
             }
             "-fullscreen" => options.fullscreen = true,
-            "-font-in-row" => options.font_layout = FontLayout::AsciiInRow,
-            "-font-greyscale" => options.font_type = FontType::Greyscale,
-            "-font-tcod" => options.font_layout = FontLayout::Tcod,
+            "-font-in-row" => options.font_layout = FontLayout::ASCII_INROW,
+            "-font-greyscale" => options.font_type = FontType::GREYSCALE,
+            "-font-tcod" => options.font_layout = FontLayout::TCOD,
             "-renderer" => {
                 if let Some(renderer) = args.next() {
                     match renderer.parse::<i32>().ok() {

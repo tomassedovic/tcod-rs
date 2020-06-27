@@ -120,6 +120,7 @@ fn generate_bindings<P: AsRef<Path>>(dst_dir: P) {
         .emit_builtins()
         .default_enum_style(bindgen::EnumVariation::Rust{non_exhaustive:false})
         .derive_default(true)
+        .bitfield_enum("TCOD_font_flags_t")
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))

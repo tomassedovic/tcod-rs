@@ -61,7 +61,7 @@ use std::mem::transmute;
 use std::path::Path;
 
 use bindings::ffi::{
-    self, TCOD_alignment_t, TCOD_bkgnd_flag_t, TCOD_font_flags_t, TCOD_renderer_t,
+    self, TCOD_alignment_t, TCOD_bkgnd_flag_t, TCOD_renderer_t,
 };
 use bindings::{AsNative, CString, FromNative};
 
@@ -391,7 +391,7 @@ impl Root {
             );
             ffi::TCOD_console_set_custom_font(
                 path.as_ptr(),
-                (font_layout as i32) | (font_type as i32),
+                font_layout.bits() | font_type.bits(),
                 nb_char_horizontal,
                 nb_char_vertical,
             );
@@ -438,7 +438,7 @@ impl Root {
 ///         .size(80, 20)
 ///         .title("Example")
 ///         .fullscreen(true)
-///         .font("terminal.png", FontLayout::AsciiInCol)
+///         .font("terminal.png", FontLayout::ASCII_INCOL)
 ///         .renderer(Renderer::GLSL)
 ///         .init();
 /// }
@@ -463,8 +463,8 @@ impl<'a> RootInitializer<'a> {
             title: Box::new("Main Window"),
             is_fullscreen: false,
             font_path: Box::new("terminal.png"),
-            font_layout: FontLayout::AsciiInCol,
-            font_type: FontType::Default,
+            font_layout: FontLayout::ASCII_INCOL,
+            font_type: FontType::DEFAULT,
             font_dimensions: (0, 0),
             console_renderer: Renderer::SDL,
         }
@@ -1277,49 +1277,47 @@ pub enum Renderer {
 }
 native_enum_convert!(Renderer, TCOD_renderer_t);
 
-/// All the possible font layouts that can be used for custom bitmap fonts
-#[repr(u32)]
-#[derive(Copy, Clone)]
-pub enum FontLayout {
-    AsciiInCol = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_ASCII_INCOL as u32,
-    AsciiInRow = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_ASCII_INROW as u32,
-    Tcod = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_TCOD as u32,
+bitflags! {
+    /// All the possible font layouts that can be used for custom bitmap fonts
+    pub struct FontLayout: i32 {
+        const ASCII_INCOL = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_ASCII_INCOL.0;
+        const ASCII_INROW = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_ASCII_INROW.0;
+        const TCOD = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_TCOD.0;
+    }
 }
-native_enum_convert!(FontLayout, TCOD_font_flags_t);
 
-#[repr(u32)]
-#[derive(Copy, Clone)]
-pub enum FontType {
-    Default = 0,
-    Greyscale = ffi::TCOD_font_flags_t::TCOD_FONT_TYPE_GREYSCALE as u32,
+bitflags! {
+    pub struct FontType: i32 {
+        const DEFAULT = 0;
+        const GREYSCALE = ffi::TCOD_font_flags_t::TCOD_FONT_TYPE_GREYSCALE.0;
+    }
 }
-native_enum_convert!(FontType, TCOD_font_flags_t);
 
 #[cfg(test)]
 mod test {
-    use super::FontLayout::AsciiInCol;
+    use super::FontLayout;
     use super::Root;
     use std::path::Path;
 
     #[test]
     fn test_custom_font_as_static_str() {
-        Root::initializer().font("terminal.png", AsciiInCol);
+        Root::initializer().font("terminal.png", FontLayout::ASCII_INCOL);
     }
 
     #[test]
     fn test_custom_font_as_path() {
-        Root::initializer().font(Path::new("terminal.png"), AsciiInCol);
+        Root::initializer().font(Path::new("terminal.png"), FontLayout::ASCII_INCOL);
     }
 
     #[test]
     fn test_custom_font_as_string() {
-        Root::initializer().font("terminal.png".to_owned(), AsciiInCol);
+        Root::initializer().font("terminal.png".to_owned(), FontLayout::ASCII_INCOL);
     }
 
     #[test]
     fn test_custom_font_as_str() {
         let string = "terminal.png".to_owned();
         let s: &str = &string;
-        Root::initializer().font(s, AsciiInCol);
+        Root::initializer().font(s, FontLayout::ASCII_INCOL);
     }
 }
