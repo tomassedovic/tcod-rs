@@ -16,14 +16,3 @@ target, will panic during the build with a message about the bindings missing:
 ```
 thread 'main' panicked at 'No bindings found for $TARGET', build.rs:148:9
 ```
-
-The current raw bindings were generated using
-[rust-bindgen](https://github.com/rust-lang/rust-bindgen) (v0.54) and are located at
-`src/ffi.rs`. The safe (hopefully?) wrapper was built on top of them at
-`src/lib.rs`.
-
-You can regenerate the raw bindings by running:
-
-```sh
-bindgen --builtins --default-enum-style rust --with-derive-default --raw-line "#![allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]" libtcod/include/libtcod.h -o lib.rs
-```
