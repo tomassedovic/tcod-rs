@@ -1,5 +1,5 @@
-use bindings::{ffi, c_int};
-use bindings::{AsNative};
+use bindings::AsNative;
+use bindings::{c_int, ffi};
 use noise::Noise;
 use random::Rng;
 use std::slice;

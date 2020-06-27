@@ -12,18 +12,17 @@ use random::Rng;
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum NoiseType {
     Default = ffi::TCOD_noise_type_t::TCOD_NOISE_DEFAULT as u32,
-    Perlin  = ffi::TCOD_noise_type_t::TCOD_NOISE_PERLIN as u32,
+    Perlin = ffi::TCOD_noise_type_t::TCOD_NOISE_PERLIN as u32,
     Simplex = ffi::TCOD_noise_type_t::TCOD_NOISE_SIMPLEX as u32,
     Wavelet = ffi::TCOD_noise_type_t::TCOD_NOISE_WAVELET as u32,
 }
 native_enum_convert!(NoiseType, TCOD_noise_type_t);
 
-
 /// Noise object encapsulates a noise generator.
 #[derive(Debug)]
 pub struct Noise {
     noise: ffi::TCOD_noise_t,
-    dimensions: u32
+    dimensions: u32,
 }
 
 impl AsNative<ffi::TCOD_noise_t> for Noise {
@@ -53,24 +52,18 @@ impl Noise {
     }
 
     pub fn set_type(&self, noise_type: NoiseType) {
-        unsafe {
-            ffi::TCOD_noise_set_type(self.noise, noise_type.into())
-        }
+        unsafe { ffi::TCOD_noise_set_type(self.noise, noise_type.into()) }
     }
 
     pub fn get<T: AsMut<[f32]>>(&self, mut coords: T) -> f32 {
         assert!(self.dimensions as usize == coords.as_mut().len());
-        unsafe {
-            ffi::TCOD_noise_get(self.noise, coords.as_mut().as_mut_ptr())
-        }
+        unsafe { ffi::TCOD_noise_get(self.noise, coords.as_mut().as_mut_ptr()) }
     }
 
     pub fn get_ex<T: AsMut<[f32]>>(&self, mut coords: T, noise_type: NoiseType) -> f32 {
         assert!(self.dimensions as usize == coords.as_mut().len());
         unsafe {
-            ffi::TCOD_noise_get_ex(self.noise,
-                                   coords.as_mut().as_mut_ptr(),
-                                   noise_type.into())
+            ffi::TCOD_noise_get_ex(self.noise, coords.as_mut().as_mut_ptr(), noise_type.into())
         }
     }
 
@@ -78,20 +71,25 @@ impl Noise {
         assert!(self.dimensions as usize == coords.as_mut().len());
         assert!(octaves > 0);
         assert!(octaves < MAX_OCTAVES);
-        unsafe {
-            ffi::TCOD_noise_get_fbm(self.noise, coords.as_mut().as_mut_ptr(), octaves as f32)
-        }
+        unsafe { ffi::TCOD_noise_get_fbm(self.noise, coords.as_mut().as_mut_ptr(), octaves as f32) }
     }
 
-    pub fn get_fbm_ex<T: AsMut<[f32]>>(&self, mut coords: T, octaves: u32, noise_type: NoiseType) -> f32 {
+    pub fn get_fbm_ex<T: AsMut<[f32]>>(
+        &self,
+        mut coords: T,
+        octaves: u32,
+        noise_type: NoiseType,
+    ) -> f32 {
         assert!(self.dimensions as usize == coords.as_mut().len());
         assert!(octaves > 0);
         assert!(octaves < MAX_OCTAVES);
         unsafe {
-            ffi::TCOD_noise_get_fbm_ex(self.noise,
-                                       coords.as_mut().as_mut_ptr(),
-                                       octaves as f32,
-                                       noise_type.into())
+            ffi::TCOD_noise_get_fbm_ex(
+                self.noise,
+                coords.as_mut().as_mut_ptr(),
+                octaves as f32,
+                noise_type.into(),
+            )
         }
     }
 
@@ -100,21 +98,26 @@ impl Noise {
         assert!(octaves > 0);
         assert!(octaves < MAX_OCTAVES);
         unsafe {
-            ffi::TCOD_noise_get_turbulence(self.noise,
-                                           coords.as_mut().as_mut_ptr(),
-                                           octaves as f32)
+            ffi::TCOD_noise_get_turbulence(self.noise, coords.as_mut().as_mut_ptr(), octaves as f32)
         }
     }
 
-    pub fn get_turbulence_ex<T: AsMut<[f32]>>(&self, mut coords: T, octaves: u32, noise_type: NoiseType) -> f32 {
+    pub fn get_turbulence_ex<T: AsMut<[f32]>>(
+        &self,
+        mut coords: T,
+        octaves: u32,
+        noise_type: NoiseType,
+    ) -> f32 {
         assert!(self.dimensions as usize == coords.as_mut().len());
         assert!(octaves > 0);
         assert!(octaves < MAX_OCTAVES);
         unsafe {
-            ffi::TCOD_noise_get_turbulence_ex(self.noise,
-                                              coords.as_mut().as_mut_ptr(),
-                                              octaves as f32,
-                                              noise_type.into())
+            ffi::TCOD_noise_get_turbulence_ex(
+                self.noise,
+                coords.as_mut().as_mut_ptr(),
+                octaves as f32,
+                noise_type.into(),
+            )
         }
     }
 }
@@ -131,7 +134,7 @@ pub struct NoiseInitializer {
     hurst: f32,
     lacunarity: f32,
     noise_type: NoiseType,
-    random: Rng
+    random: Rng,
 }
 
 impl NoiseInitializer {
@@ -142,7 +145,7 @@ impl NoiseInitializer {
             hurst: DEFAULT_HURST,
             lacunarity: DEFAULT_LACUNARITY,
             noise_type: NoiseType::Default,
-            random: Rng::get_instance()
+            random: Rng::get_instance(),
         }
     }
 
@@ -175,8 +178,12 @@ impl NoiseInitializer {
     pub fn init(&self) -> Noise {
         unsafe {
             let noise = Noise {
-                noise: ffi::TCOD_noise_new(self.dimensions as i32, self.hurst,
-                                           self.lacunarity, *self.random.as_native()),
+                noise: ffi::TCOD_noise_new(
+                    self.dimensions as i32,
+                    self.hurst,
+                    self.lacunarity,
+                    *self.random.as_native(),
+                ),
                 dimensions: self.dimensions,
             };
             ffi::TCOD_noise_set_type(noise.noise, self.noise_type.into());
@@ -196,17 +203,17 @@ mod test {
         let noise2d = Noise::init_with_dimensions(2).init();
         let noise3d = Noise::init_with_dimensions(3).init();
 
-        let val1  = noise1d.get([1.0]);
+        let val1 = noise1d.get([1.0]);
         let val1a = noise1d.get([1.0]);
         assert!(val1 >= -1.0 && val1 <= 1.0);
         assert_eq!(val1, val1a);
 
-        let val2  = noise2d.get([1.0, 2.0]);
+        let val2 = noise2d.get([1.0, 2.0]);
         let val2a = noise2d.get([1.0, 2.0]);
         assert!(val2 >= -1.0 && val2 <= 1.0);
         assert_eq!(val2, val2a);
 
-        let val3  = noise3d.get([1.0, 2.0, 3.0]);
+        let val3 = noise3d.get([1.0, 2.0, 3.0]);
         let val3a = noise3d.get([1.0, 2.0, 3.0]);
         assert!(val3 >= -1.0 && val3 <= 1.0);
         assert_eq!(val3, val3a);
@@ -242,12 +249,12 @@ mod test {
     fn get_ex() {
         let noise2d = Noise::init_with_dimensions(2).init();
 
-        let val1  = noise2d.get_ex([1.0, 2.0], NoiseType::Perlin);
+        let val1 = noise2d.get_ex([1.0, 2.0], NoiseType::Perlin);
         let val1a = noise2d.get_ex([1.0, 2.0], NoiseType::Perlin);
         assert!(val1 >= -1.0 && val1 <= 1.0);
         assert_eq!(val1, val1a);
 
-        let val2  = noise2d.get_ex([1.0, 2.0], NoiseType::Wavelet);
+        let val2 = noise2d.get_ex([1.0, 2.0], NoiseType::Wavelet);
         let val2a = noise2d.get_ex([1.0, 2.0], NoiseType::Wavelet);
         assert!(val2 >= -1.0 && val2 <= 1.0);
         assert_eq!(val2, val2a);
@@ -273,21 +280,21 @@ mod test {
         let noise2d = Noise::init_with_dimensions(2).init();
         let noise3d = Noise::init_with_dimensions(3).init();
 
-        let val1  = noise1d.get_fbm([1.0], 32);
+        let val1 = noise1d.get_fbm([1.0], 32);
         let val1a = noise1d.get_fbm([1.0], 32);
         assert!(val1.is_nan() || val1 >= -1.0 && val1 <= 1.0);
         if !val1.is_nan() {
             assert_eq!(val1, val1a);
         }
 
-        let val2  = noise2d.get_fbm([1.0, 2.0], 32);
+        let val2 = noise2d.get_fbm([1.0, 2.0], 32);
         let val2a = noise2d.get_fbm([1.0, 2.0], 32);
         assert!(val2.is_nan() || val2 >= -1.0 && val2 <= 1.0);
         if !val2.is_nan() {
             assert_eq!(val2, val2a);
         }
 
-        let val3  = noise3d.get_fbm([1.0, 2.0, 3.0], 32);
+        let val3 = noise3d.get_fbm([1.0, 2.0, 3.0], 32);
         let val3a = noise3d.get_fbm([1.0, 2.0, 3.0], 32);
         assert!(val3.is_nan() || val3 >= -1.0 && val3 <= 1.0);
         if !val3.is_nan() {
@@ -327,14 +334,14 @@ mod test {
     fn get_fbm_ex() {
         let noise2d = Noise::init_with_dimensions(2).init();
 
-        let val1  = noise2d.get_fbm_ex([1.0, 2.0], 32, NoiseType::Perlin);
+        let val1 = noise2d.get_fbm_ex([1.0, 2.0], 32, NoiseType::Perlin);
         let val1a = noise2d.get_fbm_ex([1.0, 2.0], 32, NoiseType::Perlin);
         assert!(val1.is_nan() || val1 >= -1.0 && val1 <= 1.0);
         if !val1.is_nan() {
             assert_eq!(val1, val1a);
         }
 
-        let val2  = noise2d.get_fbm_ex([1.0, 2.0], 64, NoiseType::Wavelet);
+        let val2 = noise2d.get_fbm_ex([1.0, 2.0], 64, NoiseType::Wavelet);
         let val2a = noise2d.get_fbm_ex([1.0, 2.0], 64, NoiseType::Wavelet);
         assert!(val2.is_nan() || val2 >= -1.0 && val2 <= 1.0);
         if !val2.is_nan() {
@@ -376,21 +383,21 @@ mod test {
         let noise2d = Noise::init_with_dimensions(2).init();
         let noise3d = Noise::init_with_dimensions(3).init();
 
-        let val1  = noise1d.get_turbulence([1.0], 32);
+        let val1 = noise1d.get_turbulence([1.0], 32);
         let val1a = noise1d.get_turbulence([1.0], 32);
         assert!(val1.is_nan() || val1 >= -1.0 && val1 <= 1.0);
         if !val1.is_nan() {
             assert_eq!(val1, val1a);
         }
 
-        let val2  = noise2d.get_turbulence([1.0, 2.0], 32);
+        let val2 = noise2d.get_turbulence([1.0, 2.0], 32);
         let val2a = noise2d.get_turbulence([1.0, 2.0], 32);
         assert!(val2.is_nan() || val2 >= -1.0 && val2 <= 1.0);
         if !val2.is_nan() {
             assert_eq!(val2, val2a);
         }
 
-        let val3  = noise3d.get_turbulence([1.0, 2.0, 3.0], 32);
+        let val3 = noise3d.get_turbulence([1.0, 2.0, 3.0], 32);
         let val3a = noise3d.get_turbulence([1.0, 2.0, 3.0], 32);
         assert!(val3.is_nan() || val3 >= -1.0 && val3 <= 1.0);
         if !val3.is_nan() {
@@ -430,14 +437,14 @@ mod test {
     fn get_turbulence_ex() {
         let noise2d = Noise::init_with_dimensions(2).init();
 
-        let val1  = noise2d.get_turbulence_ex([1.0, 2.0], 32, NoiseType::Perlin);
+        let val1 = noise2d.get_turbulence_ex([1.0, 2.0], 32, NoiseType::Perlin);
         let val1a = noise2d.get_turbulence_ex([1.0, 2.0], 32, NoiseType::Perlin);
         assert!(val1.is_nan() || val1 >= -1.0 && val1 <= 1.0);
         if !val1.is_nan() {
             assert_eq!(val1, val1a);
         }
 
-        let val2  = noise2d.get_turbulence_ex([1.0, 2.0], 64, NoiseType::Wavelet);
+        let val2 = noise2d.get_turbulence_ex([1.0, 2.0], 64, NoiseType::Wavelet);
         let val2a = noise2d.get_turbulence_ex([1.0, 2.0], 64, NoiseType::Wavelet);
         assert!(val2.is_nan() || val2 >= -1.0 && val2 <= 1.0);
         if !val2.is_nan() {

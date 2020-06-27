@@ -2,7 +2,7 @@ use std::io::{Error, ErrorKind};
 use std::path::Path;
 
 use bindings::ffi;
-use bindings::{AsNative, FromNative, CString};
+use bindings::{AsNative, CString, FromNative};
 use colors::Color;
 use console::{BackgroundFlag, Console};
 
@@ -16,7 +16,7 @@ impl AsNative<ffi::TCOD_image_t> for Image {
     unsafe fn as_native(&self) -> &ffi::TCOD_image_t {
         &self.tcod_image
     }
-    
+
     unsafe fn as_native_mut(&mut self) -> &mut ffi::TCOD_image_t {
         &mut self.tcod_image
     }
@@ -26,7 +26,11 @@ impl FromNative<ffi::TCOD_image_t> for Image {
     unsafe fn from_native(image: ffi::TCOD_image_t) -> Image {
         let (width, height) = get_image_size(image);
         assert!(width != 0);
-        Image { tcod_image: image, width: width, height: height }
+        Image {
+            tcod_image: image,
+            width: width,
+            height: height,
+        }
     }
 }
 
@@ -48,39 +52,54 @@ impl Image {
         }
     }
 
-    pub fn from_file<T>(path: T) -> Result<Image, Error> where T: AsRef<Path> {
+    pub fn from_file<T>(path: T) -> Result<Image, Error>
+    where
+        T: AsRef<Path>,
+    {
         let path_string = CString::new(path.as_ref().to_str().unwrap()).unwrap();
         unsafe {
             let tcod_image = ffi::TCOD_image_load(path_string.as_ptr());
             let (width, height) = get_image_size(tcod_image);
 
             if width == 0 {
-                Err(Error::new(ErrorKind::InvalidInput, "The provided image format is not supported by libtcod"))
+                Err(Error::new(
+                    ErrorKind::InvalidInput,
+                    "The provided image format is not supported by libtcod",
+                ))
             } else {
-                Ok(Image { tcod_image: tcod_image, width: width, height: height })
+                Ok(Image {
+                    tcod_image: tcod_image,
+                    width: width,
+                    height: height,
+                })
             }
         }
     }
 
-    pub fn from_console<T>(console: &T) -> Image where T: Console {
+    pub fn from_console<T>(console: &T) -> Image
+    where
+        T: Console,
+    {
         unsafe {
             let tcod_image = ffi::TCOD_image_from_console(*console.as_native());
             let (width, height) = get_image_size(tcod_image);
             Image {
                 tcod_image: tcod_image,
                 width: width,
-                height: height
+                height: height,
             }
         }
     }
 
-    pub fn refresh_console<T>(&mut self, console: &T) where T: Console {
+    pub fn refresh_console<T>(&mut self, console: &T)
+    where
+        T: Console,
+    {
         assert!(
             {
                 let img = Image::from_console(console);
                 self.width == img.width && self.height == img.height
             },
-
             "libtcod only supports console refreshing with consoles of equivalent sizes"
         );
 
@@ -89,7 +108,10 @@ impl Image {
         }
     }
 
-    pub fn save<T>(&self, path: T) where T: AsRef<Path> {
+    pub fn save<T>(&self, path: T)
+    where
+        T: AsRef<Path>,
+    {
         let path_string = CString::new(path.as_ref().to_str().unwrap()).unwrap();
         unsafe {
             ffi::TCOD_image_save(self.tcod_image, path_string.as_ptr());
@@ -110,31 +132,36 @@ impl Image {
 
     pub fn get_pixel(&self, x: i32, y: i32) -> Color {
         assert!(x >= 0 && y >= 0 && x < self.width && y < self.height);
-        unsafe {
-            FromNative::from_native(ffi::TCOD_image_get_pixel(self.tcod_image, x, y))
-        }
+        unsafe { FromNative::from_native(ffi::TCOD_image_get_pixel(self.tcod_image, x, y)) }
     }
 
     pub fn get_alpha(&self, x: i32, y: i32) -> i32 {
         assert!(x >= 0 && y >= 0 && x < self.width && y < self.height);
-        unsafe {
-            ffi::TCOD_image_get_alpha(self.tcod_image, x, y)
-        }
+        unsafe { ffi::TCOD_image_get_alpha(self.tcod_image, x, y) }
     }
 
     pub fn is_pixel_transparent(&self, x: i32, y: i32) -> bool {
         assert!(x >= 0 && y >= 0 && x < self.width && y < self.height);
-        unsafe {
-            ffi::TCOD_image_is_pixel_transparent(self.tcod_image, x, y)
-        }
+        unsafe { ffi::TCOD_image_is_pixel_transparent(self.tcod_image, x, y) }
     }
 
     pub fn get_mipmap_pixel(&self, (x0, y0): (f32, f32), (x1, y1): (f32, f32)) -> Color {
-        assert!(x0 >= 0.0 && y0 >= 0.0 &&
-                x0 < x1 && y0 < y1 &&
-                x1 < self.width as f32 && y1 < self.height as f32);
+        assert!(
+            x0 >= 0.0
+                && y0 >= 0.0
+                && x0 < x1
+                && y0 < y1
+                && x1 < self.width as f32
+                && y1 < self.height as f32
+        );
         unsafe {
-            FromNative::from_native(ffi::TCOD_image_get_mipmap_pixel(self.tcod_image, x0, y0, x1, y1))
+            FromNative::from_native(ffi::TCOD_image_get_mipmap_pixel(
+                self.tcod_image,
+                x0,
+                y0,
+                x1,
+                y1,
+            ))
         }
     }
 
@@ -193,30 +220,78 @@ impl Image {
     }
 }
 
-pub fn blit_rect<T>(src: &Image, (width, height): (i32, i32),
-                    dst: &mut T, (x, y): (i32, i32), flag: BackgroundFlag) where T: Console {
+pub fn blit_rect<T>(
+    src: &Image,
+    (width, height): (i32, i32),
+    dst: &mut T,
+    (x, y): (i32, i32),
+    flag: BackgroundFlag,
+) where
+    T: Console,
+{
     assert!(width >= -1 && height >= -1 && width <= src.width && height <= src.height);
     assert!(x >= 0 && y >= 0 && x < dst.width() && y < dst.height());
     unsafe {
-        ffi::TCOD_image_blit_rect(src.tcod_image, *dst.as_native(), x, y, width, height, flag.into());
+        ffi::TCOD_image_blit_rect(
+            src.tcod_image,
+            *dst.as_native(),
+            x,
+            y,
+            width,
+            height,
+            flag.into(),
+        );
     }
 }
 
-pub fn blit<T>(src: &Image, (scale_x, scale_y): (f32, f32), angle: f32,
-               dst: &mut T, (x, y): (f32, f32),  flag: BackgroundFlag) where T: Console {
+pub fn blit<T>(
+    src: &Image,
+    (scale_x, scale_y): (f32, f32),
+    angle: f32,
+    dst: &mut T,
+    (x, y): (f32, f32),
+    flag: BackgroundFlag,
+) where
+    T: Console,
+{
     assert!(scale_x > 0.0 && scale_y > 0.0);
     assert!(x >= 0.0 && y >= 0.0 && x < dst.width() as f32 && y < dst.height() as f32);
     unsafe {
-        ffi::TCOD_image_blit(src.tcod_image, *dst.as_native(), x, y, flag.into(), scale_x, scale_y, angle);
+        ffi::TCOD_image_blit(
+            src.tcod_image,
+            *dst.as_native(),
+            x,
+            y,
+            flag.into(),
+            scale_x,
+            scale_y,
+            angle,
+        );
     }
 }
 
-pub fn blit_2x<T>(src: &Image, (src_x, src_y): (i32, i32), (width, height): (i32, i32),
-                  dst: &mut T,  (dst_x, dst_y): (i32, i32)) where T: Console {
+pub fn blit_2x<T>(
+    src: &Image,
+    (src_x, src_y): (i32, i32),
+    (width, height): (i32, i32),
+    dst: &mut T,
+    (dst_x, dst_y): (i32, i32),
+) where
+    T: Console,
+{
     assert!(width >= -1 && height >= -1 && width <= src.width && height <= src.height);
     assert!(src_x >= 0 && src_y >= 0 && src_x < src.width && src_y < src.height);
     assert!(dst_x >= 0 && dst_y >= 0 && dst_x < dst.width() && dst_y < dst.height());
     unsafe {
-        ffi::TCOD_image_blit_2x(src.tcod_image, *dst.as_native(), dst_x, dst_y, src_x, src_y, width, height);
+        ffi::TCOD_image_blit_2x(
+            src.tcod_image,
+            *dst.as_native(),
+            dst_x,
+            dst_y,
+            src_x,
+            src_y,
+            width,
+            height,
+        );
     }
 }

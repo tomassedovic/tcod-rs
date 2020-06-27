@@ -1,7 +1,7 @@
 //! Port of line drawing toolkit.
 
-use bindings::ffi;
 use bindings::c_int;
+use bindings::ffi;
 
 /// tcod-rs uses libtcod's multithreaded line API, therefore more then one line
 /// can be created and drawn. The `Line` struct represents a line.
@@ -14,9 +14,7 @@ impl Line {
     /// Creates a line from `start` to `end` (inclusive).
     pub fn new(start: (i32, i32), end: (i32, i32)) -> Self {
         let mut line: Line = Default::default();
-        unsafe {
-            ffi::TCOD_line_init_mt(start.0, start.1, end.0, end.1, &mut line.tcod_line)
-        };
+        unsafe { ffi::TCOD_line_init_mt(start.0, start.1, end.0, end.1, &mut line.tcod_line) };
         line
     }
 
@@ -34,7 +32,8 @@ impl Line {
     /// assert_eq!(Some((5, 5)), line.next());
     /// ```
     pub fn new_with_callback<F>(start: (i32, i32), end: (i32, i32), callback: F) -> Self
-        where F: FnMut(i32, i32) -> bool
+    where
+        F: FnMut(i32, i32) -> bool,
     {
         let mut line: Line = Line::new(start, end);
         line.step_with_callback(callback);
@@ -46,9 +45,7 @@ impl Line {
     pub fn step(&mut self) -> Option<(i32, i32)> {
         let mut x: c_int = 0;
         let mut y: c_int = 0;
-        let end = unsafe {
-            ffi::TCOD_line_step_mt(&mut x, &mut y, &mut self.tcod_line)
-        };
+        let end = unsafe { ffi::TCOD_line_step_mt(&mut x, &mut y, &mut self.tcod_line) };
 
         if !end {
             Some((x, y))
@@ -58,22 +55,21 @@ impl Line {
     }
 
     fn step_with_callback<F>(&mut self, mut callback: F) -> bool
-        where F: FnMut(i32, i32) -> bool
+    where
+        F: FnMut(i32, i32) -> bool,
     {
         let mut x: c_int = self.tcod_line.origx;
         let mut y: c_int = self.tcod_line.origy;
         loop {
-		    if !callback(x, y) {
-                return false
+            if !callback(x, y) {
+                return false;
             }
-            let step = unsafe {
-                ffi::TCOD_line_step_mt(&mut x, &mut y, &mut self.tcod_line)
-            };
+            let step = unsafe { ffi::TCOD_line_step_mt(&mut x, &mut y, &mut self.tcod_line) };
             if step {
-                break
+                break;
             }
-	    }
-	    true
+        }
+        true
     }
 }
 

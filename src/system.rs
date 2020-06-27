@@ -1,30 +1,24 @@
-use std::str;
 use std::ptr;
+use std::str;
 use std::time::Duration;
 
+use bindings::ffi;
 use std::ffi::{CStr, CString};
 use std::path::Path;
-use bindings::ffi;
 
 pub fn set_fps(fps: i32) {
     assert!(fps >= 0);
-    unsafe {
-        ffi::TCOD_sys_set_fps(fps)
-    }
+    unsafe { ffi::TCOD_sys_set_fps(fps) }
 }
 
 pub fn get_fps() -> i32 {
-    let result = unsafe {
-        ffi::TCOD_sys_get_fps()
-    };
+    let result = unsafe { ffi::TCOD_sys_get_fps() };
     assert!(result >= 0);
     result
 }
 
 pub fn get_last_frame_length() -> f32 {
-    unsafe {
-        ffi::TCOD_sys_get_last_frame_length()
-    }
+    unsafe { ffi::TCOD_sys_get_last_frame_length() }
 }
 
 pub fn sleep(time: Duration) {
@@ -35,13 +29,14 @@ pub fn sleep(time: Duration) {
 }
 
 pub fn get_elapsed_time() -> Duration {
-    let ms: u32 = unsafe {
-        ffi::TCOD_sys_elapsed_milli()
-    };
+    let ms: u32 = unsafe { ffi::TCOD_sys_elapsed_milli() };
     Duration::from_millis(ms as u64)
 }
 
-pub fn save_screenshot<P>(path: P) where P: AsRef<Path> {
+pub fn save_screenshot<P>(path: P)
+where
+    P: AsRef<Path>,
+{
     let filename = path.as_ref().to_str().expect("Invalid screenshot path");
     let c_path = CString::new(filename).unwrap();
     unsafe {
@@ -89,7 +84,10 @@ pub fn get_char_size() -> (i32, i32) {
     (width, height)
 }
 
-pub fn set_clipboard<T>(value: T) where T: AsRef<str> {
+pub fn set_clipboard<T>(value: T)
+where
+    T: AsRef<str>,
+{
     let c_str = CString::new(value.as_ref().as_bytes()).unwrap();
     unsafe {
         ffi::TCOD_sys_clipboard_set(c_str.as_ptr());

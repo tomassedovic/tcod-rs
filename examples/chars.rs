@@ -1,7 +1,7 @@
 extern crate tcod;
 
-use tcod::{Console, RootConsole};
 use tcod::chars;
+use tcod::{Console, RootConsole};
 
 fn main() {
     let mut root = RootConsole::initializer()
@@ -29,4 +29,3 @@ fn main() {
     root.flush();
     root.wait_for_keypress(true);
 }
-

@@ -1,8 +1,8 @@
 extern crate tcod;
 
-use tcod::{Console, RootConsole, BackgroundFlag};
 use tcod::input::Key;
-use tcod::input::KeyCode::{Up, Down, Left, Right, Escape};
+use tcod::input::KeyCode::{Down, Escape, Left, Right, Up};
+use tcod::{BackgroundFlag, Console, RootConsole};
 
 fn main() {
     let mut con = RootConsole::initializer()

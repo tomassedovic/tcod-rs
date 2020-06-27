@@ -36,7 +36,6 @@ fn walk_from(path: &mut Dijkstra, origin: (i32, i32)) {
     println!("Arrived at the destination!\n");
 }
 
-
 fn main() {
     let mut path = create_path();
     let destination = (0, 0);

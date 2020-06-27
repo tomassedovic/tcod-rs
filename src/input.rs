@@ -1,8 +1,7 @@
 use std::str;
 
 use bindings::ffi;
-use bindings::{CStr, c_char, c_uint, keycode_from_native};
-
+use bindings::{c_char, c_uint, keycode_from_native, CStr};
 
 /// Deprecated. Use `tcod::input::Mouse` instead.
 pub type MouseState = Mouse;
@@ -106,7 +105,9 @@ pub struct Key {
 impl Key {
     pub fn text(&self) -> &str {
         unsafe {
-            CStr::from_ptr(&self.text[0] as *const c_char).to_str().unwrap()
+            CStr::from_ptr(&self.text[0] as *const c_char)
+                .to_str()
+                .unwrap()
         }
     }
 }
@@ -149,7 +150,6 @@ pub struct Mouse {
     pub wheel_down: bool,
 }
 
-
 pub fn show_cursor(visible: bool) {
     unsafe {
         ffi::TCOD_mouse_show_cursor(visible);
@@ -157,9 +157,7 @@ pub fn show_cursor(visible: bool) {
 }
 
 pub fn is_cursor_visible() -> bool {
-    unsafe {
-        ffi::TCOD_mouse_is_cursor_visible()
-    }
+    unsafe { ffi::TCOD_mouse_is_cursor_visible() }
 }
 
 pub fn move_cursor(x: i32, y: i32) {
@@ -193,8 +191,11 @@ pub fn check_for_event(event_mask: EventFlags) -> Option<(EventFlags, Event)> {
     let mut c_mouse_state: ffi::TCOD_mouse_t = Default::default();
 
     let event = unsafe {
-        ffi::TCOD_sys_check_for_event(event_mask.bits() as i32,
-                                      &mut c_key_state, &mut c_mouse_state)
+        ffi::TCOD_sys_check_for_event(
+            event_mask.bits() as i32,
+            &mut c_key_state,
+            &mut c_mouse_state,
+        )
     };
 
     let ret_flag = match event {
@@ -205,37 +206,43 @@ pub fn check_for_event(event_mask: EventFlags) -> Option<(EventFlags, Event)> {
         ffi::TCOD_event_t::TCOD_EVENT_MOUSE_MOVE => EventFlags::MOUSE_MOVE,
         ffi::TCOD_event_t::TCOD_EVENT_MOUSE_PRESS => EventFlags::MOUSE_PRESS,
         ffi::TCOD_event_t::TCOD_EVENT_MOUSE_RELEASE => EventFlags::MOUSE_RELEASE,
-        _ => EventFlags::ANY
+        _ => EventFlags::ANY,
     };
 
     if ret_flag == EventFlags::ANY {
-        return None
+        return None;
     }
 
-    let ret_event = if ret_flag.intersects(EventFlags::KEY_PRESS|EventFlags::KEY_RELEASE|EventFlags::KEY) {
-        Some(Event::Key(c_key_state.into()))
-    } else if ret_flag.intersects(EventFlags::MOUSE_MOVE|EventFlags::MOUSE_PRESS|EventFlags::MOUSE_RELEASE|EventFlags::MOUSE) {
-        Some(Event::Mouse(Mouse {
-            x: c_mouse_state.x as isize,
-            y: c_mouse_state.y as isize,
-            dx: c_mouse_state.dx as isize,
-            dy: c_mouse_state.dy as isize,
-            cx: c_mouse_state.cx as isize,
-            cy: c_mouse_state.cy as isize,
-            dcx: c_mouse_state.dcx as isize,
-            dcy: c_mouse_state.dcy as isize,
-            lbutton: c_mouse_state.lbutton,
-            rbutton: c_mouse_state.rbutton,
-            mbutton: c_mouse_state.mbutton,
-            lbutton_pressed: c_mouse_state.lbutton_pressed,
-            rbutton_pressed: c_mouse_state.rbutton_pressed,
-            mbutton_pressed: c_mouse_state.mbutton_pressed,
-            wheel_up: c_mouse_state.wheel_up,
-            wheel_down: c_mouse_state.wheel_down
-        }))
-    } else {
-        None
-    };
+    let ret_event =
+        if ret_flag.intersects(EventFlags::KEY_PRESS | EventFlags::KEY_RELEASE | EventFlags::KEY) {
+            Some(Event::Key(c_key_state.into()))
+        } else if ret_flag.intersects(
+            EventFlags::MOUSE_MOVE
+                | EventFlags::MOUSE_PRESS
+                | EventFlags::MOUSE_RELEASE
+                | EventFlags::MOUSE,
+        ) {
+            Some(Event::Mouse(Mouse {
+                x: c_mouse_state.x as isize,
+                y: c_mouse_state.y as isize,
+                dx: c_mouse_state.dx as isize,
+                dy: c_mouse_state.dy as isize,
+                cx: c_mouse_state.cx as isize,
+                cy: c_mouse_state.cy as isize,
+                dcx: c_mouse_state.dcx as isize,
+                dcy: c_mouse_state.dcy as isize,
+                lbutton: c_mouse_state.lbutton,
+                rbutton: c_mouse_state.rbutton,
+                mbutton: c_mouse_state.mbutton,
+                lbutton_pressed: c_mouse_state.lbutton_pressed,
+                rbutton_pressed: c_mouse_state.rbutton_pressed,
+                mbutton_pressed: c_mouse_state.mbutton_pressed,
+                wheel_up: c_mouse_state.wheel_up,
+                wheel_down: c_mouse_state.wheel_down,
+            }))
+        } else {
+            None
+        };
 
     ret_event.map(|event| (ret_flag, event))
 }
@@ -247,7 +254,7 @@ pub fn events() -> EventIterator {
 #[derive(Copy, Clone, Debug)]
 pub enum Event {
     Key(Key),
-    Mouse(Mouse)
+    Mouse(Mouse),
 }
 
 pub struct EventIterator;

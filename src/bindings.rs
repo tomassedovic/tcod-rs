@@ -1,10 +1,10 @@
 pub extern crate tcod_sys as ffi;
 
 pub use std::ffi::{CStr, CString};
-pub use std::os::raw::{c_char, c_int, c_float, c_uint, c_void, c_uchar};
+pub use std::os::raw::{c_char, c_float, c_int, c_uchar, c_uint, c_void};
 
-use std::mem::transmute;
 use super::input::KeyCode;
+use std::mem::transmute;
 
 pub trait AsNative<T> {
     unsafe fn as_native(&self) -> &T;
@@ -19,17 +19,17 @@ impl<'a, T, U: AsNative<T> + ?Sized> AsNative<T> for &'a U {
     unsafe fn as_native(&self) -> &T {
         (**self).as_native()
     }
-    
+
     unsafe fn as_native_mut(&mut self) -> &mut T {
         unimplemented!();
     }
 }
 
-impl <T, U: AsNative<T> + ?Sized> AsNative<T> for Box<U> {
+impl<T, U: AsNative<T> + ?Sized> AsNative<T> for Box<U> {
     unsafe fn as_native(&self) -> &T {
         (**self).as_native()
     }
-    
+
     unsafe fn as_native_mut(&mut self) -> &mut T {
         (**self).as_native_mut()
     }
@@ -37,8 +37,8 @@ impl <T, U: AsNative<T> + ?Sized> AsNative<T> for Box<U> {
 
 pub fn keycode_from_native(input: self::ffi::TCOD_keycode_t) -> Option<KeyCode> {
     match input as u32 {
-        x @ 0 ..= 66 => Some(unsafe { transmute(x) }),
-        _ => None
+        x @ 0..=66 => Some(unsafe { transmute(x) }),
+        _ => None,
     }
 }
 

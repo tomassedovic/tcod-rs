@@ -40,21 +40,29 @@
 //! * Compression utilities
 //!
 
-#[macro_use] extern crate bitflags;
-#[macro_use] extern crate lazy_static;
-#[cfg(feature = "rustc-serialize")] extern crate rustc_serialize;
-#[cfg(feature = "serialization")] extern crate serde;
 #[macro_use]
-#[cfg(feature = "serialization")] extern crate serde_derive;
+extern crate bitflags;
+#[macro_use]
+extern crate lazy_static;
+#[cfg(feature = "rustc-serialize")]
+extern crate rustc_serialize;
+#[cfg(feature = "serialization")]
+extern crate serde;
+#[macro_use]
+#[cfg(feature = "serialization")]
+extern crate serde_derive;
 
-#[cfg(test)] extern crate serde_json;
+#[cfg(test)]
+extern crate serde_json;
 
 #[macro_use]
 mod macros;
 
 pub use bindings::{AsNative, FromNative};
 pub use colors::Color;
-pub use console::{Console, RootInitializer, BackgroundFlag, Renderer, FontLayout, FontType, TextAlignment};
+pub use console::{
+    BackgroundFlag, Console, FontLayout, FontType, Renderer, RootInitializer, TextAlignment,
+};
 pub use map::Map;
 
 pub mod bsp;

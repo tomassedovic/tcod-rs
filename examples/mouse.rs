@@ -1,7 +1,7 @@
 extern crate tcod;
 
-use tcod::input as input;
-use tcod::{Console, RootConsole, BackgroundFlag};
+use tcod::input;
+use tcod::{BackgroundFlag, Console, RootConsole};
 
 fn main() {
     let mut con = RootConsole::initializer()
@@ -13,24 +13,21 @@ fn main() {
     let mut y = 25;
 
     while !con.window_closed() {
-
         loop {
             match input::check_for_event(input::EventFlags::KEY | input::EventFlags::MOUSE) {
                 None => {
                     break;
                 }
-                Some((_, event)) => {
-                    match event {
-                        input::Event::Key(ref key_state) => {
-                            println!("{:?}", key_state);
-                        },
-                        input::Event::Mouse(ref mouse_state) => {
-                            x = mouse_state.cx as i32;
-                            y = mouse_state.cy as i32;
-                            println!("{:?}", mouse_state);
-                        }
+                Some((_, event)) => match event {
+                    input::Event::Key(ref key_state) => {
+                        println!("{:?}", key_state);
                     }
-                }
+                    input::Event::Mouse(ref mouse_state) => {
+                        x = mouse_state.cx as i32;
+                        y = mouse_state.cy as i32;
+                        println!("{:?}", mouse_state);
+                    }
+                },
             }
         }
 

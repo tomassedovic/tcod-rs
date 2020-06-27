@@ -1,6 +1,6 @@
 extern crate tcod;
 
-use tcod::{Console, RootConsole, FontLayout, FontType};
+use tcod::{Console, FontLayout, FontType, RootConsole};
 
 const FLOOR_TILE: char = 1 as char;
 const WALL_TILE: char = 2 as char;
@@ -20,7 +20,7 @@ fn main() {
         .font("angband16x16.bmp", FontLayout::Tcod)
         .font_type(FontType::Greyscale)
         .font_dimensions(32, 60) // angband16x16.bmp has 32 columns & 60 rows of
-                                 // characters
+        // characters
         .size(MAP_WIDTH, MAP_HEIGHT)
         .title("Using custom character mapping with libtcod")
         .init();

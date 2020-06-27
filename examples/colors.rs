@@ -1,8 +1,7 @@
 extern crate tcod;
 
-use tcod::{Console, RootConsole, Color, BackgroundFlag};
 use tcod::colors;
-
+use tcod::{BackgroundFlag, Color, Console, RootConsole};
 
 fn main() {
     let mut con = RootConsole::initializer()
@@ -16,7 +15,17 @@ fn main() {
     // Uses the default foreground and background:
     con.put_char(40, 25, '@', BackgroundFlag::Set);
     // Custom foreground and background:
-    con.put_char_ex(42, 25, '!', Color{r: 240, g: 13, b: 20}, Color{r: 0, g: 0, b: 0});
+    con.put_char_ex(
+        42,
+        25,
+        '!',
+        Color {
+            r: 240,
+            g: 13,
+            b: 20,
+        },
+        Color { r: 0, g: 0, b: 0 },
+    );
 
     let black = Color::new(0, 0, 0);
     let red = Color::new(200, 0, 0);
