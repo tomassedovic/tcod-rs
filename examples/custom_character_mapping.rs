@@ -17,7 +17,7 @@ const ROOM_HEIGHT: i32 = 15;
 
 fn main() {
     let mut root = RootConsole::initializer()
-        .font("angband16x16.bmp", FontLayout::TCOD)
+        .font("angband16x16.png", FontLayout::TCOD)
         .font_type(FontType::GREYSCALE)
         .font_dimensions(32, 60) // angband16x16.bmp has 32 columns & 60 rows of
         // characters

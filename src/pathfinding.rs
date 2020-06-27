@@ -177,7 +177,7 @@ pub struct Dijkstra<'a> {
     height: i32,
 }
 
-impl<'a> AsNative<ffi::TCOD_path_t> for Dijkstra<'a> {
+impl<'a> AsNative<ffi::TCOD_dijkstra_t> for Dijkstra<'a> {
     unsafe fn as_native(&self) -> &ffi::TCOD_dijkstra_t {
         &self.tcod_path
     }
@@ -333,7 +333,7 @@ impl Iterator for AStarIterator {
 }
 
 pub struct DijkstraIterator {
-    tcod_path: ffi::TCOD_path_t,
+    tcod_path: ffi::TCOD_dijkstra_t,
 }
 
 impl Iterator for DijkstraIterator {

@@ -16,7 +16,7 @@ fn build_libz(libz_sources: &[&str]) {
 }
 
 fn build_libtcod_objects(mut config: cc::Build, sources: &[&str]) {
-    config.include("libtcod/include");
+    config.include("libtcod/src/libtcod");
     config.include("libtcod/src/zlib");
     for c_file in sources {
         config.file(c_file);
@@ -61,7 +61,7 @@ fn build_linux_static(_dst: &Path, libtcod_sources: &[& 'static str]) {
     config.define("NO_OPENGL", None);
     config.define("NDEBUG", None);
     config.flag("-fno-strict-aliasing");
-    config.flag("-ansi");
+    config.flag("-std=c99");
     build_libtcod_objects(config, libtcod_sources);
 }
 
@@ -78,7 +78,7 @@ fn build_linux_dynamic(dst: &Path, libtcod_sources: &[& 'static str]) {
         config.define("NO_OPENGL", None);
         config.define("NDEBUG", None);
         config.flag("-fno-strict-aliasing");
-        config.flag("-ansi");
+        config.flag("-std=c99");
         build_libtcod_objects(config, libtcod_sources);
     }
 
@@ -184,62 +184,84 @@ fn main() {
     let sdl_include_dir = src.join("libtcod").join("dependencies").join("SDL2-2.0.7").join("include");
 
     let libz_sources = &[
-        "libtcod/src/zlib/adler32.c",
-	    "libtcod/src/zlib/crc32.c",
-	    "libtcod/src/zlib/deflate.c",
-	    "libtcod/src/zlib/infback.c",
-	    "libtcod/src/zlib/inffast.c",
-	    "libtcod/src/zlib/inflate.c",
-	    "libtcod/src/zlib/inftrees.c",
-	    "libtcod/src/zlib/trees.c",
-	    "libtcod/src/zlib/zutil.c",
-	    "libtcod/src/zlib/compress.c",
-	    "libtcod/src/zlib/uncompr.c",
-	    "libtcod/src/zlib/gzclose.c",
-	    "libtcod/src/zlib/gzlib.c",
-	    "libtcod/src/zlib/gzread.c",
-	    "libtcod/src/zlib/gzwrite.c",
+        "libtcod/src/vendor/zlib/adler32.c",
+	    "libtcod/src/vendor/zlib/crc32.c",
+	    "libtcod/src/vendor/zlib/deflate.c",
+	    "libtcod/src/vendor/zlib/infback.c",
+	    "libtcod/src/vendor/zlib/inffast.c",
+	    "libtcod/src/vendor/zlib/inflate.c",
+	    "libtcod/src/vendor/zlib/inftrees.c",
+	    "libtcod/src/vendor/zlib/trees.c",
+	    "libtcod/src/vendor/zlib/zutil.c",
+	    "libtcod/src/vendor/zlib/compress.c",
+	    "libtcod/src/vendor/zlib/uncompr.c",
+	    "libtcod/src/vendor/zlib/gzclose.c",
+	    "libtcod/src/vendor/zlib/gzlib.c",
+	    "libtcod/src/vendor/zlib/gzread.c",
+	    "libtcod/src/vendor/zlib/gzwrite.c",
     ];
 
-    let libtcod_sources = &[
- 	    "libtcod/src/bresenham_c.c",
-	    "libtcod/src/bsp_c.c",
-	    "libtcod/src/color_c.c",
-	    "libtcod/src/console_c.c",
-        "libtcod/src/console_rexpaint.c",
-	    "libtcod/src/fov_c.c",
-	    "libtcod/src/fov_circular_raycasting.c",
-	    "libtcod/src/fov_diamond_raycasting.c",
-	    "libtcod/src/fov_permissive2.c",
-	    "libtcod/src/fov_recursive_shadowcasting.c",
-	    "libtcod/src/fov_restrictive.c",
-	    "libtcod/src/heightmap_c.c",
-	    "libtcod/src/image_c.c",
-	    "libtcod/src/lex_c.c",
-	    "libtcod/src/list_c.c",
-	    "libtcod/src/mersenne_c.c",
-	    "libtcod/src/namegen_c.c",
-	    "libtcod/src/noise_c.c",
-	    "libtcod/src/parser_c.c",
-	    "libtcod/src/path_c.c",
-	    "libtcod/src/sys_c.c",
-	    "libtcod/src/sys_sdl2_c.c",
-	    "libtcod/src/sys_sdl_c.c",
-	    "libtcod/src/sys_sdl_img_bmp.c",
-	    "libtcod/src/sys_sdl_img_png.c",
-	    "libtcod/src/tree_c.c",
-	    "libtcod/src/txtfield_c.c",
-	    "libtcod/src/wrappers.c",
-	    "libtcod/src/zip_c.c",
-	    "libtcod/src/png/lodepng.c",
+    let libtcod_sources = [
+ 	    "libtcod/src/libtcod/bresenham_c.c",
+	    "libtcod/src/libtcod/bsp_c.c",
+	    "libtcod/src/libtcod/color.c",
+	    "libtcod/src/libtcod/console.c",
+        "libtcod/src/libtcod/console_drawing.c",
+        "libtcod/src/libtcod/console_etc.c",
+        "libtcod/src/libtcod/console_init.c",
+        "libtcod/src/libtcod/console_printing.c",
+        "libtcod/src/libtcod/console_rexpaint.c",
+        "libtcod/src/libtcod/context.c",
+        "libtcod/src/libtcod/context_init.c",
+        "libtcod/src/libtcod/context_viewport.c",
+        "libtcod/src/libtcod/error.c",
+	    "libtcod/src/libtcod/fov_c.c",
+	    "libtcod/src/libtcod/fov_circular_raycasting.c",
+	    "libtcod/src/libtcod/fov_diamond_raycasting.c",
+	    "libtcod/src/libtcod/fov_permissive2.c",
+	    "libtcod/src/libtcod/fov_recursive_shadowcasting.c",
+	    "libtcod/src/libtcod/fov_restrictive.c",
+        "libtcod/src/libtcod/globals.c",
+        "libtcod/src/libtcod/heapq.c",
+	    "libtcod/src/libtcod/heightmap_c.c",
+	    "libtcod/src/libtcod/image_c.c",
+	    "libtcod/src/libtcod/lex_c.c",
+	    "libtcod/src/libtcod/list_c.c",
+	    "libtcod/src/libtcod/mersenne_c.c",
+	    "libtcod/src/libtcod/namegen_c.c",
+	    "libtcod/src/libtcod/noise_c.c",
+	    "libtcod/src/libtcod/parser_c.c",
+	    "libtcod/src/libtcod/path_c.c",
+        "libtcod/src/libtcod/pathfinder.c",
+        "libtcod/src/libtcod/pathfinder_frontier.c",
+        "libtcod/src/libtcod/renderer_gl.c",
+        "libtcod/src/libtcod/renderer_gl1.c",
+        "libtcod/src/libtcod/renderer_gl2.c",
+        "libtcod/src/libtcod/renderer_sdl2.c",
+	    "libtcod/src/libtcod/sys_c.c",
+	    "libtcod/src/libtcod/sys_sdl_c.c",
+	    "libtcod/src/libtcod/sys_sdl_img_bmp.c",
+	    "libtcod/src/libtcod/sys_sdl_img_png.c",
+        "libtcod/src/libtcod/tileset.c",
+        "libtcod/src/libtcod/tileset_bdf.c",
+        "libtcod/src/libtcod/tileset_fallback.c",
+        "libtcod/src/libtcod/tileset_render.c",
+        "libtcod/src/libtcod/tileset_truetype.c",
+	    "libtcod/src/libtcod/tree_c.c",
+	    "libtcod/src/libtcod/txtfield_c.c",
+	    "libtcod/src/libtcod/wrappers.c",
+	    "libtcod/src/libtcod/zip_c.c",
+        "libtcod/src/vendor/glad.c",
+	    "libtcod/src/vendor/lodepng.c",
         "libtcod/src/vendor/stb.c",
+        "libtcod/src/vendor/utf8proc/utf8proc.c",
     ];
 
     if target.contains("linux") {
         build_libz(libz_sources);
 
         #[cfg(not(feature = "dynlib"))]
-        build_linux_static(&dst, libtcod_sources);
+        build_linux_static(&dst, &libtcod_sources[..]);
         #[cfg(feature = "dynlib")]
         build_linux_dynamic(&dst, libtcod_sources);
 
@@ -255,8 +277,8 @@ fn main() {
             config.define("NO_OPENGL", None);
             config.define("NDEBUG", None);
             config.flag("-fno-strict-aliasing");
-            config.flag("-ansi");
-            build_libtcod_objects(config, libtcod_sources);
+            config.flag("-std=c99");
+            build_libtcod_objects(config, &libtcod_sources[..]);
         }
 
         // Build the DLL
@@ -266,7 +288,7 @@ fn main() {
         config.flag("-shared");
         config.flag("-o");
         config.flag(dst.join("libtcod.dylib").to_str().unwrap());
-        for c_file in libtcod_sources {
+        for c_file in &libtcod_sources[..] {
             config.flag(dst.join(c_file).with_extension("o").to_str().unwrap());
         }
         config.flag(dst.join("libz.a").to_str().unwrap());
@@ -294,7 +316,7 @@ fn main() {
         // Build the DLL
         let mut config = cc::Build::new();
         config.flag("-fno-strict-aliasing");
-        config.flag("-ansi");
+        config.flag("-std=c99");
         config.define("NO_OPENGL", None);
         config.define("NDEBUG", None);
         config.define("LIBTCOD_EXPORTS", None);
@@ -303,9 +325,9 @@ fn main() {
         config.flag("-shared");
         fs::create_dir(dst.join("lib")).unwrap();
         config.flag(&format!("-Wl,--out-implib,{}", dst.join("lib/libtcod.a").display()));
-        config.include(Path::new("libtcod").join("src").join("zlib"));
-        config.include(Path::new("libtcod").join("include"));
-        for c_file in libz_sources.iter().chain(libtcod_sources) {
+        config.include(Path::new("libtcod").join("src").join("vendor").join("zlib"));
+        config.include(Path::new("libtcod").join("src"));
+        for c_file in libz_sources.iter().chain(libtcod_sources.iter()) {
             let path = c_file.split('/').fold(PathBuf::new(), |path, segment| path.join(segment));
             config.flag(src.join(path).to_str().unwrap());
         }
@@ -339,9 +361,9 @@ fn main() {
         config.flag("/DLIBTCOD_EXPORTS");
         config.flag(&format!("/Fo:{}\\", dst.to_str().unwrap()));
         config.include(sdl_include_dir.to_str().unwrap());
-        config.include(Path::new("libtcod").join("src").join("zlib"));
-        config.include(Path::new("libtcod").join("include"));
-        for c_file in libz_sources.iter().chain(libtcod_sources) {
+        config.include(Path::new("libtcod").join("src").join("vendor").join("zlib"));
+        config.include(Path::new("libtcod").join("src"));
+        for c_file in libz_sources.iter().chain(libtcod_sources.iter()) {
             // Make sure the path is in the Windows format. This
             // shouldn't matter but it's distracting when debugging
             // build script issues.

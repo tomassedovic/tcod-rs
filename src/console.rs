@@ -60,9 +60,7 @@ use std::marker::PhantomData;
 use std::mem::transmute;
 use std::path::Path;
 
-use bindings::ffi::{
-    self, TCOD_alignment_t, TCOD_bkgnd_flag_t, TCOD_renderer_t,
-};
+use bindings::ffi::{self, TCOD_alignment_t, TCOD_bkgnd_flag_t, TCOD_renderer_t};
 use bindings::{AsNative, CString, FromNative};
 
 use colors::Color;

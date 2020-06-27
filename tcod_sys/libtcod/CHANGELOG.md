@@ -3,9 +3,340 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
-This project DOES NOT adhere to [Semantic Versioning](http://semver.org/).
+This project attempts to adhere to [Semantic Versioning](http://semver.org/)
+since `1.7.0`.
 
 ## [Unreleased]
+
+## [1.16.0-alpha.12] - 2020-05-22
+### Changed
+- CMake can now create packages.
+
+### Fixed
+- `TCOD_console_init_root` and context initializing functions were not
+  returning error codes on failure.
+
+## [1.16.0-alpha.11] - 2020-05-13
+### Changed
+- Print functions will no longer treat special glyphs as double wide.
+- Library CMake files now support Vcpkg.
+
+### Fixed
+- Fixed divide by zero when handing mouse input without a global context.
+
+## [1.16.0-alpha.10] - 2020-04-26
+### Fixed
+- Fixed characters being dropped when color codes were used.
+
+## [1.16.0-alpha.9] - 2020-04-24
+### Fixed
+- `FOV_DIAMOND` and `FOV_RESTRICTIVE` algorithms are now reentrant.
+  [#48](https://github.com/libtcod/libtcod/pull/48)
+- Heightmap functions will crash less often when given out-of-bounds parameters.
+  [#13](https://github.com/libtcod/libtcod/issues/13)
+  [#50](https://github.com/libtcod/libtcod/pull/50)
+- The `TCOD_VSYNC` environment variable was being ignored.
+- Malformed UTF-8 strings will no longer hang printing functions.
+
+## [1.16.0-alpha.8] - 2020-04-03
+### Fixed
+- Changing the active tileset now redraws tiles correctly on the next frame.
+
+## [1.16.0-alpha.7] - 2020-04-02
+### Fixed
+- Changing the active tileset will now properly show it on the next render.
+
+## [1.16.0-alpha.6] - 2020-03-26
+### Added
+- Added `TCOD_load_bdf` and `TCOD_load_bdf_memory`.
+
+## [1.16.0-alpha.5] - 2020-02-28
+### Changed
+- Mouse tile coordinates are now always zero before the first call to
+  TCOD_console_flush.
+
+## [1.16.0-alpha.4] - 2020-02-22
+### Fixed
+- Mouse tile coordinates are now correct on any resized window.
+
+## [1.16.0-alpha.3] - 2020-02-21
+### Deprecated
+- Mouse state and keyboard state functions are deprecated.
+- Mouse functions with SDL alternatives are deprecated.
+
+### Fixed
+- The wavelet noise generator now excludes -1.0f and 1.0f as return values.
+- Fixed console fading color.
+- Fixed keyboard state and mouse state functions losing state when events were
+  flushed.
+
+## [1.16.0-alpha.2] - 2020-02-14
+### Fixed
+- Fixed possible crash in `TCOD_mouse_move`.
+
+## [1.16.0-alpha.1] - 2020-02-14
+### Added
+- Added the `TCOD_clear_error` and `TCOD_set_errorf` functions.
+- Added an error code enum: `TCOD_Error`.
+
+### Changed
+- Console blit operations now perform per-cell alpha transparency.
+- When a renderer fails to load it will now fallback to a different one.
+  The order is: OPENGL2 -> OPENGL -> SDL2.
+
+### Deprecated
+- The use of `libtcod.cfg` or `terminal.png` is deprecated.
+
+### Fixed
+- The following are no longer mislabeled as taking const images:
+  - `TCOD_image_get_mipmap_pixel`
+  - `TCOD_image_blit`
+  - `TCOD_image_blit_rect`
+- `TCOD_sys_update_char` now works with the newer renderers.
+- Fixed buffer overflow in name generator.
+- `TCOD_image_from_console` now works with the newer renderers.
+- New renderers now auto-load fonts from `libtcod.cfg` or `terminal.png`.
+
+## [1.15.1] - 2019-11-22
+### Changed
+- Renamed build systems directory from `build/` to `buildsys/`.
+
+### Fixed
+- `OPENGL` and `GLSL` renderers were not properly clearing space characters.
+
+## [1.15.0] - 2019-11-08
+### Changed
+- `TCOD_image_blit_2x` now renders using Unicode block elements instead of a
+  custom encoding.
+
+### Fixed
+- Libtcod will no longer segfault if it's statically linked to an executable.
+
+## [1.14.0] - 2019-09-06
+### Added
+- `TCODConsole::get_data` method for getting the C struct pointer from C++.
+
+### Fixed
+- `TCOD_map_compute_fov` will now silently ignore out-of-bounds coordinates
+  instead of crashing.
+- Changing the tiles of an active tileset will now work correctly.
+
+## [1.13.0] - 2019-07-05
+### Added
+- You can now set the `TCOD_RENDERER` and `TCOD_VSYNC` environment variables to
+  force specific options to be used.
+  Example: ``TCOD_RENDERER=sdl2 TCOD_VSYNC=1``
+
+### Changed
+- `TCOD_sys_set_renderer` now returns an error status.
+- `TCODSystem::setRenderer` will now throw instead of terminating on an error.
+- `TCOD_console_init_root` and `TCOD_sys_set_renderer` are now no-discard.
+
+### Fixed
+- `TCOD_console_map_ascii_code_to_font` functions will now work when called
+  before `TCOD_console_init_root`.
+
+## [1.12.3] - 2019-06-02
+### Fixed
+- Fixed regressions in text alignment for non-rectangle-bound text on UTF-8
+  print functions.
+
+## [1.12.2] - 2019-05-24
+### Fixed
+- Fixed crashes and bad output when using printf-style functions.
+
+## [1.12.1] - 2019-05-17
+### Fixed
+- Fixed shader compilation issues in the OPENGL2 renderer.
+- Fallback fonts should fail less on Linux.
+
+## [1.12.0] - 2019-05-17
+### Added
+- Added the `TCOD_get_error` and `TCOD_set_error` functions.
+
+### Changed
+- `TCOD_console_init_root` and `TCOD_console_set_custom_font` will now return
+  an error code instead of terminating on a known error.
+
+## [1.11.5] - 2019-05-10
+### Added
+- Several functions in the `tcod::console` namespace are now accessible.
+  These functions are provisional, so the API may change at anytime.
+
+### Fixed
+- Corrected bounding box issues with the stateless UTF-8 print functions.
+
+## [1.11.4] - 2019-04-26
+### Fixed
+- Fixed a name conflict with endianness macros on FreeBSD.
+
+## [1.11.3] - 2019-04-19
+### Changed
+- New consoles are initialized as if clear was called.
+- The SDL callback type now uses a typed argument instead of void pointer.
+
+### Fixed
+- Fixed horizontal alignment for TrueType fonts.
+- Fixed screenshots with the older SDL renderer.
+
+### Deprecated
+- The SDL callback feature has been deprecated.
+
+## [1.11.2] - 2019-03-29
+### Fixed
+- Console printing was ignoring color codes at the beginning of a string.
+- Releases no longer display debug messages.
+
+## [1.11.1] - 2019-03-15
+### Fixed
+- Fixed header declaration for `TCOD_sys_accumulate_console`.
+
+## [1.11.0] - 2019-03-15
+### Added
+- Added new functions which convert from SDL events to libtcod events:
+  - `TCOD_sys_process_key_event`
+  - `TCOD_sys_process_mouse_event`
+  - `tcod::sdl2::process_event`
+- Added a way to access libtcod's SDL variables.
+  - `TCOD_sys_get_sdl_window`
+  - `TCOD_sys_get_sdl_renderer`
+- Added `TCOD_sys_accumulate_console` which renders a console to the display
+  without automatically presenting it.
+- The new renderers can potentially use a fall-back font when none is provided.
+
+### Fixed
+- `TCOD_console_has_mouse_focus` and `TCOD_console_is_active` are now more
+  reliable with the newer renderers.
+
+## [1.10.8] - 2019-03-01
+### Deprecated
+- Updated libtcodpy deprecation warning with instructions on how to update to
+  python-tcod.
+
+## [1.10.7] - 2019-03-01
+### Changed
+- GCC releases now include debug symbols.
+### Fixed
+- `SDL2` and `OPENGL2` now support screenshots.
+- `TCOD_sys_get_char_size` fixed on the newer renderers.
+
+## [1.10.6] - 2019-02-15
+### Changed
+- Printing generates more compact layouts.
+### Fixed
+- Fixed segmentation faults in the newer print functions caused by bad color
+  codes.
+- The `OPENGL` and `GLSL` renders work again in static builds.
+- The `SDL2` and `OPENGL2` renders can now large numbers of tiles.
+
+## [1.10.5] - 2019-02-06
+### Changed
+- The SDL2/OPENGL2 renderers will now auto-detect a custom fonts key-color.
+### Fixed
+- `TCOD_console_printf_frame` was clearing tiles outside if it's bounds.
+- The `TCOD_FONT_LAYOUT_CP437` layout was incorrect.
+
+## [1.10.4] - 2019-02-01
+### Fixed
+- Fixed regression where mouse wheel events unset mouse coordinates.
+
+## [1.10.3] - 2019-01-19
+### Fixed
+- Use correct math for tile-based delta in mouse events.
+- New renderers now support tile-based mouse coordinates.
+- SDL2 renderer will now properly refresh after the window is resized.
+- MinGW samples now bundle their own runtimes.
+
+## [1.10.2] - 2018-11-23
+### Fixed
+- Version numbers were not updated.
+
+## [1.10.1] - 2018-11-23
+### Changed
+- `RENDERER_OPENGL2` now only needs OpenGL 2.0 to load.
+
+### Fixed
+- `FONT_LAYOUT_CP437` constant was missing from libtcodpy.
+- Function stubs for `TCOD_console_set_keyboard_repeat` and
+  `TCOD_console_disable_keyboard_repeat` have been added to the ABI, this
+  should fix older programs which depended on them existing.
+
+## [1.10.0] - 2018-11-17
+### Added
+- Added pkg-config for 'libtcod' on AutoTools builds.
+- Added `TCOD_FONT_LAYOUT_CP437`.
+
+### Fixed
+- `RENDERER_OPENGL2` constant was missing from libtcodpy.
+- Fixed crash when assigning to larger code-points.
+- Fixed center alignment on printf functions.
+- Fixed missing border tiles on printf frame function.
+
+## [1.9.0] - 2018-10-24
+### Added
+- New renderer: `TCOD_RENDERER_OPENGL2`
+- `TCOD_RENDERER_SDL2` and `TCOD_RENDERER_OPENGL2` now have reliable fullscreen
+  support.
+- SCons MSVC releases now include libtcod's `.pdb` file.
+
+## Changed
+- `src/vendor` must be included when building libtcod.
+- `glad.c` added to vendor directory.
+- In GCC builds: non-public symbols are no longer visible by default.
+
+## [1.8.2] - 2018-10-13
+### Fixed
+- Fixed potential crash when splitting lines in UTF-8 print functions.
+- Fixed possible hang in `TCOD_lex_parse_until_token_value`.
+
+## [1.8.1] - 2018-10-11
+### Changed
+- Updated the compiler used to deploy Windows MinGW builds.
+
+## [1.8.0] - 2018-10-07
+### Added
+- New `TCOD_MAJOR_VERSION`, `TCOD_MINOR_VERSION`, and `TCOD_PATCHLEVEL`
+  constants.
+- Added UTF-8 print functions for C and C++:
+  - `TCOD_console_printf`, `TCOD_console_printf_ex`,
+    `TCOD_console_printf_rect`, and `TCOD_console_printf_rect_ex`.
+  - `TCOD_console_printf_frame`
+  - `TCOD_console_get_height_rect_fmt`
+  - New overrides for `TCODConsole::print` which can take `std::string`.
+  - `TCODConsole::printf`.
+- Added `TCOD_quit` function, this function must be called on exit.
+- New renderer: `TCOD_RENDERER_SDL2`
+
+### Changed
+- AutoTools now adds version numbers to the libraries it builds.
+- lodepng and zlib sources moved into `src/vendor/` folder.
+- Bundled zlib library updated from `1.2.8` to `1.2.11`.
+- LodePNG updated from `20160501` to `20180611`.
+- libtcod C type declarations are stricter.
+- libtcod now uses the C99 and C++14 standards.
+- In the repository `include/` headers have been moved into `src/`.
+- Most headers except for `libtcod.h` and `libtcod.h` have been moved into a
+  `libtcod/` sub-folder.
+- SCons default architecture is now automatic instead of just 32-bit.
+- libtcod gui headers now use LIBTCOD_EXPORTS instead of LIBTCOD_GUI_EXPORTS to
+  determine dllexport/dllimport.
+
+### Deprecated
+- All functions replaced by the new UTF-8 functions are deprecated.
+- The ctypes implementation of libtcodpy will no longer be maintained, use
+  python-tcod as a drop-in replacement.
+- Deprecated file-system, threading, clipboard, and dynamic library functions.
+
+### Fixed
+- `libtcodpy.map_clear`: `transparent` and `walkable` parameters were reversed.
+- Resolved build issues on PowerPC platforms.
+- Mouse state is now tracked even when mouse events are not asked for.
+- libtcod sys event functions no longer crash if the given key pointer is NULL.
+- SCons no longer crashes downloading SDL2 for Windows.
+
+### Removed
+- Autotools no longer creates `libtcodxx` or `libtcodgui` libraries, C++
+  programs should link to `libtcod` instead.
 
 ## [1.7.0] - 2018-06-12
 ### Changed
@@ -176,7 +507,8 @@ This project DOES NOT adhere to [Semantic Versioning](http://semver.org/).
 
 ### Removed
 - Removed SDL1 support.
-- Removed C/C++/Python API functions TCOD_sys_set_keyboard_repeat and TCOD_sys_disable_keyboard_repeat.  This was SDL1 functionality, and not supported in SDL2.
+- Removed C/C++/Python API functions `TCOD_console_set_keyboard_repeat` and
+  `TCOD_console_disable_keyboard_repeat`.  This was SDL1 functionality, and not supported in SDL2.
 
 ## [1.6.1] - 2016-09-23
 ### Changed
