@@ -15,7 +15,7 @@ fn main() {
     while !con.window_closed() {
 
         loop {
-            match input::check_for_event(input::KEY | input::MOUSE) {
+            match input::check_for_event(input::EventFlags::KEY | input::EventFlags::MOUSE) {
                 None => {
                     break;
                 }

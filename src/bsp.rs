@@ -267,7 +267,7 @@ mod test {
     #[test]
     #[allow(unused_variables)]
     fn created_destroyed_no_panic() {
-        let bsp = Bsp::new_with_size(0, 0, 50, 50);
+        let mut bsp = Bsp::new_with_size(0, 0, 50, 50);
         let left = bsp.left(); // left has null .bsp
     }
 
@@ -377,8 +377,8 @@ mod test {
 
         root.split_recursive(None, 2, 5, 5, 1.5, 1.5);
 
-        let middle_left = root.left().unwrap();
-        let middle_right = root.right().unwrap();
+        let mut middle_left = root.left().unwrap();
+        let mut middle_right = root.right().unwrap();
         let leaf1 = middle_left.left().unwrap();
         let leaf2 = middle_left.right().unwrap();
         let leaf3 = middle_right.left().unwrap();

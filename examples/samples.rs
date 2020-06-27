@@ -546,7 +546,7 @@ impl Render for NoiseSample {
 
         if let Some((_, Event::Key(key))) = event {
             match key.printable {
-                '1'...'9' =>
+                '1'..='9' =>
                     self.func = {
                         let number = key.printable.to_digit(10).unwrap() as u8;
                         NoiseFunction::from_value(number - 1)
@@ -778,7 +778,7 @@ struct PathSample<'a> {
 }
 
 const TORCH_RADIUS : f32 = 10.0;
-const SQUARED_TORCH_RADIUS : f32 = (TORCH_RADIUS*TORCH_RADIUS);
+const SQUARED_TORCH_RADIUS : f32 = TORCH_RADIUS*TORCH_RADIUS;
 
 static SMAP : [&'static str; 20] = [
     "##############################################",
@@ -1622,7 +1622,7 @@ fn main() {
         print_samples(&mut root, cur_sample, &samples);
         print_help_message(&mut root);
 
-        let event = check_for_event(KEY_PRESS | MOUSE);
+        let event = check_for_event(EventFlags::KEY_PRESS | EventFlags::MOUSE);
         samples[cur_sample].render(&mut console, &root, event);
 
         blit(&console, (0, 0), (SAMPLE_SCREEN_WIDTH, SAMPLE_SCREEN_HEIGHT),
