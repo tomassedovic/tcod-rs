@@ -1,13 +1,14 @@
 extern crate tcod;
 
 use tcod::chars;
+use tcod::error::Result;
 use tcod::{Console, RootConsole};
 
-fn main() {
+fn main() -> Result<()> {
     let mut root = RootConsole::initializer()
         .size(80, 50)
         .title("Example of libtcod's special chars")
-        .init();
+        .init()?;
 
     root.clear();
 
@@ -26,6 +27,8 @@ fn main() {
     root.set_char(39, 26, chars::VLINE);
     root.set_char(39, 25, chars::NW);
 
-    root.flush();
+    root.flush()?;
     root.wait_for_keypress(true);
+
+    Ok(())
 }

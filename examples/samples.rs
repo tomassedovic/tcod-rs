@@ -12,6 +12,7 @@ use tcod::chars;
 use tcod::colors;
 use tcod::colors::Color;
 use tcod::console::*;
+use tcod::error::Result;
 use tcod::image;
 use tcod::image::{blit_2x, Image};
 use tcod::input::*;
@@ -1876,7 +1877,7 @@ impl Options {
     }
 }
 
-fn main() {
+fn main() -> Result<()> {
     let mut colors = ColorsSample::new();
     let mut offscreen = OffscreenSample::new();
     let mut mouse = MouseSample::new();
@@ -1918,7 +1919,7 @@ fn main() {
         .font(options.font, options.font_layout)
         .font_type(options.font_type)
         .font_dimensions(options.nb_char_horiz, options.nb_char_vertic)
-        .init();
+        .init()?;
 
     let mut credits_end = false;
     while !root.window_closed() {
@@ -1945,7 +1946,7 @@ fn main() {
         // erase the renderer in debug mode (needed because the root
         // console is not cleared each frame)
         root.print(1, 1, "        ");
-        root.flush();
+        root.flush()?;
 
         if let Some((_, Event::Key(key))) = event {
             match key.code {
@@ -1973,6 +1974,7 @@ fn main() {
             }
         }
     }
+    Ok(())
 }
 
 fn print_samples(root: &mut Root, cur_sample: usize, samples: &[MenuItem]) {

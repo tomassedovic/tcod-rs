@@ -1,13 +1,14 @@
 extern crate tcod;
 
 use tcod::colors;
+use tcod::error::Result;
 use tcod::{BackgroundFlag, Color, Console, RootConsole};
 
-fn main() {
+fn main() -> Result<()> {
     let mut con = RootConsole::initializer()
         .size(80, 50)
         .title("Using colours with libtcod")
-        .init();
+        .init()?;
     con.set_default_background(Color::DARKEST_GREEN);
     con.set_default_foreground(Color::LIGHTER_AZURE);
 
@@ -40,8 +41,10 @@ fn main() {
     let (h, s, v) = red.hsv();
     println!("Red colour's hue: {}, saturation: {}, value: {}", h, s, v);
 
-    con.flush();
+    con.flush()?;
 
     // Press any key to exit:
     con.wait_for_keypress(true);
+
+    Ok(())
 }

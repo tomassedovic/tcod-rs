@@ -1,13 +1,14 @@
 extern crate tcod;
 
+use tcod::error::Result;
 use tcod::input;
 use tcod::{BackgroundFlag, Console, RootConsole};
 
-fn main() {
+fn main() -> Result<()> {
     let mut con = RootConsole::initializer()
         .size(80, 50)
         .title("Move the cursor inside the window")
-        .init();
+        .init()?;
 
     let mut x = 40;
     let mut y = 25;
@@ -33,6 +34,8 @@ fn main() {
 
         con.clear();
         con.put_char(x, y, '@', BackgroundFlag::Set);
-        con.flush();
+        con.flush()?;
     }
+
+    Ok(())
 }

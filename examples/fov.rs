@@ -1,6 +1,7 @@
 extern crate rand;
 extern crate tcod;
 
+use tcod::error::Result;
 use tcod::map::FovAlgorithm;
 use tcod::{BackgroundFlag, Console, Map, RootConsole};
 
@@ -12,11 +13,11 @@ pub struct Tile {
     y: i32,
 }
 
-fn main() {
+fn main() -> Result<()> {
     let mut root = RootConsole::initializer()
         .size(40, 40)
         .title("FOV example")
-        .init();
+        .init()?;
 
     let mut map = Map::new(40, 40);
     let mut tiles = Vec::new();
@@ -59,7 +60,9 @@ fn main() {
 
     root.put_char(20, 20, '@', BackgroundFlag::Set);
 
-    root.flush();
+    root.flush()?;
     //Press any key to exit.
     root.wait_for_keypress(true);
+
+    Ok(())
 }

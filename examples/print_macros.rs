@@ -1,13 +1,14 @@
 #[macro_use]
 extern crate tcod;
 
+use tcod::error::Result;
 use tcod::{BackgroundFlag, Console, RootConsole, TextAlignment};
 
-fn main() {
+fn main() -> Result<()> {
     let mut root = RootConsole::initializer()
         .size(80, 50)
         .title("Displaying text")
-        .init();
+        .init()?;
 
     // No optional parameters
     tcod_print!(
@@ -55,6 +56,8 @@ fn main() {
         1
     );
 
-    root.flush();
+    root.flush()?;
     root.wait_for_keypress(true);
+
+    Ok(())
 }

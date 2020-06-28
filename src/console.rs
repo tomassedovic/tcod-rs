@@ -12,25 +12,32 @@
 //!
 //! ```no_run
 //! use tcod::console::{Root, Offscreen};
+//! # use tcod::error::Result;
 //!
-//! let mut root = Root::initializer().init();
+//! # fn main() -> Result<()> {
+//! let mut root = Root::initializer().init()?;
 //! let (width, height) = (80, 30);
 //! let mut offscreen = Offscreen::new(width, height);
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! A typical `tcod-rs` program's basic structure would look something like this:
 //!
 //! ```no_run
 //! use tcod::console::Root;
+//! use tcod::error::Result;
 //!
-//! fn main() {
-//!     let mut root = Root::initializer().init(); // Replace with custom initialization code
+//! fn main() -> Result<()> {
+//!     let mut root = Root::initializer().init()?; // Replace with custom initialization code
 //!
 //!     while !root.window_closed() {
 //!         // Handling user input
 //!         // Updating the gamestate
 //!         // Rendering the results
 //!     }
+//!
+//!     Ok(())
 //! }
 //! ```
 //!
@@ -64,6 +71,7 @@ use bindings::ffi::{self, TCOD_alignment_t, TCOD_bkgnd_flag_t, TCOD_renderer_t};
 use bindings::{AsNative, CString, FromNative};
 
 use colors::Color;
+use error::{Error, Result};
 use input::{Key, KeyPressFlags};
 
 /// A type representing secondary consoles
@@ -93,12 +101,15 @@ use input::{Key, KeyPressFlags};
 /// ```no_run
 /// use tcod::console as console;
 /// use tcod::console::{Root, Offscreen};
+/// use tcod::error::Result;
 ///
-/// fn main() {
-///     let mut root = Root::initializer().init();
+/// fn main() -> Result<()> {
+///     let mut root = Root::initializer().init()?;
 ///
 ///     let mut direct = Offscreen::new(20, 20);
 ///     console::blit(&direct, (0, 0), (20, 20), &mut root, (0, 0), 1.0, 1.0);
+///
+///     Ok(())
 /// }
 ///
 /// ```
@@ -148,9 +159,10 @@ unsafe impl Send for Offscreen {}
 /// use tcod::console::Root;
 /// use tcod::input::Key;
 /// use tcod::input::KeyCode::{Up, Down, Left, Right};
+/// use tcod::error::Result;
 ///
-/// fn main() {
-///     let mut root = Root::initializer().init();
+/// fn main() -> Result<()> {
+///     let mut root = Root::initializer().init()?;
 ///
 ///     let keypress = root.wait_for_keypress(true);
 ///     match keypress.code {
@@ -160,6 +172,8 @@ unsafe impl Send for Offscreen {}
 ///         Right => {},
 ///         _ => {}
 ///     }
+///
+///     Ok(())
 /// }
 /// ```
 ///
@@ -175,14 +189,17 @@ unsafe impl Send for Offscreen {}
 ///
 /// ```no_run
 /// use tcod::console::{Console, Root};
+/// use tcod::error::Result;
 ///
-/// fn main() {
-///     let mut root = Root::initializer().init();
+/// fn main() -> Result<()> {
+///     let mut root = Root::initializer().init()?;
 ///
 ///     root.clear();
 ///     // Output style manipulation
 ///     // Calling the output functions
-///     root.flush();
+///     root.flush()?;
+///
+///     Ok(())
 /// }
 /// ```
 
@@ -290,9 +307,12 @@ impl Root {
     }
 
     /// Flushes the contents of the `Root` console onto the screen.
-    pub fn flush(&mut self) {
-        unsafe {
-            ffi::TCOD_console_flush();
+    pub fn flush(&mut self) -> Result<()> {
+        let result = unsafe { ffi::TCOD_console_flush() };
+        if Error::is_error(result) {
+            Err(Error::from(result))
+        } else {
+            Ok(())
         }
     }
 
@@ -380,8 +400,8 @@ impl Root {
         font_type: FontType,
         nb_char_horizontal: i32,
         nb_char_vertical: i32,
-    ) {
-        unsafe {
+    ) -> Result<()> {
+        let result = unsafe {
             let filename = font_path.to_str().expect("Invalid font path");
             let path = CString::new(filename).ok().expect(
                 "Font path could not be converted \
@@ -392,7 +412,13 @@ impl Root {
                 (font_layout.bits() | font_type.bits()) as i32,
                 nb_char_horizontal,
                 nb_char_vertical,
-            );
+            )
+        };
+
+        if Error::is_error(result) {
+            Err(Error::from(result))
+        } else {
+            Ok(())
         }
     }
 }
@@ -512,7 +538,7 @@ impl<'a> RootInitializer<'a> {
         self
     }
 
-    pub fn init(&self) -> Root {
+    pub fn init(&self) -> Result<Root> {
         assert!(self.width > 0 && self.height > 0);
 
         match self.font_dimensions {
@@ -522,22 +548,25 @@ impl<'a> RootInitializer<'a> {
                 self.font_type,
                 horizontal,
                 vertical,
-            ),
+            )?,
         }
 
         unsafe {
             let c_title = CString::new((*self.title).as_ref().as_bytes()).unwrap();
-            ffi::TCOD_console_init_root(
+            let result = ffi::TCOD_console_init_root(
                 self.width,
                 self.height,
                 c_title.as_ptr(),
                 self.is_fullscreen,
                 self.console_renderer.into(),
             );
+            if Error::is_error(result) {
+                return Err(Error::from(result));
+            }
         }
-        Root {
+        Ok(Root {
             _blocker: PhantomData,
-        }
+        })
     }
 }
 
@@ -636,8 +665,10 @@ fn to_wstring(text: &[u8]) -> Vec<char> {
 ///
 /// ```no_run
 /// use tcod::console::{Console, Root, BackgroundFlag, TextAlignment};
+/// # use tcod::error::Result;
 ///
-/// let mut root = Root::initializer().size(80, 50).init();
+/// # fn main() -> Result<()> {
+/// let mut root = Root::initializer().size(80, 50).init()?;
 ///
 /// root.print_ex(1, 1, BackgroundFlag::None, TextAlignment::Left,
 ///               "Text aligned to left.");
@@ -650,6 +681,8 @@ fn to_wstring(text: &[u8]) -> Vec<char> {
 ///
 /// root.print_ex(40, 19, BackgroundFlag::None, TextAlignment::Center,
 ///               "Press any key to quit.");
+/// # Ok(())
+/// # }
 /// ```
 pub trait Console: AsNative<ffi::TCOD_console_t> {
     /// Returns the default text alignment for the `Console` instance. For all the possible
@@ -1158,9 +1191,10 @@ pub trait Console: AsNative<ffi::TCOD_console_t> {
 /// ```no_run
 /// use tcod::console as console;
 /// use tcod::console::{Console, Root, Offscreen};
+/// use tcod::error::Result;
 ///
-/// fn main() {
-///     let mut root = Root::initializer().init();
+/// fn main() -> Result<()> {
+///     let mut root = Root::initializer().init()?;
 ///
 ///     let mut direct = Offscreen::new(20, 20);
 ///     let mut boxed_direct = Box::new(Offscreen::new(20, 20));
@@ -1171,6 +1205,8 @@ pub trait Console: AsNative<ffi::TCOD_console_t> {
 ///     console::blit(&boxed_direct, (0, 0), (20, 20), &mut root, (20, 0), 1.0, 1.0);
 ///     console::blit(&trait_object, (0, 0), (20, 20), &mut root, (0, 20), 1.0, 1.0);
 ///     console::blit(&boxed_trait, (0, 0), (20, 20), &mut root, (20, 20), 1.0, 1.0);
+///
+///     Ok(())
 /// }
 ///
 /// ```

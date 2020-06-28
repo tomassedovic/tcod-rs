@@ -1,12 +1,13 @@
 extern crate tcod;
 
+use tcod::error::Result;
 use tcod::{BackgroundFlag, Console, RootConsole, TextAlignment};
 
-fn main() {
+fn main() -> Result<()> {
     let mut root = RootConsole::initializer()
         .size(80, 50)
         .title("Displaying text")
-        .init();
+        .init()?;
 
     root.print_ex(
         1,
@@ -46,6 +47,8 @@ fn main() {
         10,
         wrapped_text.replace("X", &lines.to_string()),
     );
-    root.flush();
+    root.flush()?;
     root.wait_for_keypress(true);
+
+    Ok(())
 }
