@@ -32,14 +32,10 @@ impl<T> ::std::fmt::Debug for __IncompleteArrayField<T> {
 }
 pub const __llvm__: u32 = 1;
 pub const __clang__: u32 = 1;
-pub const __clang_major__: u32 = 7;
+pub const __clang_major__: u32 = 10;
 pub const __clang_minor__: u32 = 0;
 pub const __clang_patchlevel__: u32 = 0;
-pub const __clang_version__: &'static [u8; 31usize] = b"7.0.0 (tags/RELEASE_700/final)\0";
-pub const __GNUC_MINOR__: u32 = 2;
-pub const __GNUC_PATCHLEVEL__: u32 = 1;
-pub const __GNUC__: u32 = 4;
-pub const __GXX_ABI_VERSION: u32 = 1002;
+pub const __clang_version__: &'static [u8; 8usize] = b"10.0.0 \0";
 pub const __ATOMIC_RELAXED: u32 = 0;
 pub const __ATOMIC_CONSUME: u32 = 1;
 pub const __ATOMIC_ACQUIRE: u32 = 2;
@@ -52,8 +48,7 @@ pub const __OPENCL_MEMORY_SCOPE_DEVICE: u32 = 2;
 pub const __OPENCL_MEMORY_SCOPE_ALL_SVM_DEVICES: u32 = 3;
 pub const __OPENCL_MEMORY_SCOPE_SUB_GROUP: u32 = 4;
 pub const __PRAGMA_REDEFINE_EXTNAME: u32 = 1;
-pub const __VERSION__: &'static [u8; 54usize] =
-    b"4.2.1 Compatible Clang 7.0.0 (tags/RELEASE_700/final)\0";
+pub const __VERSION__: &'static [u8; 14usize] = b"Clang 10.0.0 \0";
 pub const __OBJC_BOOL_IS_BOOL: u32 = 0;
 pub const __CONSTANT_CFSTRINGS__: u32 = 1;
 pub const __ORDER_LITTLE_ENDIAN__: u32 = 1234;
@@ -61,73 +56,62 @@ pub const __ORDER_BIG_ENDIAN__: u32 = 4321;
 pub const __ORDER_PDP_ENDIAN__: u32 = 3412;
 pub const __BYTE_ORDER__: u32 = 1234;
 pub const __LITTLE_ENDIAN__: u32 = 1;
-pub const _LP64: u32 = 1;
-pub const __LP64__: u32 = 1;
+pub const _ILP32: u32 = 1;
+pub const __ILP32__: u32 = 1;
 pub const __CHAR_BIT__: u32 = 8;
 pub const __SCHAR_MAX__: u32 = 127;
 pub const __SHRT_MAX__: u32 = 32767;
 pub const __INT_MAX__: u32 = 2147483647;
-pub const __LONG_MAX__: u64 = 9223372036854775807;
+pub const __LONG_MAX__: u32 = 2147483647;
 pub const __LONG_LONG_MAX__: u64 = 9223372036854775807;
-pub const __WCHAR_MAX__: u32 = 2147483647;
-pub const __WINT_MAX__: u32 = 4294967295;
+pub const __WCHAR_MAX__: u32 = 65535;
+pub const __WINT_MAX__: u32 = 65535;
 pub const __INTMAX_MAX__: u64 = 9223372036854775807;
-pub const __SIZE_MAX__: i32 = -1;
+pub const __SIZE_MAX__: u32 = 4294967295;
 pub const __UINTMAX_MAX__: i32 = -1;
-pub const __PTRDIFF_MAX__: u64 = 9223372036854775807;
-pub const __INTPTR_MAX__: u64 = 9223372036854775807;
-pub const __UINTPTR_MAX__: i32 = -1;
+pub const __PTRDIFF_MAX__: u32 = 2147483647;
+pub const __INTPTR_MAX__: u32 = 2147483647;
+pub const __UINTPTR_MAX__: u32 = 4294967295;
 pub const __SIZEOF_DOUBLE__: u32 = 8;
 pub const __SIZEOF_FLOAT__: u32 = 4;
 pub const __SIZEOF_INT__: u32 = 4;
-pub const __SIZEOF_LONG__: u32 = 8;
-pub const __SIZEOF_LONG_DOUBLE__: u32 = 16;
+pub const __SIZEOF_LONG__: u32 = 4;
+pub const __SIZEOF_LONG_DOUBLE__: u32 = 8;
 pub const __SIZEOF_LONG_LONG__: u32 = 8;
-pub const __SIZEOF_POINTER__: u32 = 8;
+pub const __SIZEOF_POINTER__: u32 = 4;
 pub const __SIZEOF_SHORT__: u32 = 2;
-pub const __SIZEOF_PTRDIFF_T__: u32 = 8;
-pub const __SIZEOF_SIZE_T__: u32 = 8;
-pub const __SIZEOF_WCHAR_T__: u32 = 4;
-pub const __SIZEOF_WINT_T__: u32 = 4;
-pub const __SIZEOF_INT128__: u32 = 16;
-pub const __INTMAX_FMTd__: &'static [u8; 3usize] = b"ld\0";
-pub const __INTMAX_FMTi__: &'static [u8; 3usize] = b"li\0";
-pub const __UINTMAX_FMTo__: &'static [u8; 3usize] = b"lo\0";
-pub const __UINTMAX_FMTu__: &'static [u8; 3usize] = b"lu\0";
-pub const __UINTMAX_FMTx__: &'static [u8; 3usize] = b"lx\0";
-pub const __UINTMAX_FMTX__: &'static [u8; 3usize] = b"lX\0";
+pub const __SIZEOF_PTRDIFF_T__: u32 = 4;
+pub const __SIZEOF_SIZE_T__: u32 = 4;
+pub const __SIZEOF_WCHAR_T__: u32 = 2;
+pub const __SIZEOF_WINT_T__: u32 = 2;
+pub const __INTMAX_FMTd__: &'static [u8; 4usize] = b"lld\0";
+pub const __INTMAX_FMTi__: &'static [u8; 4usize] = b"lli\0";
+pub const __UINTMAX_FMTo__: &'static [u8; 4usize] = b"llo\0";
+pub const __UINTMAX_FMTu__: &'static [u8; 4usize] = b"llu\0";
+pub const __UINTMAX_FMTx__: &'static [u8; 4usize] = b"llx\0";
+pub const __UINTMAX_FMTX__: &'static [u8; 4usize] = b"llX\0";
 pub const __INTMAX_WIDTH__: u32 = 64;
-pub const __PTRDIFF_FMTd__: &'static [u8; 3usize] = b"ld\0";
-pub const __PTRDIFF_FMTi__: &'static [u8; 3usize] = b"li\0";
-pub const __PTRDIFF_WIDTH__: u32 = 64;
-pub const __INTPTR_FMTd__: &'static [u8; 3usize] = b"ld\0";
-pub const __INTPTR_FMTi__: &'static [u8; 3usize] = b"li\0";
-pub const __INTPTR_WIDTH__: u32 = 64;
-pub const __SIZE_FMTo__: &'static [u8; 3usize] = b"lo\0";
-pub const __SIZE_FMTu__: &'static [u8; 3usize] = b"lu\0";
-pub const __SIZE_FMTx__: &'static [u8; 3usize] = b"lx\0";
-pub const __SIZE_FMTX__: &'static [u8; 3usize] = b"lX\0";
-pub const __SIZE_WIDTH__: u32 = 64;
-pub const __WCHAR_WIDTH__: u32 = 32;
-pub const __WINT_WIDTH__: u32 = 32;
+pub const __PTRDIFF_FMTd__: &'static [u8; 2usize] = b"d\0";
+pub const __PTRDIFF_FMTi__: &'static [u8; 2usize] = b"i\0";
+pub const __PTRDIFF_WIDTH__: u32 = 32;
+pub const __INTPTR_FMTd__: &'static [u8; 2usize] = b"d\0";
+pub const __INTPTR_FMTi__: &'static [u8; 2usize] = b"i\0";
+pub const __INTPTR_WIDTH__: u32 = 32;
+pub const __SIZE_FMTo__: &'static [u8; 2usize] = b"o\0";
+pub const __SIZE_FMTu__: &'static [u8; 2usize] = b"u\0";
+pub const __SIZE_FMTx__: &'static [u8; 2usize] = b"x\0";
+pub const __SIZE_FMTX__: &'static [u8; 2usize] = b"X\0";
+pub const __SIZE_WIDTH__: u32 = 32;
+pub const __WCHAR_WIDTH__: u32 = 16;
+pub const __WINT_WIDTH__: u32 = 16;
 pub const __SIG_ATOMIC_WIDTH__: u32 = 32;
 pub const __SIG_ATOMIC_MAX__: u32 = 2147483647;
 pub const __UINTMAX_WIDTH__: u32 = 64;
-pub const __UINTPTR_FMTo__: &'static [u8; 3usize] = b"lo\0";
-pub const __UINTPTR_FMTu__: &'static [u8; 3usize] = b"lu\0";
-pub const __UINTPTR_FMTx__: &'static [u8; 3usize] = b"lx\0";
-pub const __UINTPTR_FMTX__: &'static [u8; 3usize] = b"lX\0";
-pub const __UINTPTR_WIDTH__: u32 = 64;
-pub const __FLT16_HAS_DENORM__: u32 = 1;
-pub const __FLT16_DIG__: u32 = 3;
-pub const __FLT16_DECIMAL_DIG__: u32 = 5;
-pub const __FLT16_HAS_INFINITY__: u32 = 1;
-pub const __FLT16_HAS_QUIET_NAN__: u32 = 1;
-pub const __FLT16_MANT_DIG__: u32 = 11;
-pub const __FLT16_MAX_10_EXP__: u32 = 4;
-pub const __FLT16_MAX_EXP__: u32 = 15;
-pub const __FLT16_MIN_10_EXP__: i32 = -13;
-pub const __FLT16_MIN_EXP__: i32 = -14;
+pub const __UINTPTR_FMTo__: &'static [u8; 2usize] = b"o\0";
+pub const __UINTPTR_FMTu__: &'static [u8; 2usize] = b"u\0";
+pub const __UINTPTR_FMTx__: &'static [u8; 2usize] = b"x\0";
+pub const __UINTPTR_FMTX__: &'static [u8; 2usize] = b"X\0";
+pub const __UINTPTR_WIDTH__: u32 = 32;
 pub const __FLT_HAS_DENORM__: u32 = 1;
 pub const __FLT_DIG__: u32 = 6;
 pub const __FLT_DECIMAL_DIG__: u32 = 9;
@@ -149,17 +133,18 @@ pub const __DBL_MAX_EXP__: u32 = 1024;
 pub const __DBL_MIN_10_EXP__: i32 = -307;
 pub const __DBL_MIN_EXP__: i32 = -1021;
 pub const __LDBL_HAS_DENORM__: u32 = 1;
-pub const __LDBL_DIG__: u32 = 18;
-pub const __LDBL_DECIMAL_DIG__: u32 = 21;
+pub const __LDBL_DIG__: u32 = 15;
+pub const __LDBL_DECIMAL_DIG__: u32 = 17;
 pub const __LDBL_HAS_INFINITY__: u32 = 1;
 pub const __LDBL_HAS_QUIET_NAN__: u32 = 1;
-pub const __LDBL_MANT_DIG__: u32 = 64;
-pub const __LDBL_MAX_10_EXP__: u32 = 4932;
-pub const __LDBL_MAX_EXP__: u32 = 16384;
-pub const __LDBL_MIN_10_EXP__: i32 = -4931;
-pub const __LDBL_MIN_EXP__: i32 = -16381;
-pub const __POINTER_WIDTH__: u32 = 64;
+pub const __LDBL_MANT_DIG__: u32 = 53;
+pub const __LDBL_MAX_10_EXP__: u32 = 308;
+pub const __LDBL_MAX_EXP__: u32 = 1024;
+pub const __LDBL_MIN_10_EXP__: i32 = -307;
+pub const __LDBL_MIN_EXP__: i32 = -1021;
+pub const __POINTER_WIDTH__: u32 = 32;
 pub const __BIGGEST_ALIGNMENT__: u32 = 16;
+pub const __WCHAR_UNSIGNED__: u32 = 1;
 pub const __WINT_UNSIGNED__: u32 = 1;
 pub const __INT8_FMTd__: &'static [u8; 4usize] = b"hhd\0";
 pub const __INT8_FMTi__: &'static [u8; 4usize] = b"hhi\0";
@@ -167,8 +152,8 @@ pub const __INT16_FMTd__: &'static [u8; 3usize] = b"hd\0";
 pub const __INT16_FMTi__: &'static [u8; 3usize] = b"hi\0";
 pub const __INT32_FMTd__: &'static [u8; 2usize] = b"d\0";
 pub const __INT32_FMTi__: &'static [u8; 2usize] = b"i\0";
-pub const __INT64_FMTd__: &'static [u8; 3usize] = b"ld\0";
-pub const __INT64_FMTi__: &'static [u8; 3usize] = b"li\0";
+pub const __INT64_FMTd__: &'static [u8; 4usize] = b"lld\0";
+pub const __INT64_FMTi__: &'static [u8; 4usize] = b"lli\0";
 pub const __UINT8_FMTo__: &'static [u8; 4usize] = b"hho\0";
 pub const __UINT8_FMTu__: &'static [u8; 4usize] = b"hhu\0";
 pub const __UINT8_FMTx__: &'static [u8; 4usize] = b"hhx\0";
@@ -187,10 +172,10 @@ pub const __UINT32_FMTx__: &'static [u8; 2usize] = b"x\0";
 pub const __UINT32_FMTX__: &'static [u8; 2usize] = b"X\0";
 pub const __UINT32_MAX__: u32 = 4294967295;
 pub const __INT32_MAX__: u32 = 2147483647;
-pub const __UINT64_FMTo__: &'static [u8; 3usize] = b"lo\0";
-pub const __UINT64_FMTu__: &'static [u8; 3usize] = b"lu\0";
-pub const __UINT64_FMTx__: &'static [u8; 3usize] = b"lx\0";
-pub const __UINT64_FMTX__: &'static [u8; 3usize] = b"lX\0";
+pub const __UINT64_FMTo__: &'static [u8; 4usize] = b"llo\0";
+pub const __UINT64_FMTu__: &'static [u8; 4usize] = b"llu\0";
+pub const __UINT64_FMTx__: &'static [u8; 4usize] = b"llx\0";
+pub const __UINT64_FMTX__: &'static [u8; 4usize] = b"llX\0";
 pub const __UINT64_MAX__: i32 = -1;
 pub const __INT64_MAX__: u64 = 9223372036854775807;
 pub const __INT_LEAST8_MAX__: u32 = 127;
@@ -218,13 +203,13 @@ pub const __UINT_LEAST32_FMTu__: &'static [u8; 2usize] = b"u\0";
 pub const __UINT_LEAST32_FMTx__: &'static [u8; 2usize] = b"x\0";
 pub const __UINT_LEAST32_FMTX__: &'static [u8; 2usize] = b"X\0";
 pub const __INT_LEAST64_MAX__: u64 = 9223372036854775807;
-pub const __INT_LEAST64_FMTd__: &'static [u8; 3usize] = b"ld\0";
-pub const __INT_LEAST64_FMTi__: &'static [u8; 3usize] = b"li\0";
+pub const __INT_LEAST64_FMTd__: &'static [u8; 4usize] = b"lld\0";
+pub const __INT_LEAST64_FMTi__: &'static [u8; 4usize] = b"lli\0";
 pub const __UINT_LEAST64_MAX__: i32 = -1;
-pub const __UINT_LEAST64_FMTo__: &'static [u8; 3usize] = b"lo\0";
-pub const __UINT_LEAST64_FMTu__: &'static [u8; 3usize] = b"lu\0";
-pub const __UINT_LEAST64_FMTx__: &'static [u8; 3usize] = b"lx\0";
-pub const __UINT_LEAST64_FMTX__: &'static [u8; 3usize] = b"lX\0";
+pub const __UINT_LEAST64_FMTo__: &'static [u8; 4usize] = b"llo\0";
+pub const __UINT_LEAST64_FMTu__: &'static [u8; 4usize] = b"llu\0";
+pub const __UINT_LEAST64_FMTx__: &'static [u8; 4usize] = b"llx\0";
+pub const __UINT_LEAST64_FMTX__: &'static [u8; 4usize] = b"llX\0";
 pub const __INT_FAST8_MAX__: u32 = 127;
 pub const __INT_FAST8_FMTd__: &'static [u8; 4usize] = b"hhd\0";
 pub const __INT_FAST8_FMTi__: &'static [u8; 4usize] = b"hhi\0";
@@ -250,16 +235,14 @@ pub const __UINT_FAST32_FMTu__: &'static [u8; 2usize] = b"u\0";
 pub const __UINT_FAST32_FMTx__: &'static [u8; 2usize] = b"x\0";
 pub const __UINT_FAST32_FMTX__: &'static [u8; 2usize] = b"X\0";
 pub const __INT_FAST64_MAX__: u64 = 9223372036854775807;
-pub const __INT_FAST64_FMTd__: &'static [u8; 3usize] = b"ld\0";
-pub const __INT_FAST64_FMTi__: &'static [u8; 3usize] = b"li\0";
+pub const __INT_FAST64_FMTd__: &'static [u8; 4usize] = b"lld\0";
+pub const __INT_FAST64_FMTi__: &'static [u8; 4usize] = b"lli\0";
 pub const __UINT_FAST64_MAX__: i32 = -1;
-pub const __UINT_FAST64_FMTo__: &'static [u8; 3usize] = b"lo\0";
-pub const __UINT_FAST64_FMTu__: &'static [u8; 3usize] = b"lu\0";
-pub const __UINT_FAST64_FMTx__: &'static [u8; 3usize] = b"lx\0";
-pub const __UINT_FAST64_FMTX__: &'static [u8; 3usize] = b"lX\0";
+pub const __UINT_FAST64_FMTo__: &'static [u8; 4usize] = b"llo\0";
+pub const __UINT_FAST64_FMTu__: &'static [u8; 4usize] = b"llu\0";
+pub const __UINT_FAST64_FMTx__: &'static [u8; 4usize] = b"llx\0";
+pub const __UINT_FAST64_FMTX__: &'static [u8; 4usize] = b"llX\0";
 pub const __FINITE_MATH_ONLY__: u32 = 0;
-pub const __GNUC_STDC_INLINE__: u32 = 1;
-pub const __GCC_ATOMIC_TEST_AND_SET_TRUEVAL: u32 = 1;
 pub const __CLANG_ATOMIC_BOOL_LOCK_FREE: u32 = 2;
 pub const __CLANG_ATOMIC_CHAR_LOCK_FREE: u32 = 2;
 pub const __CLANG_ATOMIC_CHAR16_T_LOCK_FREE: u32 = 2;
@@ -270,137 +253,216 @@ pub const __CLANG_ATOMIC_INT_LOCK_FREE: u32 = 2;
 pub const __CLANG_ATOMIC_LONG_LOCK_FREE: u32 = 2;
 pub const __CLANG_ATOMIC_LLONG_LOCK_FREE: u32 = 2;
 pub const __CLANG_ATOMIC_POINTER_LOCK_FREE: u32 = 2;
-pub const __GCC_ATOMIC_BOOL_LOCK_FREE: u32 = 2;
-pub const __GCC_ATOMIC_CHAR_LOCK_FREE: u32 = 2;
-pub const __GCC_ATOMIC_CHAR16_T_LOCK_FREE: u32 = 2;
-pub const __GCC_ATOMIC_CHAR32_T_LOCK_FREE: u32 = 2;
-pub const __GCC_ATOMIC_WCHAR_T_LOCK_FREE: u32 = 2;
-pub const __GCC_ATOMIC_SHORT_LOCK_FREE: u32 = 2;
-pub const __GCC_ATOMIC_INT_LOCK_FREE: u32 = 2;
-pub const __GCC_ATOMIC_LONG_LOCK_FREE: u32 = 2;
-pub const __GCC_ATOMIC_LLONG_LOCK_FREE: u32 = 2;
-pub const __GCC_ATOMIC_POINTER_LOCK_FREE: u32 = 2;
 pub const __NO_INLINE__: u32 = 1;
 pub const __FLT_EVAL_METHOD__: u32 = 0;
 pub const __FLT_RADIX__: u32 = 2;
-pub const __DECIMAL_DIG__: u32 = 21;
-pub const __amd64__: u32 = 1;
-pub const __amd64: u32 = 1;
-pub const __x86_64: u32 = 1;
-pub const __x86_64__: u32 = 1;
-pub const __k8: u32 = 1;
-pub const __k8__: u32 = 1;
-pub const __tune_k8__: u32 = 1;
+pub const __DECIMAL_DIG__: u32 = 17;
+pub const __GCC_ASM_FLAG_OUTPUTS__: u32 = 1;
+pub const __code_model_small_: u32 = 1;
+pub const i386: u32 = 1;
+pub const __i386: u32 = 1;
+pub const __i386__: u32 = 1;
+pub const __SEG_GS: u32 = 1;
+pub const __SEG_FS: u32 = 1;
+pub const __pentium4: u32 = 1;
+pub const __pentium4__: u32 = 1;
+pub const __tune_pentium4__: u32 = 1;
 pub const __NO_MATH_INLINES: u32 = 1;
 pub const __FXSR__: u32 = 1;
 pub const __SSE2__: u32 = 1;
 pub const __SSE2_MATH__: u32 = 1;
 pub const __SSE__: u32 = 1;
 pub const __SSE_MATH__: u32 = 1;
+pub const _M_IX86_FP: u32 = 2;
 pub const __MMX__: u32 = 1;
 pub const __GCC_HAVE_SYNC_COMPARE_AND_SWAP_1: u32 = 1;
 pub const __GCC_HAVE_SYNC_COMPARE_AND_SWAP_2: u32 = 1;
 pub const __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4: u32 = 1;
 pub const __GCC_HAVE_SYNC_COMPARE_AND_SWAP_8: u32 = 1;
-pub const __SIZEOF_FLOAT128__: u32 = 16;
-pub const unix: u32 = 1;
-pub const __unix: u32 = 1;
-pub const __unix__: u32 = 1;
-pub const linux: u32 = 1;
-pub const __linux: u32 = 1;
-pub const __linux__: u32 = 1;
-pub const __gnu_linux__: u32 = 1;
-pub const __ELF__: u32 = 1;
-pub const __FLOAT128__: u32 = 1;
-pub const __STDC__: u32 = 1;
+pub const _WIN32: u32 = 1;
+pub const _MSC_VER: u32 = 1900;
+pub const _MSC_FULL_VER: u32 = 190024241;
+pub const _MSC_BUILD: u32 = 1;
+pub const _MSC_EXTENSIONS: u32 = 1;
+pub const _INTEGRAL_MAX_BITS: u32 = 64;
+pub const _M_IX86: u32 = 600;
 pub const __STDC_HOSTED__: u32 = 1;
 pub const __STDC_VERSION__: u32 = 201112;
 pub const __STDC_UTF_16__: u32 = 1;
 pub const __STDC_UTF_32__: u32 = 1;
-pub const _WCHAR_H: u32 = 1;
-pub const _FEATURES_H: u32 = 1;
-pub const _DEFAULT_SOURCE: u32 = 1;
-pub const __USE_ISOC11: u32 = 1;
-pub const __USE_ISOC99: u32 = 1;
-pub const __USE_ISOC95: u32 = 1;
-pub const __USE_POSIX_IMPLICITLY: u32 = 1;
-pub const _POSIX_SOURCE: u32 = 1;
-pub const _POSIX_C_SOURCE: u32 = 200809;
-pub const __USE_POSIX: u32 = 1;
-pub const __USE_POSIX2: u32 = 1;
-pub const __USE_POSIX199309: u32 = 1;
-pub const __USE_POSIX199506: u32 = 1;
-pub const __USE_XOPEN2K: u32 = 1;
-pub const __USE_XOPEN2K8: u32 = 1;
-pub const _ATFILE_SOURCE: u32 = 1;
-pub const __USE_MISC: u32 = 1;
-pub const __USE_ATFILE: u32 = 1;
-pub const __USE_FORTIFY_LEVEL: u32 = 0;
-pub const _STDC_PREDEF_H: u32 = 1;
-pub const __STDC_IEC_559__: u32 = 1;
-pub const __STDC_IEC_559_COMPLEX__: u32 = 1;
-pub const __STDC_ISO_10646__: u32 = 201505;
-pub const __STDC_NO_THREADS__: u32 = 1;
-pub const __GNU_LIBRARY__: u32 = 6;
-pub const __GLIBC__: u32 = 2;
-pub const __GLIBC_MINOR__: u32 = 23;
-pub const _SYS_CDEFS_H: u32 = 1;
-pub const __WORDSIZE: u32 = 64;
-pub const __WORDSIZE_TIME64_COMPAT32: u32 = 1;
-pub const __SYSCALL_WORDSIZE: u32 = 64;
-pub const __FILE_defined: u32 = 1;
-pub const ____FILE_defined: u32 = 1;
-pub const __GNUC_VA_LIST: u32 = 1;
-pub const _BITS_WCHAR_H: u32 = 1;
-pub const __WCHAR_MAX: u32 = 2147483647;
-pub const __WCHAR_MIN: i32 = -2147483648;
-pub const ____mbstate_t_defined: u32 = 1;
-pub const __mbstate_t_defined: u32 = 1;
-pub const WCHAR_MIN: i32 = -2147483648;
-pub const WCHAR_MAX: u32 = 2147483647;
-pub const WEOF: u32 = 4294967295;
-pub const _XLOCALE_H: u32 = 1;
-pub const _STDINT_H: u32 = 1;
-pub const INT8_MIN: i32 = -128;
-pub const INT16_MIN: i32 = -32768;
-pub const INT32_MIN: i32 = -2147483648;
-pub const INT8_MAX: u32 = 127;
-pub const INT16_MAX: u32 = 32767;
-pub const INT32_MAX: u32 = 2147483647;
-pub const UINT8_MAX: u32 = 255;
-pub const UINT16_MAX: u32 = 65535;
-pub const UINT32_MAX: u32 = 4294967295;
-pub const INT_LEAST8_MIN: i32 = -128;
-pub const INT_LEAST16_MIN: i32 = -32768;
-pub const INT_LEAST32_MIN: i32 = -2147483648;
-pub const INT_LEAST8_MAX: u32 = 127;
-pub const INT_LEAST16_MAX: u32 = 32767;
-pub const INT_LEAST32_MAX: u32 = 2147483647;
-pub const UINT_LEAST8_MAX: u32 = 255;
-pub const UINT_LEAST16_MAX: u32 = 65535;
-pub const UINT_LEAST32_MAX: u32 = 4294967295;
-pub const INT_FAST8_MIN: i32 = -128;
-pub const INT_FAST16_MIN: i64 = -9223372036854775808;
-pub const INT_FAST32_MIN: i64 = -9223372036854775808;
-pub const INT_FAST8_MAX: u32 = 127;
-pub const INT_FAST16_MAX: u64 = 9223372036854775807;
-pub const INT_FAST32_MAX: u64 = 9223372036854775807;
-pub const UINT_FAST8_MAX: u32 = 255;
-pub const UINT_FAST16_MAX: i32 = -1;
-pub const UINT_FAST32_MAX: i32 = -1;
-pub const INTPTR_MIN: i64 = -9223372036854775808;
-pub const INTPTR_MAX: u64 = 9223372036854775807;
-pub const UINTPTR_MAX: i32 = -1;
-pub const PTRDIFF_MIN: i64 = -9223372036854775808;
-pub const PTRDIFF_MAX: u64 = 9223372036854775807;
-pub const SIG_ATOMIC_MIN: i32 = -2147483648;
-pub const SIG_ATOMIC_MAX: u32 = 2147483647;
-pub const SIZE_MAX: i32 = -1;
+pub const _SAL_VERSION: u32 = 20;
+pub const __SAL_H_VERSION: u32 = 180000000;
+pub const _USE_DECLSPECS_FOR_SAL: u32 = 0;
+pub const _USE_ATTRIBUTES_FOR_SAL: u32 = 0;
+pub const _CRT_PACKING: u32 = 8;
+pub const _HAS_EXCEPTIONS: u32 = 1;
+pub const _ARGMAX: u32 = 100;
+pub const _CRT_INT_MAX: u32 = 2147483647;
+pub const _CRT_FUNCTIONS_REQUIRED: u32 = 1;
+pub const _CRT_HAS_CXX17: u32 = 0;
+pub const _ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE: u32 = 1;
+pub const _CRT_BUILD_DESKTOP_APP: u32 = 1;
+pub const _CRT_INTERNAL_NONSTDC_NAMES: u32 = 1;
+pub const __STDC_SECURE_LIB__: u32 = 200411;
+pub const __GOT_SECURE_LIB__: u32 = 200411;
+pub const __STDC_WANT_SECURE_LIB__: u32 = 1;
+pub const _SECURECRT_FILL_BUFFER_PATTERN: u32 = 254;
+pub const _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES: u32 = 0;
+pub const _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT: u32 = 0;
+pub const _CRT_SECURE_CPP_OVERLOAD_SECURE_NAMES: u32 = 1;
+pub const _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_MEMORY: u32 = 0;
+pub const _CRT_SECURE_CPP_OVERLOAD_SECURE_NAMES_MEMORY: u32 = 0;
+pub const EPERM: u32 = 1;
+pub const ENOENT: u32 = 2;
+pub const ESRCH: u32 = 3;
+pub const EINTR: u32 = 4;
+pub const EIO: u32 = 5;
+pub const ENXIO: u32 = 6;
+pub const E2BIG: u32 = 7;
+pub const ENOEXEC: u32 = 8;
+pub const EBADF: u32 = 9;
+pub const ECHILD: u32 = 10;
+pub const EAGAIN: u32 = 11;
+pub const ENOMEM: u32 = 12;
+pub const EACCES: u32 = 13;
+pub const EFAULT: u32 = 14;
+pub const EBUSY: u32 = 16;
+pub const EEXIST: u32 = 17;
+pub const EXDEV: u32 = 18;
+pub const ENODEV: u32 = 19;
+pub const ENOTDIR: u32 = 20;
+pub const EISDIR: u32 = 21;
+pub const ENFILE: u32 = 23;
+pub const EMFILE: u32 = 24;
+pub const ENOTTY: u32 = 25;
+pub const EFBIG: u32 = 27;
+pub const ENOSPC: u32 = 28;
+pub const ESPIPE: u32 = 29;
+pub const EROFS: u32 = 30;
+pub const EMLINK: u32 = 31;
+pub const EPIPE: u32 = 32;
+pub const EDOM: u32 = 33;
+pub const EDEADLK: u32 = 36;
+pub const ENAMETOOLONG: u32 = 38;
+pub const ENOLCK: u32 = 39;
+pub const ENOSYS: u32 = 40;
+pub const ENOTEMPTY: u32 = 41;
+pub const EINVAL: u32 = 22;
+pub const ERANGE: u32 = 34;
+pub const EILSEQ: u32 = 42;
+pub const STRUNCATE: u32 = 80;
+pub const EDEADLOCK: u32 = 36;
+pub const EADDRINUSE: u32 = 100;
+pub const EADDRNOTAVAIL: u32 = 101;
+pub const EAFNOSUPPORT: u32 = 102;
+pub const EALREADY: u32 = 103;
+pub const EBADMSG: u32 = 104;
+pub const ECANCELED: u32 = 105;
+pub const ECONNABORTED: u32 = 106;
+pub const ECONNREFUSED: u32 = 107;
+pub const ECONNRESET: u32 = 108;
+pub const EDESTADDRREQ: u32 = 109;
+pub const EHOSTUNREACH: u32 = 110;
+pub const EIDRM: u32 = 111;
+pub const EINPROGRESS: u32 = 112;
+pub const EISCONN: u32 = 113;
+pub const ELOOP: u32 = 114;
+pub const EMSGSIZE: u32 = 115;
+pub const ENETDOWN: u32 = 116;
+pub const ENETRESET: u32 = 117;
+pub const ENETUNREACH: u32 = 118;
+pub const ENOBUFS: u32 = 119;
+pub const ENODATA: u32 = 120;
+pub const ENOLINK: u32 = 121;
+pub const ENOMSG: u32 = 122;
+pub const ENOPROTOOPT: u32 = 123;
+pub const ENOSR: u32 = 124;
+pub const ENOSTR: u32 = 125;
+pub const ENOTCONN: u32 = 126;
+pub const ENOTRECOVERABLE: u32 = 127;
+pub const ENOTSOCK: u32 = 128;
+pub const ENOTSUP: u32 = 129;
+pub const EOPNOTSUPP: u32 = 130;
+pub const EOTHER: u32 = 131;
+pub const EOVERFLOW: u32 = 132;
+pub const EOWNERDEAD: u32 = 133;
+pub const EPROTO: u32 = 134;
+pub const EPROTONOSUPPORT: u32 = 135;
+pub const EPROTOTYPE: u32 = 136;
+pub const ETIME: u32 = 137;
+pub const ETIMEDOUT: u32 = 138;
+pub const ETXTBSY: u32 = 139;
+pub const EWOULDBLOCK: u32 = 140;
+pub const _CRT_INTERNAL_STDIO_SYMBOL_PREFIX: &'static [u8; 2usize] = b"_\0";
+pub const _CRT_INTERNAL_PRINTF_LEGACY_VSPRINTF_NULL_TERMINATION: u32 = 1;
+pub const _CRT_INTERNAL_PRINTF_STANDARD_SNPRINTF_BEHAVIOR: u32 = 2;
+pub const _CRT_INTERNAL_PRINTF_LEGACY_WIDE_SPECIFIERS: u32 = 4;
+pub const _CRT_INTERNAL_PRINTF_LEGACY_MSVCRT_COMPATIBILITY: u32 = 8;
+pub const _CRT_INTERNAL_PRINTF_LEGACY_THREE_DIGIT_EXPONENTS: u32 = 16;
+pub const _CRT_INTERNAL_SCANF_SECURECRT: u32 = 1;
+pub const _CRT_INTERNAL_SCANF_LEGACY_WIDE_SPECIFIERS: u32 = 2;
+pub const _CRT_INTERNAL_SCANF_LEGACY_MSVCRT_COMPATIBILITY: u32 = 4;
+pub const _UPPER: u32 = 1;
+pub const _LOWER: u32 = 2;
+pub const _DIGIT: u32 = 4;
+pub const _SPACE: u32 = 8;
+pub const _PUNCT: u32 = 16;
+pub const _CONTROL: u32 = 32;
+pub const _BLANK: u32 = 64;
+pub const _HEX: u32 = 128;
+pub const _LEADBYTE: u32 = 32768;
+pub const _ALPHA: u32 = 259;
+pub const _SH_DENYRW: u32 = 16;
+pub const _SH_DENYWR: u32 = 32;
+pub const _SH_DENYRD: u32 = 48;
+pub const _SH_DENYNO: u32 = 64;
+pub const _SH_SECURE: u32 = 128;
+pub const SH_DENYRW: u32 = 16;
+pub const SH_DENYWR: u32 = 32;
+pub const SH_DENYRD: u32 = 48;
+pub const SH_DENYNO: u32 = 64;
+pub const _MAX_ITOSTR_BASE16_COUNT: u32 = 9;
+pub const _MAX_ITOSTR_BASE10_COUNT: u32 = 12;
+pub const _MAX_ITOSTR_BASE8_COUNT: u32 = 12;
+pub const _MAX_ITOSTR_BASE2_COUNT: u32 = 33;
+pub const _MAX_LTOSTR_BASE16_COUNT: u32 = 9;
+pub const _MAX_LTOSTR_BASE10_COUNT: u32 = 12;
+pub const _MAX_LTOSTR_BASE8_COUNT: u32 = 12;
+pub const _MAX_LTOSTR_BASE2_COUNT: u32 = 33;
+pub const _MAX_ULTOSTR_BASE16_COUNT: u32 = 9;
+pub const _MAX_ULTOSTR_BASE10_COUNT: u32 = 11;
+pub const _MAX_ULTOSTR_BASE8_COUNT: u32 = 12;
+pub const _MAX_ULTOSTR_BASE2_COUNT: u32 = 33;
+pub const _MAX_I64TOSTR_BASE16_COUNT: u32 = 17;
+pub const _MAX_I64TOSTR_BASE10_COUNT: u32 = 21;
+pub const _MAX_I64TOSTR_BASE8_COUNT: u32 = 23;
+pub const _MAX_I64TOSTR_BASE2_COUNT: u32 = 65;
+pub const _MAX_U64TOSTR_BASE16_COUNT: u32 = 17;
+pub const _MAX_U64TOSTR_BASE10_COUNT: u32 = 21;
+pub const _MAX_U64TOSTR_BASE8_COUNT: u32 = 23;
+pub const _MAX_U64TOSTR_BASE2_COUNT: u32 = 65;
+pub const _S_IFMT: u32 = 61440;
+pub const _S_IFDIR: u32 = 16384;
+pub const _S_IFCHR: u32 = 8192;
+pub const _S_IFIFO: u32 = 4096;
+pub const _S_IFREG: u32 = 32768;
+pub const _S_IREAD: u32 = 256;
+pub const _S_IWRITE: u32 = 128;
+pub const _S_IEXEC: u32 = 64;
+pub const S_IFMT: u32 = 61440;
+pub const S_IFDIR: u32 = 16384;
+pub const S_IFCHR: u32 = 8192;
+pub const S_IFREG: u32 = 32768;
+pub const S_IREAD: u32 = 256;
+pub const S_IWRITE: u32 = 128;
+pub const S_IEXEC: u32 = 64;
+pub const WCHAR_MIN: u32 = 0;
+pub const WCHAR_MAX: u32 = 65535;
 pub const WINT_MIN: u32 = 0;
-pub const WINT_MAX: u32 = 4294967295;
-pub const true_: u32 = 1;
-pub const false_: u32 = 0;
+pub const WINT_MAX: u32 = 65535;
 pub const __bool_true_false_are_defined: u32 = 1;
+pub const false_: u32 = 0;
+pub const true_: u32 = 1;
 pub const TCOD_MAJOR_VERSION: u32 = 1;
 pub const TCOD_MINOR_VERSION: u32 = 16;
 pub const TCOD_PATCHLEVEL: u32 = 0;
@@ -434,586 +496,2907 @@ pub const TCOD_LEX_KEYWORD_SIZE: u32 = 20;
 pub const TCOD_HEAP_DEFAULT_CAPACITY: u32 = 256;
 pub const TCOD_HEAP_MAX_NODE_SIZE: u32 = 256;
 pub const TCOD_PATHFINDER_MAX_DIMENSIONS: u32 = 4;
+pub type va_list = *mut ::std::os::raw::c_char;
+pub type size_t = ::std::os::raw::c_uint;
+pub type __vcrt_bool = bool;
+pub type wchar_t = ::std::os::raw::c_ushort;
+extern "C" {
+    pub fn __security_init_cookie();
+}
+extern "fastcall" {
+    pub fn __security_check_cookie(_StackCookie: usize);
+}
+extern "C" {
+    pub fn __report_gsfailure();
+}
+extern "C" {
+    pub static mut __security_cookie: usize;
+}
+pub type __crt_bool = bool;
+extern "C" {
+    pub fn _invalid_parameter_noinfo();
+}
+extern "C" {
+    pub fn _invalid_parameter_noinfo_noreturn();
+}
+extern "C" {
+    pub fn _invoke_watson(
+        _Expression: *const wchar_t,
+        _FunctionName: *const wchar_t,
+        _FileName: *const wchar_t,
+        _LineNo: ::std::os::raw::c_uint,
+        _Reserved: usize,
+    );
+}
+pub type errno_t = ::std::os::raw::c_int;
+pub type wint_t = ::std::os::raw::c_ushort;
+pub type wctype_t = ::std::os::raw::c_ushort;
+pub type __time32_t = ::std::os::raw::c_long;
+pub type __time64_t = ::std::os::raw::c_longlong;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct _IO_FILE {
-    _unused: [u8; 0],
-}
-pub type FILE = _IO_FILE;
-pub type __FILE = _IO_FILE;
-pub type va_list = __builtin_va_list;
-pub type __gnuc_va_list = __builtin_va_list;
-pub type size_t = ::std::os::raw::c_ulong;
-pub type wchar_t = ::std::os::raw::c_int;
-pub type wint_t = ::std::os::raw::c_uint;
-#[repr(C)]
-#[derive(Copy, Clone)]
-pub struct __mbstate_t {
-    pub __count: ::std::os::raw::c_int,
-    pub __value: __mbstate_t__bindgen_ty_1,
-}
-#[repr(C)]
-#[derive(Copy, Clone)]
-pub union __mbstate_t__bindgen_ty_1 {
-    pub __wch: ::std::os::raw::c_uint,
-    pub __wchb: [::std::os::raw::c_char; 4usize],
-    _bindgen_union_align: u32,
+pub struct __crt_locale_data_public {
+    pub _locale_pctype: *const ::std::os::raw::c_ushort,
+    pub _locale_mb_cur_max: ::std::os::raw::c_int,
+    pub _locale_lc_codepage: ::std::os::raw::c_uint,
 }
 #[test]
-fn bindgen_test_layout___mbstate_t__bindgen_ty_1() {
+fn bindgen_test_layout___crt_locale_data_public() {
     assert_eq!(
-        ::std::mem::size_of::<__mbstate_t__bindgen_ty_1>(),
-        4usize,
-        concat!("Size of: ", stringify!(__mbstate_t__bindgen_ty_1))
+        ::std::mem::size_of::<__crt_locale_data_public>(),
+        12usize,
+        concat!("Size of: ", stringify!(__crt_locale_data_public))
     );
     assert_eq!(
-        ::std::mem::align_of::<__mbstate_t__bindgen_ty_1>(),
+        ::std::mem::align_of::<__crt_locale_data_public>(),
         4usize,
-        concat!("Alignment of ", stringify!(__mbstate_t__bindgen_ty_1))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<__mbstate_t__bindgen_ty_1>())).__wch as *const _ as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__mbstate_t__bindgen_ty_1),
-            "::",
-            stringify!(__wch)
-        )
+        concat!("Alignment of ", stringify!(__crt_locale_data_public))
     );
     assert_eq!(
         unsafe {
-            &(*(::std::ptr::null::<__mbstate_t__bindgen_ty_1>())).__wchb as *const _ as usize
+            &(*(::std::ptr::null::<__crt_locale_data_public>()))._locale_pctype as *const _ as usize
         },
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(__mbstate_t__bindgen_ty_1),
+            stringify!(__crt_locale_data_public),
             "::",
-            stringify!(__wchb)
-        )
-    );
-}
-impl Default for __mbstate_t__bindgen_ty_1 {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
-#[test]
-fn bindgen_test_layout___mbstate_t() {
-    assert_eq!(
-        ::std::mem::size_of::<__mbstate_t>(),
-        8usize,
-        concat!("Size of: ", stringify!(__mbstate_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<__mbstate_t>(),
-        4usize,
-        concat!("Alignment of ", stringify!(__mbstate_t))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<__mbstate_t>())).__count as *const _ as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__mbstate_t),
-            "::",
-            stringify!(__count)
+            stringify!(_locale_pctype)
         )
     );
     assert_eq!(
-        unsafe { &(*(::std::ptr::null::<__mbstate_t>())).__value as *const _ as usize },
+        unsafe {
+            &(*(::std::ptr::null::<__crt_locale_data_public>()))._locale_mb_cur_max as *const _
+                as usize
+        },
         4usize,
         concat!(
             "Offset of field: ",
-            stringify!(__mbstate_t),
+            stringify!(__crt_locale_data_public),
             "::",
-            stringify!(__value)
+            stringify!(_locale_mb_cur_max)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<__crt_locale_data_public>()))._locale_lc_codepage as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__crt_locale_data_public),
+            "::",
+            stringify!(_locale_lc_codepage)
         )
     );
 }
-impl Default for __mbstate_t {
+impl Default for __crt_locale_data_public {
     fn default() -> Self {
         unsafe { ::std::mem::zeroed() }
     }
 }
-pub type mbstate_t = __mbstate_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct tm {
-    _unused: [u8; 0],
-}
-extern "C" {
-    pub fn wcscpy(__dest: *mut wchar_t, __src: *const wchar_t) -> *mut wchar_t;
-}
-extern "C" {
-    pub fn wcsncpy(__dest: *mut wchar_t, __src: *const wchar_t, __n: size_t) -> *mut wchar_t;
-}
-extern "C" {
-    pub fn wcscat(__dest: *mut wchar_t, __src: *const wchar_t) -> *mut wchar_t;
-}
-extern "C" {
-    pub fn wcsncat(__dest: *mut wchar_t, __src: *const wchar_t, __n: size_t) -> *mut wchar_t;
-}
-extern "C" {
-    pub fn wcscmp(
-        __s1: *const ::std::os::raw::c_int,
-        __s2: *const ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn wcsncmp(
-        __s1: *const ::std::os::raw::c_int,
-        __s2: *const ::std::os::raw::c_int,
-        __n: ::std::os::raw::c_ulong,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn wcscasecmp(__s1: *const wchar_t, __s2: *const wchar_t) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn wcsncasecmp(
-        __s1: *const wchar_t,
-        __s2: *const wchar_t,
-        __n: size_t,
-    ) -> ::std::os::raw::c_int;
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct __locale_struct {
-    pub __locales: [*mut __locale_data; 13usize],
-    pub __ctype_b: *const ::std::os::raw::c_ushort,
-    pub __ctype_tolower: *const ::std::os::raw::c_int,
-    pub __ctype_toupper: *const ::std::os::raw::c_int,
-    pub __names: [*const ::std::os::raw::c_char; 13usize],
+pub struct __crt_locale_pointers {
+    pub locinfo: *mut __crt_locale_data,
+    pub mbcinfo: *mut __crt_multibyte_data,
 }
 #[test]
-fn bindgen_test_layout___locale_struct() {
+fn bindgen_test_layout___crt_locale_pointers() {
     assert_eq!(
-        ::std::mem::size_of::<__locale_struct>(),
-        232usize,
-        concat!("Size of: ", stringify!(__locale_struct))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<__locale_struct>(),
+        ::std::mem::size_of::<__crt_locale_pointers>(),
         8usize,
-        concat!("Alignment of ", stringify!(__locale_struct))
+        concat!("Size of: ", stringify!(__crt_locale_pointers))
     );
     assert_eq!(
-        unsafe { &(*(::std::ptr::null::<__locale_struct>())).__locales as *const _ as usize },
+        ::std::mem::align_of::<__crt_locale_pointers>(),
+        4usize,
+        concat!("Alignment of ", stringify!(__crt_locale_pointers))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<__crt_locale_pointers>())).locinfo as *const _ as usize },
         0usize,
         concat!(
             "Offset of field: ",
-            stringify!(__locale_struct),
+            stringify!(__crt_locale_pointers),
             "::",
-            stringify!(__locales)
+            stringify!(locinfo)
         )
     );
     assert_eq!(
-        unsafe { &(*(::std::ptr::null::<__locale_struct>())).__ctype_b as *const _ as usize },
-        104usize,
+        unsafe { &(*(::std::ptr::null::<__crt_locale_pointers>())).mbcinfo as *const _ as usize },
+        4usize,
         concat!(
             "Offset of field: ",
-            stringify!(__locale_struct),
+            stringify!(__crt_locale_pointers),
             "::",
-            stringify!(__ctype_b)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<__locale_struct>())).__ctype_tolower as *const _ as usize },
-        112usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__locale_struct),
-            "::",
-            stringify!(__ctype_tolower)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<__locale_struct>())).__ctype_toupper as *const _ as usize },
-        120usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__locale_struct),
-            "::",
-            stringify!(__ctype_toupper)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<__locale_struct>())).__names as *const _ as usize },
-        128usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__locale_struct),
-            "::",
-            stringify!(__names)
+            stringify!(mbcinfo)
         )
     );
 }
-impl Default for __locale_struct {
+impl Default for __crt_locale_pointers {
     fn default() -> Self {
         unsafe { ::std::mem::zeroed() }
     }
 }
-pub type __locale_t = *mut __locale_struct;
-pub type locale_t = __locale_t;
+pub type _locale_t = *mut __crt_locale_pointers;
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct _Mbstatet {
+    pub _Wchar: ::std::os::raw::c_ulong,
+    pub _Byte: ::std::os::raw::c_ushort,
+    pub _State: ::std::os::raw::c_ushort,
+}
+#[test]
+fn bindgen_test_layout__Mbstatet() {
+    assert_eq!(
+        ::std::mem::size_of::<_Mbstatet>(),
+        8usize,
+        concat!("Size of: ", stringify!(_Mbstatet))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<_Mbstatet>(),
+        4usize,
+        concat!("Alignment of ", stringify!(_Mbstatet))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_Mbstatet>()))._Wchar as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_Mbstatet),
+            "::",
+            stringify!(_Wchar)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_Mbstatet>()))._Byte as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_Mbstatet),
+            "::",
+            stringify!(_Byte)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_Mbstatet>()))._State as *const _ as usize },
+        6usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_Mbstatet),
+            "::",
+            stringify!(_State)
+        )
+    );
+}
+pub type mbstate_t = _Mbstatet;
+pub type time_t = __time64_t;
+pub type rsize_t = size_t;
 extern "C" {
-    pub fn wcscasecmp_l(
-        __s1: *const wchar_t,
-        __s2: *const wchar_t,
-        __loc: __locale_t,
+    pub fn _errno() -> *mut ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _set_errno(_Value: ::std::os::raw::c_int) -> errno_t;
+}
+extern "C" {
+    pub fn _get_errno(_Value: *mut ::std::os::raw::c_int) -> errno_t;
+}
+extern "C" {
+    pub fn __doserrno() -> *mut ::std::os::raw::c_ulong;
+}
+extern "C" {
+    pub fn _set_doserrno(_Value: ::std::os::raw::c_ulong) -> errno_t;
+}
+extern "C" {
+    pub fn _get_doserrno(_Value: *mut ::std::os::raw::c_ulong) -> errno_t;
+}
+extern "C" {
+    pub fn memchr(
+        _Buf: *const ::std::os::raw::c_void,
+        _Val: ::std::os::raw::c_int,
+        _MaxCount: ::std::os::raw::c_uint,
+    ) -> *mut ::std::os::raw::c_void;
+}
+extern "C" {
+    pub fn memcmp(
+        _Buf1: *const ::std::os::raw::c_void,
+        _Buf2: *const ::std::os::raw::c_void,
+        _Size: ::std::os::raw::c_uint,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn wcsncasecmp_l(
-        __s1: *const wchar_t,
-        __s2: *const wchar_t,
-        __n: size_t,
-        __loc: __locale_t,
-    ) -> ::std::os::raw::c_int;
+    pub fn memcpy(
+        _Dst: *mut ::std::os::raw::c_void,
+        _Src: *const ::std::os::raw::c_void,
+        _Size: ::std::os::raw::c_uint,
+    ) -> *mut ::std::os::raw::c_void;
 }
 extern "C" {
-    pub fn wcscoll(__s1: *const wchar_t, __s2: *const wchar_t) -> ::std::os::raw::c_int;
+    pub fn memmove(
+        _Dst: *mut ::std::os::raw::c_void,
+        _Src: *const ::std::os::raw::c_void,
+        _Size: ::std::os::raw::c_uint,
+    ) -> *mut ::std::os::raw::c_void;
 }
 extern "C" {
-    pub fn wcsxfrm(__s1: *mut wchar_t, __s2: *const wchar_t, __n: size_t) -> size_t;
+    pub fn memset(
+        _Dst: *mut ::std::os::raw::c_void,
+        _Val: ::std::os::raw::c_int,
+        _Size: ::std::os::raw::c_uint,
+    ) -> *mut ::std::os::raw::c_void;
 }
 extern "C" {
-    pub fn wcscoll_l(
-        __s1: *const wchar_t,
-        __s2: *const wchar_t,
-        __loc: __locale_t,
-    ) -> ::std::os::raw::c_int;
+    pub fn strchr(
+        _Str: *const ::std::os::raw::c_char,
+        _Val: ::std::os::raw::c_int,
+    ) -> *mut ::std::os::raw::c_char;
 }
 extern "C" {
-    pub fn wcsxfrm_l(
-        __s1: *mut wchar_t,
-        __s2: *const wchar_t,
-        __n: size_t,
-        __loc: __locale_t,
-    ) -> size_t;
+    pub fn strrchr(
+        _Str: *const ::std::os::raw::c_char,
+        _Ch: ::std::os::raw::c_int,
+    ) -> *mut ::std::os::raw::c_char;
 }
 extern "C" {
-    pub fn wcsdup(__s: *const wchar_t) -> *mut wchar_t;
+    pub fn strstr(
+        _Str: *const ::std::os::raw::c_char,
+        _SubStr: *const ::std::os::raw::c_char,
+    ) -> *mut ::std::os::raw::c_char;
 }
 extern "C" {
     pub fn wcschr(
-        __wcs: *const ::std::os::raw::c_int,
-        __wc: ::std::os::raw::c_int,
-    ) -> *mut ::std::os::raw::c_int;
+        _Str: *const ::std::os::raw::c_ushort,
+        _Ch: ::std::os::raw::c_ushort,
+    ) -> *mut ::std::os::raw::c_ushort;
 }
 extern "C" {
-    pub fn wcsrchr(__wcs: *const wchar_t, __wc: wchar_t) -> *mut wchar_t;
+    pub fn wcsrchr(_Str: *const wchar_t, _Ch: wchar_t) -> *mut wchar_t;
 }
 extern "C" {
-    pub fn wcscspn(__wcs: *const wchar_t, __reject: *const wchar_t) -> size_t;
+    pub fn wcsstr(_Str: *const wchar_t, _SubStr: *const wchar_t) -> *mut wchar_t;
 }
 extern "C" {
-    pub fn wcsspn(__wcs: *const wchar_t, __accept: *const wchar_t) -> size_t;
+    pub fn _cgetws_s(
+        _Buffer: *mut wchar_t,
+        _BufferCount: size_t,
+        _SizeRead: *mut size_t,
+    ) -> errno_t;
 }
 extern "C" {
-    pub fn wcspbrk(__wcs: *const wchar_t, __accept: *const wchar_t) -> *mut wchar_t;
+    pub fn _cputws(_Buffer: *const wchar_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn wcsstr(__haystack: *const wchar_t, __needle: *const wchar_t) -> *mut wchar_t;
+    pub fn _getwch() -> wint_t;
 }
 extern "C" {
-    pub fn wcstok(
-        __s: *mut wchar_t,
-        __delim: *const wchar_t,
-        __ptr: *mut *mut wchar_t,
-    ) -> *mut wchar_t;
+    pub fn _getwche() -> wint_t;
 }
 extern "C" {
-    pub fn wcslen(__s: *const ::std::os::raw::c_int) -> ::std::os::raw::c_ulong;
+    pub fn _putwch(_Character: wchar_t) -> wint_t;
 }
 extern "C" {
-    pub fn wcsnlen(__s: *const wchar_t, __maxlen: size_t) -> size_t;
+    pub fn _ungetwch(_Character: wint_t) -> wint_t;
 }
 extern "C" {
-    pub fn wmemchr(
-        __s: *const ::std::os::raw::c_int,
-        __c: ::std::os::raw::c_int,
-        __n: ::std::os::raw::c_ulong,
-    ) -> *mut ::std::os::raw::c_int;
+    pub fn _getwch_nolock() -> wint_t;
 }
 extern "C" {
-    pub fn wmemcmp(
-        __s1: *const ::std::os::raw::c_int,
-        __s2: *const ::std::os::raw::c_int,
-        __n: ::std::os::raw::c_ulong,
+    pub fn _getwche_nolock() -> wint_t;
+}
+extern "C" {
+    pub fn _putwch_nolock(_Character: wchar_t) -> wint_t;
+}
+extern "C" {
+    pub fn _ungetwch_nolock(_Character: wint_t) -> wint_t;
+}
+extern "C" {
+    pub fn __conio_common_vcwprintf(
+        _Options: ::std::os::raw::c_ulonglong,
+        _Format: *const wchar_t,
+        _Locale: _locale_t,
+        _ArgList: va_list,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn wmemcpy(__s1: *mut wchar_t, __s2: *const wchar_t, __n: size_t) -> *mut wchar_t;
+    pub fn __conio_common_vcwprintf_s(
+        _Options: ::std::os::raw::c_ulonglong,
+        _Format: *const wchar_t,
+        _Locale: _locale_t,
+        _ArgList: va_list,
+    ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn wmemmove(__s1: *mut wchar_t, __s2: *const wchar_t, __n: size_t) -> *mut wchar_t;
+    pub fn __conio_common_vcwprintf_p(
+        _Options: ::std::os::raw::c_ulonglong,
+        _Format: *const wchar_t,
+        _Locale: _locale_t,
+        _ArgList: va_list,
+    ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn wmemset(__s: *mut wchar_t, __c: wchar_t, __n: size_t) -> *mut wchar_t;
+    pub fn __conio_common_vcwscanf(
+        _Options: ::std::os::raw::c_ulonglong,
+        _Format: *const wchar_t,
+        _Locale: _locale_t,
+        _ArgList: va_list,
+    ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn btowc(__c: ::std::os::raw::c_int) -> wint_t;
+    pub fn __pctype_func() -> *const ::std::os::raw::c_ushort;
 }
 extern "C" {
-    pub fn wctob(__c: wint_t) -> ::std::os::raw::c_int;
+    pub fn __pwctype_func() -> *const wctype_t;
 }
 extern "C" {
-    pub fn mbsinit(__ps: *const mbstate_t) -> ::std::os::raw::c_int;
+    pub fn iswalnum(_C: wint_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn mbrtowc(
-        __pwc: *mut wchar_t,
-        __s: *const ::std::os::raw::c_char,
-        __n: size_t,
-        __p: *mut mbstate_t,
-    ) -> size_t;
+    pub fn iswalpha(_C: wint_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn wcrtomb(__s: *mut ::std::os::raw::c_char, __wc: wchar_t, __ps: *mut mbstate_t)
-        -> size_t;
+    pub fn iswascii(_C: wint_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn __mbrlen(
-        __s: *const ::std::os::raw::c_char,
-        __n: size_t,
-        __ps: *mut mbstate_t,
-    ) -> size_t;
+    pub fn iswblank(_C: wint_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn mbrlen(__s: *const ::std::os::raw::c_char, __n: size_t, __ps: *mut mbstate_t) -> size_t;
+    pub fn iswcntrl(_C: wint_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn mbsrtowcs(
-        __dst: *mut wchar_t,
-        __src: *mut *const ::std::os::raw::c_char,
-        __len: size_t,
-        __ps: *mut mbstate_t,
-    ) -> size_t;
+    pub fn iswdigit(_C: wint_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn wcsrtombs(
-        __dst: *mut ::std::os::raw::c_char,
-        __src: *mut *const wchar_t,
-        __len: size_t,
-        __ps: *mut mbstate_t,
-    ) -> size_t;
+    pub fn iswgraph(_C: wint_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn mbsnrtowcs(
-        __dst: *mut wchar_t,
-        __src: *mut *const ::std::os::raw::c_char,
-        __nmc: size_t,
-        __len: size_t,
-        __ps: *mut mbstate_t,
-    ) -> size_t;
+    pub fn iswlower(_C: wint_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn wcsnrtombs(
-        __dst: *mut ::std::os::raw::c_char,
-        __src: *mut *const wchar_t,
-        __nwc: size_t,
-        __len: size_t,
-        __ps: *mut mbstate_t,
-    ) -> size_t;
+    pub fn iswprint(_C: wint_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn wcstod(__nptr: *const wchar_t, __endptr: *mut *mut wchar_t) -> f64;
+    pub fn iswpunct(_C: wint_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn wcstof(__nptr: *const wchar_t, __endptr: *mut *mut wchar_t) -> f32;
+    pub fn iswspace(_C: wint_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn wcstold(__nptr: *const wchar_t, __endptr: *mut *mut wchar_t) -> u128;
+    pub fn iswupper(_C: wint_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn wcstol(
-        __nptr: *const wchar_t,
-        __endptr: *mut *mut wchar_t,
-        __base: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_long;
+    pub fn iswxdigit(_C: wint_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn wcstoul(
-        __nptr: *const wchar_t,
-        __endptr: *mut *mut wchar_t,
-        __base: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_ulong;
+    pub fn __iswcsymf(_C: wint_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn wcstoll(
-        __nptr: *const wchar_t,
-        __endptr: *mut *mut wchar_t,
-        __base: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_longlong;
+    pub fn __iswcsym(_C: wint_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn wcstoull(
-        __nptr: *const wchar_t,
-        __endptr: *mut *mut wchar_t,
-        __base: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_ulonglong;
+    pub fn _iswalnum_l(_C: wint_t, _Locale: _locale_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn wcpcpy(__dest: *mut wchar_t, __src: *const wchar_t) -> *mut wchar_t;
+    pub fn _iswalpha_l(_C: wint_t, _Locale: _locale_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn wcpncpy(__dest: *mut wchar_t, __src: *const wchar_t, __n: size_t) -> *mut wchar_t;
+    pub fn _iswblank_l(_C: wint_t, _Locale: _locale_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn open_wmemstream(__bufloc: *mut *mut wchar_t, __sizeloc: *mut size_t) -> *mut __FILE;
+    pub fn _iswcntrl_l(_C: wint_t, _Locale: _locale_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn fwide(__fp: *mut __FILE, __mode: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
+    pub fn _iswdigit_l(_C: wint_t, _Locale: _locale_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn fwprintf(__stream: *mut __FILE, __format: *const wchar_t, ...) -> ::std::os::raw::c_int;
+    pub fn _iswgraph_l(_C: wint_t, _Locale: _locale_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn wprintf(__format: *const wchar_t, ...) -> ::std::os::raw::c_int;
+    pub fn _iswlower_l(_C: wint_t, _Locale: _locale_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn swprintf(
-        __s: *mut wchar_t,
-        __n: size_t,
-        __format: *const wchar_t,
+    pub fn _iswprint_l(_C: wint_t, _Locale: _locale_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _iswpunct_l(_C: wint_t, _Locale: _locale_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _iswspace_l(_C: wint_t, _Locale: _locale_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _iswupper_l(_C: wint_t, _Locale: _locale_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _iswxdigit_l(_C: wint_t, _Locale: _locale_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _iswcsymf_l(_C: wint_t, _Locale: _locale_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _iswcsym_l(_C: wint_t, _Locale: _locale_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn towupper(_C: wint_t) -> wint_t;
+}
+extern "C" {
+    pub fn towlower(_C: wint_t) -> wint_t;
+}
+extern "C" {
+    pub fn iswctype(_C: wint_t, _Type: wctype_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _towupper_l(_C: wint_t, _Locale: _locale_t) -> wint_t;
+}
+extern "C" {
+    pub fn _towlower_l(_C: wint_t, _Locale: _locale_t) -> wint_t;
+}
+extern "C" {
+    pub fn _iswctype_l(_C: wint_t, _Type: wctype_t, _Locale: _locale_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn isleadbyte(_C: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _isleadbyte_l(_C: ::std::os::raw::c_int, _Locale: _locale_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn is_wctype(_C: wint_t, _Type: wctype_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wgetcwd(_DstBuf: *mut wchar_t, _SizeInWords: ::std::os::raw::c_int) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wgetdcwd(
+        _Drive: ::std::os::raw::c_int,
+        _DstBuf: *mut wchar_t,
+        _SizeInWords: ::std::os::raw::c_int,
+    ) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wchdir(_Path: *const wchar_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wmkdir(_Path: *const wchar_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wrmdir(_Path: *const wchar_t) -> ::std::os::raw::c_int;
+}
+pub type _fsize_t = ::std::os::raw::c_ulong;
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct _wfinddata32_t {
+    pub attrib: ::std::os::raw::c_uint,
+    pub time_create: __time32_t,
+    pub time_access: __time32_t,
+    pub time_write: __time32_t,
+    pub size: _fsize_t,
+    pub name: [wchar_t; 260usize],
+}
+#[test]
+fn bindgen_test_layout__wfinddata32_t() {
+    assert_eq!(
+        ::std::mem::size_of::<_wfinddata32_t>(),
+        540usize,
+        concat!("Size of: ", stringify!(_wfinddata32_t))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<_wfinddata32_t>(),
+        4usize,
+        concat!("Alignment of ", stringify!(_wfinddata32_t))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata32_t>())).attrib as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata32_t),
+            "::",
+            stringify!(attrib)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata32_t>())).time_create as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata32_t),
+            "::",
+            stringify!(time_create)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata32_t>())).time_access as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata32_t),
+            "::",
+            stringify!(time_access)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata32_t>())).time_write as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata32_t),
+            "::",
+            stringify!(time_write)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata32_t>())).size as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata32_t),
+            "::",
+            stringify!(size)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata32_t>())).name as *const _ as usize },
+        20usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata32_t),
+            "::",
+            stringify!(name)
+        )
+    );
+}
+impl Default for _wfinddata32_t {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct _wfinddata32i64_t {
+    pub attrib: ::std::os::raw::c_uint,
+    pub time_create: __time32_t,
+    pub time_access: __time32_t,
+    pub time_write: __time32_t,
+    pub size: ::std::os::raw::c_longlong,
+    pub name: [wchar_t; 260usize],
+}
+#[test]
+fn bindgen_test_layout__wfinddata32i64_t() {
+    assert_eq!(
+        ::std::mem::size_of::<_wfinddata32i64_t>(),
+        544usize,
+        concat!("Size of: ", stringify!(_wfinddata32i64_t))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<_wfinddata32i64_t>(),
+        8usize,
+        concat!("Alignment of ", stringify!(_wfinddata32i64_t))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata32i64_t>())).attrib as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata32i64_t),
+            "::",
+            stringify!(attrib)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata32i64_t>())).time_create as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata32i64_t),
+            "::",
+            stringify!(time_create)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata32i64_t>())).time_access as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata32i64_t),
+            "::",
+            stringify!(time_access)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata32i64_t>())).time_write as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata32i64_t),
+            "::",
+            stringify!(time_write)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata32i64_t>())).size as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata32i64_t),
+            "::",
+            stringify!(size)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata32i64_t>())).name as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata32i64_t),
+            "::",
+            stringify!(name)
+        )
+    );
+}
+impl Default for _wfinddata32i64_t {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct _wfinddata64i32_t {
+    pub attrib: ::std::os::raw::c_uint,
+    pub time_create: __time64_t,
+    pub time_access: __time64_t,
+    pub time_write: __time64_t,
+    pub size: _fsize_t,
+    pub name: [wchar_t; 260usize],
+}
+#[test]
+fn bindgen_test_layout__wfinddata64i32_t() {
+    assert_eq!(
+        ::std::mem::size_of::<_wfinddata64i32_t>(),
+        560usize,
+        concat!("Size of: ", stringify!(_wfinddata64i32_t))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<_wfinddata64i32_t>(),
+        8usize,
+        concat!("Alignment of ", stringify!(_wfinddata64i32_t))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata64i32_t>())).attrib as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata64i32_t),
+            "::",
+            stringify!(attrib)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata64i32_t>())).time_create as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata64i32_t),
+            "::",
+            stringify!(time_create)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata64i32_t>())).time_access as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata64i32_t),
+            "::",
+            stringify!(time_access)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata64i32_t>())).time_write as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata64i32_t),
+            "::",
+            stringify!(time_write)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata64i32_t>())).size as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata64i32_t),
+            "::",
+            stringify!(size)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata64i32_t>())).name as *const _ as usize },
+        36usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata64i32_t),
+            "::",
+            stringify!(name)
+        )
+    );
+}
+impl Default for _wfinddata64i32_t {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct _wfinddata64_t {
+    pub attrib: ::std::os::raw::c_uint,
+    pub time_create: __time64_t,
+    pub time_access: __time64_t,
+    pub time_write: __time64_t,
+    pub size: ::std::os::raw::c_longlong,
+    pub name: [wchar_t; 260usize],
+}
+#[test]
+fn bindgen_test_layout__wfinddata64_t() {
+    assert_eq!(
+        ::std::mem::size_of::<_wfinddata64_t>(),
+        560usize,
+        concat!("Size of: ", stringify!(_wfinddata64_t))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<_wfinddata64_t>(),
+        8usize,
+        concat!("Alignment of ", stringify!(_wfinddata64_t))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata64_t>())).attrib as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata64_t),
+            "::",
+            stringify!(attrib)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata64_t>())).time_create as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata64_t),
+            "::",
+            stringify!(time_create)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata64_t>())).time_access as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata64_t),
+            "::",
+            stringify!(time_access)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata64_t>())).time_write as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata64_t),
+            "::",
+            stringify!(time_write)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata64_t>())).size as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata64_t),
+            "::",
+            stringify!(size)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_wfinddata64_t>())).name as *const _ as usize },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_wfinddata64_t),
+            "::",
+            stringify!(name)
+        )
+    );
+}
+impl Default for _wfinddata64_t {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
+extern "C" {
+    pub fn _waccess(
+        _FileName: *const wchar_t,
+        _AccessMode: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _waccess_s(_FileName: *const wchar_t, _AccessMode: ::std::os::raw::c_int) -> errno_t;
+}
+extern "C" {
+    pub fn _wchmod(
+        _FileName: *const wchar_t,
+        _Mode: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wcreat(
+        _FileName: *const wchar_t,
+        _PermissionMode: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wfindfirst32(_FileName: *const wchar_t, _FindData: *mut _wfinddata32_t) -> isize;
+}
+extern "C" {
+    pub fn _wfindnext32(
+        _FindHandle: isize,
+        _FindData: *mut _wfinddata32_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wunlink(_FileName: *const wchar_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wrename(
+        _OldFileName: *const wchar_t,
+        _NewFileName: *const wchar_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wmktemp_s(_TemplateName: *mut wchar_t, _SizeInWords: size_t) -> errno_t;
+}
+extern "C" {
+    pub fn _wmktemp(_TemplateName: *mut wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wfindfirst32i64(_FileName: *const wchar_t, _FindData: *mut _wfinddata32i64_t) -> isize;
+}
+extern "C" {
+    pub fn _wfindfirst64i32(_FileName: *const wchar_t, _FindData: *mut _wfinddata64i32_t) -> isize;
+}
+extern "C" {
+    pub fn _wfindfirst64(_FileName: *const wchar_t, _FindData: *mut _wfinddata64_t) -> isize;
+}
+extern "C" {
+    pub fn _wfindnext32i64(
+        _FindHandle: isize,
+        _FindData: *mut _wfinddata32i64_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wfindnext64i32(
+        _FindHandle: isize,
+        _FindData: *mut _wfinddata64i32_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wfindnext64(
+        _FindHandle: isize,
+        _FindData: *mut _wfinddata64_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wsopen_s(
+        _FileHandle: *mut ::std::os::raw::c_int,
+        _FileName: *const wchar_t,
+        _OpenFlag: ::std::os::raw::c_int,
+        _ShareFlag: ::std::os::raw::c_int,
+        _PermissionFlag: ::std::os::raw::c_int,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn _wsopen_dispatch(
+        _FileName: *const wchar_t,
+        _OFlag: ::std::os::raw::c_int,
+        _ShFlag: ::std::os::raw::c_int,
+        _PMode: ::std::os::raw::c_int,
+        _PFileHandle: *mut ::std::os::raw::c_int,
+        _BSecure: ::std::os::raw::c_int,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn _wopen(
+        _FileName: *const wchar_t,
+        _OpenFlag: ::std::os::raw::c_int,
         ...
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn vfwprintf(
-        __s: *mut __FILE,
-        __format: *const wchar_t,
-        __arg: *mut __va_list_tag,
+    pub fn _wsopen(
+        _FileName: *const wchar_t,
+        _OpenFlag: ::std::os::raw::c_int,
+        _ShareFlag: ::std::os::raw::c_int,
+        ...
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn vwprintf(__format: *const wchar_t, __arg: *mut __va_list_tag) -> ::std::os::raw::c_int;
+    pub fn _wexecl(_FileName: *const wchar_t, _ArgList: *const wchar_t, ...) -> isize;
 }
 extern "C" {
-    pub fn vswprintf(
-        __s: *mut wchar_t,
-        __n: size_t,
-        __format: *const wchar_t,
-        __arg: *mut __va_list_tag,
-    ) -> ::std::os::raw::c_int;
+    pub fn _wexecle(_FileName: *const wchar_t, _ArgList: *const wchar_t, ...) -> isize;
 }
 extern "C" {
-    pub fn fwscanf(__stream: *mut __FILE, __format: *const wchar_t, ...) -> ::std::os::raw::c_int;
+    pub fn _wexeclp(_FileName: *const wchar_t, _ArgList: *const wchar_t, ...) -> isize;
 }
 extern "C" {
-    pub fn wscanf(__format: *const wchar_t, ...) -> ::std::os::raw::c_int;
+    pub fn _wexeclpe(_FileName: *const wchar_t, _ArgList: *const wchar_t, ...) -> isize;
 }
 extern "C" {
-    pub fn swscanf(__s: *const wchar_t, __format: *const wchar_t, ...) -> ::std::os::raw::c_int;
+    pub fn _wexecv(_FileName: *const wchar_t, _ArgList: *const *const wchar_t) -> isize;
 }
 extern "C" {
-    #[link_name = "\u{1}__isoc99_fwscanf"]
-    pub fn fwscanf1(__stream: *mut __FILE, __format: *const wchar_t, ...) -> ::std::os::raw::c_int;
+    pub fn _wexecve(
+        _FileName: *const wchar_t,
+        _ArgList: *const *const wchar_t,
+        _Env: *const *const wchar_t,
+    ) -> isize;
 }
 extern "C" {
-    #[link_name = "\u{1}__isoc99_wscanf"]
-    pub fn wscanf1(__format: *const wchar_t, ...) -> ::std::os::raw::c_int;
+    pub fn _wexecvp(_FileName: *const wchar_t, _ArgList: *const *const wchar_t) -> isize;
 }
 extern "C" {
-    #[link_name = "\u{1}__isoc99_swscanf"]
-    pub fn swscanf1(__s: *const wchar_t, __format: *const wchar_t, ...) -> ::std::os::raw::c_int;
+    pub fn _wexecvpe(
+        _FileName: *const wchar_t,
+        _ArgList: *const *const wchar_t,
+        _Env: *const *const wchar_t,
+    ) -> isize;
 }
 extern "C" {
-    pub fn vfwscanf(
-        __s: *mut __FILE,
-        __format: *const wchar_t,
-        __arg: *mut __va_list_tag,
-    ) -> ::std::os::raw::c_int;
+    pub fn _wspawnl(
+        _Mode: ::std::os::raw::c_int,
+        _FileName: *const wchar_t,
+        _ArgList: *const wchar_t,
+        ...
+    ) -> isize;
 }
 extern "C" {
-    pub fn vwscanf(__format: *const wchar_t, __arg: *mut __va_list_tag) -> ::std::os::raw::c_int;
+    pub fn _wspawnle(
+        _Mode: ::std::os::raw::c_int,
+        _FileName: *const wchar_t,
+        _ArgList: *const wchar_t,
+        ...
+    ) -> isize;
 }
 extern "C" {
-    pub fn vswscanf(
-        __s: *const wchar_t,
-        __format: *const wchar_t,
-        __arg: *mut __va_list_tag,
-    ) -> ::std::os::raw::c_int;
+    pub fn _wspawnlp(
+        _Mode: ::std::os::raw::c_int,
+        _FileName: *const wchar_t,
+        _ArgList: *const wchar_t,
+        ...
+    ) -> isize;
 }
 extern "C" {
-    #[link_name = "\u{1}__isoc99_vfwscanf"]
-    pub fn vfwscanf1(
-        __s: *mut __FILE,
-        __format: *const wchar_t,
-        __arg: *mut __va_list_tag,
-    ) -> ::std::os::raw::c_int;
+    pub fn _wspawnlpe(
+        _Mode: ::std::os::raw::c_int,
+        _FileName: *const wchar_t,
+        _ArgList: *const wchar_t,
+        ...
+    ) -> isize;
 }
 extern "C" {
-    #[link_name = "\u{1}__isoc99_vwscanf"]
-    pub fn vwscanf1(__format: *const wchar_t, __arg: *mut __va_list_tag) -> ::std::os::raw::c_int;
+    pub fn _wspawnv(
+        _Mode: ::std::os::raw::c_int,
+        _FileName: *const wchar_t,
+        _ArgList: *const *const wchar_t,
+    ) -> isize;
 }
 extern "C" {
-    #[link_name = "\u{1}__isoc99_vswscanf"]
-    pub fn vswscanf1(
-        __s: *const wchar_t,
-        __format: *const wchar_t,
-        __arg: *mut __va_list_tag,
-    ) -> ::std::os::raw::c_int;
+    pub fn _wspawnve(
+        _Mode: ::std::os::raw::c_int,
+        _FileName: *const wchar_t,
+        _ArgList: *const *const wchar_t,
+        _Env: *const *const wchar_t,
+    ) -> isize;
 }
 extern "C" {
-    pub fn fgetwc(__stream: *mut __FILE) -> wint_t;
+    pub fn _wspawnvp(
+        _Mode: ::std::os::raw::c_int,
+        _FileName: *const wchar_t,
+        _ArgList: *const *const wchar_t,
+    ) -> isize;
 }
 extern "C" {
-    pub fn getwc(__stream: *mut __FILE) -> wint_t;
+    pub fn _wspawnvpe(
+        _Mode: ::std::os::raw::c_int,
+        _FileName: *const wchar_t,
+        _ArgList: *const *const wchar_t,
+        _Env: *const *const wchar_t,
+    ) -> isize;
+}
+extern "C" {
+    pub fn _wsystem(_Command: *const wchar_t) -> ::std::os::raw::c_int;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _iobuf {
+    pub _Placeholder: *mut ::std::os::raw::c_void,
+}
+#[test]
+fn bindgen_test_layout__iobuf() {
+    assert_eq!(
+        ::std::mem::size_of::<_iobuf>(),
+        4usize,
+        concat!("Size of: ", stringify!(_iobuf))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<_iobuf>(),
+        4usize,
+        concat!("Alignment of ", stringify!(_iobuf))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_iobuf>()))._Placeholder as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_iobuf),
+            "::",
+            stringify!(_Placeholder)
+        )
+    );
+}
+impl Default for _iobuf {
+    fn default() -> Self {
+        unsafe { ::std::mem::zeroed() }
+    }
+}
+pub type FILE = _iobuf;
+extern "C" {
+    pub fn __acrt_iob_func(_Ix: ::std::os::raw::c_uint) -> *mut FILE;
+}
+extern "C" {
+    pub fn fgetwc(_Stream: *mut FILE) -> wint_t;
+}
+extern "C" {
+    pub fn _fgetwchar() -> wint_t;
+}
+extern "C" {
+    pub fn fputwc(_Character: wchar_t, _Stream: *mut FILE) -> wint_t;
+}
+extern "C" {
+    pub fn _fputwchar(_Character: wchar_t) -> wint_t;
+}
+extern "C" {
+    pub fn getwc(_Stream: *mut FILE) -> wint_t;
 }
 extern "C" {
     pub fn getwchar() -> wint_t;
 }
 extern "C" {
-    pub fn fputwc(__wc: wchar_t, __stream: *mut __FILE) -> wint_t;
-}
-extern "C" {
-    pub fn putwc(__wc: wchar_t, __stream: *mut __FILE) -> wint_t;
-}
-extern "C" {
-    pub fn putwchar(__wc: wchar_t) -> wint_t;
-}
-extern "C" {
     pub fn fgetws(
-        __ws: *mut wchar_t,
-        __n: ::std::os::raw::c_int,
-        __stream: *mut __FILE,
+        _Buffer: *mut wchar_t,
+        _BufferCount: ::std::os::raw::c_int,
+        _Stream: *mut FILE,
     ) -> *mut wchar_t;
 }
 extern "C" {
-    pub fn fputws(__ws: *const wchar_t, __stream: *mut __FILE) -> ::std::os::raw::c_int;
+    pub fn fputws(_Buffer: *const wchar_t, _Stream: *mut FILE) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn ungetwc(__wc: wint_t, __stream: *mut __FILE) -> wint_t;
+    pub fn _getws_s(_Buffer: *mut wchar_t, _BufferCount: size_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn putwc(_Character: wchar_t, _Stream: *mut FILE) -> wint_t;
+}
+extern "C" {
+    pub fn putwchar(_Character: wchar_t) -> wint_t;
+}
+extern "C" {
+    pub fn _putws(_Buffer: *const wchar_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ungetwc(_Character: wint_t, _Stream: *mut FILE) -> wint_t;
+}
+extern "C" {
+    pub fn _wfdopen(_FileHandle: ::std::os::raw::c_int, _Mode: *const wchar_t) -> *mut FILE;
+}
+extern "C" {
+    pub fn _wfopen(_FileName: *const wchar_t, _Mode: *const wchar_t) -> *mut FILE;
+}
+extern "C" {
+    pub fn _wfopen_s(
+        _Stream: *mut *mut FILE,
+        _FileName: *const wchar_t,
+        _Mode: *const wchar_t,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn _wfreopen(
+        _FileName: *const wchar_t,
+        _Mode: *const wchar_t,
+        _OldStream: *mut FILE,
+    ) -> *mut FILE;
+}
+extern "C" {
+    pub fn _wfreopen_s(
+        _Stream: *mut *mut FILE,
+        _FileName: *const wchar_t,
+        _Mode: *const wchar_t,
+        _OldStream: *mut FILE,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn _wfsopen(
+        _FileName: *const wchar_t,
+        _Mode: *const wchar_t,
+        _ShFlag: ::std::os::raw::c_int,
+    ) -> *mut FILE;
+}
+extern "C" {
+    pub fn _wperror(_ErrorMessage: *const wchar_t);
+}
+extern "C" {
+    pub fn _wpopen(_Command: *const wchar_t, _Mode: *const wchar_t) -> *mut FILE;
+}
+extern "C" {
+    pub fn _wremove(_FileName: *const wchar_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wtempnam(_Directory: *const wchar_t, _FilePrefix: *const wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wtmpnam_s(_Buffer: *mut wchar_t, _BufferCount: size_t) -> errno_t;
+}
+extern "C" {
+    pub fn _wtmpnam(_Buffer: *mut wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _fgetwc_nolock(_Stream: *mut FILE) -> wint_t;
+}
+extern "C" {
+    pub fn _fputwc_nolock(_Character: wchar_t, _Stream: *mut FILE) -> wint_t;
+}
+extern "C" {
+    pub fn _getwc_nolock(_Stream: *mut FILE) -> wint_t;
+}
+extern "C" {
+    pub fn _putwc_nolock(_Character: wchar_t, _Stream: *mut FILE) -> wint_t;
+}
+extern "C" {
+    pub fn _ungetwc_nolock(_Character: wint_t, _Stream: *mut FILE) -> wint_t;
+}
+extern "C" {
+    pub fn __stdio_common_vfwprintf(
+        _Options: ::std::os::raw::c_ulonglong,
+        _Stream: *mut FILE,
+        _Format: *const wchar_t,
+        _Locale: _locale_t,
+        _ArgList: va_list,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn __stdio_common_vfwprintf_s(
+        _Options: ::std::os::raw::c_ulonglong,
+        _Stream: *mut FILE,
+        _Format: *const wchar_t,
+        _Locale: _locale_t,
+        _ArgList: va_list,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn __stdio_common_vfwprintf_p(
+        _Options: ::std::os::raw::c_ulonglong,
+        _Stream: *mut FILE,
+        _Format: *const wchar_t,
+        _Locale: _locale_t,
+        _ArgList: va_list,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn __stdio_common_vfwscanf(
+        _Options: ::std::os::raw::c_ulonglong,
+        _Stream: *mut FILE,
+        _Format: *const wchar_t,
+        _Locale: _locale_t,
+        _ArgList: va_list,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn __stdio_common_vswprintf(
+        _Options: ::std::os::raw::c_ulonglong,
+        _Buffer: *mut wchar_t,
+        _BufferCount: size_t,
+        _Format: *const wchar_t,
+        _Locale: _locale_t,
+        _ArgList: va_list,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn __stdio_common_vswprintf_s(
+        _Options: ::std::os::raw::c_ulonglong,
+        _Buffer: *mut wchar_t,
+        _BufferCount: size_t,
+        _Format: *const wchar_t,
+        _Locale: _locale_t,
+        _ArgList: va_list,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn __stdio_common_vsnwprintf_s(
+        _Options: ::std::os::raw::c_ulonglong,
+        _Buffer: *mut wchar_t,
+        _BufferCount: size_t,
+        _MaxCount: size_t,
+        _Format: *const wchar_t,
+        _Locale: _locale_t,
+        _ArgList: va_list,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn __stdio_common_vswprintf_p(
+        _Options: ::std::os::raw::c_ulonglong,
+        _Buffer: *mut wchar_t,
+        _BufferCount: size_t,
+        _Format: *const wchar_t,
+        _Locale: _locale_t,
+        _ArgList: va_list,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn __stdio_common_vswscanf(
+        _Options: ::std::os::raw::c_ulonglong,
+        _Buffer: *const wchar_t,
+        _BufferCount: size_t,
+        _Format: *const wchar_t,
+        _Locale: _locale_t,
+        _ArgList: va_list,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _itow_s(
+        _Value: ::std::os::raw::c_int,
+        _Buffer: *mut wchar_t,
+        _BufferCount: size_t,
+        _Radix: ::std::os::raw::c_int,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn _itow(
+        _Value: ::std::os::raw::c_int,
+        _Buffer: *mut wchar_t,
+        _Radix: ::std::os::raw::c_int,
+    ) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _ltow_s(
+        _Value: ::std::os::raw::c_long,
+        _Buffer: *mut wchar_t,
+        _BufferCount: size_t,
+        _Radix: ::std::os::raw::c_int,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn _ltow(
+        _Value: ::std::os::raw::c_long,
+        _Buffer: *mut wchar_t,
+        _Radix: ::std::os::raw::c_int,
+    ) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _ultow_s(
+        _Value: ::std::os::raw::c_ulong,
+        _Buffer: *mut wchar_t,
+        _BufferCount: size_t,
+        _Radix: ::std::os::raw::c_int,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn _ultow(
+        _Value: ::std::os::raw::c_ulong,
+        _Buffer: *mut wchar_t,
+        _Radix: ::std::os::raw::c_int,
+    ) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn wcstod(_String: *const wchar_t, _EndPtr: *mut *mut wchar_t) -> f64;
+}
+extern "C" {
+    pub fn _wcstod_l(
+        _String: *const wchar_t,
+        _EndPtr: *mut *mut wchar_t,
+        _Locale: _locale_t,
+    ) -> f64;
+}
+extern "C" {
+    pub fn wcstol(
+        _String: *const wchar_t,
+        _EndPtr: *mut *mut wchar_t,
+        _Radix: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_long;
+}
+extern "C" {
+    pub fn _wcstol_l(
+        _String: *const wchar_t,
+        _EndPtr: *mut *mut wchar_t,
+        _Radix: ::std::os::raw::c_int,
+        _Locale: _locale_t,
+    ) -> ::std::os::raw::c_long;
+}
+extern "C" {
+    pub fn wcstoll(
+        _String: *const wchar_t,
+        _EndPtr: *mut *mut wchar_t,
+        _Radix: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_longlong;
+}
+extern "C" {
+    pub fn _wcstoll_l(
+        _String: *const wchar_t,
+        _EndPtr: *mut *mut wchar_t,
+        _Radix: ::std::os::raw::c_int,
+        _Locale: _locale_t,
+    ) -> ::std::os::raw::c_longlong;
+}
+extern "C" {
+    pub fn wcstoul(
+        _String: *const wchar_t,
+        _EndPtr: *mut *mut wchar_t,
+        _Radix: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_ulong;
+}
+extern "C" {
+    pub fn _wcstoul_l(
+        _String: *const wchar_t,
+        _EndPtr: *mut *mut wchar_t,
+        _Radix: ::std::os::raw::c_int,
+        _Locale: _locale_t,
+    ) -> ::std::os::raw::c_ulong;
+}
+extern "C" {
+    pub fn wcstoull(
+        _String: *const wchar_t,
+        _EndPtr: *mut *mut wchar_t,
+        _Radix: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_ulonglong;
+}
+extern "C" {
+    pub fn _wcstoull_l(
+        _String: *const wchar_t,
+        _EndPtr: *mut *mut wchar_t,
+        _Radix: ::std::os::raw::c_int,
+        _Locale: _locale_t,
+    ) -> ::std::os::raw::c_ulonglong;
+}
+extern "C" {
+    pub fn wcstold(_String: *const wchar_t, _EndPtr: *mut *mut wchar_t) -> f64;
+}
+extern "C" {
+    pub fn _wcstold_l(
+        _String: *const wchar_t,
+        _EndPtr: *mut *mut wchar_t,
+        _Locale: _locale_t,
+    ) -> f64;
+}
+extern "C" {
+    pub fn wcstof(_String: *const wchar_t, _EndPtr: *mut *mut wchar_t) -> f32;
+}
+extern "C" {
+    pub fn _wcstof_l(
+        _String: *const wchar_t,
+        _EndPtr: *mut *mut wchar_t,
+        _Locale: _locale_t,
+    ) -> f32;
+}
+extern "C" {
+    pub fn _wtof(_String: *const wchar_t) -> f64;
+}
+extern "C" {
+    pub fn _wtof_l(_String: *const wchar_t, _Locale: _locale_t) -> f64;
+}
+extern "C" {
+    pub fn _wtoi(_String: *const wchar_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wtoi_l(_String: *const wchar_t, _Locale: _locale_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wtol(_String: *const wchar_t) -> ::std::os::raw::c_long;
+}
+extern "C" {
+    pub fn _wtol_l(_String: *const wchar_t, _Locale: _locale_t) -> ::std::os::raw::c_long;
+}
+extern "C" {
+    pub fn _wtoll(_String: *const wchar_t) -> ::std::os::raw::c_longlong;
+}
+extern "C" {
+    pub fn _wtoll_l(_String: *const wchar_t, _Locale: _locale_t) -> ::std::os::raw::c_longlong;
+}
+extern "C" {
+    pub fn _i64tow_s(
+        _Value: ::std::os::raw::c_longlong,
+        _Buffer: *mut wchar_t,
+        _BufferCount: size_t,
+        _Radix: ::std::os::raw::c_int,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn _i64tow(
+        _Value: ::std::os::raw::c_longlong,
+        _Buffer: *mut wchar_t,
+        _Radix: ::std::os::raw::c_int,
+    ) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _ui64tow_s(
+        _Value: ::std::os::raw::c_ulonglong,
+        _Buffer: *mut wchar_t,
+        _BufferCount: size_t,
+        _Radix: ::std::os::raw::c_int,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn _ui64tow(
+        _Value: ::std::os::raw::c_ulonglong,
+        _Buffer: *mut wchar_t,
+        _Radix: ::std::os::raw::c_int,
+    ) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wtoi64(_String: *const wchar_t) -> ::std::os::raw::c_longlong;
+}
+extern "C" {
+    pub fn _wtoi64_l(_String: *const wchar_t, _Locale: _locale_t) -> ::std::os::raw::c_longlong;
+}
+extern "C" {
+    pub fn _wcstoi64(
+        _String: *const wchar_t,
+        _EndPtr: *mut *mut wchar_t,
+        _Radix: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_longlong;
+}
+extern "C" {
+    pub fn _wcstoi64_l(
+        _String: *const wchar_t,
+        _EndPtr: *mut *mut wchar_t,
+        _Radix: ::std::os::raw::c_int,
+        _Locale: _locale_t,
+    ) -> ::std::os::raw::c_longlong;
+}
+extern "C" {
+    pub fn _wcstoui64(
+        _String: *const wchar_t,
+        _EndPtr: *mut *mut wchar_t,
+        _Radix: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_ulonglong;
+}
+extern "C" {
+    pub fn _wcstoui64_l(
+        _String: *const wchar_t,
+        _EndPtr: *mut *mut wchar_t,
+        _Radix: ::std::os::raw::c_int,
+        _Locale: _locale_t,
+    ) -> ::std::os::raw::c_ulonglong;
+}
+extern "C" {
+    pub fn _wfullpath(
+        _Buffer: *mut wchar_t,
+        _Path: *const wchar_t,
+        _BufferCount: size_t,
+    ) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wmakepath_s(
+        _Buffer: *mut wchar_t,
+        _BufferCount: size_t,
+        _Drive: *const wchar_t,
+        _Dir: *const wchar_t,
+        _Filename: *const wchar_t,
+        _Ext: *const wchar_t,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn _wmakepath(
+        _Buffer: *mut wchar_t,
+        _Drive: *const wchar_t,
+        _Dir: *const wchar_t,
+        _Filename: *const wchar_t,
+        _Ext: *const wchar_t,
+    );
+}
+extern "C" {
+    pub fn _wsplitpath(
+        _FullPath: *const wchar_t,
+        _Drive: *mut wchar_t,
+        _Dir: *mut wchar_t,
+        _Filename: *mut wchar_t,
+        _Ext: *mut wchar_t,
+    );
+}
+extern "C" {
+    pub fn _wsplitpath_s(
+        _FullPath: *const wchar_t,
+        _Drive: *mut wchar_t,
+        _DriveCount: size_t,
+        _Dir: *mut wchar_t,
+        _DirCount: size_t,
+        _Filename: *mut wchar_t,
+        _FilenameCount: size_t,
+        _Ext: *mut wchar_t,
+        _ExtCount: size_t,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn _wdupenv_s(
+        _Buffer: *mut *mut wchar_t,
+        _BufferCount: *mut size_t,
+        _VarName: *const wchar_t,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn _wgetenv(_VarName: *const wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wgetenv_s(
+        _RequiredCount: *mut size_t,
+        _Buffer: *mut wchar_t,
+        _BufferCount: size_t,
+        _VarName: *const wchar_t,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn _wputenv(_EnvString: *const wchar_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wputenv_s(_Name: *const wchar_t, _Value: *const wchar_t) -> errno_t;
+}
+extern "C" {
+    pub fn _wsearchenv_s(
+        _Filename: *const wchar_t,
+        _VarName: *const wchar_t,
+        _Buffer: *mut wchar_t,
+        _BufferCount: size_t,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn _wsearchenv(
+        _Filename: *const wchar_t,
+        _VarName: *const wchar_t,
+        _ResultPath: *mut wchar_t,
+    );
+}
+extern "C" {
+    pub fn wcscat_s(
+        _Destination: *mut wchar_t,
+        _SizeInWords: rsize_t,
+        _Source: *const wchar_t,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn wcscpy_s(
+        _Destination: *mut wchar_t,
+        _SizeInWords: rsize_t,
+        _Source: *const wchar_t,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn wcsncat_s(
+        _Destination: *mut wchar_t,
+        _SizeInWords: rsize_t,
+        _Source: *const wchar_t,
+        _MaxCount: rsize_t,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn wcsncpy_s(
+        _Destination: *mut wchar_t,
+        _SizeInWords: rsize_t,
+        _Source: *const wchar_t,
+        _MaxCount: rsize_t,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn wcstok_s(
+        _String: *mut wchar_t,
+        _Delimiter: *const wchar_t,
+        _Context: *mut *mut wchar_t,
+    ) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wcsdup(_String: *const wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn wcscat(_Destination: *mut wchar_t, _Source: *const wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn wcscmp(
+        _String1: *const ::std::os::raw::c_ushort,
+        _String2: *const ::std::os::raw::c_ushort,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn wcscpy(_Destination: *mut wchar_t, _Source: *const wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn wcscspn(_String: *const wchar_t, _Control: *const wchar_t) -> size_t;
+}
+extern "C" {
+    pub fn wcslen(_String: *const ::std::os::raw::c_ushort) -> ::std::os::raw::c_uint;
+}
+extern "C" {
+    pub fn wcsnlen(_Source: *const wchar_t, _MaxCount: size_t) -> size_t;
+}
+extern "C" {
+    pub fn wcsncat(
+        _Destination: *mut wchar_t,
+        _Source: *const wchar_t,
+        _Count: size_t,
+    ) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn wcsncmp(
+        _String1: *const ::std::os::raw::c_ushort,
+        _String2: *const ::std::os::raw::c_ushort,
+        _MaxCount: ::std::os::raw::c_uint,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn wcsncpy(
+        _Destination: *mut wchar_t,
+        _Source: *const wchar_t,
+        _Count: size_t,
+    ) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn wcspbrk(_String: *const wchar_t, _Control: *const wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn wcsspn(_String: *const wchar_t, _Control: *const wchar_t) -> size_t;
+}
+extern "C" {
+    pub fn wcstok(
+        _String: *mut wchar_t,
+        _Delimiter: *const wchar_t,
+        _Context: *mut *mut wchar_t,
+    ) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wcserror(_ErrorNumber: ::std::os::raw::c_int) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wcserror_s(
+        _Buffer: *mut wchar_t,
+        _SizeInWords: size_t,
+        _ErrorNumber: ::std::os::raw::c_int,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn __wcserror(_String: *const wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn __wcserror_s(
+        _Buffer: *mut wchar_t,
+        _SizeInWords: size_t,
+        _ErrorMessage: *const wchar_t,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn _wcsicmp(_String1: *const wchar_t, _String2: *const wchar_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wcsicmp_l(
+        _String1: *const wchar_t,
+        _String2: *const wchar_t,
+        _Locale: _locale_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wcsnicmp(
+        _String1: *const wchar_t,
+        _String2: *const wchar_t,
+        _MaxCount: size_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wcsnicmp_l(
+        _String1: *const wchar_t,
+        _String2: *const wchar_t,
+        _MaxCount: size_t,
+        _Locale: _locale_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wcsnset_s(
+        _Destination: *mut wchar_t,
+        _SizeInWords: size_t,
+        _Value: wchar_t,
+        _MaxCount: size_t,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn _wcsnset(_String: *mut wchar_t, _Value: wchar_t, _MaxCount: size_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wcsrev(_String: *mut wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wcsset_s(_Destination: *mut wchar_t, _SizeInWords: size_t, _Value: wchar_t) -> errno_t;
+}
+extern "C" {
+    pub fn _wcsset(_String: *mut wchar_t, _Value: wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wcslwr_s(_String: *mut wchar_t, _SizeInWords: size_t) -> errno_t;
+}
+extern "C" {
+    pub fn _wcslwr(_String: *mut wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wcslwr_s_l(_String: *mut wchar_t, _SizeInWords: size_t, _Locale: _locale_t) -> errno_t;
+}
+extern "C" {
+    pub fn _wcslwr_l(_String: *mut wchar_t, _Locale: _locale_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wcsupr_s(_String: *mut wchar_t, _Size: size_t) -> errno_t;
+}
+extern "C" {
+    pub fn _wcsupr(_String: *mut wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wcsupr_s_l(_String: *mut wchar_t, _Size: size_t, _Locale: _locale_t) -> errno_t;
+}
+extern "C" {
+    pub fn _wcsupr_l(_String: *mut wchar_t, _Locale: _locale_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn wcsxfrm(
+        _Destination: *mut wchar_t,
+        _Source: *const wchar_t,
+        _MaxCount: size_t,
+    ) -> size_t;
+}
+extern "C" {
+    pub fn _wcsxfrm_l(
+        _Destination: *mut wchar_t,
+        _Source: *const wchar_t,
+        _MaxCount: size_t,
+        _Locale: _locale_t,
+    ) -> size_t;
+}
+extern "C" {
+    pub fn wcscoll(_String1: *const wchar_t, _String2: *const wchar_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wcscoll_l(
+        _String1: *const wchar_t,
+        _String2: *const wchar_t,
+        _Locale: _locale_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wcsicoll(_String1: *const wchar_t, _String2: *const wchar_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wcsicoll_l(
+        _String1: *const wchar_t,
+        _String2: *const wchar_t,
+        _Locale: _locale_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wcsncoll(
+        _String1: *const wchar_t,
+        _String2: *const wchar_t,
+        _MaxCount: size_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wcsncoll_l(
+        _String1: *const wchar_t,
+        _String2: *const wchar_t,
+        _MaxCount: size_t,
+        _Locale: _locale_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wcsnicoll(
+        _String1: *const wchar_t,
+        _String2: *const wchar_t,
+        _MaxCount: size_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wcsnicoll_l(
+        _String1: *const wchar_t,
+        _String2: *const wchar_t,
+        _MaxCount: size_t,
+        _Locale: _locale_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn wcsdup(_String: *const wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn wcsicmp(_String1: *const wchar_t, _String2: *const wchar_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn wcsnicmp(
+        _String1: *const wchar_t,
+        _String2: *const wchar_t,
+        _MaxCount: size_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn wcsnset(_String: *mut wchar_t, _Value: wchar_t, _MaxCount: size_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn wcsrev(_String: *mut wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn wcsset(_String: *mut wchar_t, _Value: wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn wcslwr(_String: *mut wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn wcsupr(_String: *mut wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn wcsicoll(_String1: *const wchar_t, _String2: *const wchar_t) -> ::std::os::raw::c_int;
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct tm {
+    pub tm_sec: ::std::os::raw::c_int,
+    pub tm_min: ::std::os::raw::c_int,
+    pub tm_hour: ::std::os::raw::c_int,
+    pub tm_mday: ::std::os::raw::c_int,
+    pub tm_mon: ::std::os::raw::c_int,
+    pub tm_year: ::std::os::raw::c_int,
+    pub tm_wday: ::std::os::raw::c_int,
+    pub tm_yday: ::std::os::raw::c_int,
+    pub tm_isdst: ::std::os::raw::c_int,
+}
+#[test]
+fn bindgen_test_layout_tm() {
+    assert_eq!(
+        ::std::mem::size_of::<tm>(),
+        36usize,
+        concat!("Size of: ", stringify!(tm))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<tm>(),
+        4usize,
+        concat!("Alignment of ", stringify!(tm))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<tm>())).tm_sec as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(tm),
+            "::",
+            stringify!(tm_sec)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<tm>())).tm_min as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(tm),
+            "::",
+            stringify!(tm_min)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<tm>())).tm_hour as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(tm),
+            "::",
+            stringify!(tm_hour)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<tm>())).tm_mday as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(tm),
+            "::",
+            stringify!(tm_mday)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<tm>())).tm_mon as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(tm),
+            "::",
+            stringify!(tm_mon)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<tm>())).tm_year as *const _ as usize },
+        20usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(tm),
+            "::",
+            stringify!(tm_year)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<tm>())).tm_wday as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(tm),
+            "::",
+            stringify!(tm_wday)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<tm>())).tm_yday as *const _ as usize },
+        28usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(tm),
+            "::",
+            stringify!(tm_yday)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<tm>())).tm_isdst as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(tm),
+            "::",
+            stringify!(tm_isdst)
+        )
+    );
+}
+extern "C" {
+    pub fn _wasctime(_Tm: *const tm) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wasctime_s(_Buffer: *mut wchar_t, _SizeInWords: size_t, _Tm: *const tm) -> errno_t;
 }
 extern "C" {
     pub fn wcsftime(
-        __s: *mut wchar_t,
-        __maxsize: size_t,
-        __format: *const wchar_t,
-        __tp: *const tm,
+        _Buffer: *mut wchar_t,
+        _SizeInWords: size_t,
+        _Format: *const wchar_t,
+        _Tm: *const tm,
     ) -> size_t;
+}
+extern "C" {
+    pub fn _wcsftime_l(
+        _Buffer: *mut wchar_t,
+        _SizeInWords: size_t,
+        _Format: *const wchar_t,
+        _Tm: *const tm,
+        _Locale: _locale_t,
+    ) -> size_t;
+}
+extern "C" {
+    pub fn _wctime32(_Time: *const __time32_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wctime32_s(
+        _Buffer: *mut wchar_t,
+        _SizeInWords: size_t,
+        _Time: *const __time32_t,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn _wctime64(_Time: *const __time64_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wctime64_s(
+        _Buffer: *mut wchar_t,
+        _SizeInWords: size_t,
+        _Time: *const __time64_t,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn _wstrdate_s(_Buffer: *mut wchar_t, _SizeInWords: size_t) -> errno_t;
+}
+extern "C" {
+    pub fn _wstrdate(_Buffer: *mut wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wstrtime_s(_Buffer: *mut wchar_t, _SizeInWords: size_t) -> errno_t;
+}
+extern "C" {
+    pub fn _wstrtime(_Buffer: *mut wchar_t) -> *mut wchar_t;
+}
+pub type _ino_t = ::std::os::raw::c_ushort;
+pub type ino_t = _ino_t;
+pub type _dev_t = ::std::os::raw::c_uint;
+pub type dev_t = _dev_t;
+pub type _off_t = ::std::os::raw::c_long;
+pub type off_t = _off_t;
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct _stat32 {
+    pub st_dev: _dev_t,
+    pub st_ino: _ino_t,
+    pub st_mode: ::std::os::raw::c_ushort,
+    pub st_nlink: ::std::os::raw::c_short,
+    pub st_uid: ::std::os::raw::c_short,
+    pub st_gid: ::std::os::raw::c_short,
+    pub st_rdev: _dev_t,
+    pub st_size: _off_t,
+    pub st_atime: __time32_t,
+    pub st_mtime: __time32_t,
+    pub st_ctime: __time32_t,
+}
+#[test]
+fn bindgen_test_layout__stat32() {
+    assert_eq!(
+        ::std::mem::size_of::<_stat32>(),
+        36usize,
+        concat!("Size of: ", stringify!(_stat32))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<_stat32>(),
+        4usize,
+        concat!("Alignment of ", stringify!(_stat32))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32>())).st_dev as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32),
+            "::",
+            stringify!(st_dev)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32>())).st_ino as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32),
+            "::",
+            stringify!(st_ino)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32>())).st_mode as *const _ as usize },
+        6usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32),
+            "::",
+            stringify!(st_mode)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32>())).st_nlink as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32),
+            "::",
+            stringify!(st_nlink)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32>())).st_uid as *const _ as usize },
+        10usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32),
+            "::",
+            stringify!(st_uid)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32>())).st_gid as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32),
+            "::",
+            stringify!(st_gid)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32>())).st_rdev as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32),
+            "::",
+            stringify!(st_rdev)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32>())).st_size as *const _ as usize },
+        20usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32),
+            "::",
+            stringify!(st_size)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32>())).st_atime as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32),
+            "::",
+            stringify!(st_atime)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32>())).st_mtime as *const _ as usize },
+        28usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32),
+            "::",
+            stringify!(st_mtime)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32>())).st_ctime as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32),
+            "::",
+            stringify!(st_ctime)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct _stat32i64 {
+    pub st_dev: _dev_t,
+    pub st_ino: _ino_t,
+    pub st_mode: ::std::os::raw::c_ushort,
+    pub st_nlink: ::std::os::raw::c_short,
+    pub st_uid: ::std::os::raw::c_short,
+    pub st_gid: ::std::os::raw::c_short,
+    pub st_rdev: _dev_t,
+    pub st_size: ::std::os::raw::c_longlong,
+    pub st_atime: __time32_t,
+    pub st_mtime: __time32_t,
+    pub st_ctime: __time32_t,
+}
+#[test]
+fn bindgen_test_layout__stat32i64() {
+    assert_eq!(
+        ::std::mem::size_of::<_stat32i64>(),
+        48usize,
+        concat!("Size of: ", stringify!(_stat32i64))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<_stat32i64>(),
+        8usize,
+        concat!("Alignment of ", stringify!(_stat32i64))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32i64>())).st_dev as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32i64),
+            "::",
+            stringify!(st_dev)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32i64>())).st_ino as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32i64),
+            "::",
+            stringify!(st_ino)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32i64>())).st_mode as *const _ as usize },
+        6usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32i64),
+            "::",
+            stringify!(st_mode)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32i64>())).st_nlink as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32i64),
+            "::",
+            stringify!(st_nlink)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32i64>())).st_uid as *const _ as usize },
+        10usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32i64),
+            "::",
+            stringify!(st_uid)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32i64>())).st_gid as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32i64),
+            "::",
+            stringify!(st_gid)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32i64>())).st_rdev as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32i64),
+            "::",
+            stringify!(st_rdev)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32i64>())).st_size as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32i64),
+            "::",
+            stringify!(st_size)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32i64>())).st_atime as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32i64),
+            "::",
+            stringify!(st_atime)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32i64>())).st_mtime as *const _ as usize },
+        36usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32i64),
+            "::",
+            stringify!(st_mtime)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat32i64>())).st_ctime as *const _ as usize },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat32i64),
+            "::",
+            stringify!(st_ctime)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct _stat64i32 {
+    pub st_dev: _dev_t,
+    pub st_ino: _ino_t,
+    pub st_mode: ::std::os::raw::c_ushort,
+    pub st_nlink: ::std::os::raw::c_short,
+    pub st_uid: ::std::os::raw::c_short,
+    pub st_gid: ::std::os::raw::c_short,
+    pub st_rdev: _dev_t,
+    pub st_size: _off_t,
+    pub st_atime: __time64_t,
+    pub st_mtime: __time64_t,
+    pub st_ctime: __time64_t,
+}
+#[test]
+fn bindgen_test_layout__stat64i32() {
+    assert_eq!(
+        ::std::mem::size_of::<_stat64i32>(),
+        48usize,
+        concat!("Size of: ", stringify!(_stat64i32))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<_stat64i32>(),
+        8usize,
+        concat!("Alignment of ", stringify!(_stat64i32))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64i32>())).st_dev as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64i32),
+            "::",
+            stringify!(st_dev)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64i32>())).st_ino as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64i32),
+            "::",
+            stringify!(st_ino)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64i32>())).st_mode as *const _ as usize },
+        6usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64i32),
+            "::",
+            stringify!(st_mode)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64i32>())).st_nlink as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64i32),
+            "::",
+            stringify!(st_nlink)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64i32>())).st_uid as *const _ as usize },
+        10usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64i32),
+            "::",
+            stringify!(st_uid)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64i32>())).st_gid as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64i32),
+            "::",
+            stringify!(st_gid)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64i32>())).st_rdev as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64i32),
+            "::",
+            stringify!(st_rdev)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64i32>())).st_size as *const _ as usize },
+        20usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64i32),
+            "::",
+            stringify!(st_size)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64i32>())).st_atime as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64i32),
+            "::",
+            stringify!(st_atime)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64i32>())).st_mtime as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64i32),
+            "::",
+            stringify!(st_mtime)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64i32>())).st_ctime as *const _ as usize },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64i32),
+            "::",
+            stringify!(st_ctime)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct _stat64 {
+    pub st_dev: _dev_t,
+    pub st_ino: _ino_t,
+    pub st_mode: ::std::os::raw::c_ushort,
+    pub st_nlink: ::std::os::raw::c_short,
+    pub st_uid: ::std::os::raw::c_short,
+    pub st_gid: ::std::os::raw::c_short,
+    pub st_rdev: _dev_t,
+    pub st_size: ::std::os::raw::c_longlong,
+    pub st_atime: __time64_t,
+    pub st_mtime: __time64_t,
+    pub st_ctime: __time64_t,
+}
+#[test]
+fn bindgen_test_layout__stat64() {
+    assert_eq!(
+        ::std::mem::size_of::<_stat64>(),
+        56usize,
+        concat!("Size of: ", stringify!(_stat64))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<_stat64>(),
+        8usize,
+        concat!("Alignment of ", stringify!(_stat64))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64>())).st_dev as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64),
+            "::",
+            stringify!(st_dev)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64>())).st_ino as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64),
+            "::",
+            stringify!(st_ino)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64>())).st_mode as *const _ as usize },
+        6usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64),
+            "::",
+            stringify!(st_mode)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64>())).st_nlink as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64),
+            "::",
+            stringify!(st_nlink)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64>())).st_uid as *const _ as usize },
+        10usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64),
+            "::",
+            stringify!(st_uid)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64>())).st_gid as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64),
+            "::",
+            stringify!(st_gid)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64>())).st_rdev as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64),
+            "::",
+            stringify!(st_rdev)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64>())).st_size as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64),
+            "::",
+            stringify!(st_size)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64>())).st_atime as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64),
+            "::",
+            stringify!(st_atime)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64>())).st_mtime as *const _ as usize },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64),
+            "::",
+            stringify!(st_mtime)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<_stat64>())).st_ctime as *const _ as usize },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(_stat64),
+            "::",
+            stringify!(st_ctime)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct stat {
+    pub st_dev: _dev_t,
+    pub st_ino: _ino_t,
+    pub st_mode: ::std::os::raw::c_ushort,
+    pub st_nlink: ::std::os::raw::c_short,
+    pub st_uid: ::std::os::raw::c_short,
+    pub st_gid: ::std::os::raw::c_short,
+    pub st_rdev: _dev_t,
+    pub st_size: _off_t,
+    pub st_atime: time_t,
+    pub st_mtime: time_t,
+    pub st_ctime: time_t,
+}
+#[test]
+fn bindgen_test_layout_stat() {
+    assert_eq!(
+        ::std::mem::size_of::<stat>(),
+        48usize,
+        concat!("Size of: ", stringify!(stat))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<stat>(),
+        8usize,
+        concat!("Alignment of ", stringify!(stat))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<stat>())).st_dev as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(stat),
+            "::",
+            stringify!(st_dev)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<stat>())).st_ino as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(stat),
+            "::",
+            stringify!(st_ino)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<stat>())).st_mode as *const _ as usize },
+        6usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(stat),
+            "::",
+            stringify!(st_mode)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<stat>())).st_nlink as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(stat),
+            "::",
+            stringify!(st_nlink)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<stat>())).st_uid as *const _ as usize },
+        10usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(stat),
+            "::",
+            stringify!(st_uid)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<stat>())).st_gid as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(stat),
+            "::",
+            stringify!(st_gid)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<stat>())).st_rdev as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(stat),
+            "::",
+            stringify!(st_rdev)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<stat>())).st_size as *const _ as usize },
+        20usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(stat),
+            "::",
+            stringify!(st_size)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<stat>())).st_atime as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(stat),
+            "::",
+            stringify!(st_atime)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<stat>())).st_mtime as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(stat),
+            "::",
+            stringify!(st_mtime)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<stat>())).st_ctime as *const _ as usize },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(stat),
+            "::",
+            stringify!(st_ctime)
+        )
+    );
+}
+extern "C" {
+    pub fn _fstat32(
+        _FileHandle: ::std::os::raw::c_int,
+        _Stat: *mut _stat32,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _fstat32i64(
+        _FileHandle: ::std::os::raw::c_int,
+        _Stat: *mut _stat32i64,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _fstat64i32(
+        _FileHandle: ::std::os::raw::c_int,
+        _Stat: *mut _stat64i32,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _fstat64(
+        _FileHandle: ::std::os::raw::c_int,
+        _Stat: *mut _stat64,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _stat32(
+        _FileName: *const ::std::os::raw::c_char,
+        _Stat: *mut _stat32,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _stat32i64(
+        _FileName: *const ::std::os::raw::c_char,
+        _Stat: *mut _stat32i64,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _stat64i32(
+        _FileName: *const ::std::os::raw::c_char,
+        _Stat: *mut _stat64i32,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _stat64(
+        _FileName: *const ::std::os::raw::c_char,
+        _Stat: *mut _stat64,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wstat32(_FileName: *const wchar_t, _Stat: *mut _stat32) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wstat32i64(_FileName: *const wchar_t, _Stat: *mut _stat32i64) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wstat64i32(_FileName: *const wchar_t, _Stat: *mut _stat64i32) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn _wstat64(_FileName: *const wchar_t, _Stat: *mut _stat64) -> ::std::os::raw::c_int;
+}
+pub type _Wint_t = wchar_t;
+extern "C" {
+    pub fn _wsetlocale(_Category: ::std::os::raw::c_int, _Locale: *const wchar_t) -> *mut wchar_t;
+}
+extern "C" {
+    pub fn _wcreate_locale(_Category: ::std::os::raw::c_int, _Locale: *const wchar_t) -> _locale_t;
+}
+extern "C" {
+    pub fn btowc(_Ch: ::std::os::raw::c_int) -> wint_t;
+}
+extern "C" {
+    pub fn mbrlen(
+        _Ch: *const ::std::os::raw::c_char,
+        _SizeInBytes: size_t,
+        _State: *mut mbstate_t,
+    ) -> size_t;
+}
+extern "C" {
+    pub fn mbrtowc(
+        _DstCh: *mut wchar_t,
+        _SrcCh: *const ::std::os::raw::c_char,
+        _SizeInBytes: size_t,
+        _State: *mut mbstate_t,
+    ) -> size_t;
+}
+extern "C" {
+    pub fn mbsrtowcs_s(
+        _Retval: *mut size_t,
+        _Dst: *mut wchar_t,
+        _Size: size_t,
+        _PSrc: *mut *const ::std::os::raw::c_char,
+        _N: size_t,
+        _State: *mut mbstate_t,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn mbsrtowcs(
+        _Dest: *mut wchar_t,
+        _PSrc: *mut *const ::std::os::raw::c_char,
+        _Count: size_t,
+        _State: *mut mbstate_t,
+    ) -> size_t;
+}
+extern "C" {
+    pub fn wcrtomb_s(
+        _Retval: *mut size_t,
+        _Dst: *mut ::std::os::raw::c_char,
+        _SizeInBytes: size_t,
+        _Ch: wchar_t,
+        _State: *mut mbstate_t,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn wcrtomb(
+        _Dest: *mut ::std::os::raw::c_char,
+        _Source: wchar_t,
+        _State: *mut mbstate_t,
+    ) -> size_t;
+}
+extern "C" {
+    pub fn wcsrtombs_s(
+        _Retval: *mut size_t,
+        _Dst: *mut ::std::os::raw::c_char,
+        _SizeInBytes: size_t,
+        _Src: *mut *const wchar_t,
+        _Size: size_t,
+        _State: *mut mbstate_t,
+    ) -> errno_t;
+}
+extern "C" {
+    pub fn wcsrtombs(
+        _Dest: *mut ::std::os::raw::c_char,
+        _PSource: *mut *const wchar_t,
+        _Count: size_t,
+        _State: *mut mbstate_t,
+    ) -> size_t;
+}
+extern "C" {
+    pub fn wctob(_WCh: wint_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn wmemcpy_s(_S1: *mut wchar_t, _N1: rsize_t, _S2: *const wchar_t, _N: rsize_t) -> errno_t;
+}
+extern "C" {
+    pub fn wmemmove_s(_S1: *mut wchar_t, _N1: rsize_t, _S2: *const wchar_t, _N: rsize_t)
+        -> errno_t;
 }
 pub type int_least8_t = ::std::os::raw::c_schar;
 pub type int_least16_t = ::std::os::raw::c_short;
 pub type int_least32_t = ::std::os::raw::c_int;
-pub type int_least64_t = ::std::os::raw::c_long;
+pub type int_least64_t = ::std::os::raw::c_longlong;
 pub type uint_least8_t = ::std::os::raw::c_uchar;
 pub type uint_least16_t = ::std::os::raw::c_ushort;
 pub type uint_least32_t = ::std::os::raw::c_uint;
-pub type uint_least64_t = ::std::os::raw::c_ulong;
+pub type uint_least64_t = ::std::os::raw::c_ulonglong;
 pub type int_fast8_t = ::std::os::raw::c_schar;
-pub type int_fast16_t = ::std::os::raw::c_long;
-pub type int_fast32_t = ::std::os::raw::c_long;
-pub type int_fast64_t = ::std::os::raw::c_long;
+pub type int_fast16_t = ::std::os::raw::c_int;
+pub type int_fast32_t = ::std::os::raw::c_int;
+pub type int_fast64_t = ::std::os::raw::c_longlong;
 pub type uint_fast8_t = ::std::os::raw::c_uchar;
-pub type uint_fast16_t = ::std::os::raw::c_ulong;
-pub type uint_fast32_t = ::std::os::raw::c_ulong;
-pub type uint_fast64_t = ::std::os::raw::c_ulong;
-pub type intmax_t = ::std::os::raw::c_long;
-pub type uintmax_t = ::std::os::raw::c_ulong;
+pub type uint_fast16_t = ::std::os::raw::c_uint;
+pub type uint_fast32_t = ::std::os::raw::c_uint;
+pub type uint_fast64_t = ::std::os::raw::c_ulonglong;
+pub type intmax_t = ::std::os::raw::c_longlong;
+pub type uintmax_t = ::std::os::raw::c_ulonglong;
 extern "C" {
     pub fn TCOD_strdup(s: *const ::std::os::raw::c_char) -> *mut ::std::os::raw::c_char;
 }
@@ -1275,13 +3658,13 @@ fn bindgen_test_layout_TCOD_dice_t() {
         )
     );
 }
-#[repr(u32)]
+#[repr(i32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TCOD_random_algo_t {
     TCOD_RNG_MT = 0,
     TCOD_RNG_CMWC = 1,
 }
-#[repr(u32)]
+#[repr(i32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TCOD_distribution_t {
     TCOD_DISTRIBUTION_LINEAR = 0,
@@ -1301,12 +3684,12 @@ pub struct _TCOD_tree_t {
 fn bindgen_test_layout__TCOD_tree_t() {
     assert_eq!(
         ::std::mem::size_of::<_TCOD_tree_t>(),
-        24usize,
+        12usize,
         concat!("Size of: ", stringify!(_TCOD_tree_t))
     );
     assert_eq!(
         ::std::mem::align_of::<_TCOD_tree_t>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(_TCOD_tree_t))
     );
     assert_eq!(
@@ -1321,7 +3704,7 @@ fn bindgen_test_layout__TCOD_tree_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<_TCOD_tree_t>())).father as *const _ as usize },
-        8usize,
+        4usize,
         concat!(
             "Offset of field: ",
             stringify!(_TCOD_tree_t),
@@ -1331,7 +3714,7 @@ fn bindgen_test_layout__TCOD_tree_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<_TCOD_tree_t>())).sons as *const _ as usize },
-        16usize,
+        8usize,
         concat!(
             "Offset of field: ",
             stringify!(_TCOD_tree_t),
@@ -1368,12 +3751,12 @@ pub struct TCOD_bsp_t {
 fn bindgen_test_layout_TCOD_bsp_t() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_bsp_t>(),
-        48usize,
+        36usize,
         concat!("Size of: ", stringify!(TCOD_bsp_t))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_bsp_t>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_bsp_t))
     );
     assert_eq!(
@@ -1388,7 +3771,7 @@ fn bindgen_test_layout_TCOD_bsp_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_bsp_t>())).x as *const _ as usize },
-        24usize,
+        12usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_bsp_t),
@@ -1398,7 +3781,7 @@ fn bindgen_test_layout_TCOD_bsp_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_bsp_t>())).y as *const _ as usize },
-        28usize,
+        16usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_bsp_t),
@@ -1408,7 +3791,7 @@ fn bindgen_test_layout_TCOD_bsp_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_bsp_t>())).w as *const _ as usize },
-        32usize,
+        20usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_bsp_t),
@@ -1418,7 +3801,7 @@ fn bindgen_test_layout_TCOD_bsp_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_bsp_t>())).h as *const _ as usize },
-        36usize,
+        24usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_bsp_t),
@@ -1428,7 +3811,7 @@ fn bindgen_test_layout_TCOD_bsp_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_bsp_t>())).position as *const _ as usize },
-        40usize,
+        28usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_bsp_t),
@@ -1438,7 +3821,7 @@ fn bindgen_test_layout_TCOD_bsp_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_bsp_t>())).level as *const _ as usize },
-        44usize,
+        32usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_bsp_t),
@@ -1448,7 +3831,7 @@ fn bindgen_test_layout_TCOD_bsp_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_bsp_t>())).horizontal as *const _ as usize },
-        45usize,
+        33usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_bsp_t),
@@ -1780,7 +4163,7 @@ pub const TCOD_COLOR_MAGENTA: _bindgen_ty_1 = _bindgen_ty_1::TCOD_COLOR_MAGENTA;
 pub const TCOD_COLOR_PINK: _bindgen_ty_1 = _bindgen_ty_1::TCOD_COLOR_PINK;
 pub const TCOD_COLOR_CRIMSON: _bindgen_ty_1 = _bindgen_ty_1::TCOD_COLOR_CRIMSON;
 pub const TCOD_COLOR_NB: _bindgen_ty_1 = _bindgen_ty_1::TCOD_COLOR_NB;
-#[repr(u32)]
+#[repr(i32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum _bindgen_ty_1 {
     TCOD_COLOR_RED = 0,
@@ -1815,7 +4198,7 @@ pub const TCOD_COLOR_DARK: _bindgen_ty_2 = _bindgen_ty_2::TCOD_COLOR_DARK;
 pub const TCOD_COLOR_DARKER: _bindgen_ty_2 = _bindgen_ty_2::TCOD_COLOR_DARKER;
 pub const TCOD_COLOR_DARKEST: _bindgen_ty_2 = _bindgen_ty_2::TCOD_COLOR_DARKEST;
 pub const TCOD_COLOR_LEVELS: _bindgen_ty_2 = _bindgen_ty_2::TCOD_COLOR_LEVELS;
-#[repr(u32)]
+#[repr(i32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum _bindgen_ty_2 {
     TCOD_COLOR_DESATURATED = 0,
@@ -2499,12 +4882,12 @@ pub struct TCOD_TilesetObserver {
 fn bindgen_test_layout_TCOD_TilesetObserver() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_TilesetObserver>(),
-        40usize,
+        20usize,
         concat!("Size of: ", stringify!(TCOD_TilesetObserver))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_TilesetObserver>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_TilesetObserver))
     );
     assert_eq!(
@@ -2519,7 +4902,7 @@ fn bindgen_test_layout_TCOD_TilesetObserver() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_TilesetObserver>())).next as *const _ as usize },
-        8usize,
+        4usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_TilesetObserver),
@@ -2529,7 +4912,7 @@ fn bindgen_test_layout_TCOD_TilesetObserver() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_TilesetObserver>())).userdata as *const _ as usize },
-        16usize,
+        8usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_TilesetObserver),
@@ -2541,7 +4924,7 @@ fn bindgen_test_layout_TCOD_TilesetObserver() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_TilesetObserver>())).on_observer_delete as *const _ as usize
         },
-        24usize,
+        12usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_TilesetObserver),
@@ -2553,7 +4936,7 @@ fn bindgen_test_layout_TCOD_TilesetObserver() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_TilesetObserver>())).on_tile_changed as *const _ as usize
         },
-        32usize,
+        16usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_TilesetObserver),
@@ -2586,12 +4969,12 @@ pub struct TCOD_Tileset {
 fn bindgen_test_layout_TCOD_Tileset() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_Tileset>(),
-        64usize,
+        44usize,
         concat!("Size of: ", stringify!(TCOD_Tileset))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_Tileset>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_Tileset))
     );
     assert_eq!(
@@ -2646,7 +5029,7 @@ fn bindgen_test_layout_TCOD_Tileset() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Tileset>())).pixels as *const _ as usize },
-        24usize,
+        20usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Tileset),
@@ -2658,7 +5041,7 @@ fn bindgen_test_layout_TCOD_Tileset() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_Tileset>())).character_map_length as *const _ as usize
         },
-        32usize,
+        24usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Tileset),
@@ -2668,7 +5051,7 @@ fn bindgen_test_layout_TCOD_Tileset() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Tileset>())).character_map as *const _ as usize },
-        40usize,
+        28usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Tileset),
@@ -2678,7 +5061,7 @@ fn bindgen_test_layout_TCOD_Tileset() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Tileset>())).observer_list as *const _ as usize },
-        48usize,
+        32usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Tileset),
@@ -2688,7 +5071,7 @@ fn bindgen_test_layout_TCOD_Tileset() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Tileset>())).virtual_columns as *const _ as usize },
-        56usize,
+        36usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Tileset),
@@ -2698,7 +5081,7 @@ fn bindgen_test_layout_TCOD_Tileset() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Tileset>())).ref_count as *const _ as usize },
-        60usize,
+        40usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Tileset),
@@ -2833,7 +5216,7 @@ extern "C" {
         desired: ::std::os::raw::c_int,
     ) -> TCOD_Error;
 }
-#[repr(u32)]
+#[repr(i32)]
 #[doc = "  \\enum TCOD_bkgnd_flag_t"]
 #[doc = ""]
 #[doc = "  Background color blend modes."]
@@ -2854,7 +5237,7 @@ pub enum TCOD_bkgnd_flag_t {
     TCOD_BKGND_ALPH = 12,
     TCOD_BKGND_DEFAULT = 13,
 }
-#[repr(u32)]
+#[repr(i32)]
 #[doc = "  \\enum TCOD_alignment_t"]
 #[doc = ""]
 #[doc = "  Print justification options."]
@@ -2962,12 +5345,12 @@ pub struct TCOD_Console {
 fn bindgen_test_layout_TCOD_Console() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_Console>(),
-        56usize,
+        44usize,
         concat!("Size of: ", stringify!(TCOD_Console))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_Console>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_Console))
     );
     assert_eq!(
@@ -3002,7 +5385,7 @@ fn bindgen_test_layout_TCOD_Console() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Console>())).bkgnd_flag as *const _ as usize },
-        16usize,
+        12usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Console),
@@ -3012,7 +5395,7 @@ fn bindgen_test_layout_TCOD_Console() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Console>())).alignment as *const _ as usize },
-        20usize,
+        16usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Console),
@@ -3022,7 +5405,7 @@ fn bindgen_test_layout_TCOD_Console() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Console>())).fore as *const _ as usize },
-        24usize,
+        20usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Console),
@@ -3032,7 +5415,7 @@ fn bindgen_test_layout_TCOD_Console() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Console>())).back as *const _ as usize },
-        27usize,
+        23usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Console),
@@ -3042,7 +5425,7 @@ fn bindgen_test_layout_TCOD_Console() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Console>())).has_key_color as *const _ as usize },
-        30usize,
+        26usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Console),
@@ -3052,7 +5435,7 @@ fn bindgen_test_layout_TCOD_Console() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Console>())).key_color as *const _ as usize },
-        31usize,
+        27usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Console),
@@ -3062,7 +5445,7 @@ fn bindgen_test_layout_TCOD_Console() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Console>())).elements as *const _ as usize },
-        36usize,
+        32usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Console),
@@ -3072,7 +5455,7 @@ fn bindgen_test_layout_TCOD_Console() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Console>())).userdata as *const _ as usize },
-        40usize,
+        36usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Console),
@@ -3082,7 +5465,7 @@ fn bindgen_test_layout_TCOD_Console() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Console>())).on_delete as *const _ as usize },
-        48usize,
+        40usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Console),
@@ -3359,7 +5742,7 @@ extern "C" {
         height: ::std::os::raw::c_int,
     );
 }
-#[repr(u32)]
+#[repr(i32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TCOD_keycode_t {
     TCODK_NONE = 0,
@@ -3573,7 +5956,7 @@ impl Default for TCOD_key_t {
         unsafe { ::std::mem::zeroed() }
     }
 }
-#[repr(u32)]
+#[repr(i32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TCOD_chars_t {
     TCOD_CHAR_HLINE = 196,
@@ -3657,7 +6040,7 @@ pub enum TCOD_chars_t {
     TCOD_CHAR_POW2 = 253,
     TCOD_CHAR_BULLET_SQUARE = 254,
 }
-#[repr(u32)]
+#[repr(i32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TCOD_key_status_t {
     TCOD_KEY_PRESSED = 1,
@@ -3728,8 +6111,8 @@ impl ::std::ops::BitAndAssign for TCOD_font_flags_t {
 #[doc = "  These font flags can be OR'd together into a bit-field and passed to"]
 #[doc = "  TCOD_console_set_custom_font"]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub struct TCOD_font_flags_t(pub u32);
-#[repr(u32)]
+pub struct TCOD_font_flags_t(pub i32);
+#[repr(i32)]
 #[doc = "  The available renderers."]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TCOD_renderer_t {
@@ -4055,12 +6438,12 @@ pub struct TCOD_Context {
 fn bindgen_test_layout_TCOD_Context() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_Context>(),
-        88usize,
+        44usize,
         concat!("Size of: ", stringify!(TCOD_Context))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_Context>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_Context))
     );
     assert_eq!(
@@ -4075,7 +6458,7 @@ fn bindgen_test_layout_TCOD_Context() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Context>())).contextdata as *const _ as usize },
-        8usize,
+        4usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Context),
@@ -4085,7 +6468,7 @@ fn bindgen_test_layout_TCOD_Context() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Context>())).destructor_ as *const _ as usize },
-        16usize,
+        8usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Context),
@@ -4095,7 +6478,7 @@ fn bindgen_test_layout_TCOD_Context() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Context>())).present_ as *const _ as usize },
-        24usize,
+        12usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Context),
@@ -4105,7 +6488,7 @@ fn bindgen_test_layout_TCOD_Context() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Context>())).pixel_to_tile_ as *const _ as usize },
-        32usize,
+        16usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Context),
@@ -4115,7 +6498,7 @@ fn bindgen_test_layout_TCOD_Context() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Context>())).save_screenshot_ as *const _ as usize },
-        40usize,
+        20usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Context),
@@ -4125,7 +6508,7 @@ fn bindgen_test_layout_TCOD_Context() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Context>())).get_sdl_window_ as *const _ as usize },
-        48usize,
+        24usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Context),
@@ -4135,7 +6518,7 @@ fn bindgen_test_layout_TCOD_Context() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Context>())).get_sdl_renderer_ as *const _ as usize },
-        56usize,
+        28usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Context),
@@ -4145,7 +6528,7 @@ fn bindgen_test_layout_TCOD_Context() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Context>())).accumulate_ as *const _ as usize },
-        64usize,
+        32usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Context),
@@ -4155,7 +6538,7 @@ fn bindgen_test_layout_TCOD_Context() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Context>())).set_tileset as *const _ as usize },
-        72usize,
+        36usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Context),
@@ -4168,7 +6551,7 @@ fn bindgen_test_layout_TCOD_Context() {
             &(*(::std::ptr::null::<TCOD_Context>())).cb_recommended_console_size_ as *const _
                 as usize
         },
-        80usize,
+        40usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Context),
@@ -4321,12 +6704,12 @@ pub struct TCOD_mipmap_ {
 fn bindgen_test_layout_TCOD_mipmap_() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_mipmap_>(),
-        32usize,
+        24usize,
         concat!("Size of: ", stringify!(TCOD_mipmap_))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_mipmap_>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_mipmap_))
     );
     assert_eq!(
@@ -4381,7 +6764,7 @@ fn bindgen_test_layout_TCOD_mipmap_() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_mipmap_>())).dirty as *const _ as usize },
-        24usize,
+        20usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_mipmap_),
@@ -4407,12 +6790,12 @@ pub struct TCOD_Image {
 fn bindgen_test_layout_TCOD_Image() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_Image>(),
-        24usize,
+        12usize,
         concat!("Size of: ", stringify!(TCOD_Image))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_Image>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_Image))
     );
     assert_eq!(
@@ -4427,7 +6810,7 @@ fn bindgen_test_layout_TCOD_Image() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Image>())).mipmaps as *const _ as usize },
-        8usize,
+        4usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Image),
@@ -4437,7 +6820,7 @@ fn bindgen_test_layout_TCOD_Image() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Image>())).key_color as *const _ as usize },
-        16usize,
+        8usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Image),
@@ -4447,7 +6830,7 @@ fn bindgen_test_layout_TCOD_Image() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Image>())).has_key_color as *const _ as usize },
-        19usize,
+        11usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Image),
@@ -5072,7 +7455,7 @@ extern "C" {
 impl TCOD_colctrl_t {
     pub const TCOD_COLCTRL_NUMBER: TCOD_colctrl_t = TCOD_colctrl_t::TCOD_COLCTRL_5;
 }
-#[repr(u32)]
+#[repr(i32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TCOD_colctrl_t {
     TCOD_COLCTRL_1 = 1,
@@ -5424,12 +7807,12 @@ pub struct TCOD_Map {
 fn bindgen_test_layout_TCOD_Map() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_Map>(),
-        24usize,
+        16usize,
         concat!("Size of: ", stringify!(TCOD_Map))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_Map>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_Map))
     );
     assert_eq!(
@@ -5464,7 +7847,7 @@ fn bindgen_test_layout_TCOD_Map() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Map>())).cells as *const _ as usize },
-        16usize,
+        12usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Map),
@@ -5479,7 +7862,7 @@ impl Default for TCOD_Map {
     }
 }
 pub type TCOD_map_t = *mut TCOD_Map;
-#[repr(u32)]
+#[repr(i32)]
 #[doc = "  Field-of-view options."]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TCOD_fov_algorithm_t {
@@ -5604,7 +7987,7 @@ extern "C" {
     #[doc = "This function is provisional, the API may change in the future."]
     pub fn TCOD_set_default_tileset(tileset: *mut TCOD_Tileset);
 }
-#[repr(u32)]
+#[repr(i32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TCOD_noise_type_t {
     TCOD_NOISE_PERLIN = 1,
@@ -5631,12 +8014,12 @@ pub struct TCOD_Noise {
 fn bindgen_test_layout_TCOD_Noise() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_Noise>(),
-        4904usize,
+        4888usize,
         concat!("Size of: ", stringify!(TCOD_Noise))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_Noise>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_Noise))
     );
     assert_eq!(
@@ -5701,7 +8084,7 @@ fn bindgen_test_layout_TCOD_Noise() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Noise>())).waveletTileData as *const _ as usize },
-        4880usize,
+        4876usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Noise),
@@ -5711,7 +8094,7 @@ fn bindgen_test_layout_TCOD_Noise() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Noise>())).rand as *const _ as usize },
-        4888usize,
+        4880usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Noise),
@@ -5721,7 +8104,7 @@ fn bindgen_test_layout_TCOD_Noise() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Noise>())).noise_type as *const _ as usize },
-        4896usize,
+        4884usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Noise),
@@ -5789,12 +8172,12 @@ pub struct TCOD_heightmap_t {
 fn bindgen_test_layout_TCOD_heightmap_t() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_heightmap_t>(),
-        16usize,
+        12usize,
         concat!("Size of: ", stringify!(TCOD_heightmap_t))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_heightmap_t>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_heightmap_t))
     );
     assert_eq!(
@@ -6060,12 +8443,12 @@ pub struct TCOD_lex_t {
 fn bindgen_test_layout_TCOD_lex_t() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_lex_t>(),
-        2632usize,
+        2584usize,
         concat!("Size of: ", stringify!(TCOD_lex_t))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_lex_t>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_lex_t))
     );
     assert_eq!(
@@ -6120,7 +8503,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).tok as *const _ as usize },
-        24usize,
+        20usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6130,7 +8513,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).toklen as *const _ as usize },
-        32usize,
+        24usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6140,7 +8523,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).lastStringDelim as *const _ as usize },
-        36usize,
+        28usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6150,7 +8533,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).pos as *const _ as usize },
-        40usize,
+        32usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6160,7 +8543,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).buf as *const _ as usize },
-        48usize,
+        36usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6170,7 +8553,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).filename as *const _ as usize },
-        56usize,
+        40usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6180,7 +8563,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).last_javadoc_comment as *const _ as usize },
-        64usize,
+        44usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6190,7 +8573,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).nb_symbols as *const _ as usize },
-        72usize,
+        48usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6200,7 +8583,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).nb_keywords as *const _ as usize },
-        76usize,
+        52usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6210,7 +8593,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).flags as *const _ as usize },
-        80usize,
+        56usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6220,7 +8603,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).symbols as *const _ as usize },
-        84usize,
+        60usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6230,7 +8613,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).keywords as *const _ as usize },
-        584usize,
+        560usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6240,7 +8623,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).simpleCmt as *const _ as usize },
-        2584usize,
+        2560usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6250,7 +8633,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).cmtStart as *const _ as usize },
-        2592usize,
+        2564usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6260,7 +8643,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).cmtStop as *const _ as usize },
-        2600usize,
+        2568usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6270,7 +8653,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).javadocCmtStart as *const _ as usize },
-        2608usize,
+        2572usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6280,7 +8663,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).stringDelim as *const _ as usize },
-        2616usize,
+        2576usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6290,7 +8673,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).javadoc_read as *const _ as usize },
-        2624usize,
+        2580usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6300,7 +8683,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).allocBuf as *const _ as usize },
-        2625usize,
+        2581usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6310,7 +8693,7 @@ fn bindgen_test_layout_TCOD_lex_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_lex_t>())).savept as *const _ as usize },
-        2626usize,
+        2582usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_lex_t),
@@ -6807,12 +9190,12 @@ pub struct TCOD_Dijkstra {
 fn bindgen_test_layout_TCOD_Dijkstra() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_Dijkstra>(),
-        64usize,
+        40usize,
         concat!("Size of: ", stringify!(TCOD_Dijkstra))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_Dijkstra>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_Dijkstra))
     );
     assert_eq!(
@@ -6867,7 +9250,7 @@ fn bindgen_test_layout_TCOD_Dijkstra() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Dijkstra>())).func as *const _ as usize },
-        24usize,
+        20usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Dijkstra),
@@ -6877,7 +9260,7 @@ fn bindgen_test_layout_TCOD_Dijkstra() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Dijkstra>())).user_data as *const _ as usize },
-        32usize,
+        24usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Dijkstra),
@@ -6887,7 +9270,7 @@ fn bindgen_test_layout_TCOD_Dijkstra() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Dijkstra>())).distances as *const _ as usize },
-        40usize,
+        28usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Dijkstra),
@@ -6897,7 +9280,7 @@ fn bindgen_test_layout_TCOD_Dijkstra() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Dijkstra>())).nodes as *const _ as usize },
-        48usize,
+        32usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Dijkstra),
@@ -6907,7 +9290,7 @@ fn bindgen_test_layout_TCOD_Dijkstra() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Dijkstra>())).path as *const _ as usize },
-        56usize,
+        36usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Dijkstra),
@@ -6982,50 +9365,11 @@ extern "C" {
 extern "C" {
     pub fn TCOD_dijkstra_delete(dijkstra: TCOD_dijkstra_t);
 }
-#[repr(C)]
-#[repr(align(16))]
-#[derive(Debug, Default, Copy, Clone)]
-pub struct max_align_t {
-    pub __clang_max_align_nonce1: ::std::os::raw::c_longlong,
-    pub __bindgen_padding_0: u64,
-    pub __clang_max_align_nonce2: u128,
+extern "C" {
+    pub fn __threadid() -> ::std::os::raw::c_ulong;
 }
-#[test]
-fn bindgen_test_layout_max_align_t() {
-    assert_eq!(
-        ::std::mem::size_of::<max_align_t>(),
-        32usize,
-        concat!("Size of: ", stringify!(max_align_t))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<max_align_t>(),
-        16usize,
-        concat!("Alignment of ", stringify!(max_align_t))
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<max_align_t>())).__clang_max_align_nonce1 as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(max_align_t),
-            "::",
-            stringify!(__clang_max_align_nonce1)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<max_align_t>())).__clang_max_align_nonce2 as *const _ as usize
-        },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(max_align_t),
-            "::",
-            stringify!(__clang_max_align_nonce2)
-        )
-    );
+extern "C" {
+    pub fn __threadhandle() -> usize;
 }
 #[repr(C)]
 #[derive(Debug, Default)]
@@ -7045,6 +9389,26 @@ fn bindgen_test_layout_TCOD_HeapNode() {
         4usize,
         concat!("Alignment of ", stringify!(TCOD_HeapNode))
     );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<TCOD_HeapNode>())).priority as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(TCOD_HeapNode),
+            "::",
+            stringify!(priority)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<TCOD_HeapNode>())).data as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(TCOD_HeapNode),
+            "::",
+            stringify!(data)
+        )
+    );
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -7059,12 +9423,12 @@ pub struct TCOD_Heap {
 fn bindgen_test_layout_TCOD_Heap() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_Heap>(),
-        32usize,
+        20usize,
         concat!("Size of: ", stringify!(TCOD_Heap))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_Heap>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_Heap))
     );
     assert_eq!(
@@ -7079,7 +9443,7 @@ fn bindgen_test_layout_TCOD_Heap() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Heap>())).size as *const _ as usize },
-        8usize,
+        4usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Heap),
@@ -7089,7 +9453,7 @@ fn bindgen_test_layout_TCOD_Heap() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Heap>())).capacity as *const _ as usize },
-        12usize,
+        8usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Heap),
@@ -7099,7 +9463,7 @@ fn bindgen_test_layout_TCOD_Heap() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Heap>())).node_size as *const _ as usize },
-        16usize,
+        12usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Heap),
@@ -7109,7 +9473,7 @@ fn bindgen_test_layout_TCOD_Heap() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Heap>())).data_size as *const _ as usize },
-        24usize,
+        16usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Heap),
@@ -7158,12 +9522,12 @@ pub struct TCOD_ArrayData {
 fn bindgen_test_layout_TCOD_ArrayData() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_ArrayData>(),
-        96usize,
+        52usize,
         concat!("Size of: ", stringify!(TCOD_ArrayData))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_ArrayData>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_ArrayData))
     );
     assert_eq!(
@@ -7198,7 +9562,7 @@ fn bindgen_test_layout_TCOD_ArrayData() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_ArrayData>())).strides as *const _ as usize },
-        48usize,
+        28usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_ArrayData),
@@ -7208,7 +9572,7 @@ fn bindgen_test_layout_TCOD_ArrayData() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_ArrayData>())).data as *const _ as usize },
-        88usize,
+        48usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_ArrayData),
@@ -7233,12 +9597,12 @@ pub struct TCOD_BasicGraph2D {
 fn bindgen_test_layout_TCOD_BasicGraph2D() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_BasicGraph2D>(),
-        104usize,
+        60usize,
         concat!("Size of: ", stringify!(TCOD_BasicGraph2D))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_BasicGraph2D>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_BasicGraph2D))
     );
     assert_eq!(
@@ -7253,7 +9617,7 @@ fn bindgen_test_layout_TCOD_BasicGraph2D() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_BasicGraph2D>())).cardinal as *const _ as usize },
-        96usize,
+        52usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_BasicGraph2D),
@@ -7263,7 +9627,7 @@ fn bindgen_test_layout_TCOD_BasicGraph2D() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_BasicGraph2D>())).diagonal as *const _ as usize },
-        100usize,
+        56usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_BasicGraph2D),
@@ -7294,12 +9658,12 @@ pub struct TCOD_Pathfinder {
 fn bindgen_test_layout_TCOD_Pathfinder() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_Pathfinder>(),
-        376usize,
+        208usize,
         concat!("Size of: ", stringify!(TCOD_Pathfinder))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_Pathfinder>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_Pathfinder))
     );
     assert_eq!(
@@ -7314,7 +9678,7 @@ fn bindgen_test_layout_TCOD_Pathfinder() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Pathfinder>())).shape as *const _ as usize },
-        8usize,
+        4usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Pathfinder),
@@ -7324,7 +9688,7 @@ fn bindgen_test_layout_TCOD_Pathfinder() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Pathfinder>())).owns_distance as *const _ as usize },
-        40usize,
+        20usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Pathfinder),
@@ -7334,7 +9698,7 @@ fn bindgen_test_layout_TCOD_Pathfinder() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Pathfinder>())).owns_graph as *const _ as usize },
-        41usize,
+        21usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Pathfinder),
@@ -7344,7 +9708,7 @@ fn bindgen_test_layout_TCOD_Pathfinder() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Pathfinder>())).owns_traversal as *const _ as usize },
-        42usize,
+        22usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Pathfinder),
@@ -7354,7 +9718,7 @@ fn bindgen_test_layout_TCOD_Pathfinder() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Pathfinder>())).distance as *const _ as usize },
-        48usize,
+        24usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Pathfinder),
@@ -7364,7 +9728,7 @@ fn bindgen_test_layout_TCOD_Pathfinder() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Pathfinder>())).graph as *const _ as usize },
-        144usize,
+        76usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Pathfinder),
@@ -7374,7 +9738,7 @@ fn bindgen_test_layout_TCOD_Pathfinder() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Pathfinder>())).traversal as *const _ as usize },
-        248usize,
+        136usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Pathfinder),
@@ -7384,7 +9748,7 @@ fn bindgen_test_layout_TCOD_Pathfinder() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Pathfinder>())).heap as *const _ as usize },
-        344usize,
+        188usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Pathfinder),
@@ -7451,12 +9815,12 @@ pub struct TCOD_Frontier {
 fn bindgen_test_layout_TCOD_Frontier() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_Frontier>(),
-        56usize,
+        44usize,
         concat!("Size of: ", stringify!(TCOD_Frontier))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_Frontier>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_Frontier))
     );
     assert_eq!(
@@ -7551,7 +9915,7 @@ extern "C" {
     #[doc = "Remove all nodes from this frontier."]
     pub fn TCOD_frontier_clear(frontier: *mut TCOD_Frontier) -> TCOD_Error;
 }
-#[repr(u32)]
+#[repr(i32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TCOD_value_type_t {
     TCOD_TYPE_NONE = 0,
@@ -7608,7 +9972,7 @@ pub union TCOD_value_t {
     pub dice: TCOD_dice_t,
     pub list: TCOD_list_t,
     pub custom: *mut ::std::os::raw::c_void,
-    _bindgen_union_align: [u64; 2usize],
+    _bindgen_union_align: [u32; 4usize],
 }
 #[test]
 fn bindgen_test_layout_TCOD_value_t() {
@@ -7619,7 +9983,7 @@ fn bindgen_test_layout_TCOD_value_t() {
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_value_t>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_value_t))
     );
     assert_eq!(
@@ -7806,12 +10170,12 @@ pub struct TCOD_parser_listener_t {
 fn bindgen_test_layout_TCOD_parser_listener_t() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_parser_listener_t>(),
-        40usize,
+        20usize,
         concat!("Size of: ", stringify!(TCOD_parser_listener_t))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_parser_listener_t>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_parser_listener_t))
     );
     assert_eq!(
@@ -7828,7 +10192,7 @@ fn bindgen_test_layout_TCOD_parser_listener_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_parser_listener_t>())).new_flag as *const _ as usize },
-        8usize,
+        4usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_parser_listener_t),
@@ -7840,7 +10204,7 @@ fn bindgen_test_layout_TCOD_parser_listener_t() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_parser_listener_t>())).new_property as *const _ as usize
         },
-        16usize,
+        8usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_parser_listener_t),
@@ -7852,7 +10216,7 @@ fn bindgen_test_layout_TCOD_parser_listener_t() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_parser_listener_t>())).end_struct as *const _ as usize
         },
-        24usize,
+        12usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_parser_listener_t),
@@ -7862,7 +10226,7 @@ fn bindgen_test_layout_TCOD_parser_listener_t() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_parser_listener_t>())).error as *const _ as usize },
-        32usize,
+        16usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_parser_listener_t),
@@ -7989,12 +10353,12 @@ pub struct TCOD_ParserStruct {
 fn bindgen_test_layout_TCOD_ParserStruct() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_ParserStruct>(),
-        40usize,
+        20usize,
         concat!("Size of: ", stringify!(TCOD_ParserStruct))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_ParserStruct>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_ParserStruct))
     );
     assert_eq!(
@@ -8009,7 +10373,7 @@ fn bindgen_test_layout_TCOD_ParserStruct() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_ParserStruct>())).flags as *const _ as usize },
-        8usize,
+        4usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_ParserStruct),
@@ -8019,7 +10383,7 @@ fn bindgen_test_layout_TCOD_ParserStruct() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_ParserStruct>())).props as *const _ as usize },
-        16usize,
+        8usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_ParserStruct),
@@ -8029,7 +10393,7 @@ fn bindgen_test_layout_TCOD_ParserStruct() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_ParserStruct>())).lists as *const _ as usize },
-        24usize,
+        12usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_ParserStruct),
@@ -8039,7 +10403,7 @@ fn bindgen_test_layout_TCOD_ParserStruct() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_ParserStruct>())).structs as *const _ as usize },
-        32usize,
+        16usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_ParserStruct),
@@ -8066,12 +10430,12 @@ pub struct TCOD_Parser {
 fn bindgen_test_layout_TCOD_Parser() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_Parser>(),
-        152usize,
+        76usize,
         concat!("Size of: ", stringify!(TCOD_Parser))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_Parser>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_Parser))
     );
     assert_eq!(
@@ -8086,7 +10450,7 @@ fn bindgen_test_layout_TCOD_Parser() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Parser>())).customs as *const _ as usize },
-        8usize,
+        4usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Parser),
@@ -8096,7 +10460,7 @@ fn bindgen_test_layout_TCOD_Parser() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Parser>())).fatal as *const _ as usize },
-        136usize,
+        68usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Parser),
@@ -8106,7 +10470,7 @@ fn bindgen_test_layout_TCOD_Parser() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_Parser>())).props as *const _ as usize },
-        144usize,
+        72usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_Parser),
@@ -8170,12 +10534,12 @@ pub struct TCOD_TilesetAtlasOpenGL {
 fn bindgen_test_layout_TCOD_TilesetAtlasOpenGL() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_TilesetAtlasOpenGL>(),
-        32usize,
+        24usize,
         concat!("Size of: ", stringify!(TCOD_TilesetAtlasOpenGL))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_TilesetAtlasOpenGL>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_TilesetAtlasOpenGL))
     );
     assert_eq!(
@@ -8192,7 +10556,7 @@ fn bindgen_test_layout_TCOD_TilesetAtlasOpenGL() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_TilesetAtlasOpenGL>())).observer as *const _ as usize
         },
-        8usize,
+        4usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_TilesetAtlasOpenGL),
@@ -8202,7 +10566,7 @@ fn bindgen_test_layout_TCOD_TilesetAtlasOpenGL() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_TilesetAtlasOpenGL>())).texture as *const _ as usize },
-        16usize,
+        8usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_TilesetAtlasOpenGL),
@@ -8214,7 +10578,7 @@ fn bindgen_test_layout_TCOD_TilesetAtlasOpenGL() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_TilesetAtlasOpenGL>())).texture_size as *const _ as usize
         },
-        20usize,
+        12usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_TilesetAtlasOpenGL),
@@ -8226,7 +10590,7 @@ fn bindgen_test_layout_TCOD_TilesetAtlasOpenGL() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_TilesetAtlasOpenGL>())).texture_columns as *const _ as usize
         },
-        24usize,
+        16usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_TilesetAtlasOpenGL),
@@ -8238,7 +10602,7 @@ fn bindgen_test_layout_TCOD_TilesetAtlasOpenGL() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_TilesetAtlasOpenGL>())).texture_rows as *const _ as usize
         },
-        28usize,
+        20usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_TilesetAtlasOpenGL),
@@ -8268,7 +10632,7 @@ pub struct TCOD_RendererGLCommon {
 fn bindgen_test_layout_TCOD_RendererGLCommon() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_RendererGLCommon>(),
-        64usize,
+        48usize,
         concat!("Size of: ", stringify!(TCOD_RendererGLCommon))
     );
     assert_eq!(
@@ -8288,7 +10652,7 @@ fn bindgen_test_layout_TCOD_RendererGLCommon() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_RendererGLCommon>())).glcontext as *const _ as usize },
-        8usize,
+        4usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererGLCommon),
@@ -8298,7 +10662,7 @@ fn bindgen_test_layout_TCOD_RendererGLCommon() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_RendererGLCommon>())).atlas as *const _ as usize },
-        16usize,
+        8usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererGLCommon),
@@ -8310,7 +10674,7 @@ fn bindgen_test_layout_TCOD_RendererGLCommon() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_RendererGLCommon>())).sdl_subsystems as *const _ as usize
         },
-        24usize,
+        12usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererGLCommon),
@@ -8322,7 +10686,7 @@ fn bindgen_test_layout_TCOD_RendererGLCommon() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_RendererGLCommon>())).last_offset_x as *const _ as usize
         },
-        32usize,
+        16usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererGLCommon),
@@ -8334,7 +10698,7 @@ fn bindgen_test_layout_TCOD_RendererGLCommon() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_RendererGLCommon>())).last_offset_y as *const _ as usize
         },
-        40usize,
+        24usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererGLCommon),
@@ -8346,7 +10710,7 @@ fn bindgen_test_layout_TCOD_RendererGLCommon() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_RendererGLCommon>())).last_scale_x as *const _ as usize
         },
-        48usize,
+        32usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererGLCommon),
@@ -8358,7 +10722,7 @@ fn bindgen_test_layout_TCOD_RendererGLCommon() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_RendererGLCommon>())).last_scale_y as *const _ as usize
         },
-        56usize,
+        40usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererGLCommon),
@@ -8390,7 +10754,7 @@ pub struct TCOD_RendererGL1 {
 fn bindgen_test_layout_TCOD_RendererGL1() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_RendererGL1>(),
-        80usize,
+        64usize,
         concat!("Size of: ", stringify!(TCOD_RendererGL1))
     );
     assert_eq!(
@@ -8412,7 +10776,7 @@ fn bindgen_test_layout_TCOD_RendererGL1() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_RendererGL1>())).background_texture as *const _ as usize
         },
-        64usize,
+        48usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererGL1),
@@ -8424,7 +10788,7 @@ fn bindgen_test_layout_TCOD_RendererGL1() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_RendererGL1>())).background_width as *const _ as usize
         },
-        68usize,
+        52usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererGL1),
@@ -8436,7 +10800,7 @@ fn bindgen_test_layout_TCOD_RendererGL1() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_RendererGL1>())).background_height as *const _ as usize
         },
-        72usize,
+        56usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererGL1),
@@ -8474,7 +10838,7 @@ pub struct TCOD_RendererGL2 {
 fn bindgen_test_layout_TCOD_RendererGL2() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_RendererGL2>(),
-        96usize,
+        80usize,
         concat!("Size of: ", stringify!(TCOD_RendererGL2))
     );
     assert_eq!(
@@ -8494,7 +10858,7 @@ fn bindgen_test_layout_TCOD_RendererGL2() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_RendererGL2>())).program as *const _ as usize },
-        64usize,
+        48usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererGL2),
@@ -8506,7 +10870,7 @@ fn bindgen_test_layout_TCOD_RendererGL2() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_RendererGL2>())).console_textures as *const _ as usize
         },
-        68usize,
+        52usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererGL2),
@@ -8516,7 +10880,7 @@ fn bindgen_test_layout_TCOD_RendererGL2() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_RendererGL2>())).console_width as *const _ as usize },
-        80usize,
+        64usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererGL2),
@@ -8526,7 +10890,7 @@ fn bindgen_test_layout_TCOD_RendererGL2() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_RendererGL2>())).console_height as *const _ as usize },
-        84usize,
+        68usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererGL2),
@@ -8536,7 +10900,7 @@ fn bindgen_test_layout_TCOD_RendererGL2() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_RendererGL2>())).vertex_buffer as *const _ as usize },
-        88usize,
+        72usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererGL2),
@@ -8587,12 +10951,12 @@ pub struct TCOD_TilesetAtlasSDL2 {
 fn bindgen_test_layout_TCOD_TilesetAtlasSDL2() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_TilesetAtlasSDL2>(),
-        40usize,
+        20usize,
         concat!("Size of: ", stringify!(TCOD_TilesetAtlasSDL2))
     );
     assert_eq!(
         ::std::mem::align_of::<TCOD_TilesetAtlasSDL2>(),
-        8usize,
+        4usize,
         concat!("Alignment of ", stringify!(TCOD_TilesetAtlasSDL2))
     );
     assert_eq!(
@@ -8607,7 +10971,7 @@ fn bindgen_test_layout_TCOD_TilesetAtlasSDL2() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_TilesetAtlasSDL2>())).texture as *const _ as usize },
-        8usize,
+        4usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_TilesetAtlasSDL2),
@@ -8617,7 +10981,7 @@ fn bindgen_test_layout_TCOD_TilesetAtlasSDL2() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_TilesetAtlasSDL2>())).tileset as *const _ as usize },
-        16usize,
+        8usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_TilesetAtlasSDL2),
@@ -8627,7 +10991,7 @@ fn bindgen_test_layout_TCOD_TilesetAtlasSDL2() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_TilesetAtlasSDL2>())).observer as *const _ as usize },
-        24usize,
+        12usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_TilesetAtlasSDL2),
@@ -8639,7 +11003,7 @@ fn bindgen_test_layout_TCOD_TilesetAtlasSDL2() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_TilesetAtlasSDL2>())).texture_columns as *const _ as usize
         },
-        32usize,
+        16usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_TilesetAtlasSDL2),
@@ -8673,7 +11037,7 @@ pub struct TCOD_RendererSDL2 {
 fn bindgen_test_layout_TCOD_RendererSDL2() {
     assert_eq!(
         ::std::mem::size_of::<TCOD_RendererSDL2>(),
-        80usize,
+        56usize,
         concat!("Size of: ", stringify!(TCOD_RendererSDL2))
     );
     assert_eq!(
@@ -8693,7 +11057,7 @@ fn bindgen_test_layout_TCOD_RendererSDL2() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_RendererSDL2>())).renderer as *const _ as usize },
-        8usize,
+        4usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererSDL2),
@@ -8703,7 +11067,7 @@ fn bindgen_test_layout_TCOD_RendererSDL2() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_RendererSDL2>())).atlas as *const _ as usize },
-        16usize,
+        8usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererSDL2),
@@ -8713,7 +11077,7 @@ fn bindgen_test_layout_TCOD_RendererSDL2() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_RendererSDL2>())).cache_console as *const _ as usize },
-        24usize,
+        12usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererSDL2),
@@ -8723,7 +11087,7 @@ fn bindgen_test_layout_TCOD_RendererSDL2() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_RendererSDL2>())).cache_texture as *const _ as usize },
-        32usize,
+        16usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererSDL2),
@@ -8735,7 +11099,7 @@ fn bindgen_test_layout_TCOD_RendererSDL2() {
         unsafe {
             &(*(::std::ptr::null::<TCOD_RendererSDL2>())).sdl_subsystems as *const _ as usize
         },
-        40usize,
+        20usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererSDL2),
@@ -8745,7 +11109,7 @@ fn bindgen_test_layout_TCOD_RendererSDL2() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_RendererSDL2>())).last_offset_x as *const _ as usize },
-        48usize,
+        24usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererSDL2),
@@ -8755,7 +11119,7 @@ fn bindgen_test_layout_TCOD_RendererSDL2() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_RendererSDL2>())).last_offset_y as *const _ as usize },
-        56usize,
+        32usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererSDL2),
@@ -8765,7 +11129,7 @@ fn bindgen_test_layout_TCOD_RendererSDL2() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_RendererSDL2>())).last_scale_x as *const _ as usize },
-        64usize,
+        40usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererSDL2),
@@ -8775,7 +11139,7 @@ fn bindgen_test_layout_TCOD_RendererSDL2() {
     );
     assert_eq!(
         unsafe { &(*(::std::ptr::null::<TCOD_RendererSDL2>())).last_scale_y as *const _ as usize },
-        72usize,
+        48usize,
         concat!(
             "Offset of field: ",
             stringify!(TCOD_RendererSDL2),
@@ -8934,7 +11298,7 @@ extern "C" {
 extern "C" {
     pub fn TCOD_sys_get_SDL_renderer() -> *mut SDL_Renderer;
 }
-#[repr(u32)]
+#[repr(i32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum TCOD_event_t {
     TCOD_EVENT_NONE = 0,
@@ -9356,75 +11720,13 @@ extern "C" {
         out: *mut TCOD_mouse_t,
     ) -> TCOD_event_t;
 }
-pub type __builtin_va_list = [__va_list_tag; 1usize];
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct __va_list_tag {
-    pub gp_offset: ::std::os::raw::c_uint,
-    pub fp_offset: ::std::os::raw::c_uint,
-    pub overflow_arg_area: *mut ::std::os::raw::c_void,
-    pub reg_save_area: *mut ::std::os::raw::c_void,
-}
-#[test]
-fn bindgen_test_layout___va_list_tag() {
-    assert_eq!(
-        ::std::mem::size_of::<__va_list_tag>(),
-        24usize,
-        concat!("Size of: ", stringify!(__va_list_tag))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<__va_list_tag>(),
-        8usize,
-        concat!("Alignment of ", stringify!(__va_list_tag))
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<__va_list_tag>())).gp_offset as *const _ as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__va_list_tag),
-            "::",
-            stringify!(gp_offset)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<__va_list_tag>())).fp_offset as *const _ as usize },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__va_list_tag),
-            "::",
-            stringify!(fp_offset)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<__va_list_tag>())).overflow_arg_area as *const _ as usize },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__va_list_tag),
-            "::",
-            stringify!(overflow_arg_area)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::std::ptr::null::<__va_list_tag>())).reg_save_area as *const _ as usize },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(__va_list_tag),
-            "::",
-            stringify!(reg_save_area)
-        )
-    );
-}
-impl Default for __va_list_tag {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
+#[derive(Debug, Default, Copy, Clone)]
+pub struct __crt_locale_data {
+    pub _address: u8,
 }
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
-pub struct __locale_data {
+pub struct __crt_multibyte_data {
     pub _address: u8,
 }
