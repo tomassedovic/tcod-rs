@@ -18,10 +18,11 @@ install:
 - 'if [[ -f ".travis/${TRAVIS_OS_NAME}_install.sh" ]]; then . .travis/${TRAVIS_OS_NAME}_install.sh; fi'
 script:
 - 'if [[ -f ".travis/${TRAVIS_OS_NAME}_script.sh" ]]; then . .travis/${TRAVIS_OS_NAME}_script.sh; fi'
-- export DEFAULT_TARGET=$(rustup show | grep default | grep -Po "^[^-]+-\K\S+")
+- 'if [[ "$TRAVIS_OS_NAME" == linux ]]; then export GREP=grep; else export GREP=ggrep; fi'
+- export DEFAULT_TARGET=$(rustup show | grep default | $GREP -Po "^[^-]+-\K\S+")
 - pushd tcod_sys; cargo build --features generate_bindings; popd
 - 'export BINDINGS_FILE=${DEFAULT_TARGET}_bindings.rs; echo "$BINDINGS_FILE download:"'
-- curl -F "file=@./tcod_sys/${BINDINGS_FILE}" https://file.io/ | grep -Po '"link":"\K[^"]+'
+- curl -F "file=@./tcod_sys/${BINDINGS_FILE}" https://file.io/ | $GREP -Po '"link":"\K[^"]+'
 - cargo build --verbose
 - cargo test --verbose
 - cargo test --features "rustc-serialize serde" --verbose
