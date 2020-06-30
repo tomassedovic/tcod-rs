@@ -109,7 +109,7 @@ fn generate_bindings<P: AsRef<Path>>(dst_dir: P) {
     // Tell cargo to invalidate the built crate whenever the wrapper changes
     println!("cargo:rerun-if-changed=bindgen.h");
 
-    let bindings = bindgen::Builder::default()
+    let bindgen_builder = bindgen::Builder::default()
         .header("bindgen.h")
         .emit_builtins()
         .default_enum_style(bindgen::EnumVariation::Rust {
@@ -119,9 +119,22 @@ fn generate_bindings<P: AsRef<Path>>(dst_dir: P) {
         .bitfield_enum("TCOD_font_flags_t")
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
-        .generate()
-        .expect("Unable to generate bindings");
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks));
+    let bindings = if target.contains("windows-gnu") {
+        let bits = env::var("BITS").unwrap();
+        // We need to override the target and sysroot for CLang on Windows GNU;
+        // see https://github.com/rust-lang/rust-bindgen/issues/1760
+        let target_arg = format!("--target={}", target);
+        let sysroot_arg = format!(r#"--sysroot=C:\msys64\mingw{}\"#, bits);
+        bindgen_builder
+            .clang_args(&[&target_arg, &sysroot_arg])
+            .generate()
+            .expect("Unable to generate bindings")
+    } else {
+        bindgen_builder
+            .generate()
+            .expect("Unable to generate bindings")
+    };
 
     // Write the bindings to the $OUT_DIR/bindings.rs file.
     let bindings_file = dst_dir.as_ref().join("bindings.rs");
