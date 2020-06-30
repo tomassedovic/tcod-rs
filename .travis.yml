@@ -13,11 +13,11 @@ matrix:
     rust: nightly
 before_install:
 - chmod +x .travis/*.sh
-- 'if [[ -f ".travis/${TRAVIS_OS_NAME}_before_install.sh" ]]; then .travis/${TRAVIS_OS_NAME}_before_install.sh; fi'
+- 'if [[ -f ".travis/${TRAVIS_OS_NAME}_before_install.sh" ]]; then . .travis/${TRAVIS_OS_NAME}_before_install.sh; fi'
 install:
-- 'if [[ -f ".travis/${TRAVIS_OS_NAME}_install.sh" ]]; then .travis/${TRAVIS_OS_NAME}_install.sh; fi'
+- 'if [[ -f ".travis/${TRAVIS_OS_NAME}_install.sh" ]]; then . .travis/${TRAVIS_OS_NAME}_install.sh; fi'
 script:
-- 'if [[ -f ".travis/${TRAVIS_OS_NAME}_script.sh" ]]; then .travis/${TRAVIS_OS_NAME}_script.sh; fi'
+- 'if [[ -f ".travis/${TRAVIS_OS_NAME}_script.sh" ]]; then . .travis/${TRAVIS_OS_NAME}_script.sh; fi'
 - export DEFAULT_TARGET=$(rustup show | grep default | grep -Po "^[^-]+-\K\S+")
 - pushd tcod_sys; cargo build --features generate_bindings; popd
 - 'export BINDINGS_FILE=${DEFAULT_TARGET}_bindings.rs; echo "$BINDINGS_FILE download:"'
