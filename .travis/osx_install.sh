@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-brew install sdl2 llvm
+brew install sdl2 llvm grep
