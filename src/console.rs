@@ -1313,17 +1313,17 @@ native_enum_convert!(Renderer, TCOD_renderer_t);
 
 bitflags! {
     /// All the possible font layouts that can be used for custom bitmap fonts
-    pub struct FontLayout: ffi::TCOD_font_flags_t_type {
-        const ASCII_INCOL = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_ASCII_INCOL.0;
-        const ASCII_INROW = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_ASCII_INROW.0;
-        const TCOD = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_TCOD.0;
+    pub struct FontLayout: std::os::raw::c_int {
+        const ASCII_INCOL = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_ASCII_INCOL.0 as std::os::raw::c_int;
+        const ASCII_INROW = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_ASCII_INROW.0 as std::os::raw::c_int;
+        const TCOD = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_TCOD.0 as std::os::raw::c_int;
     }
 }
 
 bitflags! {
-    pub struct FontType: ffi::TCOD_font_flags_t_type {
+    pub struct FontType: std::os::raw::c_int {
         const DEFAULT = 0;
-        const GREYSCALE = ffi::TCOD_font_flags_t::TCOD_FONT_TYPE_GREYSCALE.0;
+        const GREYSCALE = ffi::TCOD_font_flags_t::TCOD_FONT_TYPE_GREYSCALE.0 as std::os::raw::c_int;
     }
 }
 
