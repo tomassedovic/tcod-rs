@@ -19,8 +19,8 @@ install:
   - set RUST_BACKTRACE=1
   - rustc -V
   - cargo -V
-  - ps: $env:BITS=$(if ($env:ARCH -eq "amd64") { 64 } else { 32 })
-  - ps: $env:PROGRAM_FILES=$(if ($env:ARCH -eq "amd64") { "C:\Program Files" } else { ${env:ProgramFiles(x86)} })
+  - ps: $env:BITS=$(if ($env:ARCH -eq "amd64" -or $env:MSYS_BITS -eq "64") { 64 } else { 32 })
+  - ps: $env:PROGRAM_FILES=$(if ($env:ARCH -eq "amd64" -or $env:MSYS_BITS -eq "64") { "C:\Program Files" } else { ${env:ProgramFiles(x86)} })
   - ps: Start-FileDownload "https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/LLVM-10.0.0-win${env:BITS}.exe"
   - LLVM-10.0.0-win%BITS%.exe /S /D=%PROGRAM_FILES%\LLVM
   - set LIBCLANG_PATH=%PROGRAM_FILES%\LLVM\bin
