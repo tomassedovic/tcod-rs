@@ -9,6 +9,7 @@ readme = "README.md"
 keywords = ["gamedev", "roguelike", "libtcod"]
 license = "WTFPL"
 authors = ["Tomas Sedovic <tomas@sedovic.cz>",
+           "Alexander Krivács Schrøder <alexschrod@gmail.com>",
            "Bastien Léonard <bastien.leonard@gmail.com>",
            "Darren Kaste <darrenkaste@gmail.com>",
            "Edu Garcia <arcnorj@gmail.com>",

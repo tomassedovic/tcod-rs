@@ -195,6 +195,7 @@ URL of your feature branch works).
 ### Contributors
 
 
+* Alexander Krivács Schrøder <alexschrod@gmail.com>
 * Bastien Léonard, @bastienleonard, <bastien.leonard@gmail.com>
 * Darren Kaste, @dkaste, <darrenkaste@gmail.com>
 * Edu Garcia, @Arcnor, <arcnorj@gmail.com>
