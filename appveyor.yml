@@ -8,8 +8,8 @@ environment:
     VS: C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat
   - TARGET: x86_64-pc-windows-gnu
     MSYS_BITS: 64
-  - TARGET: i686-pc-windows-gnu
-    MSYS_BITS: 32
+#  - TARGET: i686-pc-windows-gnu
+#    MSYS_BITS: 32
 install:
   - ps: Start-FileDownload "https://static.rust-lang.org/dist/rust-nightly-${env:TARGET}.exe"
   - rust-nightly-%TARGET%.exe /VERYSILENT /NORESTART /DIR="C:\Program Files (x86)\Rust"
