@@ -1,3 +1,20 @@
+# Warning: Not Maintained
+
+This project is no longer actively developed or maintained. Please accept our apologies.
+
+Open pull requests may still get merged, but we don't expect to investigate or fix open issues.
+
+## Alternatives
+
+There are two great alternatives to check out! They are both written in pure Rust (fewer chances of library linking or dependency issues, easier to deploy) and target the web browsers as well.
+
+* [bracket-lib](https://github.com/thebracket/bracket-lib)
+  * Written by [Herbert "TheBracket"](https://github.com/thebracket), author of [Nox Futura](https://thebracket.itch.io/nox-futura)
+  * Comes with a [comprehensive tutorial](https://bfnightly.bracketproductions.com/rustbook/)
+* [doryen-rs](https://github.com/jice-nospam/doryen-rs)
+  * Written by [Jice](https://github.com/jice-nospam), the original author of libtcod (which this project provides bindings for)
+  * Spiritual successor to libtcod
+
 libtcod bindings for Rust [![Build Status](https://travis-ci.org/tomassedovic/tcod-rs.svg?branch=master)](https://travis-ci.org/tomassedovic/tcod-rs)
 -------------------------
 

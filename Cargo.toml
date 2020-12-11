@@ -26,6 +26,9 @@ authors = ["Tomas Sedovic <tomas@sedovic.cz>",
            "Pranz <jesper.fridefors@gmail.com>",
            "Zoltán Nagy @abesto <abesto@abesto.net>"]
 
+[badges]
+maintenance = { status = "deprecated" }
+
 [lib]
 name = "tcod"
 path = "src/lib.rs"
