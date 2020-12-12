@@ -1,7 +1,7 @@
 [package]
 name = "tcod-sys"
 description = "Raw FFI bindings & build script to link against libtcod."
-version = "5.0.1"
+version = "6.0.0"
 license = "WTFPL"
 homepage = "https://github.com/tomassedovic/tcod-rs"
 repository = "https://github.com/tomassedovic/tcod-rs/tree/master/tcod-sys"
@@ -18,7 +18,9 @@ path = "lib.rs"
 
 [features]
 dynlib = []
+generate_bindings = ["bindgen"]
 
 [build-dependencies]
 cc = "1.0"
 pkg-config = "0.3"
+bindgen = {version = "0.54", optional = true}

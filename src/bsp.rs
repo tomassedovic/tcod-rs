@@ -1,12 +1,12 @@
 //! Port of BSP toolkit.
 
+use bindings::c_void;
 use bindings::ffi;
 use bindings::AsNative;
-use bindings::{c_void, c_bool};
 use random::Rng;
-use std::ops::{Deref, DerefMut};
 use std::fmt;
 use std::mem;
+use std::ops::{Deref, DerefMut};
 use std::ptr;
 
 #[derive(Copy, Clone, Debug)]
@@ -39,7 +39,7 @@ pub enum TraverseOrder {
 /// ```
 pub struct Bsp<'a> {
     bsp: &'a mut ffi::TCOD_bsp_t,
-    root: bool
+    root: bool,
 }
 
 impl<'a> Deref for Bsp<'a> {
@@ -58,22 +58,28 @@ impl<'a> DerefMut for Bsp<'a> {
 
 impl<'a> fmt::Debug for Bsp<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "Bsp{{x: {}, y:{}, w: {}, h: {}, position: {}, level: {}, horizontal: {} }}",
-               self.x, self.y, self.w, self.h, self.position, self.level, self.horizontal)
+        write!(
+            f,
+            "Bsp{{x: {}, y:{}, w: {}, h: {}, position: {}, level: {}, horizontal: {} }}",
+            self.x, self.y, self.w, self.h, self.position, self.level, self.horizontal
+        )
     }
 }
 
-
-extern "C" fn callback_wrapper<T>(node: *mut ffi::TCOD_bsp_t, user_data: *mut c_void) -> c_bool
-    where T: FnMut(&mut Bsp) -> bool
+extern "C" fn callback_wrapper<T>(node: *mut ffi::TCOD_bsp_t, user_data: *mut c_void) -> bool
+where
+    T: FnMut(&mut Bsp) -> bool,
 {
     let callback_ptr = user_data as *mut T;
-    let cb: &mut T = unsafe {
-        &mut *callback_ptr
+    let cb: &mut T = unsafe { &mut *callback_ptr };
+    if node.is_null() {
+        panic!("Null node when traversing a BSP.")
+    }
+    let mut bsp = Bsp {
+        bsp: unsafe { &mut *node },
+        root: false,
     };
-    if node.is_null() { panic!("Null node when traversing a BSP.") }
-    let mut bsp = Bsp { bsp: unsafe { &mut *node }, root: false };
-    cb(&mut bsp) as c_bool
+    cb(&mut bsp)
 }
 
 impl<'a> Bsp<'a> {
@@ -85,7 +91,10 @@ impl<'a> Bsp<'a> {
             }
             &mut *pointer
         };
-        Bsp { bsp: bsp, root: true }
+        Bsp {
+            bsp: bsp,
+            root: true,
+        }
     }
 
     pub fn remove_sons(&mut self) {
@@ -93,31 +102,35 @@ impl<'a> Bsp<'a> {
     }
 
     pub fn split_once(&mut self, horizontal: bool, position: i32) {
-        unsafe { ffi::TCOD_bsp_split_once(self.bsp as *mut ffi::TCOD_bsp_t,
-                                          horizontal as u8,
-                                          position) }
+        unsafe { ffi::TCOD_bsp_split_once(self.bsp as *mut ffi::TCOD_bsp_t, horizontal, position) }
     }
 
-    pub fn split_recursive(&mut self,
-                           mut randomizer: Option<&mut Rng>,
-                           nb: i32,
-                           min_h_size: i32,
-                           min_v_size: i32,
-                           max_h_ratio: f32,
-                           max_v_ratio: f32) {
-        let rnd = unsafe { if let Some(ref mut r) = randomizer {
-            *r.as_native_mut()
-        } else {
-            ptr::null()
-        } };
+    pub fn split_recursive(
+        &mut self,
+        mut randomizer: Option<&mut Rng>,
+        nb: i32,
+        min_h_size: i32,
+        min_v_size: i32,
+        max_h_ratio: f32,
+        max_v_ratio: f32,
+    ) {
+        let rnd = unsafe {
+            if let Some(ref mut r) = randomizer {
+                *r.as_native_mut()
+            } else {
+                ptr::null()
+            }
+        };
         unsafe {
-            ffi::TCOD_bsp_split_recursive(self.bsp as *mut ffi::TCOD_bsp_t,
-                                          rnd as *mut _,
-                                          nb,
-                                          min_h_size,
-                                          min_v_size,
-                                          max_h_ratio,
-                                          max_v_ratio)
+            ffi::TCOD_bsp_split_recursive(
+                self.bsp as *mut ffi::TCOD_bsp_t,
+                rnd as *mut _,
+                nb,
+                min_h_size,
+                min_v_size,
+                max_h_ratio,
+                max_v_ratio,
+            )
         }
     }
 
@@ -126,39 +139,39 @@ impl<'a> Bsp<'a> {
     }
 
     /// Returns `Some(Bsp)` with left subtree, or `None` if the BSP has not been split.
-    pub fn left(&self) -> Option<Self> {
+    pub fn left(&mut self) -> Option<Self> {
         unsafe {
-            let left = ffi::TCOD_bsp_left(self.bsp as *const ffi::TCOD_bsp_t);
+            let left = ffi::TCOD_bsp_left(self.bsp as *mut ffi::TCOD_bsp_t);
             if left.is_null() {
                 None
             } else {
                 Some(Bsp {
                     bsp: &mut *left,
-                    root: false
+                    root: false,
                 })
             }
         }
     }
 
     /// Returns `Some(Bsp)` with right subtree, or `None` if the BSP has not been split.
-    pub fn right(&self) -> Option<Self> {
+    pub fn right(&mut self) -> Option<Self> {
         unsafe {
-            let right = ffi::TCOD_bsp_right(self.bsp as *const ffi::TCOD_bsp_t) ;
+            let right = ffi::TCOD_bsp_right(self.bsp as *mut ffi::TCOD_bsp_t);
             if right.is_null() {
                 None
             } else {
                 Some(Bsp {
                     bsp: &mut *right,
-                    root:false
+                    root: false,
                 })
             }
         }
     }
 
     /// Returns `Some(Bsp)` with father, or `None` if the node is root.
-    pub fn father(&self) -> Option<Self> {
+    pub fn father(&mut self) -> Option<Self> {
         unsafe {
-            let father = ffi::TCOD_bsp_father(self.bsp as *const ffi::TCOD_bsp_t);
+            let father = ffi::TCOD_bsp_father(self.bsp as *mut ffi::TCOD_bsp_t);
             if father.is_null() {
                 None
             } else {
@@ -170,35 +183,34 @@ impl<'a> Bsp<'a> {
         }
     }
 
-    pub fn is_leaf(&self) -> bool {
-        unsafe { ffi::TCOD_bsp_is_leaf(self.bsp as *const ffi::TCOD_bsp_t) != 0 }
+    pub fn is_leaf(&mut self) -> bool {
+        unsafe { ffi::TCOD_bsp_is_leaf(self.bsp as *mut ffi::TCOD_bsp_t) }
     }
 
-    pub fn contains(&self, cx: i32, cy: i32) -> bool {
-        unsafe { ffi::TCOD_bsp_contains(self.bsp as *const ffi::TCOD_bsp_t, cx, cy) != 0 }
+    pub fn contains(&mut self, cx: i32, cy: i32) -> bool {
+        unsafe { ffi::TCOD_bsp_contains(self.bsp as *mut ffi::TCOD_bsp_t, cx, cy) }
     }
 
-    pub fn find_node(&self, cx: i32, cy: i32) -> Option<Self> {
+    pub fn find_node(&mut self, cx: i32, cy: i32) -> Option<Self> {
         unsafe {
-            let pointer = ffi::TCOD_bsp_find_node(self.bsp as *const ffi::TCOD_bsp_t,
-                                                  cx, cy);
+            let pointer = ffi::TCOD_bsp_find_node(self.bsp as *mut ffi::TCOD_bsp_t, cx, cy);
             if pointer.is_null() {
                 None
             } else {
                 Some(Bsp {
                     bsp: &mut *pointer,
-                    root: false
+                    root: false,
                 })
             }
         }
     }
 
     pub fn horizontal(&self) -> bool {
-        self.horizontal != 0
+        self.horizontal
     }
 
     pub fn set_horizontal(&mut self, h: bool) {
-        self.horizontal = h as u8;
+        self.horizontal = h;
     }
 
     /// Instead of 5 `traverse*` functions as in original API, Rust binding
@@ -218,35 +230,41 @@ impl<'a> Bsp<'a> {
     ///    assert_eq!(counter, 1);
     /// ```
     pub fn traverse<F>(&self, order: TraverseOrder, mut callback: F) -> bool
-        where F: FnMut(&mut Bsp) -> bool
+    where
+        F: FnMut(&mut Bsp) -> bool,
     {
         let cb: &mut dyn FnMut(&mut Bsp) -> bool = &mut callback;
         let retval = unsafe {
             let bsp = mem::transmute(self.bsp as *const ffi::TCOD_bsp_t);
             match order {
-                TraverseOrder::PreOrder =>
-                    ffi::TCOD_bsp_traverse_pre_order(bsp,
-                                                     Some(callback_wrapper::<F>),
-                                                     cb as *mut _ as *mut c_void),
-                TraverseOrder::InOrder =>
-                    ffi::TCOD_bsp_traverse_in_order(bsp,
-                                                    Some(callback_wrapper::<F>),
-                                                    cb as *mut _ as *mut c_void),
-                TraverseOrder::PostOrder =>
-                    ffi::TCOD_bsp_traverse_post_order(bsp,
-                                                      Some(callback_wrapper::<F>),
-                                                      cb as *mut _ as *mut c_void),
-                TraverseOrder::LevelOrder =>
-                    ffi::TCOD_bsp_traverse_level_order(bsp,
-                                                       Some(callback_wrapper::<F>),
-                                                       cb as *mut _ as *mut c_void),
-                TraverseOrder::InvertedLevelOrder =>
-                    ffi::TCOD_bsp_traverse_inverted_level_order(bsp,
-                                                                Some(callback_wrapper::<F>),
-                                                                cb as *mut _ as *mut c_void),
+                TraverseOrder::PreOrder => ffi::TCOD_bsp_traverse_pre_order(
+                    bsp,
+                    Some(callback_wrapper::<F>),
+                    cb as *mut _ as *mut c_void,
+                ),
+                TraverseOrder::InOrder => ffi::TCOD_bsp_traverse_in_order(
+                    bsp,
+                    Some(callback_wrapper::<F>),
+                    cb as *mut _ as *mut c_void,
+                ),
+                TraverseOrder::PostOrder => ffi::TCOD_bsp_traverse_post_order(
+                    bsp,
+                    Some(callback_wrapper::<F>),
+                    cb as *mut _ as *mut c_void,
+                ),
+                TraverseOrder::LevelOrder => ffi::TCOD_bsp_traverse_level_order(
+                    bsp,
+                    Some(callback_wrapper::<F>),
+                    cb as *mut _ as *mut c_void,
+                ),
+                TraverseOrder::InvertedLevelOrder => ffi::TCOD_bsp_traverse_inverted_level_order(
+                    bsp,
+                    Some(callback_wrapper::<F>),
+                    cb as *mut _ as *mut c_void,
+                ),
             }
         };
-        retval != 0
+        retval
     }
 }
 
@@ -267,7 +285,7 @@ mod test {
     #[test]
     #[allow(unused_variables)]
     fn created_destroyed_no_panic() {
-        let bsp = Bsp::new_with_size(0, 0, 50, 50);
+        let mut bsp = Bsp::new_with_size(0, 0, 50, 50);
         let left = bsp.left(); // left has null .bsp
     }
 
@@ -302,7 +320,7 @@ mod test {
 
     #[test]
     fn split_recursive() {
-        let mut bsp = Bsp::new_with_size(0, 0, 100,100);
+        let mut bsp = Bsp::new_with_size(0, 0, 100, 100);
         let mut counter = 0;
 
         bsp.split_recursive(None, 2, 5, 5, 1.5, 1.5);
@@ -372,13 +390,13 @@ mod test {
 
     #[test]
     fn traverse_orders() {
-        let mut root = Bsp::new_with_size(0, 0, 100,100);
+        let mut root = Bsp::new_with_size(0, 0, 100, 100);
         let mut counter = 0;
 
         root.split_recursive(None, 2, 5, 5, 1.5, 1.5);
 
-        let middle_left = root.left().unwrap();
-        let middle_right = root.right().unwrap();
+        let mut middle_left = root.left().unwrap();
+        let mut middle_right = root.right().unwrap();
         let leaf1 = middle_left.left().unwrap();
         let leaf2 = middle_left.right().unwrap();
         let leaf3 = middle_right.left().unwrap();
@@ -466,7 +484,7 @@ mod test {
 
     #[test]
     fn break_traverse() {
-        let mut bsp = Bsp::new_with_size(0, 0, 100,100);
+        let mut bsp = Bsp::new_with_size(0, 0, 100, 100);
         let mut counter = 0;
 
         bsp.split_recursive(None, 2, 5, 5, 1.5, 1.5);
@@ -479,9 +497,9 @@ mod test {
 
     #[test]
     fn safe_tree_pointer() {
-        let mut bsp1 = Bsp::new_with_size(0, 0, 100,100);
+        let mut bsp1 = Bsp::new_with_size(0, 0, 100, 100);
         bsp1.split_recursive(None, 2, 5, 5, 1.5, 1.5);
-        let mut bsp2 = Bsp::new_with_size(0, 0, 100,100);
+        let mut bsp2 = Bsp::new_with_size(0, 0, 100, 100);
         bsp2.split_recursive(None, 2, 5, 5, 1.5, 1.5);
         assert!(bsp1.left().unwrap().tree.father != bsp2.left().unwrap().tree.father);
         assert!(bsp1.left().unwrap().tree.father == bsp1.right().unwrap().tree.father);

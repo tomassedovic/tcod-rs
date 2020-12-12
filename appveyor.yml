@@ -8,8 +8,8 @@ environment:
     VS: C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat
   - TARGET: x86_64-pc-windows-gnu
     MSYS_BITS: 64
-  - TARGET: i686-pc-windows-gnu
-    MSYS_BITS: 32
+#  - TARGET: i686-pc-windows-gnu
+#    MSYS_BITS: 32
 install:
   - ps: Start-FileDownload "https://static.rust-lang.org/dist/rust-nightly-${env:TARGET}.exe"
   - rust-nightly-%TARGET%.exe /VERYSILENT /NORESTART /DIR="C:\Program Files (x86)\Rust"
@@ -19,9 +19,20 @@ install:
   - set RUST_BACKTRACE=1
   - rustc -V
   - cargo -V
+  - ps: $env:BITS=$(if ($env:ARCH -eq "amd64" -or $env:MSYS_BITS -eq "64") { 64 } else { 32 })
+  - ps: $env:PROGRAM_FILES=$(if ($env:ARCH -eq "amd64" -or $env:MSYS_BITS -eq "64") { "C:\Program Files" } else { ${env:ProgramFiles(x86)} })
+  - ps: Start-FileDownload "https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/LLVM-10.0.0-win${env:BITS}.exe"
+  - LLVM-10.0.0-win%BITS%.exe /S /D=%PROGRAM_FILES%\LLVM
+  - set LIBCLANG_PATH=%PROGRAM_FILES%\LLVM\bin
 
 build: false
+
+build_script:
+  - cd tcod_sys && cargo build --features generate_bindings && cd ..
 
 test_script:
   - cargo test
   - cargo test --release
+
+artifacts:
+  - path: tcod_sys\$(TARGET)_bindings.rs

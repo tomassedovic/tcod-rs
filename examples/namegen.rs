@@ -1,7 +1,7 @@
- extern crate tcod;
+extern crate tcod;
 
 use tcod::namegen::Namegen;
-use tcod::random::{Rng, Algo};
+use tcod::random::{Algo, Rng};
 
 fn setup_namegen() -> Namegen {
     let rng = Rng::new(Algo::MT);

@@ -53,7 +53,6 @@ fn main() {
     assert_eq!(path.get(6), None);
     assert_eq!(path.get(7), None);
 
-
     // Walk the path (consuming it):
     for pos in path.walk() {
         println!("Walking to {:?}", pos);

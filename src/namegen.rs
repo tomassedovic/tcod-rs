@@ -1,11 +1,11 @@
-use std::ptr;
-use std::str;
 use std::ffi::{CStr, CString};
 use std::path::Path;
+use std::ptr;
+use std::str;
 use std::sync::Mutex;
 
 use bindings::ffi;
-use bindings::{AsNative, c_char};
+use bindings::{c_char, AsNative};
 use random::Rng;
 
 static mut NAMEGEN_FREE: bool = true;
@@ -20,7 +20,8 @@ pub struct Namegen {
 impl Drop for Namegen {
     fn drop(&mut self) {
         unsafe {
-            let _lock = NAMEGEN_MUTEX.lock()
+            let _lock = NAMEGEN_MUTEX
+                .lock()
                 .ok()
                 .expect("Namegen mutex could not be locked");
             if self.rng.is_empty() {
@@ -36,22 +37,29 @@ impl Namegen {
         unsafe {
             match NAMEGEN_FREE {
                 true => {
-                    let _lock = NAMEGEN_MUTEX.lock()
+                    let _lock = NAMEGEN_MUTEX
+                        .lock()
                         .ok()
                         .expect("Namegen mutex could not be locked");
                     NAMEGEN_FREE = false;
                     Some(Namegen { rng: Vec::new() })
-                },
-                false => None
+                }
+                false => None,
             }
         }
     }
 
-    pub fn parse<T>(&mut self, path: T) where T: AsRef<Path> {
+    pub fn parse<T>(&mut self, path: T)
+    where
+        T: AsRef<Path>,
+    {
         self.parse_with_rng(path, &Rng::get_instance())
     }
 
-    pub fn parse_with_rng<T>(&mut self, path: T, rng: &Rng) where T: AsRef<Path> {
+    pub fn parse_with_rng<T>(&mut self, path: T, rng: &Rng)
+    where
+        T: AsRef<Path>,
+    {
         self.rng.push(rng.save());
 
         let path_string = CString::new(path.as_ref().to_str().unwrap()).unwrap();
@@ -60,21 +68,31 @@ impl Namegen {
         }
     }
 
-    pub fn generate<T>(&self, name: T) -> Option<String> where T: AsRef<str> {
+    pub fn generate<T>(&self, name: T) -> Option<String>
+    where
+        T: AsRef<str>,
+    {
         unsafe {
             let name_string = CString::new(name.as_ref()).unwrap();
-            let borrowed = ffi::TCOD_namegen_generate(name_string.as_ptr() as *mut _, 0);
+            let borrowed = ffi::TCOD_namegen_generate(name_string.as_ptr() as *mut _, false);
             cstr_to_owned(borrowed)
         }
     }
 
-    pub fn generate_custom<T, U>(&self, name: T, rule: U) -> Option<String> where T: AsRef<str>, U: AsRef<str> {
+    pub fn generate_custom<T, U>(&self, name: T, rule: U) -> Option<String>
+    where
+        T: AsRef<str>,
+        U: AsRef<str>,
+    {
         unsafe {
             let name_string = CString::new(name.as_ref()).unwrap();
             let rule_string = CString::new(rule.as_ref()).unwrap();
 
-            let borrowed = ffi::TCOD_namegen_generate_custom(name_string.as_ptr() as *mut _,
-                                                             rule_string.as_ptr() as *mut _, 0);
+            let borrowed = ffi::TCOD_namegen_generate_custom(
+                name_string.as_ptr() as *mut _,
+                rule_string.as_ptr() as *mut _,
+                false,
+            );
             cstr_to_owned(borrowed)
         }
     }
@@ -100,8 +118,6 @@ fn cstr_to_owned(string: *mut c_char) -> Option<String> {
 
     unsafe {
         let string = CStr::from_ptr(string);
-        str::from_utf8(string.to_bytes())
-            .map(|x| x.to_owned())
-            .ok()
+        str::from_utf8(string.to_bytes()).map(|x| x.to_owned()).ok()
     }
 }

@@ -32,7 +32,7 @@ useful functionality such as:
 
 
 This project provides [Rust](http://www.rust-lang.org/) bindings for libtcod
-v1.6.3.
+v1.16.0-alpha.12.
 
 This project follows [Semantic Versioning](http://semver.org/). Since we're
 under `1.0.0` anything goes. The API can change at any time.
@@ -57,7 +57,7 @@ https://libtcod.readthedocs.io/en/stable/
 Current status
 --------------
 
-All raw tcod bindings are available via the `tcod-sys` crate. In addition we
+All raw tcod bindings are available via the `tcod-sys` crate. In addition, we
 want to provide safe (and more in line with the Rust style) wrappers -- if you
 can segfault outside of `unsafe` blocks, that's a bug. The safe bindings are not
 yet complete, however.
@@ -91,7 +91,7 @@ How to use this
 ---------------
 
 `tcod-rs` depends on `libtcod` so you need to build or download the official
-version. The `libtcod` version known to work is bundled with `tcod-sys` and
+version. The `libtcod` version known to work comes bundled with `tcod-sys` and
 Cargo will build it for you, but you need the build dependencies installed.
 
 Alternatively, you can provide the precompiled libtcod library to override the
@@ -101,7 +101,7 @@ To use `tcod-rs`, add this to your game's `Cargo.toml`:
 
 ```toml
 [dependencies]
-tcod = "0.15"
+tcod = "0.16"
 ```
 
 ### Building on Linux
@@ -201,11 +201,6 @@ We're not sure exactly why this is so we'd appreciate anyone's help!
 Contributing
 ------------
 
-The raw bindings were generated using
-[rust-bindgen](https://github.com/rust-lang/rust-bindgen) and are located at
-`src/ffi.rs`. The safe (hopefully?) wrapper was built on top of them at
-`src/lib.rs`.
-
 This is far from done, patches to missing functionality wrappers, documentation
 and examples are very much appreciated. If your patch (any patch -- including
 typos) gets accepted, you'll get a commit access if you want it.
@@ -213,16 +208,11 @@ typos) gets accepted, you'll get a commit access if you want it.
 We accept GitHub as well as regular pull requests (i.e. emailing or tweeting the
 URL of your feature branch works).
 
-You can regenerate the raw bindings by running:
-
-```sh
-bindgen -builtins -l tcod include/libtcod.h -o src/ffi.rs
-```
-
 
 ### Contributors
 
 
+* Alexander Krivács Schrøder <alexschrod@gmail.com>
 * Bastien Léonard, @bastienleonard, <bastien.leonard@gmail.com>
 * Darren Kaste, @dkaste, <darrenkaste@gmail.com>
 * Edu Garcia, @Arcnor, <arcnorj@gmail.com>

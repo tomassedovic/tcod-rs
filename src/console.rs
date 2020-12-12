@@ -12,25 +12,32 @@
 //!
 //! ```no_run
 //! use tcod::console::{Root, Offscreen};
+//! # use tcod::error::Result;
 //!
-//! let mut root = Root::initializer().init();
+//! # fn main() -> Result<()> {
+//! let mut root = Root::initializer().init()?;
 //! let (width, height) = (80, 30);
 //! let mut offscreen = Offscreen::new(width, height);
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! A typical `tcod-rs` program's basic structure would look something like this:
 //!
 //! ```no_run
 //! use tcod::console::Root;
+//! use tcod::error::Result;
 //!
-//! fn main() {
-//!     let mut root = Root::initializer().init(); // Replace with custom initialization code
+//! fn main() -> Result<()> {
+//!     let mut root = Root::initializer().init()?; // Replace with custom initialization code
 //!
 //!     while !root.window_closed() {
 //!         // Handling user input
 //!         // Updating the gamestate
 //!         // Rendering the results
 //!     }
+//!
+//!     Ok(())
 //! }
 //! ```
 //!
@@ -60,10 +67,11 @@ use std::marker::PhantomData;
 use std::mem::transmute;
 use std::path::Path;
 
-use bindings::ffi::{self, TCOD_bkgnd_flag_t, TCOD_renderer_t, TCOD_font_flags_t, TCOD_alignment_t};
-use bindings::{AsNative, FromNative, c_bool, CString};
+use bindings::ffi::{self, TCOD_alignment_t, TCOD_bkgnd_flag_t, TCOD_renderer_t};
+use bindings::{AsNative, CString, FromNative};
 
 use colors::Color;
+use error::{Error, Result};
 use input::{Key, KeyPressFlags};
 
 /// A type representing secondary consoles
@@ -93,12 +101,15 @@ use input::{Key, KeyPressFlags};
 /// ```no_run
 /// use tcod::console as console;
 /// use tcod::console::{Root, Offscreen};
+/// use tcod::error::Result;
 ///
-/// fn main() {
-///     let mut root = Root::initializer().init();
+/// fn main() -> Result<()> {
+///     let mut root = Root::initializer().init()?;
 ///
 ///     let mut direct = Offscreen::new(20, 20);
 ///     console::blit(&direct, (0, 0), (20, 20), &mut root, (0, 0), 1.0, 1.0);
+///
+///     Ok(())
 /// }
 ///
 /// ```
@@ -122,10 +133,11 @@ impl Offscreen {
     pub fn new(width: i32, height: i32) -> Offscreen {
         assert!(width > 0 && height > 0);
         unsafe {
-            Offscreen { con: ffi::TCOD_console_new(width, height) }
+            Offscreen {
+                con: ffi::TCOD_console_new(width, height),
+            }
         }
     }
-
 }
 
 // ! libtcod is not thread-safe, this may have some side effects but none have been seen yet
@@ -147,9 +159,10 @@ unsafe impl Send for Offscreen {}
 /// use tcod::console::Root;
 /// use tcod::input::Key;
 /// use tcod::input::KeyCode::{Up, Down, Left, Right};
+/// use tcod::error::Result;
 ///
-/// fn main() {
-///     let mut root = Root::initializer().init();
+/// fn main() -> Result<()> {
+///     let mut root = Root::initializer().init()?;
 ///
 ///     let keypress = root.wait_for_keypress(true);
 ///     match keypress.code {
@@ -159,6 +172,8 @@ unsafe impl Send for Offscreen {}
 ///         Right => {},
 ///         _ => {}
 ///     }
+///
+///     Ok(())
 /// }
 /// ```
 ///
@@ -174,28 +189,33 @@ unsafe impl Send for Offscreen {}
 ///
 /// ```no_run
 /// use tcod::console::{Console, Root};
+/// use tcod::error::Result;
 ///
-/// fn main() {
-///     let mut root = Root::initializer().init();
+/// fn main() -> Result<()> {
+///     let mut root = Root::initializer().init()?;
 ///
 ///     root.clear();
 ///     // Output style manipulation
 ///     // Calling the output functions
-///     root.flush();
+///     root.flush()?;
+///
+///     Ok(())
 /// }
 /// ```
 
 struct RootId {
-    id: ffi::TCOD_console_t
+    id: ffi::TCOD_console_t,
 }
 
 unsafe impl Sync for RootId {}
 
-static ROOT_ID: RootId = RootId { id: 0 as ffi::TCOD_console_t };
+static ROOT_ID: RootId = RootId {
+    id: 0 as ffi::TCOD_console_t,
+};
 
 pub struct Root {
     // This is here to prevent the explicit creation of Root consoles.
-    _blocker: PhantomData<Root>
+    _blocker: PhantomData<Root>,
 }
 
 impl Root {
@@ -217,52 +237,40 @@ impl Root {
     ///     .init();
     /// ```
     ///
-     pub fn initializer<'a>() -> RootInitializer<'a> {
+    pub fn initializer<'a>() -> RootInitializer<'a> {
         RootInitializer::new()
     }
 
     /// Returns with true when the `Root` console is in fullscreen mode.
     pub fn is_fullscreen(&self) -> bool {
-        unsafe {
-            ffi::TCOD_console_is_fullscreen() != 0
-        }
+        unsafe { ffi::TCOD_console_is_fullscreen() }
     }
 
     /// Toggles between windowed and fullscreen mode.
     pub fn set_fullscreen(&mut self, fullscreen: bool) {
         unsafe {
-            ffi::TCOD_console_set_fullscreen(fullscreen as u8);
+            ffi::TCOD_console_set_fullscreen(fullscreen);
         }
     }
 
     /// Returns true if the `Root` console is currently active.
     pub fn is_active(&self) -> bool {
-        unsafe {
-            ffi::TCOD_console_is_active() != 0
-        }
+        unsafe { ffi::TCOD_console_is_active() }
     }
 
     /// Returns true if the `Root` console has focus.
     pub fn has_focus(&self) -> bool {
-        unsafe {
-            ffi::TCOD_console_has_mouse_focus() != 0
-        }
+        unsafe { ffi::TCOD_console_has_mouse_focus() }
     }
-
 
     /// Returns the current fade amount (previously set by `set_fade`).
     pub fn get_fade(&self) -> u8 {
-        unsafe {
-            ffi::TCOD_console_get_fade()
-        }
+        unsafe { ffi::TCOD_console_get_fade() }
     }
 
     /// Returns the current fade color (previously set by `set_fade`).
     pub fn get_fading_color(&self) -> Color {
-        unsafe {
-            FromNative::from_native(
-                ffi::TCOD_console_get_fading_color())
-        }
+        unsafe { FromNative::from_native(ffi::TCOD_console_get_fading_color()) }
     }
 
     /// This function defines the fading parameters, allowing to easily fade the game screen to/from a color.
@@ -278,9 +286,7 @@ impl Root {
     /// that represents the event. If `flush` is true, all pending keypresses are flushed from the
     /// keyboard buffer. If false, it returns the first element from it.
     pub fn wait_for_keypress(&mut self, flush: bool) -> Key {
-        let tcod_key = unsafe {
-            ffi::TCOD_console_wait_for_keypress(flush as c_bool)
-        };
+        let tcod_key = unsafe { ffi::TCOD_console_wait_for_keypress(flush) };
         tcod_key.into()
     }
 
@@ -288,9 +294,7 @@ impl Root {
     /// [KeyState](../input/struct.KeyState.html) representing the
     /// event if they have, or `None` if they have not.
     pub fn check_for_keypress(&self, status: KeyPressFlags) -> Option<Key> {
-        let tcod_key = unsafe {
-            ffi::TCOD_console_check_for_keypress(status.bits() as i32)
-        };
+        let tcod_key = unsafe { ffi::TCOD_console_check_for_keypress(status.bits() as i32) };
         if tcod_key.vk == ffi::TCOD_keycode_t::TCODK_NONE {
             return None;
         }
@@ -299,20 +303,24 @@ impl Root {
 
     /// Returns with true if the `Root` console has been closed.
     pub fn window_closed(&self) -> bool {
-        unsafe {
-            ffi::TCOD_console_is_window_closed() != 0
-        }
+        unsafe { ffi::TCOD_console_is_window_closed() }
     }
 
     /// Flushes the contents of the `Root` console onto the screen.
-    pub fn flush(&mut self) {
-        unsafe {
-            ffi::TCOD_console_flush();
+    pub fn flush(&mut self) -> Result<()> {
+        let result = unsafe { ffi::TCOD_console_flush() };
+        if Error::is_error(result) {
+            Err(Error::from(result))
+        } else {
+            Ok(())
         }
     }
 
     /// Sets the main window's title to the string specified in the argument.
-    pub fn set_window_title<T>(&mut self, title: T) where T: AsRef<str> {
+    pub fn set_window_title<T>(&mut self, title: T)
+    where
+        T: AsRef<str>,
+    {
         unsafe {
             let c_title = CString::new(title.as_ref().as_bytes()).unwrap();
             ffi::TCOD_console_set_window_title(c_title.as_ptr());
@@ -322,12 +330,11 @@ impl Root {
     /// Embeds libtcod credits in a console.
     /// Returns true when the credits screen is finished.
 
-    pub fn render_credits(&self, x : i32, y: i32, alpha: bool) -> bool {
+    pub fn render_credits(&self, x: i32, y: i32, alpha: bool) -> bool {
         unsafe {
-            let result = ffi::TCOD_console_credits_render(x, y, alpha as c_bool);
-            result != 0
+            let result = ffi::TCOD_console_credits_render(x, y, alpha);
+            result
         }
-
     }
 
     /// Maps a single ASCII code to a character in a bitmap font.
@@ -337,16 +344,9 @@ impl Root {
     /// * `ascii_code`: The ASCII code to map
     /// * `font_char_x/font_char_y`: The coordinate of the character in the
     /// bitmap font (in characters, not pixels)
-    pub fn map_ascii_code_to_font(&mut self,
-                                  ascii_code: i32,
-                                  font_char_x: i32,
-                                  font_char_y: i32) {
+    pub fn map_ascii_code_to_font(&mut self, ascii_code: i32, font_char_x: i32, font_char_y: i32) {
         unsafe {
-            ffi::TCOD_console_map_ascii_code_to_font(
-                ascii_code,
-                font_char_x,
-                font_char_y
-            );
+            ffi::TCOD_console_map_ascii_code_to_font(ascii_code, font_char_x, font_char_y);
         }
     }
 
@@ -359,17 +359,19 @@ impl Root {
     /// * `font_char_x/font_char_y`: The coordinate of the character in the
     /// bitmap font (in characters, not pixels) corresponding to the first ASCII
     /// code
-    pub fn map_ascii_codes_to_font(&mut self,
-                                   ascii_code: i32,
-                                   nb_codes: i32,
-                                   font_char_x: i32,
-                                   font_char_y: i32) {
+    pub fn map_ascii_codes_to_font(
+        &mut self,
+        ascii_code: i32,
+        nb_codes: i32,
+        font_char_x: i32,
+        font_char_y: i32,
+    ) {
         unsafe {
             ffi::TCOD_console_map_ascii_codes_to_font(
                 ascii_code,
                 nb_codes,
                 font_char_x,
-                font_char_y
+                font_char_y,
             );
         }
     }
@@ -382,36 +384,43 @@ impl Root {
     /// * `font_char_x/font_char_y`: The coordinate of the character in the
     /// bitmap font (in characters, not pixels) corresponding to the first ASCII
     /// code in the string
-    pub fn map_string_to_font(&mut self,
-                              s: &str,
-                              font_char_x: i32,
-                              font_char_y: i32) {
+    pub fn map_string_to_font(&mut self, s: &str, font_char_x: i32, font_char_y: i32) {
         unsafe {
-            let string = CString::new(s).ok().expect("Could not convert the given \
-                                                      string to a C string.");
-            ffi::TCOD_console_map_string_to_font(
-                string.as_ptr(),
-                font_char_x,
-                font_char_y
+            let string = CString::new(s).ok().expect(
+                "Could not convert the given \
+                                                      string to a C string.",
             );
+            ffi::TCOD_console_map_string_to_font(string.as_ptr(), font_char_x, font_char_y);
         }
     }
 
-    fn set_custom_font(font_path: &Path,
-                       font_layout: FontLayout,
-                       font_type: FontType,
-                       nb_char_horizontal: i32,
-                       nb_char_vertical: i32) {
-        unsafe {
+    fn set_custom_font(
+        font_path: &Path,
+        font_layout: FontLayout,
+        font_type: FontType,
+        nb_char_horizontal: i32,
+        nb_char_vertical: i32,
+    ) -> Result<()> {
+        let result = unsafe {
             let filename = font_path.to_str().expect("Invalid font path");
-            let path = CString::new(filename).ok().expect("Font path could not be converted \
-                                                           to a C string");
+            let path = CString::new(filename).ok().expect(
+                "Font path could not be converted \
+                                                           to a C string",
+            );
             ffi::TCOD_console_set_custom_font(
-                path.as_ptr(), (font_layout as i32) | (font_type as i32),
-                nb_char_horizontal, nb_char_vertical);
+                path.as_ptr(),
+                (font_layout.bits() | font_type.bits()) as i32,
+                nb_char_horizontal,
+                nb_char_vertical,
+            )
+        };
+
+        if Error::is_error(result) {
+            Err(Error::from(result))
+        } else {
+            Ok(())
         }
     }
-
 }
 
 /// Helper struct for the `Root` console initialization
@@ -453,7 +462,7 @@ impl Root {
 ///         .size(80, 20)
 ///         .title("Example")
 ///         .fullscreen(true)
-///         .font("terminal.png", FontLayout::AsciiInCol)
+///         .font("terminal.png", FontLayout::ASCII_INCOL)
 ///         .renderer(Renderer::GLSL)
 ///         .init();
 /// }
@@ -467,7 +476,7 @@ pub struct RootInitializer<'a> {
     font_layout: FontLayout,
     font_type: FontType,
     font_dimensions: (i32, i32),
-    console_renderer: Renderer
+    console_renderer: Renderer,
 }
 
 impl<'a> RootInitializer<'a> {
@@ -478,10 +487,10 @@ impl<'a> RootInitializer<'a> {
             title: Box::new("Main Window"),
             is_fullscreen: false,
             font_path: Box::new("terminal.png"),
-            font_layout: FontLayout::AsciiInCol,
-            font_type: FontType::Default,
+            font_layout: FontLayout::ASCII_INCOL,
+            font_type: FontType::DEFAULT,
             font_dimensions: (0, 0),
-            console_renderer: Renderer::SDL
+            console_renderer: Renderer::SDL,
         }
     }
 
@@ -491,7 +500,10 @@ impl<'a> RootInitializer<'a> {
         self
     }
 
-    pub fn title<T>(&mut self, title: T) -> &mut RootInitializer<'a> where T: AsRef<str> + 'a {
+    pub fn title<T>(&mut self, title: T) -> &mut RootInitializer<'a>
+    where
+        T: AsRef<str> + 'a,
+    {
         assert!(title.as_ref().is_ascii());
         self.title = Box::new(title);
         self
@@ -502,7 +514,10 @@ impl<'a> RootInitializer<'a> {
         self
     }
 
-    pub fn font<P>(&mut self, path: P, font_layout: FontLayout) -> &mut RootInitializer<'a> where P: AsRef<Path> + 'a {
+    pub fn font<P>(&mut self, path: P, font_layout: FontLayout) -> &mut RootInitializer<'a>
+    where
+        P: AsRef<Path> + 'a,
+    {
         self.font_path = Box::new(path);
         self.font_layout = font_layout;
         self
@@ -523,25 +538,35 @@ impl<'a> RootInitializer<'a> {
         self
     }
 
-    pub fn init(&self) -> Root {
+    pub fn init(&self) -> Result<Root> {
         assert!(self.width > 0 && self.height > 0);
 
         match self.font_dimensions {
-            (horizontal, vertical) => {
-                Root::set_custom_font((*self.font_path).as_ref(),
-                                      self.font_layout, self.font_type,
-                                      horizontal, vertical)
-            }
+            (horizontal, vertical) => Root::set_custom_font(
+                (*self.font_path).as_ref(),
+                self.font_layout,
+                self.font_type,
+                horizontal,
+                vertical,
+            )?,
         }
 
         unsafe {
             let c_title = CString::new((*self.title).as_ref().as_bytes()).unwrap();
-            ffi::TCOD_console_init_root(self.width, self.height,
-                                        c_title.as_ptr(),
-                                        self.is_fullscreen as c_bool,
-                                        self.console_renderer.into());
+            let result = ffi::TCOD_console_init_root(
+                self.width,
+                self.height,
+                c_title.as_ptr(),
+                self.is_fullscreen,
+                self.console_renderer.into(),
+            );
+            if Error::is_error(result) {
+                return Err(Error::from(result));
+            }
         }
-        Root { _blocker: PhantomData }
+        Ok(Root {
+            _blocker: PhantomData,
+        })
     }
 }
 
@@ -617,7 +642,10 @@ impl AsciiLiteral for [u8; 32] {}
 
 impl<'a, T> AsciiLiteral for &'a T where T: AsciiLiteral {}
 
-impl<T> TcodString for T where T: AsRef<[u8]> + AsciiLiteral {
+impl<T> TcodString for T
+where
+    T: AsRef<[u8]> + AsciiLiteral,
+{
     fn as_ascii(&self) -> Option<&[u8]> {
         Some(self.as_ref())
     }
@@ -637,8 +665,10 @@ fn to_wstring(text: &[u8]) -> Vec<char> {
 ///
 /// ```no_run
 /// use tcod::console::{Console, Root, BackgroundFlag, TextAlignment};
+/// # use tcod::error::Result;
 ///
-/// let mut root = Root::initializer().size(80, 50).init();
+/// # fn main() -> Result<()> {
+/// let mut root = Root::initializer().size(80, 50).init()?;
 ///
 /// root.print_ex(1, 1, BackgroundFlag::None, TextAlignment::Left,
 ///               "Text aligned to left.");
@@ -651,15 +681,15 @@ fn to_wstring(text: &[u8]) -> Vec<char> {
 ///
 /// root.print_ex(40, 19, BackgroundFlag::None, TextAlignment::Center,
 ///               "Press any key to quit.");
+/// # Ok(())
+/// # }
 /// ```
-pub trait Console : AsNative<ffi::TCOD_console_t> {
+pub trait Console: AsNative<ffi::TCOD_console_t> {
     /// Returns the default text alignment for the `Console` instance. For all the possible
     /// text alignment options, see the documentation for
     /// [TextAlignment](./enum.TextAlignment.html).
     fn get_alignment(&self) -> TextAlignment {
-        let alignment = unsafe {
-            ffi::TCOD_console_get_alignment(*self.as_native())
-        };
+        let alignment = unsafe { ffi::TCOD_console_get_alignment(*self.as_native()) };
         unsafe { transmute(alignment) }
     }
 
@@ -682,32 +712,26 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
 
     /// Returns the width of the console in characters.
     fn width(&self) -> i32 {
-        unsafe {
-            ffi::TCOD_console_get_width(*self.as_native())
-        }
+        unsafe { ffi::TCOD_console_get_width(*self.as_native()) }
     }
 
     /// Returns the height of the console in characters.
     fn height(&self) -> i32 {
-        unsafe {
-            ffi::TCOD_console_get_height(*self.as_native())
-        }
+        unsafe { ffi::TCOD_console_get_height(*self.as_native()) }
     }
 
     /// Return the console's default background color. This is used in
     /// several other methods, like: `clear`, `put_char`, etc.
     fn get_default_background(&mut self) -> Color {
         unsafe {
-            FromNative::from_native(
-                ffi::TCOD_console_get_default_background(*self.as_native()))
+            FromNative::from_native(ffi::TCOD_console_get_default_background(*self.as_native()))
         }
     }
 
     /// Return the console's default foreground color.
     fn get_default_foreground(&mut self) -> Color {
         unsafe {
-            FromNative::from_native(
-                ffi::TCOD_console_get_default_foreground(*self.as_native()))
+            FromNative::from_native(ffi::TCOD_console_get_default_foreground(*self.as_native()))
         }
     }
 
@@ -729,25 +753,29 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
     /// Returns the background color of the cell at the specified coordinates.
     fn get_char_background(&self, x: i32, y: i32) -> Color {
         unsafe {
-            FromNative::from_native(
-                ffi::TCOD_console_get_char_background(*self.as_native(), x, y))
+            FromNative::from_native(ffi::TCOD_console_get_char_background(
+                *self.as_native(),
+                x,
+                y,
+            ))
         }
     }
 
     /// Returns the foreground color of the cell at the specified coordinates.
     fn get_char_foreground(&self, x: i32, y: i32) -> Color {
         unsafe {
-            FromNative::from_native(
-                ffi::TCOD_console_get_char_foreground(*self.as_native(), x, y))
+            FromNative::from_native(ffi::TCOD_console_get_char_foreground(
+                *self.as_native(),
+                x,
+                y,
+            ))
         }
     }
 
     /// Returns the console's current background flag. For a detailed explanation
     /// of the possible values, see [BackgroundFlag](./enum.BackgroundFlag.html).
     fn get_background_flag(&self) -> BackgroundFlag {
-        let flag = unsafe {
-            ffi::TCOD_console_get_background_flag(*self.as_native())
-        };
+        let flag = unsafe { ffi::TCOD_console_get_background_flag(*self.as_native()) };
         unsafe { transmute(flag) }
     }
 
@@ -755,16 +783,13 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
     /// of the possible values, see [BackgroundFlag](./enum.BackgroundFlag.html).
     fn set_background_flag(&mut self, background_flag: BackgroundFlag) {
         unsafe {
-            ffi::TCOD_console_set_background_flag(*self.as_native(),
-                                                  background_flag.into());
+            ffi::TCOD_console_set_background_flag(*self.as_native(), background_flag.into());
         }
     }
 
     /// Returns the ASCII value of the cell located at `x, y`
     fn get_char(&self, x: i32, y: i32) -> char {
-        let ffi_char = unsafe {
-            ffi::TCOD_console_get_char(*self.as_native(), x, y)
-        };
+        let ffi_char = unsafe { ffi::TCOD_console_get_char(*self.as_native(), x, y) };
         assert!(ffi_char >= 0 && ffi_char < 256);
         ffi_char as u8 as char
     }
@@ -772,21 +797,26 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
     /// Modifies the ASCII value of the cell located at `x, y`.
     fn set_char(&mut self, x: i32, y: i32, c: char) {
         assert!(x >= 0 && y >= 0);
-        unsafe {
-            ffi::TCOD_console_set_char(*self.as_native(), x, y, c as i32)
-        }
+        unsafe { ffi::TCOD_console_set_char(*self.as_native(), x, y, c as i32) }
     }
 
     /// Changes the background color of the specified cell
-    fn set_char_background(&mut self, x: i32, y: i32,
-                           color: Color,
-                           background_flag: BackgroundFlag) {
+    fn set_char_background(
+        &mut self,
+        x: i32,
+        y: i32,
+        color: Color,
+        background_flag: BackgroundFlag,
+    ) {
         assert!(x >= 0 && y >= 0);
         unsafe {
-            ffi::TCOD_console_set_char_background(*self.as_native(),
-                                                  x, y,
-                                                  *color.as_native(),
-                                                  background_flag.into())
+            ffi::TCOD_console_set_char_background(
+                *self.as_native(),
+                x,
+                y,
+                *color.as_native(),
+                background_flag.into(),
+            )
         }
     }
 
@@ -794,9 +824,7 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
     fn set_char_foreground(&mut self, x: i32, y: i32, color: Color) {
         assert!(x >= 0 && y >= 0);
         unsafe {
-            ffi::TCOD_console_set_char_foreground(*self.as_native(),
-                                                  x, y,
-                                                  *color.as_native());
+            ffi::TCOD_console_set_char_foreground(*self.as_native(), x, y, *color.as_native());
         }
     }
 
@@ -806,28 +834,32 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
     /// see [BackgroundFlag](./enum.BackgroundFlag.html).
     /// 2. Updates its foreground color based on the default color set in the console
     /// 3. Sets its ASCII value to `glyph`
-    fn put_char(&mut self,
-                x: i32, y: i32, glyph: char,
-                background_flag: BackgroundFlag) {
+    fn put_char(&mut self, x: i32, y: i32, glyph: char, background_flag: BackgroundFlag) {
         assert!(x >= 0 && y >= 0);
         unsafe {
-            ffi::TCOD_console_put_char(*self.as_native(),
-                                       x, y, glyph as i32,
-                                       background_flag.into());
+            ffi::TCOD_console_put_char(
+                *self.as_native(),
+                x,
+                y,
+                glyph as i32,
+                background_flag.into(),
+            );
         }
     }
 
     /// Updates every propert of the given cell using explicit colors for the
     /// background and foreground.
-    fn put_char_ex(&mut self,
-                   x: i32, y: i32, glyph: char,
-                   foreground: Color, background: Color) {
+    fn put_char_ex(&mut self, x: i32, y: i32, glyph: char, foreground: Color, background: Color) {
         assert!(x >= 0 && y >= 0);
         unsafe {
-            ffi::TCOD_console_put_char_ex(*self.as_native(),
-                                          x, y, glyph as i32,
-                                          *foreground.as_native(),
-                                          *background.as_native());
+            ffi::TCOD_console_put_char_ex(
+                *self.as_native(),
+                x,
+                y,
+                glyph as i32,
+                *foreground.as_native(),
+                *background.as_native(),
+            );
         }
     }
 
@@ -844,7 +876,11 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
     /// * `TextAlignment::Left`: leftmost character of the string
     /// * `TextAlignment::Center`: center character of the sting
     /// * `TextAlignment::Right`: rightmost character of the string
-    fn print<T>(&mut self, x: i32, y: i32, text: T) where Self: Sized, T: AsRef<[u8]> + TcodString {
+    fn print<T>(&mut self, x: i32, y: i32, text: T)
+    where
+        Self: Sized,
+        T: AsRef<[u8]> + TcodString,
+    {
         assert!(x >= 0 && y >= 0);
         if let Some(text) = text.as_ascii() {
             let c_text = CString::new(text).unwrap();
@@ -854,7 +890,12 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
         } else {
             let c_text = to_wstring(text.as_ref());
             unsafe {
-                ffi::TCOD_console_print_utf(*self.as_native(), x, y, c_text.as_ptr() as *const i32);
+                ffi::TCOD_console_print_utf(
+                    *self.as_native(),
+                    x,
+                    y,
+                    c_text.as_ptr() as *const ffi::wchar_t,
+                );
             }
         }
     }
@@ -862,20 +903,35 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
     /// Prints the text at the specified location in a rectangular area with
     /// the dimensions: (width; height). If the text is longer than the width the
     /// newlines will be inserted.
-    fn print_rect<T>(&mut self,
-                  x: i32, y: i32,
-                  width: i32, height: i32,
-                  text: T) where Self: Sized, T: AsRef<[u8]> + TcodString {
+    fn print_rect<T>(&mut self, x: i32, y: i32, width: i32, height: i32, text: T)
+    where
+        Self: Sized,
+        T: AsRef<[u8]> + TcodString,
+    {
         assert!(x >= 0 && y >= 0);
         if let Some(text) = text.as_ascii() {
             let c_text = CString::new(text).unwrap();
             unsafe {
-                ffi::TCOD_console_print_rect(*self.as_native(), x, y, width, height, c_text.as_ptr());
+                ffi::TCOD_console_print_rect(
+                    *self.as_native(),
+                    x,
+                    y,
+                    width,
+                    height,
+                    c_text.as_ptr(),
+                );
             }
         } else {
             let c_text = to_wstring(text.as_ref());
             unsafe {
-                ffi::TCOD_console_print_rect_utf(*self.as_native(), x, y, width, height, c_text.as_ptr() as *const i32);
+                ffi::TCOD_console_print_rect_utf(
+                    *self.as_native(),
+                    x,
+                    y,
+                    width,
+                    height,
+                    c_text.as_ptr() as *const ffi::wchar_t,
+                );
             }
         }
     }
@@ -883,86 +939,137 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
     /// Prints the text at the specified location with an explicit
     /// [BackgroundFlag](./enum.BackgroundFlag.html) and
     /// [TextAlignment](./enum.TextAlignment.html).
-    fn print_ex<T>(&mut self,
-                x: i32, y: i32,
-                background_flag: BackgroundFlag,
-                alignment: TextAlignment,
-                text: T) where Self: Sized, T: AsRef<[u8]> + TcodString {
+    fn print_ex<T>(
+        &mut self,
+        x: i32,
+        y: i32,
+        background_flag: BackgroundFlag,
+        alignment: TextAlignment,
+        text: T,
+    ) where
+        Self: Sized,
+        T: AsRef<[u8]> + TcodString,
+    {
         assert!(x >= 0 && y >= 0);
         if let Some(text) = text.as_ascii() {
             let c_text = CString::new(text).unwrap();
             unsafe {
-                ffi::TCOD_console_print_ex(*self.as_native(), x, y,
-                                           background_flag.into(),
-                                           alignment.into(),
-                                           c_text.as_ptr());
+                ffi::TCOD_console_print_ex(
+                    *self.as_native(),
+                    x,
+                    y,
+                    background_flag.into(),
+                    alignment.into(),
+                    c_text.as_ptr(),
+                );
             }
         } else {
             let c_text = to_wstring(text.as_ref());
             unsafe {
-                ffi::TCOD_console_print_ex_utf(*self.as_native(), x, y,
-                                               background_flag.into(),
-                                               alignment.into(),
-                                               c_text.as_ptr() as *const i32);
+                ffi::TCOD_console_print_ex_utf(
+                    *self.as_native(),
+                    x,
+                    y,
+                    background_flag.into(),
+                    alignment.into(),
+                    c_text.as_ptr() as *const ffi::wchar_t,
+                );
             }
         }
     }
 
     /// Combines the functions of `print_ex` and `print_rect`
-    fn print_rect_ex<T>(&mut self,
-                        x: i32, y: i32,
-                        width: i32, height: i32,
-                        background_flag: BackgroundFlag,
-                        alignment: TextAlignment,
-                        text: T) where Self: Sized, T: AsRef<[u8]> + TcodString {
+    fn print_rect_ex<T>(
+        &mut self,
+        x: i32,
+        y: i32,
+        width: i32,
+        height: i32,
+        background_flag: BackgroundFlag,
+        alignment: TextAlignment,
+        text: T,
+    ) where
+        Self: Sized,
+        T: AsRef<[u8]> + TcodString,
+    {
         assert!(x >= 0 && y >= 0);
         if let Some(text) = text.as_ascii() {
             let c_text = CString::new(text).unwrap();
             unsafe {
-                ffi::TCOD_console_print_rect_ex(*self.as_native(), x, y, width, height,
-                                                background_flag.into(), alignment.into(),
-                                                c_text.as_ptr());
+                ffi::TCOD_console_print_rect_ex(
+                    *self.as_native(),
+                    x,
+                    y,
+                    width,
+                    height,
+                    background_flag.into(),
+                    alignment.into(),
+                    c_text.as_ptr(),
+                );
             }
         } else {
             let c_text = to_wstring(text.as_ref());
             unsafe {
-                ffi::TCOD_console_print_rect_ex_utf(*self.as_native(), x, y, width, height,
-                                                    background_flag.into(), alignment.into(),
-                                                    c_text.as_ptr() as *const i32);
+                ffi::TCOD_console_print_rect_ex_utf(
+                    *self.as_native(),
+                    x,
+                    y,
+                    width,
+                    height,
+                    background_flag.into(),
+                    alignment.into(),
+                    c_text.as_ptr() as *const ffi::wchar_t,
+                );
             }
         }
     }
 
     /// Compute the height of a wrapped text printed using `print_rect` or `print_rect_ex`.
-    fn get_height_rect<T>(&self,
-                          x: i32, y: i32,
-                          width: i32, height: i32,
-                          text: T) -> i32 where Self: Sized, T: AsRef<[u8]> + TcodString {
+    fn get_height_rect<T>(&self, x: i32, y: i32, width: i32, height: i32, text: T) -> i32
+    where
+        Self: Sized,
+        T: AsRef<[u8]> + TcodString,
+    {
         assert!(x >= 0 && y >= 0);
         if let Some(text) = text.as_ascii() {
             let c_text = CString::new(text).unwrap();
             unsafe {
-                ffi::TCOD_console_get_height_rect(*self.as_native(), x, y, width, height,
-                                                  c_text.as_ptr())
+                ffi::TCOD_console_get_height_rect(
+                    *self.as_native(),
+                    x,
+                    y,
+                    width,
+                    height,
+                    c_text.as_ptr(),
+                )
             }
         } else {
             let c_text = to_wstring(text.as_ref());
             unsafe {
-                ffi::TCOD_console_get_height_rect_utf(*self.as_native(), x, y, width, height,
-                                                      c_text.as_ptr() as *const i32)
+                ffi::TCOD_console_get_height_rect_utf(
+                    *self.as_native(),
+                    x,
+                    y,
+                    width,
+                    height,
+                    c_text.as_ptr() as *const ffi::wchar_t,
+                )
             }
         }
     }
 
-
     /// Fill a rectangle with the default background colour.
     ///
     /// If `clear` is true, set each cell's character to space (ASCII 32).
-    fn rect(&mut self,
-            x: i32, y: i32,
-            width: i32, height: i32,
-            clear: bool,
-            background_flag: BackgroundFlag) {
+    fn rect(
+        &mut self,
+        x: i32,
+        y: i32,
+        width: i32,
+        height: i32,
+        clear: bool,
+        background_flag: BackgroundFlag,
+    ) {
         assert!(x >= 0);
         assert!(y >= 0);
         assert!(width >= 0);
@@ -970,7 +1077,15 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
         assert!(x + width <= self.width());
         assert!(y + height <= self.height());
         unsafe {
-            ffi::TCOD_console_rect(*self.as_native(), x, y, width, height, clear as c_bool, background_flag.into());
+            ffi::TCOD_console_rect(
+                *self.as_native(),
+                x,
+                y,
+                width,
+                height,
+                clear,
+                background_flag.into(),
+            );
         }
     }
 
@@ -1006,8 +1121,19 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
     ///
     /// If the `title` is specified, it will be printed on top of the rectangle
     /// using inverted colours.
-    fn print_frame<T>(&mut self, x: i32, y: i32, width: i32, height: i32,
-                     clear: bool, background_flag: BackgroundFlag, title: Option<T>) where Self: Sized, T: AsRef<str> {
+    fn print_frame<T>(
+        &mut self,
+        x: i32,
+        y: i32,
+        width: i32,
+        height: i32,
+        clear: bool,
+        background_flag: BackgroundFlag,
+        title: Option<T>,
+    ) where
+        Self: Sized,
+        T: AsRef<str>,
+    {
         assert!(x >= 0 && y >= 0 && width >= 0 && height >= 0);
         assert!(x + width <= self.width() && y + height <= self.height());
         // NOTE: we need to run `CString::new` and `as_ptr` in two
@@ -1015,17 +1141,24 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
         // would get dropped too early and we'd get a dangling
         // pointer.
         let title = title.map(|s| {
-                assert!(s.as_ref().is_ascii());
-                CString::new(s.as_ref().as_bytes()).unwrap()
+            assert!(s.as_ref().is_ascii());
+            CString::new(s.as_ref().as_bytes()).unwrap()
         });
         // NOTE: `map_or` takes the option by value, which would cause
         // a premature drop again. The `as_ref` here prevents that
         // from happening.
         let c_title = title.as_ref().map_or(ptr::null(), |s| s.as_ptr());
         unsafe {
-            ffi::TCOD_console_print_frame(*self.as_native(), x, y, width, height,
-                                          clear as c_bool, background_flag.into(),
-                                          c_title);
+            ffi::TCOD_console_print_frame(
+                *self.as_native(),
+                x,
+                y,
+                width,
+                height,
+                clear,
+                background_flag.into(),
+                c_title,
+            );
         }
     }
 }
@@ -1058,9 +1191,10 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
 /// ```no_run
 /// use tcod::console as console;
 /// use tcod::console::{Console, Root, Offscreen};
+/// use tcod::error::Result;
 ///
-/// fn main() {
-///     let mut root = Root::initializer().init();
+/// fn main() -> Result<()> {
+///     let mut root = Root::initializer().init()?;
 ///
 ///     let mut direct = Offscreen::new(20, 20);
 ///     let mut boxed_direct = Box::new(Offscreen::new(20, 20));
@@ -1071,26 +1205,38 @@ pub trait Console : AsNative<ffi::TCOD_console_t> {
 ///     console::blit(&boxed_direct, (0, 0), (20, 20), &mut root, (20, 0), 1.0, 1.0);
 ///     console::blit(&trait_object, (0, 0), (20, 20), &mut root, (0, 20), 1.0, 1.0);
 ///     console::blit(&boxed_trait, (0, 0), (20, 20), &mut root, (20, 20), 1.0, 1.0);
+///
+///     Ok(())
 /// }
 ///
 /// ```
-pub fn blit<T, U>(source_console: &T,
-                  (source_x, source_y): (i32, i32),
-                  (source_width, source_height): (i32, i32),
-                  destination_console: &mut U,
-                  (destination_x, destination_y): (i32, i32),
-                  foreground_alpha: f32, background_alpha: f32)
-    where T: Console,
-          U: Console {
-    assert!(source_x >= 0 && source_y >= 0 &&
-            source_width >= 0 && source_height >= 0); // If width or height is 0, the source width/height is used.
+pub fn blit<T, U>(
+    source_console: &T,
+    (source_x, source_y): (i32, i32),
+    (source_width, source_height): (i32, i32),
+    destination_console: &mut U,
+    (destination_x, destination_y): (i32, i32),
+    foreground_alpha: f32,
+    background_alpha: f32,
+) where
+    T: Console,
+    U: Console,
+{
+    assert!(source_x >= 0 && source_y >= 0 && source_width >= 0 && source_height >= 0); // If width or height is 0, the source width/height is used.
 
     unsafe {
-        ffi::TCOD_console_blit(*source_console.as_native(),
-                               source_x, source_y, source_width, source_height,
-                               *destination_console.as_native(),
-                               destination_x, destination_y,
-                               foreground_alpha, background_alpha);
+        ffi::TCOD_console_blit(
+            *source_console.as_native(),
+            source_x,
+            source_y,
+            source_width,
+            source_height,
+            *destination_console.as_native(),
+            destination_x,
+            destination_y,
+            foreground_alpha,
+            background_alpha,
+        );
     }
 }
 
@@ -1102,7 +1248,7 @@ impl AsNative<ffi::TCOD_console_t> for Root {
     unsafe fn as_native(&self) -> &ffi::TCOD_console_t {
         &ROOT_ID.id
     }
-    
+
     unsafe fn as_native_mut(&mut self) -> &mut ffi::TCOD_console_t {
         unimplemented!();
     }
@@ -1112,7 +1258,7 @@ impl AsNative<ffi::TCOD_console_t> for Offscreen {
     unsafe fn as_native(&self) -> &ffi::TCOD_console_t {
         &self.con
     }
-    
+
     unsafe fn as_native_mut(&mut self) -> &mut ffi::TCOD_console_t {
         &mut self.con
     }
@@ -1125,8 +1271,8 @@ impl Console for Offscreen {}
 #[repr(u32)]
 #[derive(Copy, Clone)]
 pub enum TextAlignment {
-    Left   = ffi::TCOD_alignment_t::TCOD_LEFT as u32,
-    Right  = ffi::TCOD_alignment_t::TCOD_RIGHT as u32,
+    Left = ffi::TCOD_alignment_t::TCOD_LEFT as u32,
+    Right = ffi::TCOD_alignment_t::TCOD_RIGHT as u32,
     Center = ffi::TCOD_alignment_t::TCOD_CENTER as u32,
 }
 native_enum_convert!(TextAlignment, TCOD_alignment_t);
@@ -1151,7 +1297,7 @@ pub enum BackgroundFlag {
     Burn = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_BURN as u32,
     Overlay = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_OVERLAY as u32,
     Alph = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_ALPH as u32,
-    Default = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_DEFAULT as u32
+    Default = ffi::TCOD_bkgnd_flag_t::TCOD_BKGND_DEFAULT as u32,
 }
 native_enum_convert!(BackgroundFlag, TCOD_bkgnd_flag_t);
 
@@ -1159,58 +1305,53 @@ native_enum_convert!(BackgroundFlag, TCOD_bkgnd_flag_t);
 #[repr(u32)]
 #[derive(Copy, Clone)]
 pub enum Renderer {
-    GLSL   = ffi::TCOD_renderer_t::TCOD_RENDERER_GLSL as u32,
+    GLSL = ffi::TCOD_renderer_t::TCOD_RENDERER_GLSL as u32,
     OpenGL = ffi::TCOD_renderer_t::TCOD_RENDERER_OPENGL as u32,
-    SDL    = ffi::TCOD_renderer_t::TCOD_RENDERER_SDL as u32,
+    SDL = ffi::TCOD_renderer_t::TCOD_RENDERER_SDL as u32,
 }
 native_enum_convert!(Renderer, TCOD_renderer_t);
 
-/// All the possible font layouts that can be used for custom bitmap fonts
-#[repr(u32)]
-#[derive(Copy, Clone)]
-pub enum FontLayout {
-    AsciiInCol = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_ASCII_INCOL as u32,
-    AsciiInRow = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_ASCII_INROW as u32,
-    Tcod       = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_TCOD as u32,
+bitflags! {
+    /// All the possible font layouts that can be used for custom bitmap fonts
+    pub struct FontLayout: std::os::raw::c_int {
+        const ASCII_INCOL = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_ASCII_INCOL.0 as std::os::raw::c_int;
+        const ASCII_INROW = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_ASCII_INROW.0 as std::os::raw::c_int;
+        const TCOD = ffi::TCOD_font_flags_t::TCOD_FONT_LAYOUT_TCOD.0 as std::os::raw::c_int;
+    }
 }
-native_enum_convert!(FontLayout, TCOD_font_flags_t);
 
-#[repr(u32)]
-#[derive(Copy, Clone)]
-pub enum FontType {
-    Default = 0,
-    Greyscale = ffi::TCOD_font_flags_t::TCOD_FONT_TYPE_GREYSCALE as u32,
+bitflags! {
+    pub struct FontType: std::os::raw::c_int {
+        const DEFAULT = 0;
+        const GREYSCALE = ffi::TCOD_font_flags_t::TCOD_FONT_TYPE_GREYSCALE.0 as std::os::raw::c_int;
+    }
 }
-native_enum_convert!(FontType, TCOD_font_flags_t);
-
-
 
 #[cfg(test)]
 mod test {
-    use std::path::Path;
+    use super::FontLayout;
     use super::Root;
-    use super::FontLayout::AsciiInCol;
+    use std::path::Path;
 
     #[test]
     fn test_custom_font_as_static_str() {
-        Root::initializer().font("terminal.png", AsciiInCol);
+        Root::initializer().font("terminal.png", FontLayout::ASCII_INCOL);
     }
 
     #[test]
     fn test_custom_font_as_path() {
-        Root::initializer().font(Path::new("terminal.png"), AsciiInCol);
-
+        Root::initializer().font(Path::new("terminal.png"), FontLayout::ASCII_INCOL);
     }
 
     #[test]
     fn test_custom_font_as_string() {
-        Root::initializer().font("terminal.png".to_owned(), AsciiInCol);
+        Root::initializer().font("terminal.png".to_owned(), FontLayout::ASCII_INCOL);
     }
 
     #[test]
     fn test_custom_font_as_str() {
         let string = "terminal.png".to_owned();
         let s: &str = &string;
-        Root::initializer().font(s, AsciiInCol);
+        Root::initializer().font(s, FontLayout::ASCII_INCOL);
     }
 }

@@ -1,5 +1,5 @@
-use bindings::{ffi, c_int};
-use bindings::{AsNative};
+use bindings::AsNative;
+use bindings::{c_int, ffi};
 use noise::Noise;
 use random::Rng;
 use std::slice;
@@ -77,7 +77,7 @@ impl HeightMap {
     }
 
     pub fn has_land_on_border(&self, water_level: f32) -> bool {
-        unsafe { ffi::TCOD_heightmap_has_land_on_border(self.height_map, water_level) != 0 }
+        unsafe { ffi::TCOD_heightmap_has_land_on_border(self.height_map, water_level) }
     }
 
     pub fn get_minmax(&self) -> MinMax {

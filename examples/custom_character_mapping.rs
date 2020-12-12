@@ -1,6 +1,7 @@
 extern crate tcod;
 
-use tcod::{Console, RootConsole, FontLayout, FontType};
+use tcod::error::Result;
+use tcod::{Console, FontLayout, FontType, RootConsole};
 
 const FLOOR_TILE: char = 1 as char;
 const WALL_TILE: char = 2 as char;
@@ -15,15 +16,15 @@ const MAP_HEIGHT: i32 = 50;
 const ROOM_WIDTH: i32 = 20;
 const ROOM_HEIGHT: i32 = 15;
 
-fn main() {
+fn main() -> Result<()> {
     let mut root = RootConsole::initializer()
-        .font("angband16x16.bmp", FontLayout::Tcod)
-        .font_type(FontType::Greyscale)
+        .font("angband16x16.png", FontLayout::TCOD)
+        .font_type(FontType::GREYSCALE)
         .font_dimensions(32, 60) // angband16x16.bmp has 32 columns & 60 rows of
-                                 // characters
+        // characters
         .size(MAP_WIDTH, MAP_HEIGHT)
         .title("Using custom character mapping with libtcod")
-        .init();
+        .init()?;
 
     // map ASCII_CODE to character in font at position X, Y
     root.map_ascii_code_to_font(FLOOR_TILE as i32, 4, 0);
@@ -64,6 +65,8 @@ fn main() {
     root.set_char(middle_x + 2, middle_y - 5, ENEMY_2_TILE);
     root.set_char(middle_x, middle_y - 7, CHEST_TILE);
 
-    root.flush();
+    root.flush()?;
     root.wait_for_keypress(true);
+
+    Ok(())
 }
