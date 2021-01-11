@@ -190,13 +190,16 @@ bitflags! {
 }
 
 pub fn check_for_event(event_mask: EventFlags) -> Option<(EventFlags, Event)> {
-    let mut c_key_state: ffi::TCOD_key_t = unsafe { mem::uninitialized() };
-    let mut c_mouse_state: ffi::TCOD_mouse_t = unsafe { mem::uninitialized() };
+    let mut c_key_state: mem::MaybeUninit<ffi::TCOD_key_t> = mem::MaybeUninit::uninit();
+    let mut c_mouse_state: mem::MaybeUninit<ffi::TCOD_mouse_t> = mem::MaybeUninit::uninit();
 
     let event = unsafe {
         ffi::TCOD_sys_check_for_event(event_mask.bits() as i32,
-                                      &mut c_key_state, &mut c_mouse_state)
+                                      c_key_state.as_mut_ptr(), c_mouse_state.as_mut_ptr())
     };
+
+    let c_key_state = unsafe { c_key_state.assume_init() };
+    let c_mouse_state = unsafe { c_mouse_state.assume_init() };
 
     let ret_flag = match event {
         ffi::TCOD_event_t::TCOD_EVENT_KEY_PRESS => KEY_PRESS,
