@@ -278,8 +278,10 @@ impl<'a> Dijkstra<'a> {
     }
 
     pub fn reverse(&mut self) {
-        unsafe {
-            ffi::TCOD_dijkstra_reverse(self.tcod_path);
+        if !self.is_empty() {
+            unsafe {
+                ffi::TCOD_dijkstra_reverse(self.tcod_path);
+            }
         }
     }
 
