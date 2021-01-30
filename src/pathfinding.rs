@@ -148,7 +148,7 @@ impl<'a> AStar<'a> {
             let mut x: c_int = 0;
             let mut y: c_int = 0;
             ffi::TCOD_path_get(self.tcod_path, index, &mut x, &mut y);
-            (Some((x, y)))
+            Some((x, y))
         }
     }
 
@@ -278,8 +278,10 @@ impl<'a> Dijkstra<'a> {
     }
 
     pub fn reverse(&mut self) {
-        unsafe {
-            ffi::TCOD_dijkstra_reverse(self.tcod_path);
+        if !self.is_empty() {
+            unsafe {
+                ffi::TCOD_dijkstra_reverse(self.tcod_path);
+            }
         }
     }
 

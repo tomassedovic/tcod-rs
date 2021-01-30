@@ -40,7 +40,7 @@ impl <T, U: AsNative<T> + ?Sized> AsNative<T> for Box<U> {
 
 pub fn keycode_from_native(input: self::ffi::TCOD_keycode_t) -> Option<KeyCode> {
     match input as u32 {
-        x @ 0 ... 66 => Some(unsafe { transmute(x) }),
+        x @ 0 ..= 66 => Some(unsafe { transmute(x) }),
         _ => None
     }
 }
